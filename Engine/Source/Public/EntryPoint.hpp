@@ -6,5 +6,8 @@ extern int Run();
 
 int main()
 {
-    return Run();
+    RightEngine::LaunchEngine::Init();
+    int status = Run();
+    RightEngine::LaunchEngine::Exit();
+    return status;
 }
