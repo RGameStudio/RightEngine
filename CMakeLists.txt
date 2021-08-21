@@ -4,6 +4,10 @@ project(RightEngine)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(Lib/spdlog/include)
+include_directories(Engine/Source/Public)
+include_directories(Engine/Source/Core/Public)
+include_directories(Engine/Source/Core/Event/Public)
+include_directories(Engine/Source/Launch/Public)
 
 add_subdirectory("Engine")
 add_subdirectory("Game")
