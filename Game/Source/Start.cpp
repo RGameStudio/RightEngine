@@ -29,7 +29,7 @@ void GameApplication::OnStart()
 
     dispatcher->Emit(DemoEvent());
     dispatcher->Emit(DemoEvent());
-    GShouldStop = true;
+    dispatcher->Emit(ShutdownEvent());
 }
 
 void GameApplication::OnUpdate()

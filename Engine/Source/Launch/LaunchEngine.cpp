@@ -5,14 +5,35 @@
 
 bool GShouldStop = true;
 
-void RightEngine::LaunchEngine::Init()
+namespace RightEngine
 {
-    Log::Init();
-    GShouldStop = false;
-}
+    void LaunchEngine::Init()
+    {
+        Log::Init();
+        launchContext = new LaunchContext();
+        GShouldStop = false;
+    }
 
-void RightEngine::LaunchEngine::Exit()
-{
-    EventDispatcher::Destroy();
-    R_CORE_INFO("Exiting engine!");
+    void LaunchEngine::Exit()
+    {
+        EventDispatcher::Destroy();
+        R_CORE_INFO("Exiting engine!");
+
+        delete launchContext;
+    }
+
+    LaunchEngine::LaunchContext::LaunchContext()
+    {
+        EventDispatcher::Get()->Subscribe(ShutdownEvent::descriptor, EVENT_CALLBACK(LaunchEngine::LaunchContext::OnEvent));
+    }
+
+    void LaunchEngine::LaunchContext::OnEvent(const Event& event)
+    {
+        if (event.GetType() == ShutdownEvent::descriptor)
+        {
+            GShouldStop = true;
+        }
+    }
+
+    LaunchEngine::LaunchContext* LaunchEngine::launchContext = nullptr;
 }
