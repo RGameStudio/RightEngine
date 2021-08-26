@@ -36,3 +36,5 @@ private:
 
     static EventDispatcher *instance;
 };
+
+#define EVENT_CALLBACK(callback) std::bind(&callback, this, std::placeholders::_1)

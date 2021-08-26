@@ -8,7 +8,7 @@ class TestEventHandler
 public:
     TestEventHandler()
     {
-        EventDispatcher::Get()->Subscribe(DemoEvent::descriptor, std::bind(&TestEventHandler::OnEvent, this, std::placeholders::_1));
+        EventDispatcher::Get()->Subscribe(DemoEvent::descriptor, EVENT_CALLBACK(TestEventHandler::OnEvent));
     }
 
     void OnEvent(const Event &e)
@@ -20,11 +20,20 @@ public:
     }
 };
 
-int Run()
+
+void GameApplication::OnStart()
 {
     TestEventHandler test;
     EventDispatcher *dispatcher = EventDispatcher::Get();
 
     dispatcher->Emit(DemoEvent());
-    return 0;
+    GShouldStop = true;
+}
+
+void GameApplication::OnUpdate()
+{
+}
+
+void GameApplication::OnDestroy()
+{
 }
