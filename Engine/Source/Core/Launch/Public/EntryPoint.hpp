@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Window.hpp>
 #include "Core.h"
 
 extern bool GShouldStop;
@@ -16,6 +17,7 @@ int main()
 {
     RightEngine::LaunchEngine::Init();
     GameApplication::OnStart();
+    Window* window = Window::Create("RightEngine2D", 800, 600);
     while (!GShouldStop)
     {
         GameApplication::OnUpdate();
