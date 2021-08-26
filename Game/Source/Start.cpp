@@ -15,6 +15,7 @@ public:
     {
         if (e.GetType() == DemoEvent::descriptor)
         {
+            EventDispatcher::Get()->UnSubscribe(DemoEvent::descriptor, EVENT_CALLBACK(TestEventHandler::OnEvent));
             R_INFO("Got demo event!");
         }
     }
@@ -26,6 +27,7 @@ void GameApplication::OnStart()
     TestEventHandler test;
     EventDispatcher *dispatcher = EventDispatcher::Get();
 
+    dispatcher->Emit(DemoEvent());
     dispatcher->Emit(DemoEvent());
     GShouldStop = true;
 }

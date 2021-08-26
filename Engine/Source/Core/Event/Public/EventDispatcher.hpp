@@ -4,17 +4,28 @@
 #include <unordered_map>
 #include "Event.hpp"
 
+using Callback = std::function<void(const Event&)>;
+
+struct CallbackContext
+{
+    Callback callback;
+    void* instancePointer = nullptr;
+
+    CallbackContext(Callback&& callback, void* instancePointer) : callback(callback), instancePointer(instancePointer)
+    {}
+};
+
 class EventDispatcher
 {
 public:
 
-    using Callback = std::function<void(const Event &)>;
+    void Subscribe(const char* descriptor, CallbackContext context);
 
-    void Subscribe(const char *descriptor, Callback &&slot);
+    void UnSubscribe(const char* descriptor, CallbackContext context);
 
-    void Emit(const Event &event) const;
+    void Emit(const Event& event) const;
 
-    inline static EventDispatcher *Get()
+    inline static EventDispatcher* Get()
     {
         if (!instance)
         {
@@ -32,9 +43,9 @@ private:
 
     EventDispatcher() = default;
 
-    std::unordered_map<const char *, std::vector<Callback>> observers;
+    std::unordered_map<const char*, std::vector<CallbackContext>> observers;
 
-    static EventDispatcher *instance;
+    static EventDispatcher* instance;
 };
 
-#define EVENT_CALLBACK(callback) std::bind(&callback, this, std::placeholders::_1)
+#define EVENT_CALLBACK(callback) CallbackContext(std::bind(&callback, this, std::placeholders::_1), this)
