@@ -21,6 +21,8 @@ namespace RightEngine
 
         virtual void OnUpdate() = 0;
 
+        virtual void Swap() = 0;
+
         static Window *Create(std::string title, uint32_t width, uint32_t height);
 
     protected:

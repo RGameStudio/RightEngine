@@ -12,6 +12,8 @@ namespace RightEngine
 
         virtual void OnUpdate() override;
 
+        virtual void Swap() override;
+
     private:
         WindowsWindow(std::string title, uint32_t width, uint32_t height);
 

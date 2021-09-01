@@ -1,3 +1,4 @@
+#include <glad/glad.h>
 #include "WindowsWindow.hpp"
 #include "Core.h"
 
@@ -7,41 +8,50 @@ namespace RightEngine
 
     WindowsWindow::WindowsWindow(std::string title, uint32_t width, uint32_t height) : Window(title, width, height)
     {
-        const char *windowClass = "EngineWindowClass";
         appInstance = GetModuleHandle(nullptr);
 
         WNDCLASSEX wc;
         ZeroMemory(&wc, sizeof(WNDCLASSEX));
 
         wc.cbSize = sizeof(WNDCLASSEX);
-        wc.style = CS_HREDRAW | CS_VREDRAW;
+        wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
         wc.lpfnWndProc = WndProc;
         wc.hInstance = appInstance;
         wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-        wc.hbrBackground = (HBRUSH) COLOR_WINDOW;
-        wc.lpszClassName = windowClass;
+        wc.hbrBackground = NULL;
+        wc.lpszClassName = "EngineWindowClass";
 
-        RegisterClassEx(&wc);
+        R_CORE_ASSERT(RegisterClassEx(&wc), "Can't register window class");
+
+        RECT rect;
+        ZeroMemory(&rect, sizeof(RECT));
+        rect.right = width;
+        rect.bottom = height;
+
+        DWORD windowStyle = WS_OVERLAPPEDWINDOW;
+
+        AdjustWindowRectEx(&rect, windowStyle, false, NULL);
 
         windowHandle = CreateWindowEx(
                 0x0,                  // Optional window styles.
-                windowClass,          // Window class
+                wc.lpszClassName,     // Window class
                 "RightEngine2D",      // Window text
-                WS_OVERLAPPEDWINDOW,  // Window style
+                windowStyle,          // Window style
                 // Size and position
-                CW_USEDEFAULT, CW_USEDEFAULT, width, height,
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                rect.right - rect.left,
+                rect.bottom - rect.top,
+                ////////////////////
                 nullptr,              // Parent window
                 nullptr,              // Menu
                 appInstance,          // Instance handle
                 nullptr               // Additional application data
         );
 
-        if (!windowHandle)
-        {
-            R_CORE_ASSERT(windowHandle, "Can't create engine window!");
-        }
+        R_CORE_ASSERT(windowHandle, "Can't create engine window!");
 
-        ShowWindow(windowHandle, SW_SHOW);
+        ShowWindow(windowHandle, SW_SHOWDEFAULT);
 
         R_CORE_INFO("Created window successfully! Size: {0}x{1}", width, height);
     }
@@ -54,6 +64,11 @@ namespace RightEngine
             TranslateMessage(&message);
             DispatchMessage(&message);
         }
+    }
+
+    void WindowsWindow::Swap()
+    {
+        SwapBuffers(GetDC(windowHandle));
     }
 
     LRESULT CALLBACK WndProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
@@ -72,6 +87,7 @@ namespace RightEngine
                 EventDispatcher::Get()->Emit(ShutdownEvent());
                 return 0;
             case WM_SIZE:
+                //TODO Proper window resizing
                 uint32_t width = LOWORD(lParam);
                 uint32_t height = HIWORD(lParam);
 
