@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Window.hpp>
+#include <Application.hpp>
 #include "Core.h"
 
 extern bool GShouldStop;
@@ -17,10 +18,11 @@ int main()
 {
     RightEngine::LaunchEngine::Init();
     GameApplication::OnStart();
-    RightEngine::Window* window = RightEngine::Window::Create("RightEngine2D", 800, 600);
+    RightEngine::Application* application = RightEngine::Application::Get();
+
     while (!GShouldStop)
     {
-        window->OnUpdate();
+        application->OnUpdate();
         GameApplication::OnUpdate();
     }
     GameApplication::OnDestroy();

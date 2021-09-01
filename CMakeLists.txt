@@ -11,6 +11,7 @@ include_directories(Engine/Source/Core/Public)
 include_directories(Engine/Source/Core/Event/Public)
 include_directories(Engine/Source/Core/Launch/Public)
 include_directories(Engine/Source/Core/Window/Public)
+include_directories(Engine/Source/Core/Application/Public)
 
 add_subdirectory("Engine")
 add_subdirectory("Game")
