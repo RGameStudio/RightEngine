@@ -29,7 +29,6 @@ void GameApplication::OnStart()
 
     dispatcher->Emit(DemoEvent());
     dispatcher->Emit(DemoEvent());
-    dispatcher->Emit(ShutdownEvent());
 }
 
 void GameApplication::OnUpdate()

@@ -17,9 +17,10 @@ int main()
 {
     RightEngine::LaunchEngine::Init();
     GameApplication::OnStart();
-    Window* window = Window::Create("RightEngine2D", 800, 600);
+    RightEngine::Window* window = RightEngine::Window::Create("RightEngine2D", 800, 600);
     while (!GShouldStop)
     {
+        window->OnUpdate();
         GameApplication::OnUpdate();
     }
     GameApplication::OnDestroy();

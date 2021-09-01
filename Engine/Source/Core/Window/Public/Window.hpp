@@ -3,28 +3,34 @@
 #include <string>
 #include <utility>
 
-class Window
+namespace RightEngine
 {
-public:
-
-    inline uint32_t GetWidth() const
+    class Window
     {
-        return width;
-    }
+    public:
 
-    inline uint32_t GetHeight() const
-    {
-        return height;
-    }
+        inline uint32_t GetWidth() const
+        {
+            return width;
+        }
 
-    static Window* Create(std::string title, uint32_t width, uint32_t height);
+        inline uint32_t GetHeight() const
+        {
+            return height;
+        }
 
-protected:
+        virtual void OnUpdate() = 0;
 
-    Window(std::string title, uint32_t width, uint32_t height) : title(std::move(title)), width(width), height(height)
-    {}
+        static Window *Create(std::string title, uint32_t width, uint32_t height);
 
-    std::string title;
-    uint32_t width;
-    uint32_t height;
-};
+    protected:
+
+        Window(std::string title, uint32_t width, uint32_t height) : title(std::move(title)), width(width),
+                                                                     height(height)
+        {}
+
+        std::string title;
+        uint32_t width;
+        uint32_t height;
+    };
+}

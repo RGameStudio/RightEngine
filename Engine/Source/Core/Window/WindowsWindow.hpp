@@ -3,11 +3,19 @@
 #include <Window.hpp>
 #include <Windows.h>
 
-class WindowsWindow: public Window
+namespace RightEngine
 {
-friend class Window;
+    class WindowsWindow : public Window
+    {
+        friend class Window;
+    public:
 
-private:
-    WindowsWindow(std::string title, uint32_t width, uint32_t height);
-    HWND windowHandle = nullptr;
-};
+        virtual void OnUpdate() override;
+
+    private:
+        WindowsWindow(std::string title, uint32_t width, uint32_t height);
+
+        HWND windowHandle = nullptr;
+        HINSTANCE appInstance = nullptr;
+    };
+}

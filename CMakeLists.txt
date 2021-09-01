@@ -3,6 +3,8 @@ project(RightEngine)
 
 set(CMAKE_CXX_STANDARD 17)
 
+add_compile_definitions(R_ENABLE_ASSERTS)
+
 include_directories(Lib/spdlog/include)
 include_directories(Engine/Source/Public)
 include_directories(Engine/Source/Core/Public)
