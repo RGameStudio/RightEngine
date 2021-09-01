@@ -18,7 +18,7 @@ namespace RightEngine
         friend class LaunchEngine;
 
         public:
-            void OnEvent(const Event& event);
+            bool OnEvent(const Event& event);
 
         private:
             LaunchContext();

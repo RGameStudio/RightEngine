@@ -27,12 +27,14 @@ namespace RightEngine
         EventDispatcher::Get()->Subscribe(ShutdownEvent::descriptor, EVENT_CALLBACK(LaunchEngine::LaunchContext::OnEvent));
     }
 
-    void LaunchEngine::LaunchContext::OnEvent(const Event& event)
+    bool LaunchEngine::LaunchContext::OnEvent(const Event& event)
     {
         if (event.GetType() == ShutdownEvent::descriptor)
         {
             GShouldStop = true;
         }
+
+        return true;
     }
 
     LaunchEngine::LaunchContext* LaunchEngine::launchContext = nullptr;

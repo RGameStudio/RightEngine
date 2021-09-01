@@ -11,13 +11,15 @@ public:
         EventDispatcher::Get()->Subscribe(DemoEvent::descriptor, EVENT_CALLBACK(TestEventHandler::OnEvent));
     }
 
-    void OnEvent(const Event &e)
+    bool OnEvent(const Event &e)
     {
         if (e.GetType() == DemoEvent::descriptor)
         {
             EventDispatcher::Get()->UnSubscribe(DemoEvent::descriptor, EVENT_CALLBACK(TestEventHandler::OnEvent));
             R_INFO("Got demo event!");
         }
+
+        return true;
     }
 };
 

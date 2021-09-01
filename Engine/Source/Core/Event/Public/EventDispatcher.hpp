@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include "Event.hpp"
 
-using Callback = std::function<void(const Event&)>;
+using Callback = std::function<bool(const Event&)>;
 
 struct CallbackContext
 {
