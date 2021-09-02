@@ -94,6 +94,12 @@ namespace RightEngine
                 uint32_t width = LOWORD(lParam);
                 uint32_t height = HIWORD(lParam);
 
+                RECT rect;
+                ZeroMemory(&rect, sizeof(RECT));
+                rect.right = width;
+                rect.bottom = height;
+
+                AdjustWindowRectEx(&rect, WS_OVERLAPPED, false, NULL);
                 R_CORE_TRACE("Resize event. New size: {0}x{1}", width, height);
                 return 0;
         }

@@ -97,7 +97,9 @@ namespace RightEngine
             MessageBox(0, "glad fail", "gladLoadGLLoader()", 0);
         }
 
-        MessageBox(0, (char *) glGetString(GL_VERSION), "OPENGL VERSION", 0);
+        R_CORE_INFO("Renderer vendor: {0}", glGetString(GL_VENDOR));
+        R_CORE_INFO("Renderer version: {0}", glGetString(GL_VERSION));
+        R_CORE_INFO("Renderer: {0}", glGetString(GL_RENDERER));
     }
 
     void RenderingContext::InitExtentions()
