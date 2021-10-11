@@ -61,6 +61,8 @@ namespace RightEngine
 
     void WindowsWindow::OnUpdate()
     {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(117.0f / 256.0f, 170.0f / 256.0f, 1.0f, 1.0f);
         MSG message;
         while (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
         {

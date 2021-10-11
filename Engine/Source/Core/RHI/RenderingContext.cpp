@@ -91,7 +91,6 @@ namespace RightEngine
 
         R_CORE_ASSERT(wglMakeCurrent(readDc, gl33Context), "Failed to activate OpenGL 3.3 rendering context.");
 
-
         if (!gladLoadGL())
         {
             MessageBox(0, "glad fail", "gladLoadGLLoader()", 0);
@@ -100,6 +99,9 @@ namespace RightEngine
         R_CORE_INFO("Renderer vendor: {0}", glGetString(GL_VENDOR));
         R_CORE_INFO("Renderer version: {0}", glGetString(GL_VERSION));
         R_CORE_INFO("Renderer: {0}", glGetString(GL_RENDERER));
+
+        uint32_t kk = glCreateShader(GL_VERTEX_SHADER);
+
     }
 
     void RenderingContext::InitExtentions()
@@ -174,11 +176,10 @@ namespace RightEngine
         R_CORE_ASSERT(wglMakeCurrent(dummyDc, dummyContext), "Failed to activate dummy OpenGL rendering context.");
 
 
-        wglCreateContextAttribsARB = (wglCreateContextAttribsARB_type *) wglGetProcAddress(
-                "wglCreateContextAttribsARB");
+        wglCreateContextAttribsARB = (wglCreateContextAttribsARB_type *) wglGetProcAddress("wglCreateContextAttribsARB");
         wglChoosePixelFormatARB = (wglChoosePixelFormatARB_type *) wglGetProcAddress("wglChoosePixelFormatARB");
 
-        wglMakeCurrent(dummyDc, 0);
+        wglMakeCurrent(dummyDc, nullptr);
         wglDeleteContext(dummyContext);
         ReleaseDC(dummyWindow, dummyDc);
         DestroyWindow(dummyWindow);
