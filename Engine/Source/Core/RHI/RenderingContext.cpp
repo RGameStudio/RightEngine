@@ -49,7 +49,7 @@ namespace RightEngine
 
     void RenderingContext::Init(HDC readDc)
     {
-        InitExtentions();
+        PreInit();
 
         // Now we can choose a pixel format the modern way, using wglChoosePixelFormatARB.
         int pixelFormatAttribs[] = {
@@ -87,24 +87,16 @@ namespace RightEngine
         HGLRC gl33Context = wglCreateContextAttribsARB(readDc, 0, gl33Attribs);
 
         R_CORE_ASSERT(gl33Context, "Failed to create OpenGL 3.3 context.");
-
-
         R_CORE_ASSERT(wglMakeCurrent(readDc, gl33Context), "Failed to activate OpenGL 3.3 rendering context.");
-
-        if (!gladLoadGL())
-        {
-            MessageBox(0, "glad fail", "gladLoadGLLoader()", 0);
-        }
+        R_CORE_ASSERT(gladLoadGL(), "Failed to load OpenGL through gladLoadGL.");
 
         R_CORE_INFO("Renderer vendor: {0}", glGetString(GL_VENDOR));
         R_CORE_INFO("Renderer version: {0}", glGetString(GL_VERSION));
         R_CORE_INFO("Renderer: {0}", glGetString(GL_RENDERER));
-
-        uint32_t kk = glCreateShader(GL_VERTEX_SHADER);
-
+        R_CORE_INFO("Successfully initialized render context.");
     }
 
-    void RenderingContext::InitExtentions()
+    void RenderingContext::PreInit()
     {
         // Before we can load extensions, we need a dummy OpenGL context, created using a dummy window.
         // We use a dummy window because you can only set the pixel format for a window once. For the

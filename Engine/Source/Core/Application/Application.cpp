@@ -33,4 +33,9 @@ namespace RightEngine
     {
         window->OnUpdate();
     }
+
+    void Application::OnUpdateEnd()
+    {
+        window->Swap();
+    }
 }

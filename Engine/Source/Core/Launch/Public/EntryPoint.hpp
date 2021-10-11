@@ -24,6 +24,7 @@ int main()
     {
         application->OnUpdate();
         GameApplication::OnUpdate();
+        application->OnUpdateEnd();
     }
     GameApplication::OnDestroy();
     RightEngine::LaunchEngine::Exit();

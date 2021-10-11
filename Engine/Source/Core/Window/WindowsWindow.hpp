@@ -8,11 +8,16 @@ namespace RightEngine
     class WindowsWindow : public Window
     {
         friend class Window;
+
     public:
 
-        virtual void OnUpdate() override;
+        void OnUpdate() override;
 
-        virtual void Swap() override;
+        void Swap() override;
+
+        void PollEvents();
+
+        void Clear();
 
     private:
         WindowsWindow(std::string title, uint32_t width, uint32_t height);

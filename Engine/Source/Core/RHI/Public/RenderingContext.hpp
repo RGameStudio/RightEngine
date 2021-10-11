@@ -11,7 +11,7 @@ namespace RightEngine
     private:
         RenderingContext(HDC readDc);
         virtual void Init(HDC readDc);
-        virtual void InitExtentions();
+        virtual void PreInit();
 
         static RenderingContext* instance;
     };

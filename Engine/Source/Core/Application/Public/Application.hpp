@@ -12,6 +12,8 @@ namespace RightEngine
 
         void OnUpdate();
 
+        void OnUpdateEnd();
+
     private:
         static Application *instance;
 

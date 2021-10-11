@@ -59,16 +59,26 @@ namespace RightEngine
         R_CORE_INFO("Created window successfully! Size: {0}x{1}", width, height);
     }
 
-    void WindowsWindow::OnUpdate()
+    void WindowsWindow::Clear()
     {
+        glClearColor(1.0f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(117.0f / 256.0f, 170.0f / 256.0f, 1.0f, 1.0f);
+    }
+
+    void WindowsWindow::PollEvents()
+    {
         MSG message;
         while (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&message);
             DispatchMessage(&message);
         }
+    }
+
+    void WindowsWindow::OnUpdate()
+    {
+        PollEvents();
+        Clear();
     }
 
     void WindowsWindow::Swap()
