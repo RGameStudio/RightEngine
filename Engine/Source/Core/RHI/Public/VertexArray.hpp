@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdint>
 #include "VertexBuffer.hpp"
 #include "VertexBufferLayout.hpp"
@@ -18,7 +20,5 @@ namespace RightEngine
         void AddBuffer(VertexBuffer vb, VertexBufferLayout layout);
     private:
         uint32_t id;
-        VertexBuffer buffer;
-        VertexBufferLayout layout;
     };
 }

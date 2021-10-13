@@ -29,6 +29,8 @@ namespace RightEngine
 
 #define WGL_FULL_ACCELERATION_ARB                 0x2027
 #define WGL_TYPE_RGBA_ARB                         0x202B
+#define OPENGL_MAJOR_VERSION                      4
+#define OPENGL_MINOR_VERSION                      5
 
     RenderingContext *RenderingContext::instance = nullptr;
 
@@ -68,26 +70,25 @@ namespace RightEngine
         UINT numFormats;
         wglChoosePixelFormatARB(readDc, pixelFormatAttribs, 0, 1, &pixelFormat, &numFormats);
 
-        R_CORE_ASSERT(numFormats, "Failed to set the OpenGL 3.3 pixel format.");
+        R_CORE_ASSERT(numFormats, "Failed to set the OpenGL {0}.{1} pixel format.", OPENGL_MAJOR_VERSION, OPENGL_MINOR_VERSION);
 
 
         PIXELFORMATDESCRIPTOR pfd;
         DescribePixelFormat(readDc, pixelFormat, sizeof(pfd), &pfd);
 
-        R_CORE_ASSERT(SetPixelFormat(readDc, pixelFormat, &pfd), "Failed to set the OpenGL 3.3 pixel format.");
+        R_CORE_ASSERT(SetPixelFormat(readDc, pixelFormat, &pfd), "Failed to set the OpenGL {0}.{1} pixel format.", OPENGL_MAJOR_VERSION, OPENGL_MINOR_VERSION);
 
-        // Specify that we want to create an OpenGL 3.3 core profile context
-        int gl33Attribs[] = {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+        int glAttribs[] = {
+                WGL_CONTEXT_MAJOR_VERSION_ARB, OPENGL_MAJOR_VERSION,
+                WGL_CONTEXT_MINOR_VERSION_ARB, OPENGL_MINOR_VERSION,
                 WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
                 0,
         };
 
-        HGLRC gl33Context = wglCreateContextAttribsARB(readDc, 0, gl33Attribs);
+        HGLRC glContext = wglCreateContextAttribsARB(readDc, 0, glAttribs);
 
-        R_CORE_ASSERT(gl33Context, "Failed to create OpenGL 3.3 context.");
-        R_CORE_ASSERT(wglMakeCurrent(readDc, gl33Context), "Failed to activate OpenGL 3.3 rendering context.");
+        R_CORE_ASSERT(glContext, "Failed to create OpenGL {0}.{1} context.", OPENGL_MAJOR_VERSION, OPENGL_MINOR_VERSION);
+        R_CORE_ASSERT(wglMakeCurrent(readDc, glContext), "Failed to activate OpenGL {0}.{1} rendering context.", OPENGL_MAJOR_VERSION, OPENGL_MINOR_VERSION);
         R_CORE_ASSERT(gladLoadGL(), "Failed to load OpenGL through gladLoadGL.");
 
         R_CORE_INFO("Renderer vendor: {0}", glGetString(GL_VENDOR));

@@ -1,5 +1,6 @@
 #include "IndexBuffer.hpp"
 #include <glad/glad.h>
+#include <Core.h>
 
 void RightEngine::IndexBuffer::Bind() const
 {
@@ -13,10 +14,11 @@ void RightEngine::IndexBuffer::UnBind() const
 
 RightEngine::IndexBuffer::~IndexBuffer()
 {
+    R_CORE_ASSERT(false, "Delete index buffer");
     glDeleteBuffers(1, &id);
 }
 
-RightEngine::IndexBuffer::IndexBuffer(const uint32_t *data, uint32_t count, int drawMode)
+RightEngine::IndexBuffer::IndexBuffer(const uint32_t *data, uint32_t count, int drawMode): count(count)
 {
     glGenBuffers(1, &id);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);

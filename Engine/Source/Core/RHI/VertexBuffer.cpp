@@ -1,7 +1,7 @@
 #include "VertexBuffer.hpp"
 #include <Logger.hpp>
 
-RightEngine::VertexBuffer::VertexBuffer(const void *data, uint32_t size, int drawMode)
+RightEngine::VertexBuffer::VertexBuffer(const void *data, uint32_t size, int drawMode): size(size)
 {
     glGenBuffers(1, &id);
     glBindBuffer(GL_ARRAY_BUFFER, id);

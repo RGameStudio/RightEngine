@@ -1,12 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <glad/glad.h>
 
 namespace RightEngine
 {
     class IndexBuffer {
     public:
-        IndexBuffer(const unsigned int * data, unsigned int count, int drawMode = GL_STATIC_DRAW);
+        IndexBuffer(const uint32_t * data, uint32_t count, int drawMode = GL_STATIC_DRAW);
         ~IndexBuffer();
 
         void Bind() const;
