@@ -2,6 +2,7 @@
 
 #include <Window.hpp>
 #include <Application.hpp>
+#include <gtest/gtest.h>
 #include "Core.h"
 
 extern bool GShouldStop;
@@ -16,6 +17,8 @@ public:
 
 int main()
 {
+    ::testing::InitGoogleTest();
+//    RUN_ALL_TESTS();
     RightEngine::LaunchEngine::Init();
     GameApplication::OnStart();
     RightEngine::Application* application = RightEngine::Application::Get();
