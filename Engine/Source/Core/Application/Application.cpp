@@ -36,6 +36,7 @@ namespace RightEngine
                 -0.5f, -0.5f, 0.0f,
                 0.5f, -0.5f, 0.0f,
                 0.5f, 0.5f, 0.0f,
+                -0.5f, 0.5f, 0.0f,
         };
 
         uint32_t quadIndexes[] = {
@@ -47,6 +48,7 @@ namespace RightEngine
         layout.Push<float>(3);
 
         testQuadVertexBuffer = std::make_unique<VertexBuffer>(quadVertices, sizeof(quadVertices));
+        testQuadIndexBuffer = std::make_unique<IndexBuffer>(quadIndexes, sizeof(quadIndexes) / sizeof(uint32_t));
         testQuadVertexArray = std::make_unique<VertexArray>();
         testQuadVertexArray->AddBuffer(*testQuadVertexBuffer, layout);
     }
@@ -54,7 +56,7 @@ namespace RightEngine
     void Application::OnUpdate()
     {
         window->OnUpdate();
-        Renderer::Draw(*testQuadVertexArray, *testQuadVertexBuffer);
+        Renderer::Draw(*testQuadVertexArray, *testQuadIndexBuffer);
     }
 
     void Application::OnUpdateEnd()

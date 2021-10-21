@@ -20,7 +20,7 @@ void RightEngine::VertexArray::UnBind() const
     glBindVertexArray(0);
 }
 
-void RightEngine::VertexArray::AddBuffer(const RightEngine::VertexBuffer vb, const RightEngine::VertexBufferLayout layout)
+void RightEngine::VertexArray::AddBuffer(const RightEngine::VertexBuffer& vb, const RightEngine::VertexBufferLayout& layout) const
 {
     Bind();
     vb.Bind();

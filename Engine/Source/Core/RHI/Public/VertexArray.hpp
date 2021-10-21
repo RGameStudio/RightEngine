@@ -17,7 +17,7 @@ namespace RightEngine
 
         void UnBind() const;
 
-        void AddBuffer(VertexBuffer vb, VertexBufferLayout layout);
+        void AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout) const;
     private:
         uint32_t id;
     };
