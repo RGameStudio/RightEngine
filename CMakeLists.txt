@@ -3,10 +3,12 @@ project(RightEngine)
 
 set(CMAKE_CXX_STANDARD 17)
 
+enable_testing()
 add_compile_definitions(R_ENABLE_ASSERTS)
 
 include_directories(Lib/Glad/include)
 include_directories(Lib/spdlog/include)
+include_directories(Lib/easyargs/include)
 include_directories(Lib/googletest/googletest/include)
 
 include_directories(Engine/Source/Public)
@@ -18,8 +20,10 @@ include_directories(Engine/Source/Core/Application/Public)
 include_directories(Engine/Source/Core/RHI/Public)
 include_directories(Engine/Source/Core/Testing/Public)
 
-add_subdirectory("Engine")
-add_subdirectory("Game")
-add_subdirectory("Lib/spdlog")
-add_subdirectory("Lib/Glad")
-add_subdirectory("Lib/googletest")
+add_subdirectory(Engine)
+add_subdirectory(Game)
+add_subdirectory(Tests)
+add_subdirectory(Lib/spdlog)
+add_subdirectory(Lib/Glad)
+add_subdirectory(Lib/googletest)
+add_subdirectory(Lib/easyargs)
