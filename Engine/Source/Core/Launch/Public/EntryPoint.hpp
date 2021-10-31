@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef R_TEST_EXECUTABLE
+#ifdef R_TEST_BUILD
 #include <gtest/gtest.h>
 #endif
 
@@ -25,7 +25,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-#ifdef R_TEST_EXECUTABLE
+#ifdef R_TEST_BUILD
     GLaunchMode = LaunchMode::Test;
 #endif
     RightEngine::LaunchEngine::Init(argc, argv);
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
         GameApplication::OnDestroy();
     }
-#ifdef R_TEST_EXECUTABLE
+#ifdef R_TEST_BUILD
     else if (GLaunchMode == LaunchMode::Test)
     {
         ::testing::InitGoogleTest(&argc, argv);

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
 
-add_library(Engine STATIC Source/Core/Public/Logger.hpp
+set(ENGINE_SRC Source/Core/Public/Logger.hpp
         Source/Core/Logger.cpp Source/Core/Launch/LaunchEngine.cpp
         Source/Core/Launch/Public/LaunchEngine.hpp
         Source/Core/Event/Public/Event.hpp
@@ -28,3 +28,8 @@ add_library(Engine STATIC Source/Core/Public/Logger.hpp
         Source/Core/RHI/Renderer.cpp
         Source/Core/RHI/Public/DebugRHI.hpp
         Source/Core/RHI/DebugRHI.cpp)
+
+add_library(Engine STATIC ${ENGINE_SRC})
+
+add_library(EngineTest STATIC ${ENGINE_SRC})
+target_compile_definitions(EngineTest PUBLIC R_TEST_BUILD)

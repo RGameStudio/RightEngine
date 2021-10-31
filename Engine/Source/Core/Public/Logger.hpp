@@ -22,7 +22,19 @@ namespace RightEngine
     };
 }
 
-#ifndef R_TEST_EXECUTABLE
+#ifdef R_TEST_BUILD
+#define R_CORE_TRACE(...)
+#define R_CORE_INFO(...)
+#define R_CORE_WARN(...)
+#define R_CORE_ERROR(...)
+#define R_CORE_FATAL(...)
+
+#define R_TRACE(...)
+#define R_INFO(...)
+#define R_WARN(...)
+#define R_ERROR(...)
+#define R_FATAL(...)
+#else
 //Core log macros
 #define R_CORE_TRACE(...) ::RightEngine::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define R_CORE_INFO(...)  ::RightEngine::Log::GetCoreLogger()->info(__VA_ARGS__)
@@ -36,16 +48,4 @@ namespace RightEngine
 #define R_WARN(...)       ::RightEngine::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define R_ERROR(...)      ::RightEngine::Log::GetClientLogger()->error(__VA_ARGS__)
 #define R_FATAL(...)      ::RightEngine::Log::GetClientLogger()->fatal(__VA_ARGS__)
-#else
-#define R_CORE_TRACE(...)
-#define R_CORE_INFO(...)
-#define R_CORE_WARN(...)
-#define R_CORE_ERROR(...)
-#define R_CORE_FATAL(...)
-
-#define R_TRACE(...)
-#define R_INFO(...)
-#define R_WARN(...)
-#define R_ERROR(...)
-#define R_FATAL(...)
 #endif
