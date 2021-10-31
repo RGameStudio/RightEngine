@@ -3,16 +3,26 @@
 #include "WindowsWindow.hpp"
 #include "Core.h"
 
+//TODO Add error checking
+
 namespace RightEngine
 {
     LRESULT CALLBACK WndProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam);
 
     WindowsWindow::WindowsWindow(std::string title, uint32_t width, uint32_t height) : Window(title, width, height)
     {
-        appInstance = GetModuleHandle(nullptr);
+        TCHAR moduleName[MAX_PATH];
+        GetModuleFileName(NULL, moduleName, MAX_PATH);
+
+        appInstance = GetModuleHandle(moduleName);
 
         WNDCLASSEX wc;
         ZeroMemory(&wc, sizeof(WNDCLASSEX));
+
+        std::string windowClassName = title + "EngineWindowClass";
+        char* windowClassNameRaw = new char[windowClassName.size() + 1];
+        ZeroMemory(windowClassNameRaw, windowClassName.size() + 1);
+        memcpy_s(windowClassNameRaw,  windowClassName.size(), windowClassName.c_str(), windowClassName.size());
 
         wc.cbSize = sizeof(WNDCLASSEX);
         wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -20,7 +30,7 @@ namespace RightEngine
         wc.hInstance = appInstance;
         wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
         wc.hbrBackground = NULL;
-        wc.lpszClassName = "EngineWindowClass";
+        wc.lpszClassName = windowClassNameRaw;
 
         R_CORE_ASSERT(RegisterClassEx(&wc), "Can't register window class");
 
