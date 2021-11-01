@@ -36,7 +36,7 @@ jobs:
       run: |
         curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/21.2.5/mesa3d-21.2.5-release-msvc.7z
         "C:\Program Files\7-Zip\7z.exe" x mesa.7z
-        systemwideploy
+        systemwidedeploy
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
