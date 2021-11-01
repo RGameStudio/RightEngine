@@ -33,7 +33,7 @@ jobs:
         "C:\Program Files\7-Zip\7z.exe" x mesa.7z
         mklink opengl32.dll "x64\opengl32.dll"
         mklink libglapi.dll "x64\libglapi.dll"
-      working-directory: "${{github.workspace}}/build"
+      working-directory: ${{github.workspace}}/build
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
