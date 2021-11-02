@@ -36,19 +36,13 @@ jobs:
       run: |
         curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/21.2.5/mesa3d-21.2.5-release-msvc.7z
         "C:\Program Files\7-Zip\7z.exe" x mesa.7z
-        mklink opengl32.dll "x86\opengl32.dll"
-        mklink libglapi.dll "x86\libglapi.dll"
-        dir /s
+        mklink opengl32.dll "x64\opengl32.dll"
+        mklink libglapi.dll "x64\libglapi.dll"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_SYSTEM_VERSION="10.0.18362.0"
-
-    - name: Check build directory content
-      working-directory: ${{github.workspace}}/build
-      shell: cmd
-      run: dir /s
 
     - name: Build
       # Build your program with the given configuration
