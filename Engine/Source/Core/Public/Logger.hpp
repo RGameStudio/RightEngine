@@ -24,8 +24,7 @@ namespace RightEngine
 
 #ifdef R_TEST_BUILD
 #define R_CORE_TRACE(...)
-//TODO switch back
-#define R_CORE_INFO(...) ::RightEngine::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define R_CORE_INFO(...)
 #define R_CORE_WARN(...)
 #define R_CORE_ERROR(...)
 #define R_CORE_FATAL(...)
