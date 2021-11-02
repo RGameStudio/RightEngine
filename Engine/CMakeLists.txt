@@ -30,6 +30,7 @@ set(ENGINE_SRC Source/Core/Public/Logger.hpp
         Source/Core/RHI/DebugRHI.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
+target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)
 
 add_library(EngineTest STATIC ${ENGINE_SRC})
-target_compile_definitions(EngineTest PUBLIC R_TEST_BUILD)
+target_compile_definitions(EngineTest PUBLIC R_TEST_BUILD OPENGL_MAJOR_VERSION=3 OPENGL_MINOR_VERSION=3)

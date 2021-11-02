@@ -29,8 +29,6 @@ namespace RightEngine
 
 #define WGL_FULL_ACCELERATION_ARB                 0x2027
 #define WGL_TYPE_RGBA_ARB                         0x202B
-#define OPENGL_MAJOR_VERSION                      4
-#define OPENGL_MINOR_VERSION                      5
 
     RenderingContext *RenderingContext::instance = nullptr;
 

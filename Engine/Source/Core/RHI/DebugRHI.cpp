@@ -3,8 +3,10 @@
 
 void RightEngine::DebugRHI::Init()
 {
+#ifndef R_TEST_BUILD
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(GLErrorCallback, nullptr);
+#endif
 }
 
 void RightEngine::DebugRHI::GLErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
