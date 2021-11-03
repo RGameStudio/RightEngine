@@ -28,6 +28,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        
+      - name: Check git submodules
+        # Initialize and download (if needed) engine dependencies
+        run: git submodule update --init --remote
 
       - name: Configure CMake
         run: cmake -B ${{ env.build }}
