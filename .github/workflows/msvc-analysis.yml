@@ -45,7 +45,7 @@ jobs:
           cmakeBuildDirectory: ${{ env.build }}
           # Ruleset file that will determine what checks will be run
           ruleset: NativeRecommendedRules.ruleset
-          ignoredTargetPaths: ${{ github.workspace }}/Lib/easyargs
+          ignoredTargetPaths: ${{ github.workspace }}/Lib/easyargs; ${{ github.workspace }}/Lib/Glad
 
       # Upload SARIF file to GitHub Code Scanning Alerts
       - name: Upload SARIF to GitHub
