@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 enable_testing()
 add_compile_definitions(R_ENABLE_ASSERTS)
 
+set(GLSL_ROOT_DIR ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders)
+set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
+             ${GLSL_ROOT_DIR}/Basic/basic.vert
+        )
+
 include_directories(Lib/Glad/include)
 include_directories(Lib/spdlog/include)
 include_directories(Lib/easyargs/include)
@@ -19,6 +24,7 @@ include_directories(Engine/Source/Core/Window/Public)
 include_directories(Engine/Source/Core/Application/Public)
 include_directories(Engine/Source/Core/RHI/Public)
 include_directories(Engine/Source/Core/Testing/Public)
+include_directories(Engine/Source/Core/Shader/Public)
 
 add_subdirectory(Engine)
 add_subdirectory(Game)
