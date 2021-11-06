@@ -18,3 +18,11 @@ void RightEngine::Renderer::Draw(const RightEngine::VertexArray &va, const Right
     va.UnBind();
     vb.UnBind();
 }
+
+void RightEngine::Renderer::Draw(const RightEngine::VertexArray &va, const RightEngine::IndexBuffer &ib,
+                                 const RightEngine::Shader &shader)
+{
+    shader.Bind();
+    Draw(va, ib);
+    shader.UnBind();
+}

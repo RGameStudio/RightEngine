@@ -4,6 +4,7 @@
 #include "Application.hpp"
 #include "../Window/WindowsWindow.hpp"
 #include "Renderer.hpp"
+#include "Shader.hpp"
 
 namespace RightEngine
 {
@@ -11,6 +12,7 @@ namespace RightEngine
     {
         if (!instance)
         {
+            startTimestamp = high_resolution_clock::now();
             instance = new Application();
         }
 
@@ -47,6 +49,7 @@ namespace RightEngine
         VertexBufferLayout layout;
         layout.Push<float>(3);
 
+        basicShader = std::make_unique<Shader>("Resources/Shaders/Basic/basic.vert", "Resources/Shaders/Basic/basic.frag");
         testQuadVertexBuffer = std::make_unique<VertexBuffer>(quadVertices, sizeof(quadVertices));
         testQuadIndexBuffer = std::make_unique<IndexBuffer>(quadIndexes, sizeof(quadIndexes) / sizeof(uint32_t));
         testQuadVertexArray = std::make_unique<VertexArray>();
@@ -56,11 +59,19 @@ namespace RightEngine
     void Application::OnUpdate()
     {
         window->OnUpdate();
-        Renderer::Draw(*testQuadVertexArray, *testQuadIndexBuffer);
+        Renderer::Draw(*testQuadVertexArray, *testQuadIndexBuffer, *basicShader);
     }
 
     void Application::OnUpdateEnd()
     {
         window->Swap();
     }
+
+    double Application::GetTime()
+    {
+        using namespace std::chrono;
+        return duration_cast<milliseconds>(std::chrono::high_resolution_clock::now() - startTimestamp).count();
+    }
+
+    time_point<high_resolution_clock> Application::startTimestamp;
 }

@@ -27,7 +27,7 @@ set(ENGINE_SRC Source/Core/Public/Logger.hpp
         Source/Core/RHI/Public/Renderer.hpp
         Source/Core/RHI/Renderer.cpp
         Source/Core/RHI/Public/DebugRHI.hpp
-        Source/Core/RHI/DebugRHI.cpp)
+        Source/Core/RHI/DebugRHI.cpp Source/Core/Shader/Shader.cpp Source/Core/Shader/Public/Shader.hpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)
