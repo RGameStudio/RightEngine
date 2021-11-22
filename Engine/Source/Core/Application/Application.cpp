@@ -1,10 +1,11 @@
+#include "Application.hpp"
+#include <memory>
 #include <Logger.hpp>
 #include <DebugRHI.hpp>
-#include <memory>
-#include "Application.hpp"
 #include "../Window/WindowsWindow.hpp"
 #include "Renderer.hpp"
 #include "Shader.hpp"
+#include "Input.hpp"
 
 namespace RightEngine
 {
@@ -58,6 +59,7 @@ namespace RightEngine
 
     void Application::OnUpdate()
     {
+        Input::OnUpdate();
         window->OnUpdate();
         Renderer::Draw(*testQuadVertexArray, *testQuadIndexBuffer, *basicShader);
     }

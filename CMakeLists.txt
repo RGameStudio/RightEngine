@@ -25,6 +25,7 @@ include_directories(Engine/Source/Core/Application/Public)
 include_directories(Engine/Source/Core/RHI/Public)
 include_directories(Engine/Source/Core/Testing/Public)
 include_directories(Engine/Source/Core/Shader/Public)
+include_directories(Engine/Source/Core/Utils/Public)
 
 add_subdirectory(Engine)
 add_subdirectory(Game)
