@@ -63,6 +63,7 @@ namespace RightEngine
         R_CORE_ASSERT(windowHandle, "Can't create engine window!");
 
         RenderingContext* context = RenderingContext::Get(GetDC(windowHandle));
+        context->SetVSync(VSyncState::ON);
 
         ShowWindow(windowHandle, SW_SHOWDEFAULT);
 

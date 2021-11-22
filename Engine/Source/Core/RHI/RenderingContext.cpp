@@ -10,8 +10,11 @@ namespace RightEngine
     typedef BOOL WINAPI wglChoosePixelFormatARB_type(HDC hdc, const int *piAttribIList, const FLOAT *pfAttribFList,
                                                      UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
 
+    typedef BOOL WINAPI wglSwapIntervalEXT_type(int interval);
+
     wglCreateContextAttribsARB_type *wglCreateContextAttribsARB;
     wglChoosePixelFormatARB_type *wglChoosePixelFormatARB;
+    wglSwapIntervalEXT_type  *wglSwapIntervalEXT;
 
 #define WGL_CONTEXT_MAJOR_VERSION_ARB             0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB             0x2092
@@ -93,6 +96,12 @@ namespace RightEngine
         R_CORE_INFO("Renderer version: {0}", glGetString(GL_VERSION));
         R_CORE_INFO("Renderer: {0}", glGetString(GL_RENDERER));
         R_CORE_INFO("Successfully initialized render context.");
+
+        wglSwapIntervalEXT = (wglSwapIntervalEXT_type*) wglGetProcAddress("wglSwapIntervalEXT");
+        if (!wglSwapIntervalEXT)
+        {
+            R_CORE_WARN("VSync is not supported!");
+        }
     }
 
     void RenderingContext::PreInit()
@@ -174,5 +183,21 @@ namespace RightEngine
         wglDeleteContext(dummyContext);
         ReleaseDC(dummyWindow, dummyDc);
         DestroyWindow(dummyWindow);
+    }
+
+    void RenderingContext::SetVSync(VSyncState state)
+    {
+        if (wglSwapIntervalEXT)
+        {
+            switch (state)
+            {
+                case VSyncState::ON:
+                    wglSwapIntervalEXT(1);
+                    break;
+                default:
+                    wglSwapIntervalEXT(0);
+                    break;
+            }
+        }
     }
 }

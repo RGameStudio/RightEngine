@@ -3,6 +3,7 @@
 #include "EventDispatcher.hpp"
 #include "Logger.hpp"
 #include "Window.hpp"
+#include "Input.hpp"
 
 #ifdef R_ENABLE_ASSERTS
 #define R_ASSERT(x, ...) { if(!(x)) { R_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
