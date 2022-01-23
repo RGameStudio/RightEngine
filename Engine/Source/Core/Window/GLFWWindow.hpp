@@ -12,7 +12,10 @@ namespace RightEngine
 
         void Swap() override;
 
+        virtual void* GetNativeHandle() override;
+
         GLFWWindow(std::string title, uint32_t width, uint32_t height);
+
         ~GLFWWindow();
     private:
         void Init(std::string title, uint32_t width, uint32_t height);

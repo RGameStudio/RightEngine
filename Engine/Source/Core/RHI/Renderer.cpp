@@ -1,5 +1,5 @@
 #include "Renderer.hpp"
-#include <Logger.hpp>
+#include "Core.h"
 
 void RightEngine::Renderer::Draw(const RightEngine::VertexArray &va, const RightEngine::IndexBuffer &ib)
 {
@@ -25,4 +25,23 @@ void RightEngine::Renderer::Draw(const RightEngine::VertexArray &va, const Right
     shader.Bind();
     Draw(va, ib);
     shader.UnBind();
+}
+
+RightEngine::Renderer& RightEngine::Renderer::Get()
+{
+    static Renderer renderer;
+    return renderer;
+}
+
+void RightEngine::Renderer::SetWindow(Window* _window)
+{
+    this->window = _window;
+    glfwMakeContextCurrent(static_cast<GLFWwindow*>(window->GetNativeHandle()));
+
+    R_CORE_ASSERT(gladLoadGLLoader((GLADloadproc) glfwGetProcAddress), "Can't load glad!");
+}
+
+RightEngine::Window* RightEngine::Renderer::GetWindow() const
+{
+    return window;
 }

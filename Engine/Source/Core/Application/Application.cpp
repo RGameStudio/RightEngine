@@ -1,8 +1,7 @@
 #include "Application.hpp"
 #include <memory>
-#include <Logger.hpp>
-#include <DebugRHI.hpp>
-#include "../Window/WindowsWindow.hpp"
+#include "Logger.hpp"
+#include "DebugRHI.hpp"
 #include "Renderer.hpp"
 #include "Shader.hpp"
 #include "Input.hpp"
@@ -31,7 +30,9 @@ namespace RightEngine
     {
         Window* _window = Window::Create("Engine window", 800, 600);
         window.reset(_window);
-//        DebugRHI::Init();
+        auto renderer = Renderer::Get();
+        renderer.SetWindow(_window);
+        DebugRHI::Init();
 
         R_CORE_INFO("Successfully initialized application!");
 
