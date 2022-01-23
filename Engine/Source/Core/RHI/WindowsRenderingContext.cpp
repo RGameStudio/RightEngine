@@ -1,4 +1,4 @@
-#ifdef WIN32
+#ifdef WIN32_WINDOW
 #include <Core.h>
 #include <Windows.h>
 #include "WindowsRenderingContext.hpp"

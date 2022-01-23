@@ -1,4 +1,4 @@
-#ifdef WIN32
+#ifdef WIN32_WINDOW
 #include <glad/glad.h>
 #include <RenderingContext.hpp>
 #include "WindowsWindow.hpp"

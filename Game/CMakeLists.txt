@@ -19,7 +19,7 @@ add_custom_command(
 add_dependencies(Game CopyShaderFilesToGame)
 
 if (WIN32)
-    add_compile_definitions(WIN32)
+#    add_compile_definitions(WIN32)
 elseif(APPLE)
     add_compile_definitions(APPLE)
 endif()
