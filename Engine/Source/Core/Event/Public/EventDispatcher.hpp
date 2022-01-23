@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <unordered_map>
+#include <vector>
 #include "Event.hpp"
 
 using Callback = std::function<bool(const Event&)>;

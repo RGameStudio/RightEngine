@@ -7,7 +7,7 @@ set(ENGINE_SRC
         Source/Core/Window/Window.cpp
         Source/Core/Window/WindowsWindow.cpp
         Source/Core/Application/Application.cpp
-        Source/Core/RHI/RenderingContext.cpp
+        Source/Core/RHI/WindowsRenderingContext.cpp
         Source/Core/RHI/VertexBuffer.cpp
         Source/Core/RHI/Public/VertexBufferLayout.cpp
         Source/Core/RHI/VertexArray.cpp
@@ -16,10 +16,16 @@ set(ENGINE_SRC
         Source/Core/RHI/DebugRHI.cpp
         Source/Core/Shader/Shader.cpp
         Source/Core/Utils/Input.cpp
-        )
+        Source/Core/Window/GLFWWindow.cpp Source/Core/Window/GLFWWindow.hpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)
 
 add_library(EngineTest STATIC ${ENGINE_SRC})
 target_compile_definitions(EngineTest PUBLIC R_TEST_BUILD OPENGL_MAJOR_VERSION=3 OPENGL_MINOR_VERSION=3)
+
+if (WIN32)
+    add_compile_definitions(WIN32)
+elseif(APPLE)
+    add_compile_definitions(APPLE)
+endif()

@@ -1,6 +1,7 @@
-#include <Windows.h>
+#ifdef WIN32
 #include <Core.h>
-#include "RenderingContext.hpp"
+#include <Windows.h>
+#include "WindowsRenderingContext.hpp"
 #include <glad/glad.h>
 
 namespace RightEngine
@@ -33,13 +34,13 @@ namespace RightEngine
 #define WGL_FULL_ACCELERATION_ARB                 0x2027
 #define WGL_TYPE_RGBA_ARB                         0x202B
 
-    RenderingContext *RenderingContext::instance = nullptr;
+    WindowsRenderingContext *WindowsRenderingContext::instance = nullptr;
 
-    RenderingContext *RenderingContext::Get(HDC readDc)
+    WindowsRenderingContext *WindowsRenderingContext::Get(HDC readDc)
     {
         if (!instance)
         {
-            instance = new RenderingContext(readDc);
+            instance = new WindowsRenderingContext(readDc);
         }
 
         return instance;
@@ -201,3 +202,5 @@ namespace RightEngine
         }
     }
 }
+
+#endif

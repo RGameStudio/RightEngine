@@ -1,3 +1,4 @@
+#ifdef WIN32
 #pragma once
 
 #include <Windows.h>
@@ -10,20 +11,21 @@ namespace RightEngine
         OFF
     };
 
-    class RenderingContext
+    class WindowsRenderingContext
     {
     public:
-        static RenderingContext *Get(HDC readDc);
+        static WindowsRenderingContext *Get(HDC readDc);
 
         void SetVSync(VSyncState state);
 
     private:
-        RenderingContext(HDC readDc);
+        WindowsRenderingContext(HDC readDc);
 
         virtual void Init(HDC readDc);
 
         virtual void PreInit();
 
-        static RenderingContext *instance;
+        static WindowsRenderingContext *instance;
     };
 }
+#endif

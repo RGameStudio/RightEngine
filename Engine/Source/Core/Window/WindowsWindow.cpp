@@ -1,3 +1,4 @@
+#ifdef WIN32
 #include <glad/glad.h>
 #include <RenderingContext.hpp>
 #include "WindowsWindow.hpp"
@@ -130,3 +131,5 @@ namespace RightEngine
         return DefWindowProc(windowHandle, message, wParam, lParam);
     }
 }
+
+#endif
