@@ -48,21 +48,21 @@ namespace RightEngine
                 2, 3, 0
         };
 
-//        VertexBufferLayout layout;
-//        layout.Push<float>(3);
-//
-//        basicShader = std::make_unique<Shader>("Resources/Shaders/Basic/basic.vert", "Resources/Shaders/Basic/basic.frag");
-//        testQuadVertexBuffer = std::make_unique<VertexBuffer>(quadVertices, sizeof(quadVertices));
-//        testQuadIndexBuffer = std::make_unique<IndexBuffer>(quadIndexes, sizeof(quadIndexes) / sizeof(uint32_t));
-//        testQuadVertexArray = std::make_unique<VertexArray>();
-//        testQuadVertexArray->AddBuffer(*testQuadVertexBuffer, layout);
+        VertexBufferLayout layout;
+        layout.Push<float>(3);
+
+        basicShader = std::make_unique<Shader>("Resources/Shaders/Basic/basic.vert", "Resources/Shaders/Basic/basic.frag");
+        testQuadVertexBuffer = std::make_unique<VertexBuffer>(quadVertices, sizeof(quadVertices));
+        testQuadIndexBuffer = std::make_unique<IndexBuffer>(quadIndexes, sizeof(quadIndexes) / sizeof(uint32_t));
+        testQuadVertexArray = std::make_unique<VertexArray>();
+        testQuadVertexArray->AddBuffer(*testQuadVertexBuffer, layout);
     }
 
     void Application::OnUpdate()
     {
         Input::OnUpdate();
         window->OnUpdate();
-//        Renderer::Draw(*testQuadVertexArray, *testQuadIndexBuffer, *basicShader);
+        Renderer::Get().Draw(*testQuadVertexArray, *testQuadIndexBuffer, *basicShader);
     }
 
     void Application::OnUpdateEnd()
