@@ -10,10 +10,10 @@ endif()
 add_custom_target(CopyShaderFilesToGame ALL DEPENDS ${GLSL_ROOT_DIR})
 
 add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders
+        TARGET CopyShaderFilesToGame
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders
-        ${CMAKE_CURRENT_BINARY_DIR}/Resources/Shaders
+        ${CMAKE_CURRENT_BINARY_DIR}/Assets/Shaders
         DEPENDS ${GLSL_SRC})
 
 add_dependencies(Game CopyShaderFilesToGame)

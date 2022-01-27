@@ -51,7 +51,7 @@ namespace RightEngine
         VertexBufferLayout layout;
         layout.Push<float>(3);
 
-        basicShader = std::make_unique<Shader>("Resources/Shaders/Basic/basic.vert", "Resources/Shaders/Basic/basic.frag");
+        basicShader = std::make_unique<Shader>("/Assets/Shaders/Basic/basic.vert", "/Assets/Shaders/Basic/basic.frag");
         testQuadVertexBuffer = std::make_unique<VertexBuffer>(quadVertices, sizeof(quadVertices));
         testQuadIndexBuffer = std::make_unique<IndexBuffer>(quadIndexes, sizeof(quadIndexes) / sizeof(uint32_t));
         testQuadVertexArray = std::make_unique<VertexArray>();
