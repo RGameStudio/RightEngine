@@ -1,10 +1,10 @@
-#include <Logger.hpp>
-#include <DebugRHI.hpp>
-#include <memory>
 #include "Application.hpp"
-#include "../Window/WindowsWindow.hpp"
+#include <memory>
+#include "Logger.hpp"
+#include "DebugRHI.hpp"
 #include "Renderer.hpp"
 #include "Shader.hpp"
+#include "Input.hpp"
 
 namespace RightEngine
 {
@@ -28,8 +28,10 @@ namespace RightEngine
 
     void Application::Init()
     {
-        WindowsWindow* _window = (WindowsWindow*) Window::Create("RightEngine2D", 800, 600);
+        Window* _window = Window::Create("Engine window", 800, 600);
         window.reset(_window);
+        auto renderer = Renderer::Get();
+        renderer.SetWindow(_window);
         DebugRHI::Init();
 
         R_CORE_INFO("Successfully initialized application!");
@@ -49,7 +51,7 @@ namespace RightEngine
         VertexBufferLayout layout;
         layout.Push<float>(3);
 
-        basicShader = std::make_unique<Shader>("Resources/Shaders/Basic/basic.vert", "Resources/Shaders/Basic/basic.frag");
+        basicShader = std::make_unique<Shader>("/Assets/Shaders/Basic/basic.vert", "/Assets/Shaders/Basic/basic.frag");
         testQuadVertexBuffer = std::make_unique<VertexBuffer>(quadVertices, sizeof(quadVertices));
         testQuadIndexBuffer = std::make_unique<IndexBuffer>(quadIndexes, sizeof(quadIndexes) / sizeof(uint32_t));
         testQuadVertexArray = std::make_unique<VertexArray>();
@@ -58,8 +60,9 @@ namespace RightEngine
 
     void Application::OnUpdate()
     {
+        Input::OnUpdate();
         window->OnUpdate();
-        Renderer::Draw(*testQuadVertexArray, *testQuadIndexBuffer, *basicShader);
+        Renderer::Get().Draw(*testQuadVertexArray, *testQuadIndexBuffer, *basicShader);
     }
 
     void Application::OnUpdateEnd()

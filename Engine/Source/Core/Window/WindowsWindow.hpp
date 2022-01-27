@@ -1,3 +1,4 @@
+#ifdef WIN32_WINDOW
 #pragma once
 
 #include <Window.hpp>
@@ -26,3 +27,5 @@ namespace RightEngine
         HINSTANCE appInstance = nullptr;
     };
 }
+
+#endif

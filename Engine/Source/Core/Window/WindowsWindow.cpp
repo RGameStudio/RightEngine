@@ -1,3 +1,4 @@
+#ifdef WIN32_WINDOW
 #include <glad/glad.h>
 #include <RenderingContext.hpp>
 #include "WindowsWindow.hpp"
@@ -63,6 +64,7 @@ namespace RightEngine
         R_CORE_ASSERT(windowHandle, "Can't create engine window!");
 
         RenderingContext* context = RenderingContext::Get(GetDC(windowHandle));
+        context->SetVSync(VSyncState::ON);
 
         ShowWindow(windowHandle, SW_SHOWDEFAULT);
 
@@ -129,3 +131,5 @@ namespace RightEngine
         return DefWindowProc(windowHandle, message, wParam, lParam);
     }
 }
+
+#endif

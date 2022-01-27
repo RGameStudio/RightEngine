@@ -60,8 +60,9 @@ void RightEngine::Shader::SetUniform4f(const std::string &name, float v0, float 
 RightEngine::ShaderProgramSource
 RightEngine::Shader::ParseShaders(const std::string &vertexShaderPath, const std::string &fragmentShaderPath)
 {
-    std::ifstream vertexShaderStream(vertexShaderPath);
-    std::ifstream fragmentShaderStream(fragmentShaderPath);
+    const auto currentPath = std::filesystem::current_path();
+    std::ifstream vertexShaderStream(currentPath.u8string().append(vertexShaderPath));
+    std::ifstream fragmentShaderStream(currentPath.u8string().append(fragmentShaderPath));
 
     if (!vertexShaderStream.is_open())
     {
