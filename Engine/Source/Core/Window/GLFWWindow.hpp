@@ -10,15 +10,15 @@ namespace RightEngine
     public:
         virtual void OnUpdate() override;
 
-        void Swap() override;
+        void Swap() const override;
 
-        virtual void* GetNativeHandle() override;
+        virtual void* GetNativeHandle() const override;
 
-        GLFWWindow(std::string title, uint32_t width, uint32_t height);
+        GLFWWindow(const std::string& title, uint32_t width, uint32_t height);
 
         ~GLFWWindow();
     private:
-        void Init(std::string title, uint32_t width, uint32_t height);
+        void Init(const std::string& title, uint32_t width, uint32_t height);
         GLFWwindow *window = nullptr;
     };
 }

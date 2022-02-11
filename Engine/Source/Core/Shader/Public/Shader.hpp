@@ -1,6 +1,9 @@
 #pragma once
+
+#include <glm/matrix.hpp>
 #include <string>
 #include <unordered_map>
+
 namespace RightEngine
 {
     struct ShaderProgramSource
@@ -12,7 +15,7 @@ namespace RightEngine
     class Shader
     {
     public:
-        Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 
         ~Shader();
 
@@ -20,17 +23,19 @@ namespace RightEngine
 
         void UnBind() const;
 
-        void SetUniform1ui(const std::string &name, uint32_t value);
+        void SetUniform1ui(const std::string& name, uint32_t value);
 
-        void SetUniform1i(const std::string &name, int value);
+        void SetUniform1i(const std::string& name, int value);
 
-        void SetUniform1f(const std::string &name, float value);
+        void SetUniform1f(const std::string& name, float value);
 
-        void SetUniform2f(const std::string &name, float v0, float v1);
+        void SetUniform2f(const std::string& name, float v0, float v1);
 
-        void SetUniform3f(const std::string &name, float v0, float v1, float v2);
+        void SetUniform3f(const std::string& name, float v0, float v1, float v2);
 
-        void SetUniform4f(const std::string &name, float v0, float v1, float v2, float v3);
+        void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
+
+        void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
 
     private:
         std::string filePath;
@@ -38,12 +43,12 @@ namespace RightEngine
         std::unordered_map<std::string, int> uniformLocationCache;
 
     private:
-        ShaderProgramSource ParseShaders(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+        ShaderProgramSource ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 
-        uint32_t CreateShader(const std::string &vertexShader, const std::string &fragmentShader);
+        uint32_t CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
 
-        uint32_t CompileShader(uint32_t type, const std::string &source);
+        uint32_t CompileShader(uint32_t type, const std::string& source);
 
-        int GetUniformLocation(const std::string &name);
+        int GetUniformLocation(const std::string& name);
     };
 }

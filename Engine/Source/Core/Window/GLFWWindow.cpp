@@ -1,15 +1,15 @@
 #include "GLFWWindow.hpp"
-#include <GLFW/glfw3.h>
 #include "Core.h"
+#include "MouseEvent.hpp"
 
 namespace RightEngine
 {
-    GLFWWindow::GLFWWindow(std::string title, uint32_t width, uint32_t height) : Window(std::move(title), width, height)
+    GLFWWindow::GLFWWindow(const std::string& title, uint32_t width, uint32_t height) : Window(title, width, height)
     {
         Init(title, width, height);
     }
 
-    void GLFWWindow::Init(std::string title, uint32_t width, uint32_t height)
+    void GLFWWindow::Init(const std::string& title, uint32_t width, uint32_t height)
     {
         R_CORE_ASSERT(glfwInit(), "GLFW init failed");
 
@@ -21,6 +21,16 @@ namespace RightEngine
 
         window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
         R_CORE_ASSERT(window, "GLFW window create failed");
+
+        glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
+        {
+            EventDispatcher::Get()->Emit(ShutdownEvent());
+        });
+
+        glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xPos, double yPos)
+        {
+            EventDispatcher::Get()->Emit(MouseMovedEvent(xPos, yPos));
+        });
     }
 
     void GLFWWindow::OnUpdate()
@@ -28,7 +38,7 @@ namespace RightEngine
         glfwPollEvents();
     }
 
-    void GLFWWindow::Swap()
+    void GLFWWindow::Swap() const
     {
         glfwSwapBuffers(window);
     }
@@ -38,7 +48,7 @@ namespace RightEngine
         glfwDestroyWindow(window);
     }
 
-    void* GLFWWindow::GetNativeHandle()
+    void* GLFWWindow::GetNativeHandle() const
     {
         return window;
     }

@@ -18,6 +18,7 @@ namespace RightEngine
         void Draw(const VertexArray& va, const IndexBuffer& ib);
         void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
         void Draw(const VertexArray& va, const VertexBuffer& vb);
+        void Clear() const;
 
         static Renderer& Get();
     private:

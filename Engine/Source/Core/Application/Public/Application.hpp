@@ -1,12 +1,13 @@
 #pragma once
 
+#include "IndexBuffer.hpp"
+#include "VertexBuffer.hpp"
+#include "VertexArray.hpp"
+#include "Shader.hpp"
+#include "Window.hpp"
+#include "Camera.hpp"
 #include <memory>
 #include <chrono>
-#include <IndexBuffer.hpp>
-#include <VertexBuffer.hpp>
-#include <VertexArray.hpp>
-#include <Shader.hpp>
-#include "Window.hpp"
 
 namespace RightEngine
 {
@@ -15,7 +16,7 @@ namespace RightEngine
     class Application
     {
     public:
-        static Application *Get();
+        static Application* Get();
 
         void OnUpdate();
 
@@ -24,7 +25,7 @@ namespace RightEngine
         static double GetTime();
 
     private:
-        static Application *instance;
+        static Application* instance;
         static time_point<high_resolution_clock> startTimestamp;
 
         Application();
@@ -36,6 +37,7 @@ namespace RightEngine
         std::unique_ptr<VertexBuffer> testQuadVertexBuffer;
         std::unique_ptr<VertexArray> testQuadVertexArray;
         std::unique_ptr<Shader> basicShader;
+        std::shared_ptr<FPSCamera> camera;
     };
 
 }

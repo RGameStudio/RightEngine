@@ -1,12 +1,14 @@
 #include "Shader.hpp"
+#include "Logger.hpp"
+#include <glm/gtc/type_ptr.hpp>
+#include <glad/glad.h>
 #include <fstream>
 #include <sstream>
-#include <glad/glad.h>
-#include <Logger.hpp>
+#include <filesystem>
 
 //TODO Error handling
 
-RightEngine::Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath)
+RightEngine::Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 {
     ShaderProgramSource source = ParseShaders(vertexShaderPath, fragmentShaderPath);
     id = CreateShader(source.vertexSource, source.fragmentSource);
@@ -27,38 +29,38 @@ void RightEngine::Shader::UnBind() const
     glUseProgram(0);
 }
 
-void RightEngine::Shader::SetUniform1ui(const std::string &name, uint32_t value)
+void RightEngine::Shader::SetUniform1ui(const std::string& name, uint32_t value)
 {
     glUniform1ui(GetUniformLocation(name), value);
 }
 
-void RightEngine::Shader::SetUniform1i(const std::string &name, int value)
+void RightEngine::Shader::SetUniform1i(const std::string& name, int value)
 {
     glUniform1i(GetUniformLocation(name), value);
 }
 
-void RightEngine::Shader::SetUniform1f(const std::string &name, float value)
+void RightEngine::Shader::SetUniform1f(const std::string& name, float value)
 {
     glUniform1f(GetUniformLocation(name), value);
 }
 
-void RightEngine::Shader::SetUniform2f(const std::string &name, float v0, float v1)
+void RightEngine::Shader::SetUniform2f(const std::string& name, float v0, float v1)
 {
     glUniform2f(GetUniformLocation(name), v0, v1);
 }
 
-void RightEngine::Shader::SetUniform3f(const std::string &name, float v0, float v1, float v2)
+void RightEngine::Shader::SetUniform3f(const std::string& name, float v0, float v1, float v2)
 {
     glUniform3f(GetUniformLocation(name), v0, v1, v2);
 }
 
-void RightEngine::Shader::SetUniform4f(const std::string &name, float v0, float v1, float v2, float v3)
+void RightEngine::Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 {
     glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
 }
 
 RightEngine::ShaderProgramSource
-RightEngine::Shader::ParseShaders(const std::string &vertexShaderPath, const std::string &fragmentShaderPath)
+RightEngine::Shader::ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 {
     const auto currentPath = std::filesystem::current_path();
     std::ifstream vertexShaderStream(currentPath.u8string().append(vertexShaderPath));
@@ -90,7 +92,7 @@ RightEngine::Shader::ParseShaders(const std::string &vertexShaderPath, const std
     return {ss[0].str(), ss[1].str()};
 }
 
-uint32_t RightEngine::Shader::CreateShader(const std::string &vertexShader, const std::string &fragmentShader)
+uint32_t RightEngine::Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
     uint32_t program = glCreateProgram();
     uint32_t vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -107,10 +109,10 @@ uint32_t RightEngine::Shader::CreateShader(const std::string &vertexShader, cons
     return program;
 }
 
-uint32_t RightEngine::Shader::CompileShader(uint32_t type, const std::string &source)
+uint32_t RightEngine::Shader::CompileShader(uint32_t type, const std::string& source)
 {
     uint32_t shaderId = glCreateShader(type);
-    const char *src = source.c_str();
+    const char* src = source.c_str();
     glShaderSource(shaderId, 1, &src, nullptr);
     glCompileShader(shaderId);
 
@@ -120,7 +122,7 @@ uint32_t RightEngine::Shader::CompileShader(uint32_t type, const std::string &so
     {
         int length;
         glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
-        char *message = new char[length];
+        char* message = new char[length];
         glGetShaderInfoLog(shaderId, length, &length, message);
         std::string shaderType = (type == GL_VERTEX_SHADER ? "vertex" : "fragment");
         R_CORE_ERROR("Failed to compile {0} shader!", shaderType);
@@ -132,7 +134,7 @@ uint32_t RightEngine::Shader::CompileShader(uint32_t type, const std::string &so
     return shaderId;
 }
 
-int RightEngine::Shader::GetUniformLocation(const std::string &name)
+int RightEngine::Shader::GetUniformLocation(const std::string& name)
 {
     if (uniformLocationCache.find(name) != uniformLocationCache.end())
         return uniformLocationCache[name];
@@ -141,4 +143,9 @@ int RightEngine::Shader::GetUniformLocation(const std::string &name)
         R_CORE_WARN("Uniform {0} doesn't exist!", name);
     uniformLocationCache[name] = location;
     return location;
+}
+
+void RightEngine::Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
+{
+    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 }

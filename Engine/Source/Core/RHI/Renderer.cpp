@@ -1,16 +1,12 @@
 #include "Renderer.hpp"
 #include "Core.h"
 
-void RightEngine::Renderer::Draw(const RightEngine::VertexArray &va, const RightEngine::IndexBuffer &ib)
+void RightEngine::Renderer::Draw(const RightEngine::VertexArray& va, const RightEngine::IndexBuffer& ib)
 {
-    va.Bind();
-    ib.Bind();
     glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
-    va.UnBind();
-    ib.UnBind();
 }
 
-void RightEngine::Renderer::Draw(const RightEngine::VertexArray &va, const RightEngine::VertexBuffer &vb)
+void RightEngine::Renderer::Draw(const RightEngine::VertexArray& va, const RightEngine::VertexBuffer& vb)
 {
     va.Bind();
     vb.Bind();
@@ -19,12 +15,10 @@ void RightEngine::Renderer::Draw(const RightEngine::VertexArray &va, const Right
     vb.UnBind();
 }
 
-void RightEngine::Renderer::Draw(const RightEngine::VertexArray &va, const RightEngine::IndexBuffer &ib,
-                                 const RightEngine::Shader &shader)
+void RightEngine::Renderer::Draw(const RightEngine::VertexArray& va, const RightEngine::IndexBuffer& ib,
+                                 const RightEngine::Shader& shader)
 {
-    shader.Bind();
     Draw(va, ib);
-    shader.UnBind();
 }
 
 RightEngine::Renderer& RightEngine::Renderer::Get()
@@ -44,4 +38,10 @@ void RightEngine::Renderer::SetWindow(Window* _window)
 RightEngine::Window* RightEngine::Renderer::GetWindow() const
 {
     return window;
+}
+
+void RightEngine::Renderer::Clear() const
+{
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
