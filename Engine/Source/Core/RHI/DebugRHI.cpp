@@ -4,8 +4,8 @@
 void RightEngine::DebugRHI::Init()
 {
 #ifndef R_TEST_BUILD
-//    glEnable(GL_DEBUG_OUTPUT);
-//    glDebugMessageCallback(GLErrorCallback, nullptr);
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(GLErrorCallback, nullptr);
 #endif
 }
 
