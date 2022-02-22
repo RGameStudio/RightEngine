@@ -52,3 +52,13 @@ namespace RightEngine
     };
 }
 ```
+- `using namespace <...>` can be used in `.cpp` files for preventing lots of useless namespace declarations, but class methods
+must be still marked with namespace
+```c++
+using namespace RightEngine;
+// ...
+void RightEngine::Geometry::CreateVertexArray(const VertexBufferLayout& layout)
+{
+    //...
+}
+```

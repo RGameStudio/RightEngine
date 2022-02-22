@@ -2,10 +2,12 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
 #include "Shader.hpp"
 #include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
 #include "Window.hpp"
+#include "Geometry.hpp"
 
 namespace RightEngine
 {
@@ -15,9 +17,9 @@ namespace RightEngine
         void SetWindow(Window* window);
         Window* GetWindow() const;
 
-        void Draw(const VertexArray& va, const IndexBuffer& ib);
-        void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
-        void Draw(const VertexArray& va, const VertexBuffer& vb);
+        void Draw(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<IndexBuffer>& ib) const;
+        void Draw(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<VertexBuffer>& vb) const;
+        void Draw(const std::shared_ptr<Geometry>& geometry, const std::shared_ptr<Shader>& shader) const;
         void Clear() const;
 
         static Renderer& Get();

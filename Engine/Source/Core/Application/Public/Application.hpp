@@ -6,6 +6,7 @@
 #include "Shader.hpp"
 #include "Window.hpp"
 #include "Camera.hpp"
+#include "Geometry.hpp"
 #include <memory>
 #include <chrono>
 
@@ -38,6 +39,8 @@ namespace RightEngine
         std::unique_ptr<VertexArray> testQuadVertexArray;
         std::unique_ptr<Shader> basicShader;
         std::shared_ptr<FPSCamera> camera;
+        std::shared_ptr<Geometry> testGeometry;
+        std::shared_ptr<Shader> testShader;
     };
 
 }

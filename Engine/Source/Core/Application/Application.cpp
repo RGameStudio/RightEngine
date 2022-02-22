@@ -92,40 +92,32 @@ namespace RightEngine
         VertexBufferLayout layout;
         layout.Push<float>(3);
 
-        basicShader = std::make_unique<Shader>("/Assets/Shaders/Basic/basic.vert", "/Assets/Shaders/Basic/basic.frag");
-//        testQuadVertexBuffer = std::make_unique<VertexBuffer>(quadVertices, sizeof(quadVertices));
-//        testQuadIndexBuffer = std::make_unique<IndexBuffer>(quadIndexes, sizeof(quadIndexes) / sizeof(uint32_t));
-        testQuadVertexBuffer = std::make_unique<VertexBuffer>(g_vertex_buffer_data, sizeof(g_vertex_buffer_data));
-        testQuadVertexArray = std::make_unique<VertexArray>();
-        testQuadVertexArray->AddBuffer(*testQuadVertexBuffer, layout);
-
         camera = std::make_shared<FPSCamera>(glm::vec3(0, 5, -15), glm::vec3(0, 1, 0));
+        testGeometry = std::make_shared<Geometry>();
+        testGeometry->CreateVertexBuffer(g_vertex_buffer_data, sizeof(g_vertex_buffer_data));
+        testGeometry->CreateVertexArray(layout);
+        testShader = std::make_shared<Shader>("/Assets/Shaders/Basic/basic.vert", "/Assets/Shaders/Basic/basic.frag");
     }
 
     void Application::OnUpdate()
     {
         Input::OnUpdate();
-//        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
         Renderer::Get().Clear();
         window->OnUpdate();
         camera->OnUpdate();
-        basicShader->Bind();
+        testShader->Bind();
         const glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f),
                                                             static_cast<float>(window->GetWidth()) /
                                                             static_cast<float>(window->GetHeight()), 0.1f, 300.0f);
-        basicShader->SetUniformMat4f("projection", projectionMatrix);
+        testShader->SetUniformMat4f("projection", projectionMatrix);
         const auto view = camera->GetViewMatrix();
-        basicShader->SetUniformMat4f("view", view);
+        testShader->SetUniformMat4f("view", view);
         glm::mat4 model(1);
         model = glm::translate(model, glm::vec3(0, 0, 0));
         model = glm::scale(model, glm::vec3(1, 1, 1));
         model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0, 1, 0));
-        basicShader->SetUniformMat4f("model", model);
-        testQuadVertexArray->Bind();
-//        testQuadIndexBuffer->Bind();
-        testQuadVertexBuffer->Bind();
-        Renderer::Get().Draw(*testQuadVertexArray, *testQuadVertexBuffer);
+        testShader->SetUniformMat4f("model", model);
+        Renderer::Get().Draw(testGeometry, testShader);
     }
 
     void Application::OnUpdateEnd()
