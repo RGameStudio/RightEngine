@@ -3,7 +3,6 @@
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
-#include "IDrawable.hpp"
 #include <memory>
 
 namespace RightEngine

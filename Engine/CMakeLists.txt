@@ -17,7 +17,7 @@ set(ENGINE_SRC
         Source/Core/Shader/Shader.cpp
         Source/Core/Utils/Input.cpp
         Source/Core/Window/GLFWWindow.cpp
-        Source/Core/Scene/Camera.cpp Source/Core/RHI/Public/Geometry.hpp Source/Core/RHI/Geometry.cpp Source/Core/RHI/Public/IDrawable.hpp)
+        Source/Core/Scene/Camera.cpp Source/Core/RHI/Public/Geometry.hpp Source/Core/RHI/Geometry.cpp Source/Core/Scene/Public/SceneNode.hpp Source/Core/Scene/SceneNode.cpp Source/Core/Scene/Public/Scene.hpp Source/Core/Scene/Scene.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)
