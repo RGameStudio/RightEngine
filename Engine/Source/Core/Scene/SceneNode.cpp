@@ -4,11 +4,11 @@
 
 using namespace RightEngine;
 
-void RightEngine::SceneNode::Draw(const std::shared_ptr<Shader>& shader) const
+void RightEngine::SceneNode::Draw() const
 {
     if (geometry)
     {
-        Renderer::Get().Draw(geometry, shader);
+        Renderer::Get().Draw(geometry);
     }
 }
 
@@ -40,7 +40,7 @@ void SceneNode::SetPosition(const glm::vec3& position)
     this->position = position;
 }
 
-void SceneNode::Update()
+void SceneNode::OnUpdate()
 {}
 
 void SceneNode::AddChild(const std::shared_ptr<SceneNode>& node)

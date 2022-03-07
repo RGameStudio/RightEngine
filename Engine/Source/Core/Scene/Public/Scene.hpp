@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Camera.hpp"
 #include "SceneNode.hpp"
 
 namespace RightEngine
@@ -9,11 +10,16 @@ namespace RightEngine
     public:
         Scene();
 
-        virtual void Update();
+        virtual void OnUpdate();
 
-        virtual void Draw(const std::shared_ptr<Shader>& shader);
+        const std::shared_ptr<FPSCamera>& GetCamera() const;
+
+        void SetCamera(const std::shared_ptr<FPSCamera>& camera);
+
+        const std::shared_ptr<SceneNode>& GetRootNode() const;
 
     private:
         std::shared_ptr<SceneNode> rootNode;
+        std::shared_ptr<FPSCamera> camera;
     };
 }

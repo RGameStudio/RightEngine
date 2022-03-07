@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     GLaunchMode = LaunchMode::Test;
 #endif
     RightEngine::LaunchEngine::Init(argc, argv);
-    RightEngine::Application *application = RightEngine::Application::Get();
+    auto& application = RightEngine::Application::Get();
 
     if (GLaunchMode == LaunchMode::Game)
     {
@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
 
         while (!GShouldStop)
         {
-            application->OnUpdate();
+            application.OnUpdate();
             GameApplication::OnUpdate();
-            application->OnUpdateEnd();
+            application.OnUpdateEnd();
         }
 
         GameApplication::OnDestroy();

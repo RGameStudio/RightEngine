@@ -39,7 +39,7 @@ void RightEngine::Renderer::Clear() const
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry, const std::shared_ptr<Shader>& shader) const
+void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) const
 {
     shader->Bind();
     geometry->GetVertexArray()->Bind();
@@ -51,4 +51,14 @@ void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry, cons
     else {
         Draw(geometry->GetVertexArray(), geometry->GetVertexBuffer());
     }
+}
+
+void Renderer::SetShader(const std::shared_ptr<Shader>& shader)
+{
+    this->shader = shader;
+}
+
+const std::shared_ptr<Shader>& Renderer::GetShader() const
+{
+    return shader;
 }

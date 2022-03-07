@@ -7,6 +7,7 @@
 #include "Window.hpp"
 #include "Camera.hpp"
 #include "Geometry.hpp"
+#include "Scene.hpp"
 #include <memory>
 #include <chrono>
 
@@ -17,16 +18,21 @@ namespace RightEngine
     class Application
     {
     public:
-        static Application* Get();
+        static Application& Get();
 
         void OnUpdate();
-
         void OnUpdateEnd();
 
         static double GetTime();
 
+        void SetScene(const std::shared_ptr<Scene>& scene);
+
+        Application(const Application& other) = delete;
+        Application& operator=(const Application& other) = delete;
+        Application(Application&& other) = delete;
+        Application& operator=(Application&& other) = delete;
+
     private:
-        static Application* instance;
         static time_point<high_resolution_clock> startTimestamp;
 
         Application();
@@ -34,13 +40,7 @@ namespace RightEngine
         void Init();
 
         std::unique_ptr<Window> window;
-        std::unique_ptr<IndexBuffer> testQuadIndexBuffer;
-        std::unique_ptr<VertexBuffer> testQuadVertexBuffer;
-        std::unique_ptr<VertexArray> testQuadVertexArray;
-        std::unique_ptr<Shader> basicShader;
-        std::shared_ptr<FPSCamera> camera;
-        std::shared_ptr<Geometry> testGeometry;
-        std::shared_ptr<Shader> testShader;
+        std::shared_ptr<Scene> activeScene;
     };
 
 }

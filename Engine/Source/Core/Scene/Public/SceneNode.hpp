@@ -24,9 +24,9 @@ namespace RightEngine
 
         void SetPosition(const glm::vec3& position);
 
-        virtual void Draw(const std::shared_ptr<Shader>& shader) const;
+        virtual void Draw() const;
 
-        virtual void Update();
+        virtual void OnUpdate();
 
         void AddChild(const std::shared_ptr<SceneNode>& node);
 
