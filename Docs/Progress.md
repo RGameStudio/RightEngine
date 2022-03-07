@@ -1,6 +1,6 @@
 # Progress
 
-Just a bunch of screenshots, that shows progress of engine development
+Just a bunch of screenshots, that show progress of engine development
 
 ## 08-03-2022
 
