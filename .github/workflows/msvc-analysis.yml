@@ -10,9 +10,9 @@ name: Microsoft C++ Code Analysis
 
 on:
   push:
-    branches: [ master ]
+    branches: [ development ]
   pull_request:
-    branches: [ master ]
+    branches: [ development ]
 env:
   # Path to the CMake build directory.
   build: '${{ github.workspace }}/build'
