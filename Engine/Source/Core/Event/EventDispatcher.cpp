@@ -34,5 +34,3 @@ void EventDispatcher::Emit(const Event& event) const
         observer.callback(event);
     }
 }
-
-EventDispatcher* EventDispatcher::instance = nullptr;

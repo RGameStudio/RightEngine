@@ -19,34 +19,26 @@ struct CallbackContext
 class EventDispatcher
 {
 public:
+    static EventDispatcher& Get()
+    {
+        static EventDispatcher dispatcher;
+        return dispatcher;
+    }
 
     void Subscribe(const char* descriptor, CallbackContext context);
-
     void UnSubscribe(const char* descriptor, CallbackContext context);
-
     void Emit(const Event& event) const;
 
-    inline static EventDispatcher* Get()
-    {
-        if (!instance)
-        {
-            instance = new EventDispatcher();
-        }
-        return instance;
-    }
-
-    inline static void Destroy()
-    {
-        delete instance;
-    }
+    EventDispatcher(const EventDispatcher& dispatcher) = delete;
+    EventDispatcher& operator=(const EventDispatcher& dispatcher) = delete;
+    EventDispatcher(EventDispatcher&& dispatcher) = delete;
+    EventDispatcher& operator=(EventDispatcher&& dispatcher) = delete;
 
 private:
-
     EventDispatcher() = default;
+    ~EventDispatcher() = default;
 
     std::unordered_map<const char*, std::vector<CallbackContext>> observers;
-
-    static EventDispatcher* instance;
 };
 
 #define EVENT_CALLBACK(callback) CallbackContext(std::bind(&callback, this, std::placeholders::_1), this)

@@ -25,26 +25,26 @@ namespace RightEngine
 
         glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
         {
-            EventDispatcher::Get()->Emit(ShutdownEvent());
+            EventDispatcher::Get().Emit(ShutdownEvent());
         });
 
         glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xPos, double yPos)
         {
-            EventDispatcher::Get()->Emit(MouseMovedEvent(xPos, yPos));
+            EventDispatcher::Get().Emit(MouseMovedEvent(xPos, yPos));
         });
 
         glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
             switch (action) {
                 case GLFW_PRESS: {
-                    EventDispatcher::Get()->Emit(KeyPressedEvent(key, 0));
+                    EventDispatcher::Get().Emit(KeyPressedEvent(key, 0));
                     break;
                 }
                 case GLFW_RELEASE: {
-                    EventDispatcher::Get()->Emit(KeyReleasedEvent(key));
+                    EventDispatcher::Get().Emit(KeyReleasedEvent(key));
                     break;
                 }
                 case GLFW_REPEAT: {
-                    EventDispatcher::Get()->Emit(KeyPressedEvent(key, 1));
+                    EventDispatcher::Get().Emit(KeyPressedEvent(key, 1));
                     break;
                 }
             }

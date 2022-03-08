@@ -18,7 +18,6 @@ namespace RightEngine
 
     void LaunchEngine::Exit()
     {
-        EventDispatcher::Destroy();
         R_CORE_INFO("Exiting engine!");
 
         delete launchContext;
@@ -26,7 +25,7 @@ namespace RightEngine
 
     LaunchEngine::LaunchContext::LaunchContext()
     {
-        EventDispatcher::Get()->Subscribe(ShutdownEvent::descriptor, EVENT_CALLBACK(LaunchEngine::LaunchContext::OnEvent));
+        EventDispatcher::Get().Subscribe(ShutdownEvent::descriptor, EVENT_CALLBACK(LaunchEngine::LaunchContext::OnEvent));
     }
 
     void LaunchEngine::LaunchContext::SetCmdArgs(int argc, char **argv)

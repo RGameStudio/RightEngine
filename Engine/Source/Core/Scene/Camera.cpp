@@ -9,8 +9,8 @@ RightEngine::FPSCamera::FPSCamera(const glm::vec3& position, const glm::vec3& wo
                                                                                          rotation(90.0f, 0.0f, 0.0f)
 {
     UpdateVectors();
-    EventDispatcher::Get()->Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
-    EventDispatcher::Get()->Subscribe(KeyPressedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
+    EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
+    EventDispatcher::Get().Subscribe(KeyPressedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
 }
 
 void RightEngine::FPSCamera::OnUpdate()
