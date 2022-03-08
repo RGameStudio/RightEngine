@@ -1,6 +1,4 @@
 #pragma once
-#include <cstdint>
-#include <chrono>
 
 namespace RightEngine
 {
@@ -12,8 +10,6 @@ namespace RightEngine
         static float deltaTime;
         static float frameTime;
     private:
-        static std::chrono::high_resolution_clock::time_point launchTime;
-        static float lastFrameSinceStartTime;
-        static float lastFrameTime;
+        static float lastFrame;
     };
 }

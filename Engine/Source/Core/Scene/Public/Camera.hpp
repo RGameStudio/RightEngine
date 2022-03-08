@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MouseEvent.hpp"
+#include "KeyEvent.hpp"
 #include <glm/vec3.hpp>
 #include <glm/glm.hpp>
 
@@ -37,11 +38,11 @@ namespace RightEngine
         glm::vec3 worldUp;
         glm::vec3 rotation;
 
-        float movementSpeed = 50.0f;
-        float sensitivity = 0.25f;
-        float actualSpeed = 1.0f;
-        float prevXMousePos = -1;
-        float prevYMousePos = -1;
+        float movementSpeed{ 25.0f };
+        float sensitivity{ 0.25f };
+        float actualSpeed{ 1.0f };
+        float prevXMousePos{ -1 };
+        float prevYMousePos{ -1 };
 
         bool shouldCaptureMouse = true;
 
@@ -50,5 +51,7 @@ namespace RightEngine
         bool OnEvent(const Event& event);
 
         bool OnMouseMove(const MouseMovedEvent& e);
+
+        bool OnKeyPressed(const KeyPressedEvent& e);
     };
 }

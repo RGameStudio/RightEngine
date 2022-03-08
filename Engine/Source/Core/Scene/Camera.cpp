@@ -1,7 +1,7 @@
 #include "Camera.hpp"
 #include "Input.hpp"
 #include "EventDispatcher.hpp"
-#include "Logger.hpp"
+#include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 RightEngine::FPSCamera::FPSCamera(const glm::vec3& position, const glm::vec3& worldUp) : position(position),
@@ -10,6 +10,7 @@ RightEngine::FPSCamera::FPSCamera(const glm::vec3& position, const glm::vec3& wo
 {
     UpdateVectors();
     EventDispatcher::Get()->Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
+    EventDispatcher::Get()->Subscribe(KeyPressedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
 }
 
 void RightEngine::FPSCamera::OnUpdate()
@@ -72,6 +73,10 @@ bool RightEngine::FPSCamera::OnEvent(const Event& event)
     {
         return OnMouseMove(static_cast<const MouseMovedEvent&>(event));
     }
+    else if (event.GetType() == KeyPressedEvent::descriptor)
+    {
+        return OnKeyPressed(static_cast<const KeyPressedEvent&>(event));
+    }
     return true;
 }
 
@@ -108,5 +113,25 @@ bool RightEngine::FPSCamera::OnMouseMove(const MouseMovedEvent& e)
     UpdateVectors();
     prevXMousePos = e.GetX();
     prevYMousePos = e.GetY();
+    return true;
+}
+
+bool RightEngine::FPSCamera::OnKeyPressed(const RightEngine::KeyPressedEvent& e)
+{
+    switch (e.GetKeyCode()) {
+        case GLFW_KEY_W:
+            position += actualSpeed * front;
+            break;
+        case GLFW_KEY_S:
+            position -= actualSpeed * front;
+            break;
+        case GLFW_KEY_A:
+            position -= glm::normalize(glm::cross(front, up)) * actualSpeed;
+            break;
+        case GLFW_KEY_D:
+            position += glm::normalize(glm::cross(front, up)) * actualSpeed;
+            break;
+    }
+
     return true;
 }
