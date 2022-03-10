@@ -1,7 +1,8 @@
-#include <ShutdownEvent.hpp>
+#include "ShutdownEvent.hpp"
 #include "Logger.hpp"
 #include "LaunchEngine.hpp"
 #include "EventDispatcher.hpp"
+#include "Input.hpp"
 
 bool GShouldStop = true;
 LaunchMode GLaunchMode = LaunchMode::Game;
@@ -11,6 +12,7 @@ namespace RightEngine
     void LaunchEngine::Init(int argc, char* argv[])
     {
         Log::Init();
+        Input::Init();
         launchContext = new LaunchContext();
         launchContext->SetCmdArgs(argc, argv);
         GShouldStop = false;

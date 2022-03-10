@@ -1,7 +1,7 @@
 #include "Camera.hpp"
 #include "Input.hpp"
 #include "EventDispatcher.hpp"
-#include <GLFW/glfw3.h>
+#include "KeyCodes.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 RightEngine::FPSCamera::FPSCamera(const glm::vec3& position, const glm::vec3& worldUp) : position(position),
@@ -10,12 +10,12 @@ RightEngine::FPSCamera::FPSCamera(const glm::vec3& position, const glm::vec3& wo
 {
     UpdateVectors();
     EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
-    EventDispatcher::Get().Subscribe(KeyPressedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
 }
 
 void RightEngine::FPSCamera::OnUpdate()
 {
     actualSpeed = movementSpeed * Input::deltaTime;
+    Move();
 }
 
 glm::mat4 RightEngine::FPSCamera::GetViewMatrix() const
@@ -73,16 +73,12 @@ bool RightEngine::FPSCamera::OnEvent(const Event& event)
     {
         return OnMouseMove(static_cast<const MouseMovedEvent&>(event));
     }
-    else if (event.GetType() == KeyPressedEvent::descriptor)
-    {
-        return OnKeyPressed(static_cast<const KeyPressedEvent&>(event));
-    }
+
     return true;
 }
 
 bool RightEngine::FPSCamera::OnMouseMove(const MouseMovedEvent& e)
 {
-//    R_CORE_TRACE("Mouse move event: {0} {1}", e.GetX(), e.GetY());
     if (!shouldCaptureMouse)
     {
         UpdateVectors();
@@ -116,22 +112,23 @@ bool RightEngine::FPSCamera::OnMouseMove(const MouseMovedEvent& e)
     return true;
 }
 
-bool RightEngine::FPSCamera::OnKeyPressed(const RightEngine::KeyPressedEvent& e)
+void RightEngine::FPSCamera::Move()
 {
-    switch (e.GetKeyCode()) {
-        case GLFW_KEY_W:
-            position += actualSpeed * front;
-            break;
-        case GLFW_KEY_S:
-            position -= actualSpeed * front;
-            break;
-        case GLFW_KEY_A:
-            position -= glm::normalize(glm::cross(front, up)) * actualSpeed;
-            break;
-        case GLFW_KEY_D:
-            position += glm::normalize(glm::cross(front, up)) * actualSpeed;
-            break;
+    if(Input::IsKeyDown(R_KEY_W))
+    {
+        position += actualSpeed * front;
+    }
+    if(Input::IsKeyDown(R_KEY_S))
+    {
+        position -= actualSpeed * front;
+    }
+    if(Input::IsKeyDown(R_KEY_A))
+    {
+        position -= glm::normalize(glm::cross(front, up)) * actualSpeed;
+    }
+    if(Input::IsKeyDown(R_KEY_D))
+    {
+        position += glm::normalize(glm::cross(front, up)) * actualSpeed;
     }
 
-    return true;
 }

@@ -38,7 +38,7 @@ namespace RightEngine
         glm::vec3 worldUp;
         glm::vec3 rotation;
 
-        float movementSpeed{ 25.0f };
+        float movementSpeed{ 20.0f };
         float sensitivity{ 0.25f };
         float actualSpeed{ 1.0f };
         float prevXMousePos{ -1 };
@@ -52,6 +52,6 @@ namespace RightEngine
 
         bool OnMouseMove(const MouseMovedEvent& e);
 
-        bool OnKeyPressed(const KeyPressedEvent& e);
+        void Move();
     };
 }
