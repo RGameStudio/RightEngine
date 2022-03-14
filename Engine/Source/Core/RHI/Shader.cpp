@@ -1,5 +1,6 @@
 #include "Shader.hpp"
 #include "Logger.hpp"
+#include "Path.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 #include <fstream>
@@ -62,9 +63,8 @@ void RightEngine::Shader::SetUniform4f(const std::string& name, float v0, float 
 RightEngine::ShaderProgramSource
 RightEngine::Shader::ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 {
-    const auto currentPath = std::filesystem::current_path();
-    std::ifstream vertexShaderStream(currentPath.u8string().append(vertexShaderPath));
-    std::ifstream fragmentShaderStream(currentPath.u8string().append(fragmentShaderPath));
+    std::ifstream vertexShaderStream(Path::ConvertEnginePathToOSPath(vertexShaderPath));
+    std::ifstream fragmentShaderStream(Path::ConvertEnginePathToOSPath(fragmentShaderPath));
 
     if (!vertexShaderStream.is_open())
     {

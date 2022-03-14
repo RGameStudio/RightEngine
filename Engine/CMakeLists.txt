@@ -14,14 +14,15 @@ set(ENGINE_SRC
         Source/Core/RHI/IndexBuffer.cpp
         Source/Core/RHI/Renderer.cpp
         Source/Core/RHI/DebugRHI.cpp
-        Source/Core/Shader/Shader.cpp
+        Source/Core/RHI/Shader.cpp
         Source/Core/Utils/Input.cpp
         Source/Core/Window/GLFWWindow.cpp
         Source/Core/Scene/Camera.cpp
         Source/Core/RHI/Geometry.cpp
         Source/Core/Scene/SceneNode.cpp
         Source/Core/Scene/Scene.cpp
-        Source/Core/RHI/Texture.cpp)
+        Source/Core/RHI/Texture.cpp
+        Source/Core/RHI/Material.cpp Source/Core/Utils/Public/Path.hpp Source/Core/Utils/Path.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

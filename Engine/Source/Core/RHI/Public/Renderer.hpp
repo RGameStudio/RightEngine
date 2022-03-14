@@ -24,6 +24,8 @@ namespace RightEngine
 
         void Clear() const;
 
+        void HasDepthTest(bool mode);
+
         void SetShader(const std::shared_ptr<Shader>& shader);
         const std::shared_ptr<Shader>& GetShader() const;
 

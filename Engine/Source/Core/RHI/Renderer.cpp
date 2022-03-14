@@ -42,13 +42,28 @@ void RightEngine::Renderer::Clear() const
 void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) const
 {
     shader->Bind();
+    const auto material = geometry->GetMaterial();
+    if (material)
+    {
+        R_CORE_ASSERT(material->GetBaseTexture(), "Material must have base texture!")
+        material->GetBaseTexture()->Bind();
+        shader->SetUniform1i("baseTexture", 0);
+        shader->SetUniform1i("hasBaseTexture", true);
+    }
+    else
+    {
+        shader->SetUniform1i("hasBaseTexture", false);
+    }
+
     geometry->GetVertexArray()->Bind();
     geometry->GetVertexBuffer()->Bind();
-    if (geometry->GetIndexBuffer()) {
+    if (geometry->GetIndexBuffer())
+    {
         geometry->GetIndexBuffer()->Bind();
         Draw(geometry->GetVertexArray(), geometry->GetIndexBuffer());
     }
-    else {
+    else
+    {
         Draw(geometry->GetVertexArray(), geometry->GetVertexBuffer());
     }
 }
@@ -61,4 +76,16 @@ void Renderer::SetShader(const std::shared_ptr<Shader>& shader)
 const std::shared_ptr<Shader>& Renderer::GetShader() const
 {
     return shader;
+}
+
+void Renderer::HasDepthTest(bool mode)
+{
+    if (mode)
+    {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
 }

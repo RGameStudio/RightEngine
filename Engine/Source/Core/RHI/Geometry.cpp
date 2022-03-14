@@ -1,8 +1,12 @@
 #include "Geometry.hpp"
-#include "Renderer.hpp"
 #include "Core.h"
 
 using namespace RightEngine;
+
+Geometry::Geometry()
+{
+    material = std::make_shared<Material>();
+}
 
 void RightEngine::Geometry::CreateVertexBuffer(const void* data, uint32_t size, int drawMode)
 {
@@ -39,3 +43,12 @@ const std::shared_ptr<VertexArray>& Geometry::GetVertexArray() const
     return vertexArray;
 }
 
+const std::shared_ptr<Material>& Geometry::GetMaterial() const
+{
+    return material;
+}
+
+void Geometry::SetMaterial(const std::shared_ptr<Material>& newMaterial)
+{
+    material = newMaterial;
+}

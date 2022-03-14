@@ -7,3 +7,4 @@
 #include "Scene.hpp"
 #include "Assert.hpp"
 #include "Renderer.hpp"
+#include "Texture.hpp"

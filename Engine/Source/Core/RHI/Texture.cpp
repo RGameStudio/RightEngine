@@ -1,5 +1,6 @@
 #include "Texture.hpp"
 #include "Logger.hpp"
+#include "Path.hpp"
 #include <stb_image.h>
 #include <glad/glad.h>
 
@@ -7,7 +8,7 @@
 RightEngine::Texture::Texture(const std::string& path)
 {
     //stbi_set_flip_vertically_on_load(1);
-    unsigned char* localBuffer = stbi_load(path.c_str(), &width, &height, &componentAmount, 0);
+    unsigned char* localBuffer = stbi_load(Path::ConvertEnginePathToOSPath(path).c_str(), &width, &height, &componentAmount, 0);
     if (localBuffer) {
         GLenum format = GL_RGBA;
         if (componentAmount == 1)
@@ -29,7 +30,7 @@ RightEngine::Texture::Texture(const std::string& path)
         R_CORE_INFO("Load texture at path {0} successfully!", path);
     }
     else {
-        R_CORE_ERROR("Failed to load texture at path: {0}");
+        R_CORE_ERROR("Failed to load texture at path: {0}", path);
     }
     stbi_image_free(localBuffer);
 }
