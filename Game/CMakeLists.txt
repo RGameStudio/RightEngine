@@ -18,6 +18,19 @@ add_custom_command(
 
 add_dependencies(Game CopyShaderFilesToGame)
 
+set(ASSETS_DIR ${CMAKE_SOURCE_DIR}/Game/Resources)
+
+add_custom_target(CopyResourceFilesToGame ALL DEPENDS ${ASSETS_DIR})
+
+add_custom_command(
+        TARGET CopyResourceFilesToGame
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${ASSETS_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}/Assets/
+        DEPENDS ${ASSETS_DIR})
+
+add_dependencies(Game CopyResourceFilesToGame)
+
 if (WIN32)
 #    add_compile_definitions(WIN32)
 elseif(APPLE)

@@ -20,7 +20,8 @@ set(ENGINE_SRC
         Source/Core/Scene/Camera.cpp
         Source/Core/RHI/Geometry.cpp
         Source/Core/Scene/SceneNode.cpp
-        Source/Core/Scene/Scene.cpp Source/Core/Utils/Public/KeyCodes.hpp)
+        Source/Core/Scene/Scene.cpp
+        Source/Core/RHI/Texture.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)
