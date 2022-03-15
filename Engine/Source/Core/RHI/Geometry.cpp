@@ -3,6 +3,11 @@
 
 using namespace RightEngine;
 
+Geometry::Geometry()
+{
+    material = std::make_shared<Material>();
+}
+
 void RightEngine::Geometry::CreateVertexBuffer(const void* data, uint32_t size, int drawMode)
 {
     R_CORE_ASSERT(!vertexBuffer, "Vertex buffer was already created for that geometry");

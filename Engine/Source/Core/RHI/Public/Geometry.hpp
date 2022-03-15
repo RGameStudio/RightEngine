@@ -11,6 +11,8 @@ namespace RightEngine
     class Geometry
     {
     public:
+        Geometry();
+
         void CreateVertexBuffer(const void* data, uint32_t size, int drawMode = GL_STATIC_DRAW);
         void CreateIndexBuffer(const uint32_t * data, uint32_t count, int drawMode = GL_STATIC_DRAW);
         void CreateVertexArray(const RightEngine::VertexBufferLayout& layout);

@@ -5,7 +5,6 @@
 #include <glad/glad.h>
 #include <fstream>
 #include <sstream>
-#include <filesystem>
 
 //TODO Error handling
 
@@ -148,4 +147,9 @@ int RightEngine::Shader::GetUniformLocation(const std::string& name)
 void RightEngine::Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
 {
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void RightEngine::Shader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
+{
+    SetUniform4f(name, vec4.x, vec4.y, vec4.z, vec4.w);
 }

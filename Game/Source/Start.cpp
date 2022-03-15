@@ -7,9 +7,13 @@ enum class GeometryType
     PLANE
 };
 
-std::shared_ptr<RightEngine::SceneNode> CreateTestSceneNode(GeometryType type)
+std::shared_ptr<RightEngine::SceneNode> CreateTestSceneNode(GeometryType type, const std::string& texturePath)
 {
-    const auto texture = std::make_shared<RightEngine::Texture>("/Assets/Textures/MossyWoodAlbedo.png");
+    std::shared_ptr<RightEngine::Texture> texture;
+    if (!texturePath.empty())
+    {
+        texture = std::make_shared<RightEngine::Texture>(texturePath);
+    }
     auto node = std::make_shared<RightEngine::SceneNode>();
     std::shared_ptr<RightEngine::Geometry> geometry;
     switch (type)
@@ -22,7 +26,6 @@ std::shared_ptr<RightEngine::SceneNode> CreateTestSceneNode(GeometryType type)
             break;
     }
     node->SetGeometry(geometry);
-    node->GetGeometry()->SetMaterial(std::make_shared<RightEngine::Material>());
     node->GetGeometry()->GetMaterial()->SetBaseTexture(texture);
     return node;
 }
@@ -34,9 +37,9 @@ void GameApplication::OnStart()
     const auto shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert",
                                                               "/Assets/Shaders/Basic/basic.frag");
     const auto scene = std::make_shared<RightEngine::Scene>();
-    const auto plane = CreateTestSceneNode(GeometryType::PLANE);
-    plane->SetScale(glm::vec3(5, 1, 5));
-    const auto cube = CreateTestSceneNode(GeometryType::CUBE);
+    const auto plane = CreateTestSceneNode(GeometryType::PLANE, "/Assets/Textures/MossyWoodAlbedo.png");
+    plane->SetScale(glm::vec3(10, 1, 10));
+    const auto cube = CreateTestSceneNode(GeometryType::CUBE, "");
     plane->AddChild(cube);
     auto& renderer = RightEngine::Renderer::Get();
     renderer.SetShader(shader);

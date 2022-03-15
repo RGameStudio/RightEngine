@@ -43,9 +43,10 @@ void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) cons
 {
     shader->Bind();
     const auto material = geometry->GetMaterial();
-    if (material)
+    const auto& materialData = material->GetMaterialData();
+    const auto baseTexture = material->GetBaseTexture();
+    if (baseTexture)
     {
-        R_CORE_ASSERT(material->GetBaseTexture(), "Material must have base texture!")
         material->GetBaseTexture()->Bind();
         shader->SetUniform1i("baseTexture", 0);
         shader->SetUniform1i("hasBaseTexture", true);
@@ -53,6 +54,7 @@ void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) cons
     else
     {
         shader->SetUniform1i("hasBaseTexture", false);
+        shader->SetUniform4f("baseColor", materialData.baseColor);
     }
 
     geometry->GetVertexArray()->Bind();

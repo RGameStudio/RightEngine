@@ -11,3 +11,13 @@ void RightEngine::Material::SetBaseTexture(const std::shared_ptr<Texture>& textu
 {
     baseTexture = texture;
 }
+
+const MaterialData& Material::GetMaterialData() const
+{
+    return materialData;
+}
+
+void Material::SetMaterialData(const MaterialData& data)
+{
+    materialData = data;
+}

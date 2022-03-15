@@ -6,6 +6,8 @@ in vec2 texCoord;
 uniform sampler2D baseTexture;
 uniform bool hasBaseTexture;
 
+uniform vec4 baseColor;
+
 void main()
 {
     if (hasBaseTexture)
@@ -15,7 +17,7 @@ void main()
     }
     else
     {
-        color = vec4(1.0, 1.0, 1.0, 1.0);
+        color = baseColor;
     }
 
 }
