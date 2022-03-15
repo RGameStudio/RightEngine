@@ -9,7 +9,7 @@ set(ENGINE_SRC
         Source/Core/Application/Application.cpp
         Source/Core/RHI/WindowsRenderingContext.cpp
         Source/Core/RHI/VertexBuffer.cpp
-        Source/Core/RHI/Public/VertexBufferLayout.cpp
+        Source/Core/RHI/VertexBufferLayout.cpp
         Source/Core/RHI/VertexArray.cpp
         Source/Core/RHI/IndexBuffer.cpp
         Source/Core/RHI/Renderer.cpp
@@ -22,7 +22,9 @@ set(ENGINE_SRC
         Source/Core/Scene/SceneNode.cpp
         Source/Core/Scene/Scene.cpp
         Source/Core/RHI/Texture.cpp
-        Source/Core/RHI/Material.cpp Source/Core/Utils/Public/Path.hpp Source/Core/Utils/Path.cpp)
+        Source/Core/RHI/Material.cpp
+        Source/Core/Utils/Path.cpp
+        Source/Core/RHI/GeometryBuilder.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

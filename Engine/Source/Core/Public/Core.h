@@ -8,3 +8,4 @@
 #include "Assert.hpp"
 #include "Renderer.hpp"
 #include "Texture.hpp"
+#include "GeometryBuilder.hpp"

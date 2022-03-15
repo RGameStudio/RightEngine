@@ -80,3 +80,13 @@ void SceneNode::GetAllChildren(std::vector<std::shared_ptr<SceneNode>>& allChild
         allChildren.push_back(node);
     }
 }
+
+const glm::vec3& SceneNode::GetScale() const
+{
+    return scale;
+}
+
+void SceneNode::SetScale(const glm::vec3& newScale)
+{
+    scale = newScale;
+}

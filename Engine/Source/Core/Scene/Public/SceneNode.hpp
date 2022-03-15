@@ -17,23 +17,22 @@ namespace RightEngine
         glm::mat4 GetModelMatrix() const;
 
         void SetGeometry(const std::shared_ptr<Geometry>& geometry);
-
         const std::shared_ptr<Geometry>& GetGeometry() const;
 
         const glm::vec3& GetPosition() const;
-
         void SetPosition(const glm::vec3& position);
+
+        const glm::vec3& GetScale() const;
+        void SetScale(const glm::vec3& scale);
 
         virtual void Draw() const;
 
         virtual void OnUpdate();
 
         void AddChild(const std::shared_ptr<SceneNode>& node);
-
         void RemoveChild(const std::shared_ptr<SceneNode>& node);
 
         const std::vector<std::shared_ptr<SceneNode>>& GetChildren() const;
-
         std::vector<std::shared_ptr<SceneNode>> GetAllChildren() const;
 
     private:
