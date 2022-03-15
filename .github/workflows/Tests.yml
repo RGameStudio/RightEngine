@@ -24,7 +24,9 @@ jobs:
     
     - name: Check git submodules
       # Initialize and download (if needed) engine dependencies
-      run: git submodule update --init --remote
+      run: |
+        ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+        git submodule update --init --remote
       
     - name: Create build directory
       shell: powershell
