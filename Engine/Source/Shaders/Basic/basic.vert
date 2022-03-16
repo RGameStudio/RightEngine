@@ -7,10 +7,12 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-out vec2 texCoord;
+out vec2 fUV;
+out vec3 fNormal;
 
 void main()
 {
-    texCoord = uv;
+    fUV = uv;
+    fNormal = normal;
     gl_Position = projection * view * model * vec4((position), 1.0);
 }

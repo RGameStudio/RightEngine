@@ -1,6 +1,7 @@
 #include "Scene.hpp"
 #include "Assert.hpp"
 #include "Renderer.hpp"
+#include "LightNode.hpp"
 #include <glm/ext/matrix_clip_space.hpp>
 
 using namespace RightEngine;
@@ -23,6 +24,7 @@ void RightEngine::Scene::OnUpdate()
     shader->SetUniformMat4f("projection", projectionMatrix);
     shader->SetUniformMat4f("view", camera->GetViewMatrix());
     std::vector<std::shared_ptr<SceneNode>> nodes = rootNode->GetAllChildren();
+    SetupLights(nodes);
     for (const auto& node: nodes)
     {
         node->OnUpdate();
@@ -45,4 +47,25 @@ const std::shared_ptr<FPSCamera>& RightEngine::Scene::GetCamera() const
 const std::shared_ptr<SceneNode>& Scene::GetRootNode() const
 {
     return rootNode;
+}
+
+void Scene::SetupLights(const std::vector<std::shared_ptr<SceneNode>>& nodes)
+{
+    bool hasLight = false;
+    for (const auto& node: nodes)
+    {
+        if (node->GetBaseType() == NodeType::LIGHT)
+        {
+            const auto lightNode = std::static_pointer_cast<LightNode>(node);
+            Renderer::Get().SetLight(lightNode);
+            hasLight = true;
+        }
+    }
+
+    if (!hasLight)
+    {
+        R_CORE_WARN("Scene doesn't have any lights!");
+    }
+
+    Renderer::Get().SaveLight();
 }

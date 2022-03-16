@@ -7,11 +7,16 @@
 
 namespace RightEngine
 {
+    enum class NodeType
+    {
+        REGULAR,
+        LIGHT
+    };
+
     class SceneNode
     {
     public:
         SceneNode() = default;
-
         ~SceneNode() = default;
 
         glm::mat4 GetModelMatrix() const;
@@ -35,13 +40,18 @@ namespace RightEngine
         const std::vector<std::shared_ptr<SceneNode>>& GetChildren() const;
         std::vector<std::shared_ptr<SceneNode>> GetAllChildren() const;
 
-    private:
-        void GetAllChildren(std::vector<std::shared_ptr<SceneNode>>& allChildren) const;
+        NodeType GetBaseType() const;
 
+    protected:
         glm::vec3 position{ 0.0f, 0.0f, 0.0f };
         glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
 
         std::shared_ptr<Geometry> geometry;
         std::vector<std::shared_ptr<SceneNode>> children;
+
+        NodeType baseType{ NodeType::REGULAR };
+
+    private:
+        void GetAllChildren(std::vector<std::shared_ptr<SceneNode>>& allChildren) const;
     };
 }

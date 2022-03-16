@@ -54,9 +54,24 @@ void RightEngine::Shader::SetUniform3f(const std::string& name, float v0, float 
     glUniform3f(GetUniformLocation(name), v0, v1, v2);
 }
 
+void RightEngine::Shader::SetUniform3f(const std::string& name, const glm::vec3& vec3)
+{
+    SetUniform3f(name, vec3.x, vec3.y, vec3.z);
+}
+
 void RightEngine::Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 {
     glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
+}
+
+void RightEngine::Shader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
+{
+    SetUniform4f(name, vec4.x, vec4.y, vec4.z, vec4.w);
+}
+
+void RightEngine::Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
+{
+    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
 RightEngine::ShaderProgramSource
@@ -142,14 +157,4 @@ int RightEngine::Shader::GetUniformLocation(const std::string& name)
         R_CORE_WARN("Uniform {0} doesn't exist!", name);
     uniformLocationCache[name] = location;
     return location;
-}
-
-void RightEngine::Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
-{
-    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
-}
-
-void RightEngine::Shader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
-{
-    SetUniform4f(name, vec4.x, vec4.y, vec4.z, vec4.w);
 }

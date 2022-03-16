@@ -9,3 +9,7 @@ Just a bunch of screenshots, that show progress of engine development
 ## 16-03-2022
 
 ![16-03-2022.png](https://i.imgur.com/i5kbaPR.png)
+
+## 17-03-2022 (Added ambient light)
+
+![16-03-2022.png](https://i.imgur.com/z0buV7n.png)

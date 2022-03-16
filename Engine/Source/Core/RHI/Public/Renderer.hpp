@@ -1,9 +1,5 @@
 #pragma once
 
-#define GLFW_INCLUDE_NONE
-
-#include <GLFW/glfw3.h>
-
 #include "Shader.hpp"
 #include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
@@ -12,6 +8,16 @@
 
 namespace RightEngine
 {
+    enum class LightNodeType;
+    class LightNode;
+
+    struct LightInfo
+    {
+        bool hasAmbient{ false };
+        float ambientIntensity{ 0.0f };
+        glm::vec3 ambientColor{ 1.0f, 1.0f, 1.0f };
+    };
+
     class Renderer
     {
     public:
@@ -29,6 +35,9 @@ namespace RightEngine
         void SetShader(const std::shared_ptr<Shader>& shader);
         const std::shared_ptr<Shader>& GetShader() const;
 
+        void SetLight(const std::shared_ptr<LightNode>& node);
+        void SaveLight() const;
+
         static Renderer& Get();
 
         Renderer() = default;
@@ -41,5 +50,6 @@ namespace RightEngine
     private:
         Window* window{ nullptr };
         std::shared_ptr<Shader> shader;
+        LightInfo lightInfo;
     };
 }

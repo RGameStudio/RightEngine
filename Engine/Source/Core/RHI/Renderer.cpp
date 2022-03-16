@@ -1,6 +1,9 @@
+#define GLFW_INCLUDE_NONE
+#include "GLFW/glfw3.h"
+
 #include "Renderer.hpp"
 #include "Core.h"
-// TODO Move to shared_ptr
+#include "LightNode.hpp"
 
 using namespace RightEngine;
 
@@ -37,6 +40,7 @@ void RightEngine::Renderer::Clear() const
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    std::memset((void*)(&lightInfo), 0, sizeof(lightInfo));
 }
 
 void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) const
@@ -90,4 +94,30 @@ void Renderer::HasDepthTest(bool mode)
     {
         glDisable(GL_DEPTH_TEST);
     }
+}
+
+void Renderer::SetLight(const std::shared_ptr<LightNode>& node)
+{
+    switch (node->GetType())
+    {
+        case LightNodeType::AMBIENT:
+            lightInfo.hasAmbient = true;
+            lightInfo.ambientColor = node->GetColor();
+            lightInfo.ambientIntensity = node->GetIntensity();
+            break;
+        case LightNodeType::POINT_LIGHT:
+            assert(false);
+            break;
+        default:
+            R_CORE_ASSERT(false, "Unknown light type!")
+            break;
+    }
+}
+
+void Renderer::SaveLight() const
+{
+    shader->Bind();
+    shader->SetUniform1i("hasAmbient", lightInfo.hasAmbient);
+    shader->SetUniform1f("ambientStrength", lightInfo.ambientIntensity);
+    shader->SetUniform3f("ambientColor", lightInfo.ambientColor);
 }

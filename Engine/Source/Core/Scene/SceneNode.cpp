@@ -90,3 +90,8 @@ void SceneNode::SetScale(const glm::vec3& newScale)
 {
     scale = newScale;
 }
+
+NodeType SceneNode::GetBaseType() const
+{
+    return baseType;
+}

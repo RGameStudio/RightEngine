@@ -1,5 +1,6 @@
 #include "EntryPoint.hpp"
 #include "Core.h"
+#include "LightNode.hpp"
 
 enum class GeometryType
 {
@@ -40,11 +41,15 @@ void GameApplication::OnStart()
     const auto plane = CreateTestSceneNode(GeometryType::PLANE, "/Assets/Textures/MossyWoodAlbedo.png");
     plane->SetScale(glm::vec3(10, 1, 10));
     const auto cube = CreateTestSceneNode(GeometryType::CUBE, "");
+    const auto light = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::AMBIENT);
+    light->SetIntensity(0.5f);
+    light->SetColor({ 1.0f, 0.5f, 0.0f });
     plane->AddChild(cube);
     auto& renderer = RightEngine::Renderer::Get();
     renderer.SetShader(shader);
     scene->SetCamera(camera);
     scene->GetRootNode()->AddChild(plane);
+    scene->GetRootNode()->AddChild(light);
     RightEngine::Application::Get().SetScene(scene);
     RightEngine::Renderer::Get().HasDepthTest(true);
 }
