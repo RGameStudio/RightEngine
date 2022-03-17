@@ -9,6 +9,7 @@ namespace RightEngine
     struct MaterialData
     {
         glm::vec4 baseColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+        float specular{ 1.0f };
     };
 
     class Material

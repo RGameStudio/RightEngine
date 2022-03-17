@@ -5,6 +5,7 @@
 #include "VertexArray.hpp"
 #include "Window.hpp"
 #include "Geometry.hpp"
+#include "Config.hpp"
 
 namespace RightEngine
 {
@@ -16,6 +17,9 @@ namespace RightEngine
         bool hasAmbient{ false };
         float ambientIntensity{ 0.0f };
         glm::vec3 ambientColor{ 1.0f, 1.0f, 1.0f };
+        int pointLightAmount{ 0 };
+        glm::vec3 pointLightPosition[MAX_POINT_LIGHTS];
+        glm::vec3 pointLightColor[MAX_POINT_LIGHTS];
     };
 
     class Renderer

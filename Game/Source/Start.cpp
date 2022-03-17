@@ -41,10 +41,16 @@ void GameApplication::OnStart()
     const auto plane = CreateTestSceneNode(GeometryType::PLANE, "/Assets/Textures/MossyWoodAlbedo.png");
     plane->SetScale(glm::vec3(10, 1, 10));
     const auto cube = CreateTestSceneNode(GeometryType::CUBE, "");
-    const auto light = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::AMBIENT);
-    light->SetIntensity(0.5f);
-    light->SetColor({ 1.0f, 0.5f, 0.0f });
     plane->AddChild(cube);
+
+    const auto pointLight = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::POINT_LIGHT);
+    pointLight->SetPosition({ 2.0f, 2.0f, 0.0f});
+    pointLight->SetColor({ 1.0f, 0.2f, 0.0f });
+    cube->AddChild(pointLight);
+    const auto light = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::AMBIENT);
+    light->SetIntensity(0.1f);
+    light->SetColor({ 1.0f, 1.0f, 1.0f });
+
     auto& renderer = RightEngine::Renderer::Get();
     renderer.SetShader(shader);
     scene->SetCamera(camera);

@@ -58,8 +58,10 @@ void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) cons
     else
     {
         shader->SetUniform1i("hasBaseTexture", false);
-        shader->SetUniform4f("baseColor", materialData.baseColor);
     }
+
+    shader->SetUniform4f("baseColor", materialData.baseColor);
+    shader->SetUniform1f("specular", materialData.specular);
 
     geometry->GetVertexArray()->Bind();
     geometry->GetVertexBuffer()->Bind();
@@ -106,7 +108,9 @@ void Renderer::SetLight(const std::shared_ptr<LightNode>& node)
             lightInfo.ambientIntensity = node->GetIntensity();
             break;
         case LightNodeType::POINT_LIGHT:
-            assert(false);
+            lightInfo.pointLightPosition[lightInfo.pointLightAmount] = node->GetPosition();
+            lightInfo.pointLightColor[lightInfo.pointLightAmount] = node->GetColor();
+            lightInfo.pointLightAmount += 1;
             break;
         default:
             R_CORE_ASSERT(false, "Unknown light type!")
@@ -120,4 +124,11 @@ void Renderer::SaveLight() const
     shader->SetUniform1i("hasAmbient", lightInfo.hasAmbient);
     shader->SetUniform1f("ambientStrength", lightInfo.ambientIntensity);
     shader->SetUniform3f("ambientColor", lightInfo.ambientColor);
+
+    shader->SetUniform1i("pointLightAmount", lightInfo.pointLightAmount);
+    for (int i = 0; i < lightInfo.pointLightAmount; i++)
+    {
+        shader->SetUniform3f("pointLightPos[" + std::to_string(i) + "]", lightInfo.pointLightPosition[i]);
+        shader->SetUniform3f("pointLightColor[" + std::to_string(i) + "]", lightInfo.pointLightColor[i]);
+    }
 }
