@@ -15,7 +15,6 @@ namespace RightEngine
     struct LightInfo
     {
         bool hasAmbient{ false };
-        float ambientIntensity{ 0.0f };
         glm::vec3 ambientColor{ 1.0f, 1.0f, 1.0f };
         int pointLightAmount{ 0 };
         glm::vec3 pointLightPosition[MAX_POINT_LIGHTS];

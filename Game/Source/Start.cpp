@@ -42,9 +42,10 @@ void GameApplication::OnStart()
     plane->SetScale(glm::vec3(10, 1, 10));
     const auto cube = CreateTestSceneNode(GeometryType::CUBE, "");
     plane->AddChild(cube);
+    cube->SetPosition({ 0, 1.0f, 0 });
 
     const auto pointLight = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::POINT_LIGHT);
-    pointLight->SetPosition({ 2.0f, 2.0f, 0.0f});
+    pointLight->SetPosition({ 0.0f, 5.0f, 0.0f});
     pointLight->SetColor({ 1.0f, 0.2f, 0.0f });
     cube->AddChild(pointLight);
     const auto light = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::AMBIENT);

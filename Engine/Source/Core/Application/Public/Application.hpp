@@ -25,6 +25,7 @@ namespace RightEngine
 
         static double GetTime();
 
+        const std::shared_ptr<Scene>& GetScene() const;
         void SetScene(const std::shared_ptr<Scene>& scene);
 
         Application(const Application& other) = delete;

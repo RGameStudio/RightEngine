@@ -53,4 +53,9 @@ namespace RightEngine
     {
         activeScene = scene;
     }
+
+    const std::shared_ptr<Scene>& Application::GetScene() const
+    {
+        return activeScene;
+    }
 }

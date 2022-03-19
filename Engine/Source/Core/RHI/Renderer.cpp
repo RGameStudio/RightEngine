@@ -1,9 +1,10 @@
 #define GLFW_INCLUDE_NONE
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 #include "Renderer.hpp"
 #include "Core.h"
 #include "LightNode.hpp"
+#include "Application.hpp"
 
 using namespace RightEngine;
 
@@ -62,6 +63,8 @@ void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) cons
 
     shader->SetUniform4f("baseColor", materialData.baseColor);
     shader->SetUniform1f("specular", materialData.specular);
+    shader->SetUniform1f("ambient", materialData.ambient);
+    shader->SetUniform1i("shininess", materialData.shininess);
 
     geometry->GetVertexArray()->Bind();
     geometry->GetVertexBuffer()->Bind();
@@ -105,7 +108,6 @@ void Renderer::SetLight(const std::shared_ptr<LightNode>& node)
         case LightNodeType::AMBIENT:
             lightInfo.hasAmbient = true;
             lightInfo.ambientColor = node->GetColor();
-            lightInfo.ambientIntensity = node->GetIntensity();
             break;
         case LightNodeType::POINT_LIGHT:
             lightInfo.pointLightPosition[lightInfo.pointLightAmount] = node->GetPosition();
@@ -122,7 +124,6 @@ void Renderer::SaveLight() const
 {
     shader->Bind();
     shader->SetUniform1i("hasAmbient", lightInfo.hasAmbient);
-    shader->SetUniform1f("ambientStrength", lightInfo.ambientIntensity);
     shader->SetUniform3f("ambientColor", lightInfo.ambientColor);
 
     shader->SetUniform1i("pointLightAmount", lightInfo.pointLightAmount);
@@ -131,4 +132,6 @@ void Renderer::SaveLight() const
         shader->SetUniform3f("pointLightPos[" + std::to_string(i) + "]", lightInfo.pointLightPosition[i]);
         shader->SetUniform3f("pointLightColor[" + std::to_string(i) + "]", lightInfo.pointLightColor[i]);
     }
+
+    shader->SetUniform3f("cameraPos", Application::Get().GetScene()->GetCamera()->GetPosition());
 }
