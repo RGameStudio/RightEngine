@@ -38,25 +38,32 @@ void GameApplication::OnStart()
     const auto shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert",
                                                               "/Assets/Shaders/Basic/basic.frag");
     const auto scene = std::make_shared<RightEngine::Scene>();
-    const auto plane = CreateTestSceneNode(GeometryType::PLANE, "/Assets/Textures/MossyWoodAlbedo.png");
-    plane->SetScale(glm::vec3(10, 1, 10));
-    const auto cube = CreateTestSceneNode(GeometryType::CUBE, "");
-    plane->AddChild(cube);
-    cube->SetPosition({ 0, 1.0f, 0 });
 
-    const auto pointLight = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::POINT_LIGHT);
-    pointLight->SetPosition({ 0.0f, 5.0f, 0.0f});
-    pointLight->SetColor({ 1.0f, 0.2f, 0.0f });
-    cube->AddChild(pointLight);
+    const auto cube1 = CreateTestSceneNode(GeometryType::CUBE, "");
+    cube1->SetPosition({ 0, 0.0f, 0 });
+    const auto cube2 = CreateTestSceneNode(GeometryType::CUBE, "");
+    cube2->SetPosition({ 5.0f, 2.0f, 0 });
+    const auto cube3 = CreateTestSceneNode(GeometryType::CUBE, "");
+    cube3->SetPosition({ 5.0f, 0.0f, 0 });
+
+    cube1->AddChild(cube2);
+    cube2->AddChild(cube3);
+
     const auto light = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::AMBIENT);
-    light->SetIntensity(0.1f);
-    light->SetColor({ 1.0f, 1.0f, 1.0f });
+    light->SetIntensity(1.0f);
+
+    const auto lightCube = CreateTestSceneNode(GeometryType::CUBE, "");
+    const auto pointLight = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::POINT_LIGHT);
+    pointLight->SetColor({ 1.0f, 0.0f, 0.0f });
+    lightCube->SetPosition({ 2.0f, 10.0f, 0.0f });
+    lightCube->AddChild(pointLight);
 
     auto& renderer = RightEngine::Renderer::Get();
     renderer.SetShader(shader);
     scene->SetCamera(camera);
-    scene->GetRootNode()->AddChild(plane);
+    scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(light);
+    scene->GetRootNode()->AddChild(lightCube);
     RightEngine::Application::Get().SetScene(scene);
     RightEngine::Renderer::Get().HasDepthTest(true);
 }

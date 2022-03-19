@@ -28,7 +28,7 @@ void RightEngine::Scene::OnUpdate()
     for (const auto& node: nodes)
     {
         node->OnUpdate();
-        shader->SetUniformMat4f("model", node->GetModelMatrix());
+        shader->SetUniformMat4f("model", node->GetWorldModelMatrix());
         node->Draw();
     }
 }

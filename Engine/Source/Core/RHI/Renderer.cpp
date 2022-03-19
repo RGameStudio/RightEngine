@@ -110,7 +110,7 @@ void Renderer::SetLight(const std::shared_ptr<LightNode>& node)
             lightInfo.ambientColor = node->GetColor();
             break;
         case LightNodeType::POINT_LIGHT:
-            lightInfo.pointLightPosition[lightInfo.pointLightAmount] = node->GetPosition();
+            lightInfo.pointLightPosition[lightInfo.pointLightAmount] = node->GetWorldPosition();
             lightInfo.pointLightColor[lightInfo.pointLightAmount] = node->GetColor();
             lightInfo.pointLightAmount += 1;
             break;
