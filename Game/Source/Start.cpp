@@ -1,6 +1,7 @@
 #include "EntryPoint.hpp"
 #include "Core.h"
 #include "LightNode.hpp"
+#include "Shaders/BasicShader.hpp"
 
 enum class GeometryType
 {
@@ -35,8 +36,7 @@ void GameApplication::OnStart()
 {
     const auto camera = std::make_shared<RightEngine::FPSCamera>(glm::vec3(0, 5, -15),
                                                                  glm::vec3(0, 1, 0));
-    const auto shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert",
-                                                              "/Assets/Shaders/Basic/basic.frag");
+    const auto shader = std::make_shared<RightEngine::BasicShader>();
     const auto scene = std::make_shared<RightEngine::Scene>();
 
     const auto cube1 = CreateTestSceneNode(GeometryType::CUBE, "");

@@ -1,11 +1,16 @@
 #pragma once
 
-#include "glm/matrix.hpp"
+#include <glm/matrix.hpp>
 #include <string>
+#include <memory>
 #include <unordered_map>
 
 namespace RightEngine
 {
+    struct LightInfo;
+    class Scene;
+    class SceneNode;
+
     struct ShaderProgramSource
     {
         std::string vertexSource;
@@ -30,6 +35,10 @@ namespace RightEngine
         void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
         void SetUniform4f(const std::string& name, const glm::vec4& vec4);
         void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
+
+        virtual void OnSetup(const std::shared_ptr<Scene>& scene);
+        virtual void OnNodeDraw(const std::shared_ptr<SceneNode>& node);
+        virtual void OnLightSave(LightInfo lightInfo);
 
     private:
         std::string filePath;

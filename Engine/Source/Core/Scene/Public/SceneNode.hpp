@@ -36,8 +36,6 @@ namespace RightEngine
         const glm::vec3& GetScale() const;
         void SetScale(const glm::vec3& newScale);
 
-        virtual void Draw() const;
-
         virtual void OnUpdate();
 
         void AddChild(const std::shared_ptr<SceneNode>& node);

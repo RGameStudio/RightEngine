@@ -1,6 +1,7 @@
 #include "Shader.hpp"
 #include "Logger.hpp"
 #include "Path.hpp"
+#include "Renderer.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 #include <fstream>
@@ -157,4 +158,19 @@ int RightEngine::Shader::GetUniformLocation(const std::string& name)
         R_CORE_WARN("Uniform {0} doesn't exist!", name);
     uniformLocationCache[name] = location;
     return location;
+}
+
+void RightEngine::Shader::OnSetup(const std::shared_ptr<Scene>& scene)
+{
+    Bind();
+}
+
+void RightEngine::Shader::OnNodeDraw(const std::shared_ptr<SceneNode>& node)
+{
+    Bind();
+}
+
+void RightEngine::Shader::OnLightSave(LightInfo lightInfo)
+{
+    Bind();
 }

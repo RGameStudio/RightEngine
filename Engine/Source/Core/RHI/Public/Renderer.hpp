@@ -10,6 +10,7 @@
 namespace RightEngine
 {
     enum class LightNodeType;
+    class SceneNode;
     class LightNode;
 
     struct LightInfo
@@ -30,6 +31,7 @@ namespace RightEngine
         void Draw(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<IndexBuffer>& ib) const;
         void Draw(const std::shared_ptr<VertexArray>& va, const std::shared_ptr<VertexBuffer>& vb) const;
         void Draw(const std::shared_ptr<Geometry>& geometry) const;
+        void Draw(const std::shared_ptr<SceneNode>& node) const;
 
         void Clear() const;
 
@@ -40,6 +42,8 @@ namespace RightEngine
 
         void SetLight(const std::shared_ptr<LightNode>& node);
         void SaveLight() const;
+
+        void SetupDraw(const std::shared_ptr<Scene>& scene);
 
         static Renderer& Get();
 

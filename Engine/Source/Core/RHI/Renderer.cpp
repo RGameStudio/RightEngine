@@ -1,4 +1,5 @@
 #define GLFW_INCLUDE_NONE
+
 #include <GLFW/glfw3.h>
 
 #include "Renderer.hpp"
@@ -41,31 +42,11 @@ void RightEngine::Renderer::Clear() const
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    std::memset((void*)(&lightInfo), 0, sizeof(lightInfo));
+    std::memset((void*) (&lightInfo), 0, sizeof(lightInfo));
 }
 
 void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) const
 {
-    shader->Bind();
-    const auto material = geometry->GetMaterial();
-    const auto& materialData = material->GetMaterialData();
-    const auto baseTexture = material->GetBaseTexture();
-    if (baseTexture)
-    {
-        material->GetBaseTexture()->Bind();
-        shader->SetUniform1i("baseTexture", 0);
-        shader->SetUniform1i("hasBaseTexture", true);
-    }
-    else
-    {
-        shader->SetUniform1i("hasBaseTexture", false);
-    }
-
-    shader->SetUniform4f("baseColor", materialData.baseColor);
-    shader->SetUniform1f("specular", materialData.specular);
-    shader->SetUniform1f("ambient", materialData.ambient);
-    shader->SetUniform1i("shininess", materialData.shininess);
-
     geometry->GetVertexArray()->Bind();
     geometry->GetVertexBuffer()->Bind();
     if (geometry->GetIndexBuffer())
@@ -115,23 +96,27 @@ void Renderer::SetLight(const std::shared_ptr<LightNode>& node)
             lightInfo.pointLightAmount += 1;
             break;
         default:
-            R_CORE_ASSERT(false, "Unknown light type!")
+        R_CORE_ASSERT(false, "Unknown light type!")
             break;
     }
 }
 
 void Renderer::SaveLight() const
 {
-    shader->Bind();
-    shader->SetUniform1i("hasAmbient", lightInfo.hasAmbient);
-    shader->SetUniform3f("ambientColor", lightInfo.ambientColor);
+    shader->OnLightSave(lightInfo);
+}
 
-    shader->SetUniform1i("pointLightAmount", lightInfo.pointLightAmount);
-    for (int i = 0; i < lightInfo.pointLightAmount; i++)
+void Renderer::SetupDraw(const std::shared_ptr<Scene>& scene)
+{
+    shader->OnSetup(scene);
+}
+
+void Renderer::Draw(const std::shared_ptr<SceneNode>& node) const
+{
+    shader->OnNodeDraw(node);
+    const auto& geometry = node->GetGeometry();
+    if (geometry)
     {
-        shader->SetUniform3f("pointLightPos[" + std::to_string(i) + "]", lightInfo.pointLightPosition[i]);
-        shader->SetUniform3f("pointLightColor[" + std::to_string(i) + "]", lightInfo.pointLightColor[i]);
+        Draw(geometry);
     }
-
-    shader->SetUniform3f("cameraPos", Application::Get().GetScene()->GetCamera()->GetPosition());
 }

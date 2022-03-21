@@ -2,7 +2,6 @@
 #include "Assert.hpp"
 #include "Renderer.hpp"
 #include "LightNode.hpp"
-#include <glm/ext/matrix_clip_space.hpp>
 
 using namespace RightEngine;
 
@@ -14,22 +13,14 @@ RightEngine::Scene::Scene()
 void RightEngine::Scene::OnUpdate()
 {
     camera->OnUpdate();
-    const auto& renderer = Renderer::Get();
-    const auto window = renderer.GetWindow();
-    const auto shader = renderer.GetShader();
-    const auto projectionMatrix = glm::perspective(glm::radians(45.0f),
-                                                        static_cast<float>(window->GetWidth()) /
-                                                        static_cast<float>(window->GetHeight()), 0.1f, 300.0f);
-    shader->Bind();
-    shader->SetUniformMat4f("projection", projectionMatrix);
-    shader->SetUniformMat4f("view", camera->GetViewMatrix());
     std::vector<std::shared_ptr<SceneNode>> nodes = rootNode->GetAllChildren();
     SetupLights(nodes);
+    auto& renderer = Renderer::Get();
+    renderer.SetupDraw(shared_from_this());
     for (const auto& node: nodes)
     {
         node->OnUpdate();
-        shader->SetUniformMat4f("model", node->GetWorldModelMatrix());
-        node->Draw();
+        renderer.Draw(node);
     }
 }
 

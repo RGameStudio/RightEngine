@@ -4,14 +4,6 @@
 
 using namespace RightEngine;
 
-void RightEngine::SceneNode::Draw() const
-{
-    if (geometry)
-    {
-        Renderer::Get().Draw(geometry);
-    }
-}
-
 glm::mat4 RightEngine::SceneNode::GetLocalModelMatrix() const
 {
     glm::mat4 model(1);
