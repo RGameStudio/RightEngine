@@ -47,10 +47,10 @@ void BasicShader::OnNodeDraw(const std::shared_ptr<SceneNode>& node)
             SetUniform1i("hasBaseTexture", false);
         }
 
-        SetUniform4f("baseColor", materialData.baseColor);
-        SetUniform1f("specular", materialData.specular);
-        SetUniform1f("ambient", materialData.ambient);
-        SetUniform1i("shininess", materialData.shininess);
+        SetUniform3f("material.diffuse", materialData.diffuse);
+        SetUniform3f("material.specular", materialData.specular);
+        SetUniform3f("material.ambient", materialData.ambient);
+        SetUniform1f("material.shininess", materialData.shininess);
 
         SetUniformMat4f("model", node->GetWorldModelMatrix());
     }

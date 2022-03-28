@@ -2,16 +2,17 @@
 
 #include "Texture.hpp"
 #include <glm/vec4.hpp>
+#include <glm/vec3.hpp>
 #include <memory>
 
 namespace RightEngine
 {
     struct MaterialData
     {
-        glm::vec4 baseColor{ 1.0f, 1.0f, 1.0f, 1.0f };
-        float specular{ 0.5f };
-        float ambient{ 0.1f };
-        int shininess{ 32 };
+        glm::vec3 ambient{ 1.0f, 0.5f, 0.31f };
+        glm::vec3 diffuse{ 1.0f, 0.5f, 0.31f };
+        glm::vec3 specular{ 0.5f, 0.5f, 0.5f};
+        float shininess{ 32.0f };
     };
 
     class Material

@@ -13,10 +13,13 @@ uniform sampler2D baseTexture;
 uniform bool hasBaseTexture;
 
 // Material
-uniform vec4 baseColor;
-uniform float ambient;
-uniform float specular;
-uniform int shininess;
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
+uniform Material material;
 
 // Lighting
 uniform vec3 ambientColor;
@@ -38,13 +41,13 @@ void main()
     }
     else
     {
-        color = baseColor;
+        color = vec4(material.ambient, 1.0);
     }
 
     vec4 fragAmbientColor = vec4(1.0, 1.0, 1.0, 1.0);
     if (hasAmbient)
     {
-        fragAmbientColor = vec4(ambient * ambientColor, 1.0);
+        fragAmbientColor = vec4(material.ambient * ambientColor, 1.0);
     }
 
     vec4 fragDiffuseColor = vec4(1.0, 1.0, 1.0, 1.0);
@@ -56,12 +59,12 @@ void main()
         vec3 lightDir = normalize(pointLightPos[0] - fPos);
         float diff = max(dot(normal, lightDir), 0.0);
         vec3 diffuse = diff * pointLightColor[0];
-        fragDiffuseColor = vec4(diffuse, 1.0);
+        fragDiffuseColor = vec4(diffuse * material.diffuse, 1.0);
 
         vec3 viewDir = normalize(cameraPos - fPos);
         vec3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-        fragSpecularColor = vec4(specular * spec * pointLightColor[0], 1.0);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        fragSpecularColor = vec4(material.specular * spec * pointLightColor[0], 1.0);
     }
 
     color = clamp((fragDiffuseColor + fragAmbientColor + fragSpecularColor),
