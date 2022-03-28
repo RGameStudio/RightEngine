@@ -1,5 +1,5 @@
 #include "GLFWWindow.hpp"
-#include "Core.h"
+#include "Core.hpp"
 #include "MouseEvent.hpp"
 #include "KeyEvent.hpp"
 

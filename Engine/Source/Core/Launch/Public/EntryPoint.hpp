@@ -4,9 +4,7 @@
 #include <gtest/gtest.h>
 #endif
 
-#include <Window.hpp>
-#include <Application.hpp>
-#include "Core.h"
+#include "Core.hpp"
 
 enum class LaunchMode;
 

@@ -1,5 +1,5 @@
 #include "Geometry.hpp"
-#include "Core.h"
+#include "Core.hpp"
 
 using namespace RightEngine;
 

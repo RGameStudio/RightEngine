@@ -1,6 +1,6 @@
-#include <memory>
+#include "Core.hpp"
 #include <gtest/gtest.h>
-#include <Core.h>
+#include <memory>
 
 using namespace RightEngine;
 

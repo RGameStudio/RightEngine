@@ -1,6 +1,6 @@
 #include "IndexBuffer.hpp"
+#include "Core.hpp"
 #include <glad/glad.h>
-#include <Core.h>
 
 void RightEngine::IndexBuffer::Bind() const
 {

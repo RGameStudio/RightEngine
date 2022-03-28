@@ -1,5 +1,4 @@
 #include "EntryPoint.hpp"
-#include "Core.h"
 #include "SandboxLayer.hpp"
 
 static std::shared_ptr<SandboxLayer> layer;
