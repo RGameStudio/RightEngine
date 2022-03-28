@@ -9,3 +9,5 @@
 #include "Renderer.hpp"
 #include "Texture.hpp"
 #include "GeometryBuilder.hpp"
+#include "Layer.hpp"
+#include "Application.hpp"

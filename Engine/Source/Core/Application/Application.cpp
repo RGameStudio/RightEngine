@@ -18,6 +18,17 @@ namespace RightEngine
         Init();
     }
 
+    Application::~Application()
+    {
+        for (auto& layer: layers)
+        {
+            layer->OnDetach();
+            layer.reset();
+        }
+
+        layers.clear();
+    }
+
     void Application::Init()
     {
         Window* _window = Window::Create("Engine window", 1920, 1080);
@@ -34,7 +45,13 @@ namespace RightEngine
         Input::OnUpdate();
         Renderer::Get().Clear();
         window->OnUpdate();
-        activeScene->OnUpdate();
+
+        for (const auto& layer: layers)
+        {
+            layer->OnUpdate(Input::deltaTime);
+        }
+
+        // TODO: ImGUI layer
     }
 
     void Application::OnUpdateEnd()
@@ -42,20 +59,9 @@ namespace RightEngine
         window->Swap();
     }
 
-    double Application::GetTime()
+    void Application::PushLayer(const std::shared_ptr<Layer>& layer)
     {
-        using namespace std::chrono;
-        return duration_cast<milliseconds>(std::chrono::high_resolution_clock::now() - startTimestamp).count();
-    }
-    time_point<high_resolution_clock> Application::startTimestamp;
-
-    void Application::SetScene(const std::shared_ptr<Scene>& scene)
-    {
-        activeScene = scene;
-    }
-
-    const std::shared_ptr<Scene>& Application::GetScene() const
-    {
-        return activeScene;
+        layers.emplace_back(layer);
+        layer->OnAttach();
     }
 }

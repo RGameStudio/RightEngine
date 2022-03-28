@@ -8,6 +8,7 @@
 #include "Camera.hpp"
 #include "Geometry.hpp"
 #include "Scene.hpp"
+#include "Layer.hpp"
 #include <memory>
 #include <chrono>
 
@@ -23,10 +24,8 @@ namespace RightEngine
         void OnUpdate();
         void OnUpdateEnd();
 
-        static double GetTime();
-
-        const std::shared_ptr<Scene>& GetScene() const;
-        void SetScene(const std::shared_ptr<Scene>& scene);
+        // TODO: Delete layers
+        void PushLayer(const std::shared_ptr<Layer>& layer);
 
         Application(const Application& other) = delete;
         Application& operator=(const Application& other) = delete;
@@ -34,14 +33,14 @@ namespace RightEngine
         Application& operator=(Application&& other) = delete;
 
     private:
-        static time_point<high_resolution_clock> startTimestamp;
+        std::unique_ptr<Window> window;
+        std::vector<std::shared_ptr<Layer>> layers;
 
+    private:
         Application();
+        ~Application();
 
         void Init();
-
-        std::unique_ptr<Window> window;
-        std::shared_ptr<Scene> activeScene;
     };
 
 }

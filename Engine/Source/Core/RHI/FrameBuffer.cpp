@@ -83,7 +83,7 @@ namespace Utils {
             case FramebufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
         }
 
-        R_CORE_ASSERT(false);
+        R_CORE_ASSERT(false, "");
         return 0;
     }
 
@@ -176,7 +176,7 @@ void RightEngine::Framebuffer::Invalidate()
 
     if (colorAttachments.size() > 1)
     {
-        R_CORE_ASSERT(colorAttachments.size() <= 4);
+        R_CORE_ASSERT(colorAttachments.size() <= 4, "");
         GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
         glDrawBuffers(colorAttachments.size(), buffers);
     }
@@ -206,7 +206,7 @@ void RightEngine::Framebuffer::Resize(uint32_t width, uint32_t height)
 
 int RightEngine::Framebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
 {
-    R_CORE_ASSERT(attachmentIndex < colorAttachments.size());
+    R_CORE_ASSERT(attachmentIndex < colorAttachments.size(), "");
 
     glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
     int pixelData;
@@ -216,7 +216,7 @@ int RightEngine::Framebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
 
 void RightEngine::Framebuffer::ClearAttachment(uint32_t attachmentIndex, int value)
 {
-    R_CORE_ASSERT(attachmentIndex < colorAttachments.size());
+    R_CORE_ASSERT(attachmentIndex < colorAttachments.size(), "");
 
     auto& spec = colorAttachmentSpecifications[attachmentIndex];
     glClearTexImage(colorAttachments[attachmentIndex], 0,
@@ -225,7 +225,7 @@ void RightEngine::Framebuffer::ClearAttachment(uint32_t attachmentIndex, int val
 
 uint32_t RightEngine::Framebuffer::GetColorAttachment(uint32_t index) const
 {
-    R_CORE_ASSERT(index < colorAttachments.size());
+    R_CORE_ASSERT(index < colorAttachments.size(), "");
     return colorAttachments[index];
 }
 
