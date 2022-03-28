@@ -26,7 +26,8 @@ set(ENGINE_SRC
         Source/Core/Utils/Path.cpp
         Source/Core/RHI/GeometryBuilder.cpp
         Source/Core/Scene/LightNode.cpp
-        Source/Core/RHI/Shaders/BasicShader.cpp)
+        Source/Core/RHI/Shaders/BasicShader.cpp
+        Source/Core/RHI/FrameBuffer.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)
