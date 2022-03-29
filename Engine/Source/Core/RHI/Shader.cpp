@@ -159,3 +159,17 @@ int RightEngine::Shader::GetUniformLocation(const std::string& name)
     uniformLocationCache[name] = location;
     return location;
 }
+
+void RightEngine::Shader::SetMaterialUniforms(const std::shared_ptr<Material>& material)
+{
+    const auto data = material->GetMaterialData();
+    SetUniform4f("u_material.fallbackColor", data.fallbackColor);
+
+    const auto albedoTexture = material->GetBaseTexture();
+    SetUniform1i("u_material.hasAlbedo", albedoTexture != nullptr);
+    if (albedoTexture)
+    {
+        albedoTexture->Bind();
+        SetUniform1i("u_albedoTexture", 0);
+    }
+}

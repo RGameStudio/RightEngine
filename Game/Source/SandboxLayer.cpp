@@ -37,7 +37,7 @@ void SandboxLayer::OnAttach()
                                                                  glm::vec3(0, 1, 0));
     scene = std::make_shared<RightEngine::Scene>();
 
-    const auto cube1 = CreateTestSceneNode(GeometryType::CUBE, "");
+    const auto cube1 = CreateTestSceneNode(GeometryType::CUBE, "/Assets/Textures/WoodAlbedo.png");
     cube1->SetPosition({ 0, 0.0f, 0 });
     const auto cube2 = CreateTestSceneNode(GeometryType::CUBE, "");
     cube2->SetPosition({ 5.0f, 2.0f, 0 });
@@ -45,6 +45,7 @@ void SandboxLayer::OnAttach()
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
     shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert", "/Assets/Shaders/Basic/basic.frag");
+    RightEngine::Renderer::Get().HasDepthTest(true);
 }
 
 void SandboxLayer::OnUpdate(float ts)

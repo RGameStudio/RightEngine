@@ -43,6 +43,7 @@ void RightEngine::Renderer::Draw(const std::shared_ptr<Shader>& shader, const st
     shader->Bind();
     shader->SetUniformMat4f("u_ViewProjection", sceneData.viewProjectionMatrix);
     shader->SetUniformMat4f("u_Transform", transform);
+    shader->SetMaterialUniforms(geometry->GetMaterial());
     geometry->GetVertexArray()->Bind();
     geometry->GetVertexBuffer()->Bind();
     if (geometry->GetIndexBuffer())
