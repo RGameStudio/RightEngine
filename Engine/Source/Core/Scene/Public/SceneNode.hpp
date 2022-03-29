@@ -19,8 +19,8 @@ namespace RightEngine
         SceneNode() = default;
         ~SceneNode() = default;
 
-        glm::mat4 GetWorldModelMatrix() const;
-        glm::mat4 GetLocalModelMatrix() const;
+        glm::mat4 GetWorldTransformMatrix() const;
+        glm::mat4 GetLocalTransformMatrix() const;
 
         void SetGeometry(const std::shared_ptr<Geometry>& geometry);
         const std::shared_ptr<Geometry>& GetGeometry() const;
@@ -37,6 +37,7 @@ namespace RightEngine
         void SetScale(const glm::vec3& newScale);
 
         virtual void OnUpdate();
+        virtual void OnRender(const std::shared_ptr<Shader>& shader);
 
         void AddChild(const std::shared_ptr<SceneNode>& node);
         void RemoveChild(const std::shared_ptr<SceneNode>& node);

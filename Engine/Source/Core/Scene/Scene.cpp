@@ -14,13 +14,18 @@ void RightEngine::Scene::OnUpdate()
 {
     camera->OnUpdate();
     std::vector<std::shared_ptr<SceneNode>> nodes = rootNode->GetAllChildren();
-    SetupLights(nodes);
-    auto& renderer = Renderer::Get();
-    renderer.SetupDraw(shared_from_this());
     for (const auto& node: nodes)
     {
         node->OnUpdate();
-        renderer.Draw(node);
+    }
+}
+
+void Scene::OnRender(const std::shared_ptr<Shader>& shader)
+{
+    std::vector<std::shared_ptr<SceneNode>> nodes = rootNode->GetAllChildren();
+    for (const auto& node: nodes)
+    {
+        node->OnRender(shader);
     }
 }
 
@@ -38,25 +43,4 @@ const std::shared_ptr<FPSCamera>& RightEngine::Scene::GetCamera() const
 const std::shared_ptr<SceneNode>& Scene::GetRootNode() const
 {
     return rootNode;
-}
-
-void Scene::SetupLights(const std::vector<std::shared_ptr<SceneNode>>& nodes)
-{
-    bool hasLight = false;
-    for (const auto& node: nodes)
-    {
-        if (node->GetBaseType() == NodeType::LIGHT)
-        {
-            const auto lightNode = std::static_pointer_cast<LightNode>(node);
-            Renderer::Get().SetLight(lightNode);
-            hasLight = true;
-        }
-    }
-
-    if (!hasLight)
-    {
-        R_CORE_WARN("Scene doesn't have any lights!");
-    }
-
-    Renderer::Get().SaveLight();
 }

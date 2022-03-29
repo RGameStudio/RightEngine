@@ -36,10 +36,6 @@ namespace RightEngine
         void SetUniform4f(const std::string& name, const glm::vec4& vec4);
         void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
 
-        virtual void OnSetup(const std::shared_ptr<Scene>& scene);
-        virtual void OnNodeDraw(const std::shared_ptr<SceneNode>& node);
-        virtual void OnLightSave(LightInfo lightInfo);
-
     private:
         std::string filePath;
         uint32_t id;

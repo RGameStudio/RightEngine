@@ -4,7 +4,7 @@
 
 using namespace RightEngine;
 
-glm::mat4 RightEngine::SceneNode::GetLocalModelMatrix() const
+glm::mat4 RightEngine::SceneNode::GetLocalTransformMatrix() const
 {
     glm::mat4 model(1);
     const glm::mat4 transformX = glm::rotate(glm::mat4(1.0f),
@@ -21,7 +21,7 @@ glm::mat4 RightEngine::SceneNode::GetLocalModelMatrix() const
     return glm::translate(glm::mat4(1.0f), position) * rotationMatrix * glm::scale(glm::mat4(1.0f), scale);
 }
 
-glm::mat4 SceneNode::GetWorldModelMatrix() const
+glm::mat4 SceneNode::GetWorldTransformMatrix() const
 {
     return modelMatrix;
 }
@@ -55,6 +55,15 @@ void SceneNode::OnUpdate()
 {
     RecalculateTransform();
 }
+
+void SceneNode::OnRender(const std::shared_ptr<Shader>& shader)
+{
+    if (geometry)
+    {
+        Renderer::Get().Draw(shader, geometry, GetWorldTransformMatrix());
+    }
+}
+
 
 void SceneNode::AddChild(const std::shared_ptr<SceneNode>& node)
 {
@@ -116,11 +125,11 @@ void SceneNode::RecalculateTransform()
     const auto parentPtr = parent.lock();
     if (parentPtr)
     {
-        modelMatrix = parentPtr->modelMatrix * GetLocalModelMatrix();
+        modelMatrix = parentPtr->modelMatrix * GetLocalTransformMatrix();
     }
     else
     {
-        modelMatrix = GetLocalModelMatrix();
+        modelMatrix = GetLocalTransformMatrix();
     }
 
     for (auto& child: children)

@@ -1,6 +1,6 @@
 #include "SandboxLayer.hpp"
+#include "Renderer.hpp"
 #include "LightNode.hpp"
-#include "Shaders/BasicShader.hpp"
 
 enum class GeometryType
 {
@@ -35,38 +35,22 @@ void SandboxLayer::OnAttach()
 {
     const auto camera = std::make_shared<RightEngine::FPSCamera>(glm::vec3(0, 5, -15),
                                                                  glm::vec3(0, 1, 0));
-    const auto shader = std::make_shared<RightEngine::BasicShader>();
     scene = std::make_shared<RightEngine::Scene>();
 
     const auto cube1 = CreateTestSceneNode(GeometryType::CUBE, "");
     cube1->SetPosition({ 0, 0.0f, 0 });
     const auto cube2 = CreateTestSceneNode(GeometryType::CUBE, "");
     cube2->SetPosition({ 5.0f, 2.0f, 0 });
-    const auto cube3 = CreateTestSceneNode(GeometryType::CUBE, "");
-    cube3->SetPosition({ 5.0f, 0.0f, 0 });
-
-    cube1->AddChild(cube2);
-    cube2->AddChild(cube3);
-
-    const auto light = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::AMBIENT);
-    light->SetIntensity(1.0f);
-
-    const auto lightCube = CreateTestSceneNode(GeometryType::CUBE, "");
-    const auto pointLight = std::make_shared<RightEngine::LightNode>(RightEngine::LightNodeType::POINT_LIGHT);
-    pointLight->SetColor({ 1.0f, 0.0f, 0.0f });
-    lightCube->SetPosition({ 2.0f, 10.0f, 0.0f });
-    lightCube->AddChild(pointLight);
-
-    auto& renderer = RightEngine::Renderer::Get();
-    renderer.SetShader(shader);
     scene->SetCamera(camera);
     scene->GetRootNode()->AddChild(cube1);
-    scene->GetRootNode()->AddChild(light);
-    scene->GetRootNode()->AddChild(lightCube);
-    RightEngine::Renderer::Get().HasDepthTest(true);
+    scene->GetRootNode()->AddChild(cube2);
+    shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert", "/Assets/Shaders/Basic/basic.frag");
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
     scene->OnUpdate();
+    RightEngine::Renderer::Get().BeginScene(scene);
+    scene->OnRender(shader);
+    RightEngine::Renderer::Get().EndScene();
 }

@@ -26,7 +26,6 @@ set(ENGINE_SRC
         Source/Core/Utils/Path.cpp
         Source/Core/RHI/GeometryBuilder.cpp
         Source/Core/Scene/LightNode.cpp
-        Source/Core/RHI/Shaders/BasicShader.cpp
         Source/Core/RHI/FrameBuffer.cpp
         Source/Core/Application/Layer.cpp)
 

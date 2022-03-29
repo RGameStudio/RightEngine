@@ -11,4 +11,5 @@ public:
     virtual void OnUpdate(float ts) override;
 private:
     std::shared_ptr<RightEngine::Scene> scene;
+    std::shared_ptr<RightEngine::Shader> shader;
 };

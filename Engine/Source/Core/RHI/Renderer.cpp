@@ -5,6 +5,7 @@
 #include "Core.hpp"
 #include "LightNode.hpp"
 #include "Application.hpp"
+#include <glm/ext/matrix_clip_space.hpp>
 
 using namespace RightEngine;
 
@@ -37,15 +38,11 @@ RightEngine::Window* RightEngine::Renderer::GetWindow() const
     return window;
 }
 
-void RightEngine::Renderer::Clear() const
+void RightEngine::Renderer::Draw(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Geometry>& geometry, const glm::mat4& transform) const
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    std::memset((void*) (&lightInfo), 0, sizeof(lightInfo));
-}
-
-void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) const
-{
+    shader->Bind();
+    shader->SetUniformMat4f("u_ViewProjection", sceneData.viewProjectionMatrix);
+    shader->SetUniformMat4f("u_Transform", transform);
     geometry->GetVertexArray()->Bind();
     geometry->GetVertexBuffer()->Bind();
     if (geometry->GetIndexBuffer())
@@ -57,16 +54,6 @@ void RightEngine::Renderer::Draw(const std::shared_ptr<Geometry>& geometry) cons
     {
         Draw(geometry->GetVertexArray(), geometry->GetVertexBuffer());
     }
-}
-
-void Renderer::SetShader(const std::shared_ptr<Shader>& shader)
-{
-    this->shader = shader;
-}
-
-const std::shared_ptr<Shader>& Renderer::GetShader() const
-{
-    return shader;
 }
 
 void Renderer::HasDepthTest(bool mode)
@@ -81,41 +68,28 @@ void Renderer::HasDepthTest(bool mode)
     }
 }
 
-void Renderer::SetLight(const std::shared_ptr<LightNode>& node)
+void Renderer::SetClearColor(const glm::vec4& color) const
 {
-    switch (node->GetType())
-    {
-        case LightNodeType::AMBIENT:
-            lightInfo.hasAmbient = true;
-            lightInfo.ambientColor = node->GetColor();
-            break;
-        case LightNodeType::POINT_LIGHT:
-            lightInfo.pointLightPosition[lightInfo.pointLightAmount] = node->GetWorldPosition();
-            lightInfo.pointLightColor[lightInfo.pointLightAmount] = node->GetColor();
-            lightInfo.pointLightAmount += 1;
-            break;
-        default:
-        R_CORE_ASSERT(false, "Unknown light type!")
-            break;
-    }
+    glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void Renderer::SaveLight() const
+void Renderer::Clear(uint32_t clearBits) const
 {
-    shader->OnLightSave(lightInfo);
+    glClear(clearBits);
 }
 
-void Renderer::SetupDraw(const std::shared_ptr<Scene>& scene)
+void Renderer::BeginScene(const std::shared_ptr<Scene>& scene)
 {
-    shader->OnSetup(scene);
+    // TODO: Get FOV from camera
+    const auto projectionMatrix = glm::perspective(glm::radians(45.0f),
+                                                   static_cast<float>(window->GetWidth()) /
+                                                   static_cast<float>(window->GetHeight()),
+                                                   0.1f,
+                                                   300.0f);
+    const auto viewMatrix = scene->GetCamera()->GetViewMatrix();
+    sceneData.viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
-void Renderer::Draw(const std::shared_ptr<SceneNode>& node) const
+void Renderer::EndScene()
 {
-    shader->OnNodeDraw(node);
-    const auto& geometry = node->GetGeometry();
-    if (geometry)
-    {
-        Draw(geometry);
-    }
 }

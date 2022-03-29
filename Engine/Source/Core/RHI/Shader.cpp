@@ -159,18 +159,3 @@ int RightEngine::Shader::GetUniformLocation(const std::string& name)
     uniformLocationCache[name] = location;
     return location;
 }
-
-void RightEngine::Shader::OnSetup(const std::shared_ptr<Scene>& scene)
-{
-    Bind();
-}
-
-void RightEngine::Shader::OnNodeDraw(const std::shared_ptr<SceneNode>& node)
-{
-    Bind();
-}
-
-void RightEngine::Shader::OnLightSave(LightInfo lightInfo)
-{
-    Bind();
-}
