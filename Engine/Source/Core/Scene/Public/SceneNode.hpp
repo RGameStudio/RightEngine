@@ -19,6 +19,7 @@ namespace RightEngine
         SceneNode() = default;
         ~SceneNode() = default;
 
+        // TODO: Move to transform component
         glm::mat4 GetWorldTransformMatrix() const;
         glm::mat4 GetLocalTransformMatrix() const;
 
@@ -37,7 +38,6 @@ namespace RightEngine
         void SetScale(const glm::vec3& newScale);
 
         virtual void OnUpdate();
-        virtual void OnRender(const std::shared_ptr<Shader>& shader);
 
         void AddChild(const std::shared_ptr<SceneNode>& node);
         void RemoveChild(const std::shared_ptr<SceneNode>& node);

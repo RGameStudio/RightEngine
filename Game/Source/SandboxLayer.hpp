@@ -12,4 +12,5 @@ public:
 private:
     std::shared_ptr<RightEngine::Scene> scene;
     std::shared_ptr<RightEngine::Shader> shader;
+    std::shared_ptr<RightEngine::Renderer> renderer;
 };

@@ -1,8 +1,9 @@
 #include "Application.hpp"
 #include "Logger.hpp"
 #include "DebugRHI.hpp"
-#include "Renderer.hpp"
+#include "RendererCommand.hpp"
 #include "Input.hpp"
+#include "Types.hpp"
 #include <memory>
 
 namespace RightEngine
@@ -33,8 +34,7 @@ namespace RightEngine
     {
         Window* _window = Window::Create("Engine window", 1920, 1080);
         window.reset(_window);
-        auto& renderer = Renderer::Get();
-        renderer.SetWindow(_window);
+        RendererCommand::Init(GPU_API::OpenGL);
         DebugRHI::Init();
 
         R_CORE_INFO("Successfully initialized application!");
@@ -43,8 +43,8 @@ namespace RightEngine
     void Application::OnUpdate()
     {
         Input::OnUpdate();
-        Renderer::Get().SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-        Renderer::Get().Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        RendererCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+        RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         window->OnUpdate();
 
         for (const auto& layer: layers)

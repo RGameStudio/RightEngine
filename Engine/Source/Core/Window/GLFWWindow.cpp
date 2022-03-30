@@ -23,6 +23,10 @@ namespace RightEngine
         window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
         R_CORE_ASSERT(window, "GLFW window create failed");
 
+        // TODO: Create RenderingContext class
+        glfwMakeContextCurrent(window);
+        R_CORE_ASSERT(gladLoadGLLoader((GLADloadproc) glfwGetProcAddress), "Can't load glad!");
+
         glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
         {
             EventDispatcher::Get().Emit(ShutdownEvent());

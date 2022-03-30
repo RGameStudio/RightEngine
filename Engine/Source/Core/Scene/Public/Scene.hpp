@@ -11,7 +11,6 @@ namespace RightEngine
         Scene();
 
         virtual void OnUpdate();
-        virtual void OnRender(const std::shared_ptr<Shader>& shader);
 
         const std::shared_ptr<FPSCamera>& GetCamera() const;
         void SetCamera(const std::shared_ptr<FPSCamera>& camera);

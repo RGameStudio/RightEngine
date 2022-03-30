@@ -45,13 +45,22 @@ void SandboxLayer::OnAttach()
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
     shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert", "/Assets/Shaders/Basic/basic.frag");
-    RightEngine::Renderer::Get().HasDepthTest(true);
+    renderer = std::make_shared<RightEngine::Renderer>();
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
     scene->OnUpdate();
-    RightEngine::Renderer::Get().BeginScene(scene);
-    scene->OnRender(shader);
-    RightEngine::Renderer::Get().EndScene();
+    renderer->Configure();
+    renderer->BeginScene(scene);
+
+    const auto children = scene->GetRootNode()->GetAllChildren();
+    shader->Bind();
+    for (const auto& child: children)
+    {
+        shader->SetMaterialUniforms(child->GetGeometry()->GetMaterial());
+        renderer->SubmitGeometry(shader, child->GetGeometry(), child->GetWorldTransformMatrix());
+    }
+
+    renderer->EndScene();
 }

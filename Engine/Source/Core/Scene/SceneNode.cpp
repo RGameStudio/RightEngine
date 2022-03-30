@@ -56,15 +56,6 @@ void SceneNode::OnUpdate()
     RecalculateTransform();
 }
 
-void SceneNode::OnRender(const std::shared_ptr<Shader>& shader)
-{
-    if (geometry)
-    {
-        Renderer::Get().Draw(shader, geometry, GetWorldTransformMatrix());
-    }
-}
-
-
 void SceneNode::AddChild(const std::shared_ptr<SceneNode>& node)
 {
     children.push_back(node);
