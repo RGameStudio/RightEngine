@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.19)
 
 add_executable(Game Source/Start.cpp Source/SandboxLayer.cpp)
 if (WIN32)
-    target_link_libraries(Game Engine glad opengl32 easyargs glfw stb_image)
+    target_link_libraries(Game Engine glad opengl32 easyargs glfw stb_image imgui)
 else()
-    target_link_libraries(Game Engine glad easyargs glfw stb_image)
+    target_link_libraries(Game Engine glad easyargs glfw stb_image imgui)
 endif()
 
 add_custom_target(CopyShaderFilesToGame ALL DEPENDS ${GLSL_ROOT_DIR})

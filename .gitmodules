@@ -13,3 +13,6 @@
 [submodule "Lib/glm"]
 	path = Lib/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "Lib/imgui"]
+	path = Lib/imgui
+	url = git@github.com:rbetik12/imgui.git

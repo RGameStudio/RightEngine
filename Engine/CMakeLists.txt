@@ -30,7 +30,9 @@ set(ENGINE_SRC
         Source/Core/Application/Layer.cpp
         Source/Core/RHI/OpenGL/OpenGLRendererAPI.cpp
         Source/Core/RHI/RendererCommand.cpp
-        Source/Core/RHI/RendererAPI.cpp)
+        Source/Core/RHI/RendererAPI.cpp
+        Source/Core/UI/ImGuiLayer.cpp
+        Source/Core/UI/ImGuiBuild.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

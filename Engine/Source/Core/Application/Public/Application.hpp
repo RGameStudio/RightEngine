@@ -9,6 +9,7 @@
 #include "Geometry.hpp"
 #include "Scene.hpp"
 #include "Layer.hpp"
+#include "ImGuiLayer.hpp"
 #include <memory>
 #include <chrono>
 
@@ -26,6 +27,11 @@ namespace RightEngine
 
         // TODO: Delete layers
         void PushLayer(const std::shared_ptr<Layer>& layer);
+        void PushOverlay(const std::shared_ptr<Layer>& layer);
+
+        const std::shared_ptr<Window>& GetWindow() const;
+
+        void PostInit();
 
         Application(const Application& other) = delete;
         Application& operator=(const Application& other) = delete;
@@ -33,8 +39,9 @@ namespace RightEngine
         Application& operator=(Application&& other) = delete;
 
     private:
-        std::unique_ptr<Window> window;
+        std::shared_ptr<Window> window;
         std::vector<std::shared_ptr<Layer>> layers;
+        std::shared_ptr<ImGuiLayer> imGuiLayer;
 
     private:
         Application();

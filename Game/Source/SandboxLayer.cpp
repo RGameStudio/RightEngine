@@ -1,6 +1,7 @@
 #include "SandboxLayer.hpp"
 #include "Renderer.hpp"
 #include "LightNode.hpp"
+#include <imgui.h>
 
 enum class GeometryType
 {
@@ -63,4 +64,9 @@ void SandboxLayer::OnUpdate(float ts)
     }
 
     renderer->EndScene();
+}
+
+void SandboxLayer::OnImGuiRender()
+{
+    ImGui::ShowDemoWindow();
 }

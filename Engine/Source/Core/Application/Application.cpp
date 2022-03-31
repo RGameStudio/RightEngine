@@ -1,9 +1,11 @@
 #include "Application.hpp"
+#include "Assert.hpp"
 #include "Logger.hpp"
 #include "DebugRHI.hpp"
 #include "RendererCommand.hpp"
 #include "Input.hpp"
 #include "Types.hpp"
+#include "ImGuiLayer.hpp"
 #include <memory>
 
 namespace RightEngine
@@ -32,12 +34,22 @@ namespace RightEngine
 
     void Application::Init()
     {
-        Window* _window = Window::Create("Engine window", 1920, 1080);
-        window.reset(_window);
+        window.reset(Window::Create("Engine window", 1920, 1080));
         RendererCommand::Init(GPU_API::OpenGL);
         DebugRHI::Init();
 
+        imGuiLayer = std::make_shared<ImGuiLayer>();
+
         R_CORE_INFO("Successfully initialized application!");
+    }
+
+    void Application::PostInit()
+    {
+        static bool wasCalled = false;
+        R_CORE_ASSERT(!wasCalled, "PostInit was called twice!");
+        wasCalled = true;
+
+        PushOverlay(imGuiLayer);
     }
 
     void Application::OnUpdate()
@@ -52,7 +64,14 @@ namespace RightEngine
             layer->OnUpdate(Input::deltaTime);
         }
 
-        // TODO: ImGUI layer
+        imGuiLayer->Begin();
+        {
+            for (const auto& layer : layers)
+            {
+                layer->OnImGuiRender();
+            }
+        }
+        imGuiLayer->End();
     }
 
     void Application::OnUpdateEnd()
@@ -62,7 +81,21 @@ namespace RightEngine
 
     void Application::PushLayer(const std::shared_ptr<Layer>& layer)
     {
+        // TODO: Move to LayerStack data structure
+        static int layerIndex = 0;
+        layers.emplace(layers.begin() + layerIndex, layer);
+        layer->OnAttach();
+    }
+
+    void Application::PushOverlay(const std::shared_ptr<Layer>& layer)
+    {
         layers.emplace_back(layer);
         layer->OnAttach();
     }
+
+    const std::shared_ptr<Window>& Application::GetWindow() const
+    {
+        return window;
+    }
+
 }
