@@ -20,3 +20,27 @@ private:
     float mouseX, mouseY;
 };
 
+class MouseButtonPressedEvent : public Event
+{
+public:
+    EVENT_BODY("MouseButtonPressedEvent");
+
+    explicit MouseButtonPressedEvent(int button) : button(button)
+    {}
+
+    inline const int& GetButton() const
+    { return button; }
+
+private:
+    int button;
+};
+
+class MouseButtonReleasedEvent : public MouseButtonPressedEvent
+{
+public:
+    EVENT_BODY("MouseButtonReleasedEvent");
+
+    explicit MouseButtonReleasedEvent(int button) : MouseButtonPressedEvent(button)
+    {}
+};
+

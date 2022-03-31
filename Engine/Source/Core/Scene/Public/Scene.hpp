@@ -12,13 +12,13 @@ namespace RightEngine
 
         virtual void OnUpdate();
 
-        const std::shared_ptr<FPSCamera>& GetCamera() const;
-        void SetCamera(const std::shared_ptr<FPSCamera>& camera);
+        const std::shared_ptr<Camera>& GetCamera() const;
+        void SetCamera(const std::shared_ptr<Camera>& camera);
 
         const std::shared_ptr<SceneNode>& GetRootNode() const;
 
     private:
         std::shared_ptr<SceneNode> rootNode;
-        std::shared_ptr<FPSCamera> camera;
+        std::shared_ptr<Camera> camera;
     };
 }

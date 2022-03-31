@@ -20,13 +20,13 @@ void RightEngine::Scene::OnUpdate()
     }
 }
 
-void RightEngine::Scene::SetCamera(const std::shared_ptr<FPSCamera>& camera)
+void RightEngine::Scene::SetCamera(const std::shared_ptr<Camera>& camera)
 {
     R_CORE_ASSERT(!this->camera, "Camera was already set!");
     this->camera = camera;
 }
 
-const std::shared_ptr<FPSCamera>& RightEngine::Scene::GetCamera() const
+const std::shared_ptr<Camera>& RightEngine::Scene::GetCamera() const
 {
     return camera;
 }

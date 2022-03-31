@@ -37,18 +37,40 @@ namespace RightEngine
             EventDispatcher::Get().Emit(MouseMovedEvent(xPos, yPos));
         });
 
-        glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-            switch (action) {
-                case GLFW_PRESS: {
+        glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+        {
+            switch (action)
+            {
+                case GLFW_PRESS:
+                {
                     EventDispatcher::Get().Emit(KeyPressedEvent(key, 0));
                     break;
                 }
-                case GLFW_RELEASE: {
+                case GLFW_RELEASE:
+                {
                     EventDispatcher::Get().Emit(KeyReleasedEvent(key));
                     break;
                 }
-                case GLFW_REPEAT: {
+                case GLFW_REPEAT:
+                {
                     EventDispatcher::Get().Emit(KeyPressedEvent(key, 1));
+                    break;
+                }
+            }
+        });
+
+        glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
+        {
+            switch (action)
+            {
+                case GLFW_PRESS:
+                {
+                    EventDispatcher::Get().Emit(MouseButtonPressedEvent(button));
+                    break;
+                }
+                case GLFW_RELEASE:
+                {
+                    EventDispatcher::Get().Emit(MouseButtonReleasedEvent(button));
                     break;
                 }
             }

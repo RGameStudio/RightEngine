@@ -1,6 +1,7 @@
 #include "SandboxLayer.hpp"
 #include "Renderer.hpp"
 #include "LightNode.hpp"
+#include "EditorCamera.hpp"
 #include <imgui.h>
 
 enum class GeometryType
@@ -34,8 +35,8 @@ std::shared_ptr<RightEngine::SceneNode> CreateTestSceneNode(GeometryType type, c
 
 void SandboxLayer::OnAttach()
 {
-    const auto camera = std::make_shared<RightEngine::FPSCamera>(glm::vec3(0, 5, -15),
-                                                                 glm::vec3(0, 1, 0));
+    const auto camera = std::make_shared<RightEngine::EditorCamera>(glm::vec3(0, 5, -15),
+                                                              glm::vec3(0, 1, 0));
     scene = std::make_shared<RightEngine::Scene>();
 
     const auto cube1 = CreateTestSceneNode(GeometryType::CUBE, "/Assets/Textures/WoodAlbedo.png");

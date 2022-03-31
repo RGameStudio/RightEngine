@@ -34,7 +34,7 @@ namespace RightEngine
 
     void Application::Init()
     {
-        window.reset(Window::Create("Engine window", 1920, 1080));
+        window.reset(Window::Create("Right Editor", 1920, 1080));
         RendererCommand::Init(GPU_API::OpenGL);
         DebugRHI::Init();
 

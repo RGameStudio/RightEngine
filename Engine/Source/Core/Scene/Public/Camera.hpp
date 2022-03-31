@@ -7,30 +7,23 @@
 
 namespace RightEngine
 {
-    class FPSCamera
+    class Camera
     {
     public:
-        FPSCamera(const glm::vec3& position, const glm::vec3& worldUp);
+        Camera(const glm::vec3& position, const glm::vec3& worldUp);
+        ~Camera() = default;
 
-        ~FPSCamera() = default;
-
-        void OnUpdate();
+        virtual void OnUpdate();
 
         glm::mat4 GetViewMatrix() const;
 
         const glm::vec3& GetPosition() const;
-
         const glm::vec3& GetRotation() const;
-
         const glm::vec3& GetFront() const;
 
         const float& GetCameraMovementSpeed() const;
 
-        void ToggleMouseCapture();
-
-        bool IsMouseCaptured();
-
-    private:
+    protected:
         glm::vec3 position;
         glm::vec3 up;
         glm::vec3 front;
@@ -44,14 +37,12 @@ namespace RightEngine
         float prevXMousePos{ -1 };
         float prevYMousePos{ -1 };
 
-        bool shouldCaptureMouse = true;
+        bool active{ true };
 
+    private:
         void UpdateVectors();
-
         bool OnEvent(const Event& event);
-
         bool OnMouseMove(const MouseMovedEvent& e);
-
         void Move();
     };
 }

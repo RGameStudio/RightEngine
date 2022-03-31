@@ -4,56 +4,46 @@
 #include "KeyCodes.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
-RightEngine::FPSCamera::FPSCamera(const glm::vec3& position, const glm::vec3& worldUp) : position(position),
-                                                                                         worldUp(worldUp),
-                                                                                         rotation(90.0f, 0.0f, 0.0f)
+RightEngine::Camera::Camera(const glm::vec3& position, const glm::vec3& worldUp) : position(position),
+                                                                                   worldUp(worldUp),
+                                                                                   rotation(90.0f, 0.0f, 0.0f)
 {
     UpdateVectors();
-    EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(FPSCamera::OnEvent));
+    EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(Camera::OnEvent));
 }
 
-void RightEngine::FPSCamera::OnUpdate()
+void RightEngine::Camera::OnUpdate()
 {
     actualSpeed = movementSpeed * Input::deltaTime;
     Move();
 }
 
-glm::mat4 RightEngine::FPSCamera::GetViewMatrix() const
+glm::mat4 RightEngine::Camera::GetViewMatrix() const
 {
     return glm::lookAt(position, position + front, up);
 }
 
-const glm::vec3& RightEngine::FPSCamera::GetPosition() const
+const glm::vec3& RightEngine::Camera::GetPosition() const
 {
     return position;
 }
 
-const glm::vec3& RightEngine::FPSCamera::GetRotation() const
+const glm::vec3& RightEngine::Camera::GetRotation() const
 {
     return rotation;
 }
 
-const glm::vec3& RightEngine::FPSCamera::GetFront() const
+const glm::vec3& RightEngine::Camera::GetFront() const
 {
     return front;
 }
 
-const float& RightEngine::FPSCamera::GetCameraMovementSpeed() const
+const float& RightEngine::Camera::GetCameraMovementSpeed() const
 {
     return movementSpeed;
 }
 
-void RightEngine::FPSCamera::ToggleMouseCapture()
-{
-    shouldCaptureMouse = !shouldCaptureMouse;
-}
-
-bool RightEngine::FPSCamera::IsMouseCaptured()
-{
-    return shouldCaptureMouse;
-}
-
-void RightEngine::FPSCamera::UpdateVectors()
+void RightEngine::Camera::UpdateVectors()
 {
     float yaw = rotation[0];
     float pitch = rotation[1];
@@ -67,7 +57,7 @@ void RightEngine::FPSCamera::UpdateVectors()
     up = glm::normalize(glm::cross(right, front));
 }
 
-bool RightEngine::FPSCamera::OnEvent(const Event& event)
+bool RightEngine::Camera::OnEvent(const Event& event)
 {
     if (event.GetType() == MouseMovedEvent::descriptor)
     {
@@ -77,9 +67,9 @@ bool RightEngine::FPSCamera::OnEvent(const Event& event)
     return true;
 }
 
-bool RightEngine::FPSCamera::OnMouseMove(const MouseMovedEvent& e)
+bool RightEngine::Camera::OnMouseMove(const MouseMovedEvent& e)
 {
-    if (!shouldCaptureMouse)
+    if (!active)
     {
         UpdateVectors();
         return true;
@@ -112,7 +102,7 @@ bool RightEngine::FPSCamera::OnMouseMove(const MouseMovedEvent& e)
     return true;
 }
 
-void RightEngine::FPSCamera::Move()
+void RightEngine::Camera::Move()
 {
     if(Input::IsKeyDown(R_KEY_W))
     {

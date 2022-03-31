@@ -1,6 +1,7 @@
 #include "Input.hpp"
 #include "EventDispatcher.hpp"
 #include "KeyEvent.hpp"
+#include "MouseEvent.hpp"
 #include <GLFW/glfw3.h>
 #include <cstring>
 
@@ -8,6 +9,7 @@ float RightEngine::Input::lastFrame = 0.0f;
 float RightEngine::Input::deltaTime = 0.0f;
 float RightEngine::Input::frameTime = 0.0f;
 bool RightEngine::Input::keyArray[512];
+bool RightEngine::Input::mouseArray[8];
 
 bool RightEngine::Input::IsKeyDown(int keyCode)
 {
@@ -17,6 +19,16 @@ bool RightEngine::Input::IsKeyDown(int keyCode)
 bool RightEngine::Input::IsKeyUp(int keyCode)
 {
     return !keyArray[keyCode];
+}
+
+bool RightEngine::Input::IsMouseButtonDown(RightEngine::MouseButton button)
+{
+    return mouseArray[static_cast<int>(button)];
+}
+
+bool RightEngine::Input::IsMouseButtonUp(RightEngine::MouseButton button)
+{
+    return !mouseArray[static_cast<int>(button)];
 }
 
 RightEngine::Input& RightEngine::Input::Get()
@@ -33,8 +45,11 @@ void RightEngine::Input::Init()
 RightEngine::Input::Input()
 {
     std::memset(keyArray, 0, sizeof(keyArray));
+    std::memset(mouseArray, 0, sizeof(mouseArray));
     EventDispatcher::Get().Subscribe(KeyPressedEvent::descriptor, EVENT_CALLBACK(Input::OnEvent));
     EventDispatcher::Get().Subscribe(KeyReleasedEvent::descriptor, EVENT_CALLBACK(Input::OnEvent));
+    EventDispatcher::Get().Subscribe(MouseButtonPressedEvent::descriptor, EVENT_CALLBACK(Input::OnEvent));
+    EventDispatcher::Get().Subscribe(MouseButtonReleasedEvent::descriptor, EVENT_CALLBACK(Input::OnEvent));
 }
 
 float RightEngine::Input::GetTime()
@@ -50,16 +65,29 @@ void RightEngine::Input::OnUpdate()
     frameTime = deltaTime * 1000;
 }
 
-bool RightEngine::Input::OnEvent(const Event& KeyEvent)
+bool RightEngine::Input::OnEvent(const Event& inputEvent)
 {
-    if (KeyEvent.GetType() == KeyPressedEvent::descriptor)
+    if (inputEvent.GetType() == KeyPressedEvent::descriptor)
     {
-        const auto event = static_cast<const KeyPressedEvent&>(KeyEvent);
+        const auto event = static_cast<const KeyPressedEvent&>(inputEvent);
         keyArray[event.GetKeyCode()] = true;
     }
-    if (KeyEvent.GetType() == KeyReleasedEvent::descriptor)
+    if (inputEvent.GetType() == KeyReleasedEvent::descriptor)
     {
-        const auto event = static_cast<const KeyReleasedEvent&>(KeyEvent);
+        const auto event = static_cast<const KeyReleasedEvent&>(inputEvent);
         keyArray[event.GetKeyCode()] = false;
     }
+    if (inputEvent.GetType() == MouseButtonPressedEvent::descriptor)
+    {
+        const auto event = static_cast<const MouseButtonPressedEvent&>(inputEvent);
+        mouseArray[event.GetButton()] = true;
+    }
+    if (inputEvent.GetType() == MouseButtonReleasedEvent::descriptor)
+    {
+        const auto event = static_cast<const MouseButtonReleasedEvent&>(inputEvent);
+        mouseArray[event.GetButton()] = false;
+    }
+
+
+    return true;
 }

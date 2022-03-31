@@ -32,7 +32,8 @@ set(ENGINE_SRC
         Source/Core/RHI/RendererCommand.cpp
         Source/Core/RHI/RendererAPI.cpp
         Source/Core/UI/ImGuiLayer.cpp
-        Source/Core/UI/ImGuiBuild.cpp)
+        Source/Core/UI/ImGuiBuild.cpp
+        Source/Core/Scene/EditorCamera.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

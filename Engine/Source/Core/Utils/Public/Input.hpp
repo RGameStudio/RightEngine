@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Event.hpp"
+#include "Types.hpp"
 
 namespace RightEngine
 {
@@ -12,6 +13,8 @@ namespace RightEngine
         static float GetTime();
         static bool IsKeyDown(int keyCode);
         static bool IsKeyUp(int keyCode);
+        static bool IsMouseButtonUp(MouseButton button);
+        static bool IsMouseButtonDown(MouseButton button);
 
         Input(const Input& input) = delete;
         Input& operator=(const Input& input) = delete;
@@ -20,10 +23,11 @@ namespace RightEngine
     private:
         static float lastFrame;
         static bool keyArray[512];
+        static bool mouseArray[8];
 
         static void Init();
         static void OnUpdate();
-        bool OnEvent(const Event& event);
+        bool OnEvent(const Event& inputEvent);
         static Input& Get();
 
         Input();
