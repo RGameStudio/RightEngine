@@ -38,6 +38,7 @@ namespace RightEngine
         float prevYMousePos{ -1 };
 
         bool active{ true };
+        bool invertY{ false };
 
     private:
         void UpdateVectors();

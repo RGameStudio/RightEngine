@@ -7,9 +7,11 @@ uniform mat4 u_ViewProjection;
 uniform mat4 u_Transform;
 
 out vec2 f_UV;
+out vec3 f_Normal;
 
 void main()
 {
     f_UV = uv;
+    f_Normal = normal;
     gl_Position = u_ViewProjection * u_Transform * vec4((position), 1.0);
 }

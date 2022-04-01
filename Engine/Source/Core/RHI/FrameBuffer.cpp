@@ -214,6 +214,23 @@ int RightEngine::Framebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
     return pixelData;
 }
 
+void Framebuffer::ReadPixels(uint32_t attachmentIndex, int x, int y, int width, int height, void* data)
+{
+    R_CORE_ASSERT(attachmentIndex < colorAttachments.size(), "");
+
+    glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
+
+    auto spec = colorAttachmentSpecifications[attachmentIndex];
+    if (spec.textureFormat == FramebufferTextureFormat::RGBA8)
+    {
+        glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    }
+    else
+    {
+        R_CORE_ASSERT(false, "Unsupported format!");
+    }
+}
+
 void RightEngine::Framebuffer::ClearAttachment(uint32_t attachmentIndex, int value)
 {
     R_CORE_ASSERT(attachmentIndex < colorAttachments.size(), "");

@@ -17,3 +17,7 @@ Just a bunch of screenshots, that show progress of engine development
 ## 19-03-2022 (Added point light)
 
 ![19-03-2022.png](https://i.imgur.com/13es2w8.png)
+
+## 02-04-2022 (Added rendering to imgui panel)
+
+![02-04-2022.png](https://i.imgur.com/btZao5F.png)

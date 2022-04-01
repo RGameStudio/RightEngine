@@ -85,7 +85,14 @@ bool RightEngine::Camera::OnMouseMove(const MouseMovedEvent& e)
     yOffset *= sensitivity;
 
     rotation[0] += xOffset;
-    rotation[1] += yOffset;
+    if (invertY)
+    {
+        rotation[1] -= yOffset;
+    }
+    else
+    {
+        rotation[1] += yOffset;
+    }
 
 
     if (rotation[1] > 89.0f)

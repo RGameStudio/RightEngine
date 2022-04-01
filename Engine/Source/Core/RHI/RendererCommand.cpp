@@ -16,6 +16,7 @@ void RendererCommand::SetClearColor(const glm::vec4& color)
 
 void RendererCommand::Clear(uint32_t clearBits)
 {
+    // TODO: Use API agnostic bits
     rendererAPI->Clear(clearBits);
 }
 

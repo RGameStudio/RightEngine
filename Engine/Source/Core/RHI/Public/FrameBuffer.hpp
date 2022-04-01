@@ -23,7 +23,9 @@ namespace RightEngine
     struct FramebufferTextureSpecification
     {
         FramebufferTextureSpecification() = default;
-        explicit FramebufferTextureSpecification(FramebufferTextureFormat format): textureFormat(format) {}
+
+        explicit FramebufferTextureSpecification(FramebufferTextureFormat format) : textureFormat(format)
+        {}
 
         FramebufferTextureFormat textureFormat = FramebufferTextureFormat::None;
     };
@@ -31,7 +33,10 @@ namespace RightEngine
     struct FramebufferAttachmentSpecification
     {
         FramebufferAttachmentSpecification() = default;
-        FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attachments): attachments(attachments) {}
+
+        FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attachments)
+                : attachments(attachments)
+        {}
 
         std::vector<FramebufferTextureSpecification> attachments;
     };
@@ -58,6 +63,7 @@ namespace RightEngine
 
         void Resize(uint32_t width, uint32_t height);
         int ReadPixel(uint32_t attachmentIndex, int x, int y);
+        void ReadPixels(uint32_t attachmentIndex, int x, int y, int width, int height, void* data);
 
         void ClearAttachment(uint32_t attachmentIndex, int value);
 

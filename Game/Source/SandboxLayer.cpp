@@ -2,6 +2,8 @@
 #include "Renderer.hpp"
 #include "LightNode.hpp"
 #include "EditorCamera.hpp"
+#include "RendererCommand.hpp"
+#include <glad/glad.h>
 #include <imgui.h>
 
 enum class GeometryType
@@ -36,7 +38,7 @@ std::shared_ptr<RightEngine::SceneNode> CreateTestSceneNode(GeometryType type, c
 void SandboxLayer::OnAttach()
 {
     const auto camera = std::make_shared<RightEngine::EditorCamera>(glm::vec3(0, 5, -15),
-                                                              glm::vec3(0, 1, 0));
+                                                                    glm::vec3(0, 1, 0));
     scene = std::make_shared<RightEngine::Scene>();
 
     const auto cube1 = CreateTestSceneNode(GeometryType::CUBE, "/Assets/Textures/WoodAlbedo.png");
@@ -46,13 +48,30 @@ void SandboxLayer::OnAttach()
     scene->SetCamera(camera);
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
-    shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert", "/Assets/Shaders/Basic/basic.frag");
+    shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert",
+                                                   "/Assets/Shaders/Basic/basic.frag");
     renderer = std::make_shared<RightEngine::Renderer>();
+
+    RightEngine::FramebufferSpecification fbSpec;
+    fbSpec.width = 1280;
+    fbSpec.height = 720;
+    fbSpec.attachments = RightEngine::FramebufferAttachmentSpecification(
+            {
+                    RightEngine::FramebufferTextureSpecification(RightEngine::FramebufferTextureFormat::RGBA8),
+                    RightEngine::FramebufferTextureSpecification(RightEngine::FramebufferTextureFormat::RGBA8),
+                    RightEngine::FramebufferTextureSpecification(RightEngine::FramebufferTextureFormat::Depth),
+            }
+    );
+
+    frameBuffer = std::make_shared<RightEngine::Framebuffer>(fbSpec);
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
     scene->OnUpdate();
+
+    frameBuffer->Bind();
+    RightEngine::RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     renderer->Configure();
     renderer->BeginScene(scene);
 
@@ -65,9 +84,13 @@ void SandboxLayer::OnUpdate(float ts)
     }
 
     renderer->EndScene();
+    frameBuffer->UnBind();
 }
 
 void SandboxLayer::OnImGuiRender()
 {
-    ImGui::ShowDemoWindow();
+    ImGui::Begin("Scene view");
+    id = frameBuffer->GetColorAttachment();
+    ImGui::Image((void*)id, ImVec2(1280, 720));
+    ImGui::End();
 }

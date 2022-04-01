@@ -3,8 +3,10 @@
 
 using namespace RightEngine;
 
-EditorCamera::EditorCamera(const glm::vec3& position, const glm::vec3& worldUp) : Camera(position, worldUp)
-{}
+EditorCamera::EditorCamera(const glm::vec3& position, const glm::vec3& worldUp, bool invertY) : Camera(position, worldUp)
+{
+    this->invertY = invertY;
+}
 
 void EditorCamera::OnUpdate()
 {
