@@ -19,6 +19,7 @@ include_directories(Lib/glfw/include)
 include_directories(Lib/glm)
 include_directories(Lib/stb_image/Public)
 include_directories(Lib/imgui)
+include_directories(Lib/entt/include)
 
 include_directories(Engine/Source/Public)
 include_directories(Engine/Source/Core/Public)

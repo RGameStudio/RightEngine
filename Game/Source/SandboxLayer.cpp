@@ -1,6 +1,5 @@
 #include "SandboxLayer.hpp"
 #include "Renderer.hpp"
-#include "LightNode.hpp"
 #include "EditorCamera.hpp"
 #include "RendererCommand.hpp"
 #include <glad/glad.h>

@@ -3,20 +3,18 @@
 #include "Geometry.hpp"
 #include "Shader.hpp"
 #include <glm/glm.hpp>
+#include <entt.hpp>
 #include <memory>
 
 namespace RightEngine
 {
-    enum class NodeType
-    {
-        REGULAR,
-        LIGHT
-    };
+    class Scene;
 
     class SceneNode: public std::enable_shared_from_this<SceneNode>
     {
     public:
         SceneNode() = default;
+        SceneNode(entt::entity entityId, const std::shared_ptr<Scene>& scene);
         ~SceneNode() = default;
 
         // TODO: Move to transform component
@@ -45,9 +43,8 @@ namespace RightEngine
         const std::vector<std::shared_ptr<SceneNode>>& GetChildren() const;
         std::vector<std::shared_ptr<SceneNode>> GetAllChildren() const;
 
-        NodeType GetBaseType() const;
-
     protected:
+        entt::entity entity;
         glm::vec3 position{ 0.0f, 0.0f, 0.0f };
         glm::vec3 rotation{ 0.0f, 0.0f, 0.0f };
         glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
@@ -57,11 +54,12 @@ namespace RightEngine
 
         std::weak_ptr<SceneNode> parent;
         std::vector<std::shared_ptr<SceneNode>> children;
-
-        NodeType baseType{ NodeType::REGULAR };
+        std::weak_ptr<Scene> scene;
 
     private:
         void GetAllChildren(std::vector<std::shared_ptr<SceneNode>>& allChildren) const;
         void RecalculateTransform();
+
+        friend class Scene;
     };
 }

@@ -1,7 +1,6 @@
 #include "Scene.hpp"
 #include "Assert.hpp"
 #include "Renderer.hpp"
-#include "LightNode.hpp"
 
 using namespace RightEngine;
 
@@ -34,4 +33,15 @@ const std::shared_ptr<Camera>& RightEngine::Scene::GetCamera() const
 const std::shared_ptr<SceneNode>& Scene::GetRootNode() const
 {
     return rootNode;
+}
+
+std::shared_ptr<SceneNode> Scene::CreateNode()
+{
+    std::shared_ptr<SceneNode> node = std::make_shared<SceneNode>(registry.create(), shared_from_this());
+    return node;
+}
+
+void Scene::DestroyNode(const std::shared_ptr<SceneNode>& node)
+{
+
 }

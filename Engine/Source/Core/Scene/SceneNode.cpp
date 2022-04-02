@@ -4,6 +4,12 @@
 
 using namespace RightEngine;
 
+SceneNode::SceneNode(entt::entity entityId, const std::shared_ptr<Scene>& scene)
+{
+    entity = entityId;
+    this->scene = scene;
+}
+
 glm::mat4 RightEngine::SceneNode::GetLocalTransformMatrix() const
 {
     glm::mat4 model(1);
@@ -103,11 +109,6 @@ const glm::vec3& SceneNode::GetScale() const
 void SceneNode::SetScale(const glm::vec3& newScale)
 {
     scale = newScale;
-}
-
-NodeType SceneNode::GetBaseType() const
-{
-    return baseType;
 }
 
 void SceneNode::RecalculateTransform()
