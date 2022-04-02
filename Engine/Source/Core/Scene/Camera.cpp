@@ -71,7 +71,8 @@ bool RightEngine::Camera::OnMouseMove(const MouseMovedEvent& e)
 {
     if (!active)
     {
-        UpdateVectors();
+        prevXMousePos = e.GetX();
+        prevYMousePos = e.GetY();
         return true;
     }
     if (prevXMousePos == -1)
