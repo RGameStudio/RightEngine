@@ -26,6 +26,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         
+      - name: SSH Agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        
       - name: Check git submodules
         # Initialize and download (if needed) engine dependencies
         run: git submodule update --init --remote
