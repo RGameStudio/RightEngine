@@ -1,4 +1,4 @@
-name: CMake
+name: Tests
 
 on:
   push:
@@ -22,11 +22,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: SSH Agent
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: secrets.SSH_PRIVATE_KEY
+    
     - name: Check git submodules
       # Initialize and download (if needed) engine dependencies
-      run: |
-        ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-        git submodule update --init --remote
+      run: git submodule update --init
       
     - name: Create build directory
       shell: powershell
