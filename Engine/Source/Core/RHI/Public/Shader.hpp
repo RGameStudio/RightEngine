@@ -10,7 +10,7 @@ namespace RightEngine
 {
     struct LightInfo;
     class Scene;
-    class SceneNode;
+    class Entity;
 
     struct ShaderProgramSource
     {

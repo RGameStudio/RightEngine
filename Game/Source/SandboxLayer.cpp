@@ -2,6 +2,8 @@
 #include "Renderer.hpp"
 #include "EditorCamera.hpp"
 #include "RendererCommand.hpp"
+#include "Entity.hpp"
+#include "Components.hpp"
 #include <glad/glad.h>
 #include <imgui.h>
 
@@ -11,14 +13,16 @@ enum class GeometryType
     PLANE
 };
 
-std::shared_ptr<RightEngine::SceneNode> CreateTestSceneNode(GeometryType type, const std::string& texturePath)
+using namespace RightEngine;
+
+std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene, GeometryType type, const std::string& texturePath)
 {
     std::shared_ptr<RightEngine::Texture> texture;
     if (!texturePath.empty())
     {
         texture = std::make_shared<RightEngine::Texture>(texturePath);
     }
-    auto node = std::make_shared<RightEngine::SceneNode>();
+    auto node = scene->CreateEntity();
     std::shared_ptr<RightEngine::Geometry> geometry;
     switch (type)
     {
@@ -38,12 +42,12 @@ void SandboxLayer::OnAttach()
 {
     const auto camera = std::make_shared<RightEngine::EditorCamera>(glm::vec3(0, 5, -15),
                                                                     glm::vec3(0, 1, 0));
-    scene = std::make_shared<RightEngine::Scene>();
+    scene = Scene::Create();
 
-    const auto cube1 = CreateTestSceneNode(GeometryType::CUBE, "/Assets/Textures/WoodAlbedo.png");
-    cube1->SetPosition({ 0, 0.0f, 0 });
-    const auto cube2 = CreateTestSceneNode(GeometryType::CUBE, "");
-    cube2->SetPosition({ 5.0f, 2.0f, 0 });
+    const auto cube1 = CreateTestSceneNode(scene, GeometryType::CUBE, "/Assets/Textures/WoodAlbedo.png");
+    cube1->GetComponent<Transform>().SetPosition({ 0, 0.0f, 0 });
+    const auto cube2 = CreateTestSceneNode(scene, GeometryType::CUBE, "");
+    cube2->GetComponent<Transform>().SetPosition({ 5.0f, 2.0f, 0 });
     scene->SetCamera(camera);
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
@@ -79,7 +83,7 @@ void SandboxLayer::OnUpdate(float ts)
     for (const auto& child: children)
     {
         shader->SetMaterialUniforms(child->GetGeometry()->GetMaterial());
-        renderer->SubmitGeometry(shader, child->GetGeometry(), child->GetWorldTransformMatrix());
+        renderer->SubmitGeometry(shader, child->GetGeometry(), child->GetComponent<Transform>().GetWorldTransformMatrix());
     }
 
     renderer->EndScene();
