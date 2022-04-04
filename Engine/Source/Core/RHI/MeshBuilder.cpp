@@ -1,4 +1,4 @@
-#include "GeometryBuilder.hpp"
+#include "MeshBuilder.hpp"
 
 using namespace RightEngine;
 
@@ -58,26 +58,30 @@ static const float planeVertexData[] = {
         -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 };
 
-std::shared_ptr<Geometry> RightEngine::GeometryBuilder::CubeGeometry()
+Mesh* MeshBuilder::CubeGeometry()
 {
-    RightEngine::VertexBufferLayout layout;
+    VertexBufferLayout layout;
     layout.Push<float>(3);
     layout.Push<float>(3);
     layout.Push<float>(2);
-    auto geometry = std::make_shared<RightEngine::Geometry>();
-    geometry->CreateVertexBuffer(cubeVertexData, sizeof(cubeVertexData));
-    geometry->CreateVertexArray(layout);
-    return geometry;
+
+    Mesh *mesh = new Mesh();
+    auto vertexArray = std::make_shared<VertexArray>();
+    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(cubeVertexData, sizeof(cubeVertexData)), layout);
+    mesh->SetVertexArray(vertexArray);
+    return mesh;
 }
 
-std::shared_ptr<Geometry> GeometryBuilder::PlaneGeometry()
+Mesh* MeshBuilder::PlaneGeometry()
 {
-    RightEngine::VertexBufferLayout layout;
+    VertexBufferLayout layout;
     layout.Push<float>(3);
     layout.Push<float>(3);
     layout.Push<float>(2);
-    auto geometry = std::make_shared<RightEngine::Geometry>();
-    geometry->CreateVertexBuffer(planeVertexData, sizeof(planeVertexData));
-    geometry->CreateVertexArray(layout);
-    return geometry;
+
+    Mesh *mesh = new Mesh();
+    auto vertexArray = std::make_shared<VertexArray>();
+    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(planeVertexData, sizeof(planeVertexData)), layout);
+    mesh->SetVertexArray(vertexArray);
+    return mesh;
 }

@@ -6,22 +6,25 @@
 
 using namespace RightEngine;
 
-void Renderer::SubmitGeometry(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Geometry>& geometry,
+void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
+                              const Mesh& mesh,
                               const glm::mat4& transform)
 {
     shader->Bind();
     shader->SetUniformMat4f("u_ViewProjection", sceneData.viewProjectionMatrix);
     shader->SetUniformMat4f("u_Transform", transform);
-    geometry->GetVertexArray()->Bind();
-    geometry->GetVertexBuffer()->Bind();
-    if (geometry->GetIndexBuffer())
+    const auto& va = mesh.GetVertexArray();
+    const auto& ib = va->GetIndexBuffer();
+    const auto& vb = va->GetVertexBuffer();
+    va->Bind();
+    if (ib)
     {
-        geometry->GetIndexBuffer()->Bind();
-        RendererCommand::DrawIndexed(geometry->GetIndexBuffer());
+        ib->Bind();
+        RendererCommand::DrawIndexed(ib);
     }
     else
     {
-        RendererCommand::Draw(geometry->GetVertexBuffer());
+        RendererCommand::Draw(vb);
     }
 }
 

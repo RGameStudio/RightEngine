@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Geometry.hpp"
 #include "Shader.hpp"
 #include "Scene.hpp"
 #include "Assert.hpp"
@@ -18,9 +17,6 @@ namespace RightEngine
         Entity() = default;
         Entity(entt::entity entityId, const std::shared_ptr<Scene>& scene);
         ~Entity() = default;
-
-        void SetGeometry(const std::shared_ptr<Geometry>& geometry);
-        const std::shared_ptr<Geometry>& GetGeometry() const;
 
         template<typename T, typename... Args>
         T& AddComponent(Args&&... args)
@@ -59,8 +55,6 @@ namespace RightEngine
 
     protected:
         entt::entity entityHandle;
-
-        std::shared_ptr<Geometry> geometry;
 
         std::weak_ptr<Entity> parent;
         std::vector<std::shared_ptr<Entity>> children;

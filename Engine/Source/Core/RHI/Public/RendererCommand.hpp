@@ -2,7 +2,6 @@
 
 #include "Types.hpp"
 #include "Shader.hpp"
-#include "Geometry.hpp"
 #include "RendererAPI.hpp"
 
 namespace RightEngine

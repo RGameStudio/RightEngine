@@ -18,13 +18,12 @@ set(ENGINE_SRC
         Source/Core/Utils/Input.cpp
         Source/Core/Window/GLFWWindow.cpp
         Source/Core/Scene/Camera.cpp
-        Source/Core/RHI/Geometry.cpp
         Source/Core/Scene/Entity.cpp
         Source/Core/Scene/Scene.cpp
         Source/Core/RHI/Texture.cpp
         Source/Core/RHI/Material.cpp
         Source/Core/Utils/Path.cpp
-        Source/Core/RHI/GeometryBuilder.cpp
+        Source/Core/RHI/MeshBuilder.cpp
         Source/Core/RHI/FrameBuffer.cpp
         Source/Core/Application/Layer.cpp
         Source/Core/RHI/OpenGL/OpenGLRendererAPI.cpp
@@ -33,7 +32,8 @@ set(ENGINE_SRC
         Source/Core/UI/ImGuiLayer.cpp
         Source/Core/UI/ImGuiBuild.cpp
         Source/Core/Scene/EditorCamera.cpp
-        Source/Core/Scene/Components/Transform.cpp)
+        Source/Core/Scene/Components/Transform.cpp
+        Source/Core/Scene/Mesh.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

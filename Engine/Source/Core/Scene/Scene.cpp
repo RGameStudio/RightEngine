@@ -67,3 +67,8 @@ void Scene::UpdateNodeTransformRecursively(const std::shared_ptr<Entity>& node)
         UpdateNodeTransformRecursively(child);
     }
 }
+
+const entt::registry& Scene::GetRegistry() const
+{
+    return registry;
+}

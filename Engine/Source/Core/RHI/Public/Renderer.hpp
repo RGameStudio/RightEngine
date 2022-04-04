@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.hpp"
-#include "Geometry.hpp"
+#include "Components.hpp"
 #include "Config.hpp"
 #include "Camera.hpp"
 #include "Shader.hpp"
@@ -23,8 +23,8 @@ namespace RightEngine
     class Renderer
     {
     public:
-        void SubmitGeometry(const std::shared_ptr<Shader>& shader,
-                            const std::shared_ptr<Geometry>& geometry,
+        void SubmitMesh(const std::shared_ptr<Shader>& shader,
+                            const Mesh& mesh,
                             const glm::mat4& transform);
 
         void BeginScene(const std::shared_ptr<Scene>& scene);

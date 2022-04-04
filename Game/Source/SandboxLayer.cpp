@@ -23,18 +23,18 @@ std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<S
         texture = std::make_shared<RightEngine::Texture>(texturePath);
     }
     auto node = scene->CreateEntity();
-    std::shared_ptr<RightEngine::Geometry> geometry;
+    Mesh* mesh = nullptr;
     switch (type)
     {
         case GeometryType::CUBE:
-            geometry = RightEngine::GeometryBuilder::CubeGeometry();
+            mesh = RightEngine::MeshBuilder::CubeGeometry();
             break;
         case GeometryType::PLANE:
-            geometry = RightEngine::GeometryBuilder::PlaneGeometry();
+            mesh = RightEngine::MeshBuilder::PlaneGeometry();
             break;
     }
-    node->SetGeometry(geometry);
-    node->GetGeometry()->GetMaterial()->SetBaseTexture(texture);
+    mesh->GetMaterial()->SetBaseTexture(texture);
+    node->AddComponent<Mesh>(std::move(*mesh));
     return node;
 }
 
@@ -78,12 +78,13 @@ void SandboxLayer::OnUpdate(float ts)
     renderer->Configure();
     renderer->BeginScene(scene);
 
-    const auto children = scene->GetRootNode()->GetAllChildren();
     shader->Bind();
-    for (const auto& child: children)
+    for (const auto& entity : scene->GetRegistry().view<Mesh>())
     {
-        shader->SetMaterialUniforms(child->GetGeometry()->GetMaterial());
-        renderer->SubmitGeometry(shader, child->GetGeometry(), child->GetComponent<Transform>().GetWorldTransformMatrix());
+        const auto& mesh = scene->GetRegistry().get<Mesh>(entity);
+        shader->SetMaterialUniforms(mesh.GetMaterial());
+        const auto& transform = scene->GetRegistry().get<Transform>(entity);
+        renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());
     }
 
     renderer->EndScene();

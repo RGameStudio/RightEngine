@@ -18,6 +18,7 @@ namespace RightEngine
 
         const std::shared_ptr<Entity>& GetRootNode() const;
 
+        const entt::registry& GetRegistry() const;
         std::shared_ptr<Entity> CreateEntity();
         void DestroyEntity(const std::shared_ptr<Entity>& node);
 

@@ -10,16 +10,6 @@ Entity::Entity(entt::entity entityHandle, const std::shared_ptr<Scene>& scene)
     this->scene = scene;
 }
 
-const std::shared_ptr<Geometry>& RightEngine::Entity::GetGeometry() const
-{
-    return geometry;
-}
-
-void RightEngine::Entity::SetGeometry(const std::shared_ptr<Geometry>& geometry)
-{
-    this->geometry = geometry;
-}
-
 void Entity::AddChild(const std::shared_ptr<Entity>& node)
 {
     children.push_back(node);
