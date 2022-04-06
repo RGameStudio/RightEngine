@@ -5,6 +5,7 @@
 #include "Config.hpp"
 #include "Camera.hpp"
 #include "Shader.hpp"
+#include "Scene.hpp"
 #include "Types.hpp"
 #include <glm/matrix.hpp>
 

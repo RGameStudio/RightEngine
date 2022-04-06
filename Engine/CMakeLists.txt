@@ -33,7 +33,8 @@ set(ENGINE_SRC
         Source/Core/UI/ImGuiBuild.cpp
         Source/Core/Scene/EditorCamera.cpp
         Source/Core/Scene/Components/Transform.cpp
-        Source/Core/Scene/Mesh.cpp)
+        Source/Core/Scene/Mesh.cpp
+        Source/Core/RHI/OpenGL/OpenGLShader.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

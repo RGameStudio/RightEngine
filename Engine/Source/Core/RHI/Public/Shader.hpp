@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Material.hpp"
+#include "Types.hpp"
 #include <glm/matrix.hpp>
 #include <string>
 #include <memory>
@@ -8,46 +8,24 @@
 
 namespace RightEngine
 {
-    struct LightInfo;
-    class Scene;
-    class Entity;
-
-    struct ShaderProgramSource
-    {
-        std::string vertexSource;
-        std::string fragmentSource;
-    };
-
     class Shader
     {
     public:
-        Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-        ~Shader();
+        virtual ~Shader() {};
 
-        void Bind() const;
-        void UnBind() const;
+        virtual void Bind() const = 0;
+        virtual void UnBind() const = 0;
 
-        void SetUniform1ui(const std::string& name, uint32_t value);
-        void SetUniform1i(const std::string& name, int value);
-        void SetUniform1f(const std::string& name, float value);
-        void SetUniform2f(const std::string& name, float v0, float v1);
-        void SetUniform3f(const std::string& name, float v0, float v1, float v2);
-        void SetUniform3f(const std::string& name, const glm::vec3& vec3);
-        void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
-        void SetUniform4f(const std::string& name, const glm::vec4& vec4);
-        void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
+        virtual void SetUniform1ui(const std::string& name, uint32_t value) = 0;
+        virtual void SetUniform1i(const std::string& name, int value) = 0;
+        virtual void SetUniform1f(const std::string& name, float value) = 0;
+        virtual void SetUniform2f(const std::string& name, float v0, float v1) = 0;
+        virtual void SetUniform3f(const std::string& name, float v0, float v1, float v2) = 0;
+        virtual void SetUniform3f(const std::string& name, const glm::vec3& vec3) = 0;
+        virtual void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) = 0;
+        virtual void SetUniform4f(const std::string& name, const glm::vec4& vec4) = 0;
+        virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) = 0;
 
-        void SetMaterialUniforms(const std::shared_ptr<Material>& material);
-
-    private:
-        std::string filePath;
-        uint32_t id;
-        std::unordered_map<std::string, int> uniformLocationCache;
-
-    private:
-        ShaderProgramSource ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-        uint32_t CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
-        uint32_t CompileShader(uint32_t type, const std::string& source);
-        int GetUniformLocation(const std::string& name);
+        static std::shared_ptr<Shader> Create(GPU_API api, const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
     };
 }

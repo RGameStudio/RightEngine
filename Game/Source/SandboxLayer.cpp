@@ -51,7 +51,7 @@ void SandboxLayer::OnAttach()
     scene->SetCamera(camera);
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
-    shader = std::make_shared<RightEngine::Shader>("/Assets/Shaders/Basic/basic.vert",
+    shader = Shader::Create(GPU_API::OpenGL, "/Assets/Shaders/Basic/basic.vert",
                                                    "/Assets/Shaders/Basic/basic.frag");
     renderer = std::make_shared<RightEngine::Renderer>();
 
@@ -82,7 +82,16 @@ void SandboxLayer::OnUpdate(float ts)
     for (const auto& entity : scene->GetRegistry().view<Mesh>())
     {
         const auto& mesh = scene->GetRegistry().get<Mesh>(entity);
-        shader->SetMaterialUniforms(mesh.GetMaterial());
+        const auto data = mesh.GetMaterial()->GetMaterialData();
+        shader->SetUniform4f("u_material.fallbackColor", data.fallbackColor);
+
+        const auto albedoTexture =  mesh.GetMaterial()->GetBaseTexture();
+        shader->SetUniform1i("u_material.hasAlbedo", albedoTexture != nullptr);
+        if (albedoTexture)
+        {
+            albedoTexture->Bind();
+            shader->SetUniform1i("u_albedoTexture", 0);
+        }
         const auto& transform = scene->GetRegistry().get<Transform>(entity);
         renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());
     }
