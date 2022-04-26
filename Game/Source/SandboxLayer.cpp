@@ -2,9 +2,11 @@
 #include "Renderer.hpp"
 #include "EditorCamera.hpp"
 #include "RendererCommand.hpp"
+#include "UniformBuffer.hpp"
 #include "Entity.hpp"
 #include "Components.hpp"
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <imgui.h>
 
 enum class GeometryType
@@ -14,6 +16,13 @@ enum class GeometryType
 };
 
 using namespace RightEngine;
+
+struct LayerSceneData
+{
+    std::shared_ptr<UniformBuffer> materialUniformBuffer;
+};
+
+static LayerSceneData sceneData;
 
 std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene, GeometryType type, const std::string& texturePath)
 {
@@ -45,14 +54,14 @@ void SandboxLayer::OnAttach()
     scene = Scene::Create();
 
     const auto cube1 = CreateTestSceneNode(scene, GeometryType::CUBE, "/Assets/Textures/WoodAlbedo.png");
-    cube1->GetComponent<Transform>().SetPosition({ 0, 0.0f, 0 });
+    cube1->GetComponent<Transform>().SetPosition({0, 0.0f, 0});
     const auto cube2 = CreateTestSceneNode(scene, GeometryType::CUBE, "");
-    cube2->GetComponent<Transform>().SetPosition({ 5.0f, 2.0f, 0 });
+    cube2->GetComponent<Transform>().SetPosition({5.0f, 2.0f, 0});
     scene->SetCamera(camera);
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
     shader = Shader::Create(GPU_API::OpenGL, "/Assets/Shaders/Basic/basic.vert",
-                                                   "/Assets/Shaders/Basic/basic.frag");
+                            "/Assets/Shaders/Basic/basic.frag");
     renderer = std::make_shared<RightEngine::Renderer>();
 
     RightEngine::FramebufferSpecification fbSpec;
@@ -67,6 +76,8 @@ void SandboxLayer::OnAttach()
     );
 
     frameBuffer = std::make_shared<RightEngine::Framebuffer>(fbSpec);
+
+    sceneData.materialUniformBuffer = UniformBuffer::Create(GPU_API::OpenGL, sizeof(MaterialData), 0);
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -79,20 +90,19 @@ void SandboxLayer::OnUpdate(float ts)
     renderer->BeginScene(scene);
 
     shader->Bind();
-    for (const auto& entity : scene->GetRegistry().view<Mesh>())
+    for (const auto& entity: scene->GetRegistry().view<Mesh>())
     {
         const auto& mesh = scene->GetRegistry().get<Mesh>(entity);
-        const auto data = mesh.GetMaterial()->GetMaterialData();
-        shader->SetUniform4f("u_material.fallbackColor", data.fallbackColor);
-
-        const auto albedoTexture =  mesh.GetMaterial()->GetBaseTexture();
-        shader->SetUniform1i("u_material.hasAlbedo", albedoTexture != nullptr);
+        auto data = mesh.GetMaterial()->GetMaterialData();
+        const auto albedoTexture = mesh.GetMaterial()->GetBaseTexture();
+        data.hasAlbedo = albedoTexture != nullptr;
         if (albedoTexture)
         {
             albedoTexture->Bind();
-            shader->SetUniform1i("u_albedoTexture", 0);
+            shader->SetUniform1i("u_AlbedoTexture", 0);
         }
         const auto& transform = scene->GetRegistry().get<Transform>(entity);
+        sceneData.materialUniformBuffer->SetData(&data, sizeof(MaterialData));
         renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());
     }
 
@@ -104,6 +114,6 @@ void SandboxLayer::OnImGuiRender()
 {
     ImGui::Begin("Scene view");
     id = frameBuffer->GetColorAttachment();
-    ImGui::Image((void*)id, ImVec2(1280, 720));
+    ImGui::Image((void*) id, ImVec2(1280, 720));
     ImGui::End();
 }

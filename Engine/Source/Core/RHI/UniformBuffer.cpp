@@ -3,7 +3,7 @@
 #include "Assert.hpp"
 using namespace RightEngine;
 
-std::shared_ptr<UniformBuffer> UniformBuffer::Create(uint32_t size, uint32_t binding, GPU_API api)
+std::shared_ptr<UniformBuffer> UniformBuffer::Create(GPU_API api, uint32_t size, uint32_t binding)
 {
     switch (api)
     {

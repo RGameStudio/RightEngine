@@ -10,6 +10,8 @@ namespace RightEngine
     struct MaterialData
     {
         glm::vec4 fallbackColor{ 1.0f, 0.0f, 1.0f, 1.0f };
+        bool hasAlbedo;
+        glm::vec3 _padding_;
     };
 
     class Material
