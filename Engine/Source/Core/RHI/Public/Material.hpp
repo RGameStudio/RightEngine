@@ -11,7 +11,9 @@ namespace RightEngine
     {
         glm::vec4 fallbackColor{ 1.0f, 0.0f, 1.0f, 1.0f };
         bool hasAlbedo;
-        glm::vec3 _padding_;
+        bool hasNormal;
+        bool hasSpecular;
+        bool hasMetallic;
     };
 
     class Material

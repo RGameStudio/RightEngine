@@ -7,19 +7,21 @@ layout(std140, binding = 0) uniform Material
 {
     vec4 u_FallbackColor;
     bool u_HasAlbedo;
-    vec3 _padding_;
+    bool u_HasNormal;
+    bool u_HasSpecular;
+    bool u_HasMetallic;
 };
 
 in vec2 f_UV;
 in vec3 f_Normal;
 
-uniform sampler2D u_AlbedoTexture;
+uniform sampler2D u_Textures[32];
 
 void main()
 {
     if (u_HasAlbedo)
     {
-        albedo = texture(u_AlbedoTexture, f_UV);
+        albedo = texture(u_Textures[0], f_UV);
     }
     else
     {

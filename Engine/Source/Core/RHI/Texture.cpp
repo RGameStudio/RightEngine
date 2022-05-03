@@ -33,8 +33,7 @@ RightEngine::Texture::Texture(const TextureSpecification& specification, const v
 
 void RightEngine::Texture::Bind(uint32_t slot) const
 {
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, id);
+    glBindTextureUnit(slot, id);
 }
 
 void RightEngine::Texture::UnBind() const

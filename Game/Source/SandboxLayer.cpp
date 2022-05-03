@@ -98,8 +98,7 @@ void SandboxLayer::OnUpdate(float ts)
         data.hasAlbedo = albedoTexture != nullptr;
         if (albedoTexture)
         {
-            albedoTexture->Bind();
-            shader->SetUniform1i("u_AlbedoTexture", 0);
+            albedoTexture->Bind(0);
         }
         const auto& transform = scene->GetRegistry().get<Transform>(entity);
         sceneData.materialUniformBuffer->SetData(&data, sizeof(MaterialData));
