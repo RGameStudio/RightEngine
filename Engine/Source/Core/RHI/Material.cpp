@@ -2,22 +2,12 @@
 
 using namespace RightEngine;
 
-const std::shared_ptr<Texture>& RightEngine::Material::GetBaseTexture() const
-{
-    return baseTexture;
-}
-
-void RightEngine::Material::SetBaseTexture(const std::shared_ptr<Texture>& texture)
-{
-    baseTexture = texture;
-}
-
-const MaterialData& Material::GetMaterialData() const
+MaterialData& Material::GetMaterialData()
 {
     return materialData;
 }
 
-void Material::SetMaterialData(const MaterialData& data)
+TextureData& Material::GetTextureData()
 {
-    materialData = data;
+    return textureData;
 }

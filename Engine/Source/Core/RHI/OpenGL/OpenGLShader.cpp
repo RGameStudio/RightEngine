@@ -10,72 +10,6 @@ using namespace RightEngine;
 
 // TODO: Error handling
 
-OpenGLShader::OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
-{
-    ShaderProgramSource source = ParseShaders(vertexShaderPath, fragmentShaderPath);
-    id = CreateShader(source.vertexSource, source.fragmentSource);
-}
-
-OpenGLShader::~OpenGLShader()
-{
-    glDeleteProgram(id);
-}
-
-void OpenGLShader::Bind() const
-{
-    glUseProgram(id);
-}
-
-void OpenGLShader::UnBind() const
-{
-    glUseProgram(0);
-}
-
-void OpenGLShader::SetUniform1ui(const std::string& name, uint32_t value)
-{
-    glUniform1ui(GetUniformLocation(name), value);
-}
-
-void OpenGLShader::SetUniform1i(const std::string& name, int value)
-{
-    glUniform1i(GetUniformLocation(name), value);
-}
-
-void OpenGLShader::SetUniform1f(const std::string& name, float value)
-{
-    glUniform1f(GetUniformLocation(name), value);
-}
-
-void OpenGLShader::SetUniform2f(const std::string& name, float v0, float v1)
-{
-    glUniform2f(GetUniformLocation(name), v0, v1);
-}
-
-void OpenGLShader::SetUniform3f(const std::string& name, float v0, float v1, float v2)
-{
-    glUniform3f(GetUniformLocation(name), v0, v1, v2);
-}
-
-void OpenGLShader::SetUniform3f(const std::string& name, const glm::vec3& vec3)
-{
-    SetUniform3f(name, vec3.x, vec3.y, vec3.z);
-}
-
-void OpenGLShader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
-{
-    glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
-}
-
-void OpenGLShader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
-{
-    SetUniform4f(name, vec4.x, vec4.y, vec4.z, vec4.w);
-}
-
-void OpenGLShader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
-{
-    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
-}
-
 ShaderProgramSource
 OpenGLShader::ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 {
@@ -159,5 +93,76 @@ int OpenGLShader::GetUniformLocation(const std::string& name)
         R_CORE_WARN("Uniform {0} doesn't exist!", name);
     uniformLocationCache[name] = location;
     return location;
+}
+
+OpenGLShader::OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+{
+    ShaderProgramSource source = ParseShaders(vertexShaderPath, fragmentShaderPath);
+    id = CreateShader(source.vertexSource, source.fragmentSource);
+}
+
+OpenGLShader::~OpenGLShader()
+{
+    glDeleteProgram(id);
+}
+
+void OpenGLShader::Bind() const
+{
+    glUseProgram(id);
+}
+
+void OpenGLShader::UnBind() const
+{
+    glUseProgram(0);
+}
+
+void OpenGLShader::SetUniform1ui(const std::string& name, uint32_t value)
+{
+    glUniform1ui(GetUniformLocation(name), value);
+}
+
+void OpenGLShader::SetUniform1i(const std::string& name, int value)
+{
+    glUniform1i(GetUniformLocation(name), value);
+}
+
+void OpenGLShader::SetUniform1f(const std::string& name, float value)
+{
+    glUniform1f(GetUniformLocation(name), value);
+}
+
+void OpenGLShader::SetUniform2f(const std::string& name, float v0, float v1)
+{
+    glUniform2f(GetUniformLocation(name), v0, v1);
+}
+
+void OpenGLShader::SetUniform3f(const std::string& name, float v0, float v1, float v2)
+{
+    glUniform3f(GetUniformLocation(name), v0, v1, v2);
+}
+
+void OpenGLShader::SetUniform3f(const std::string& name, const glm::vec3& vec3)
+{
+    SetUniform3f(name, vec3.x, vec3.y, vec3.z);
+}
+
+void OpenGLShader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+{
+    glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
+}
+
+void OpenGLShader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
+{
+    SetUniform4f(name, vec4.x, vec4.y, vec4.z, vec4.w);
+}
+
+void OpenGLShader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
+{
+    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void OpenGLShader::SetUniform1iv(const std::string& name, const std::vector<int>& v)
+{
+    glUniform1iv(GetUniformLocation(name), v.size(), v.data());
 }
 

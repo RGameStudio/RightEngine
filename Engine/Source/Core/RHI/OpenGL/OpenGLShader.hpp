@@ -28,6 +28,7 @@ namespace RightEngine
         virtual void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) override;
         virtual void SetUniform4f(const std::string& name, const glm::vec4& vec4) override;
         virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) override;
+        virtual void SetUniform1iv(const std::string& name, const std::vector<int>& v) override;
 
     private:
         std::string filePath;

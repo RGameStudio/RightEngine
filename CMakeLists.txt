@@ -9,6 +9,8 @@ add_compile_definitions(R_ENABLE_ASSERTS)
 set(GLSL_ROOT_DIR ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders)
 set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
              ${GLSL_ROOT_DIR}/Basic/basic.vert
+             ${GLSL_ROOT_DIR}/Basic/pbr.frag
+             ${GLSL_ROOT_DIR}/Basic/pbr.vert
         )
 
 include_directories(Lib/Glad/include)

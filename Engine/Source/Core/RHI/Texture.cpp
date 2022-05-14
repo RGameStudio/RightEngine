@@ -5,10 +5,9 @@
 #include <stb_image.h>
 #include <glad/glad.h>
 
-
 RightEngine::Texture::Texture(const std::string& path)
 {
-    //stbi_set_flip_vertically_on_load(1);
+    stbi_set_flip_vertically_on_load(true);
     unsigned char* localBuffer = stbi_load(Path::ConvertEnginePathToOSPath(path).c_str(),
                                            &specification.width,
                                            &specification.height,

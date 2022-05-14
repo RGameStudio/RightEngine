@@ -5,11 +5,19 @@
 
 namespace RightEngine
 {
+    enum class TextureFormat
+    {
+        None = 0,
+        RGBA8,
+        RGB16F
+    };
+
     struct TextureSpecification
     {
         int width{ 0 };
         int height{ 0 };
         int componentAmount{ 0 };
+        TextureFormat format{ TextureFormat::RGBA8 };
     };
 
     class Texture
