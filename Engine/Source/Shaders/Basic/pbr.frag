@@ -6,14 +6,19 @@ in vec2 f_UV;
 in vec3 f_Normal;
 in vec3 f_WorldPos;
 
-layout(std140, binding = 0) uniform Material
+layout(std140, binding = 0) uniform MaterialData
 {
     vec4 u_Albedo;
     float u_Metallic;
     float u_Roughness;
+    bool u_HasAlbedo;
+    bool u_HasNormal;
+    bool u_HasMetallic;
+    bool u_HasRoughness;
+    bool u_HasAO;
 };
 
-uniform sampler2D u_Textures[32];
+uniform sampler2D u_Textures[5];
 
 // lights
 vec3 lightPositions[4];
@@ -91,16 +96,17 @@ void main()
     lightPositions[2] = vec3(14, 0, -15);
     lightPositions[3] = vec3(0, 10, -15);
     lightColors[0] = vec3(150, 150, 150);
-    lightColors[1] = vec3(150, 150, 150);
+    lightColors[1] = vec3(247, 239, 79);
     lightColors[2] = vec3(150, 150, 150);
     lightColors[3] = vec3(150, 150, 150);
 
     vec3 albedo;
+    vec3 N;
     float metallic;
     float roughness;
     float ao;
 
-    if (u_Albedo.x < 0.0)
+    if (u_HasAlbedo)
     {
         albedo = pow(texture(u_Textures[0], f_UV).rgb, vec3(2.2));
     }
@@ -109,7 +115,16 @@ void main()
         albedo = u_Albedo.rgb;
     }
 
-    if (u_Metallic < 0.0)
+    if (u_HasNormal)
+    {
+        N = getNormalFromMap();
+    }
+    else
+    {
+        N = f_Normal;
+    }
+
+    if (u_HasMetallic)
     {
         metallic = texture(u_Textures[2], f_UV).r;
     }
@@ -118,7 +133,7 @@ void main()
         metallic = u_Metallic;
     }
 
-    if (u_Roughness < 0.0)
+    if (u_HasRoughness)
     {
         roughness = texture(u_Textures[3], f_UV).r;
     }
@@ -127,9 +142,15 @@ void main()
         roughness = u_Roughness;
     }
 
-    ao = texture(u_Textures[4], f_UV).r;
+    if (u_HasAO)
+    {
+        ao = texture(u_Textures[4], f_UV).r;
+    }
+    else
+    {
+        ao = 1.0f;
+    }
 
-    vec3 N = getNormalFromMap();
     vec3 V = normalize(camPos - f_WorldPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0

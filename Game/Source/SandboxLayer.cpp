@@ -9,6 +9,15 @@
 #include <glm/glm.hpp>
 #include <imgui.h>
 
+enum class TextureSlot
+{
+    ALBEDO_TEXTURE_SLOT = 0,
+    NORMAL_TEXTURE_SLOT,
+    METALLIC_TEXTURE_SLOT,
+    ROUGHNESS_TEXTURE_SLOT,
+    AO_TEXTURE_SLOT
+};
+
 enum class GeometryType
 {
     CUBE,
@@ -30,6 +39,47 @@ struct LayerSceneData
 
 static LayerSceneData sceneData;
 
+static void TryTextureBind(MaterialData& materialData, const std::shared_ptr<Texture>& texture, TextureSlot slot)
+{
+    bool hasTexture = false;
+    if (texture)
+    {
+        texture->Bind(static_cast<uint32_t>(slot));
+        hasTexture = true;
+    }
+
+    switch (slot)
+    {
+        case TextureSlot::ALBEDO_TEXTURE_SLOT:
+            materialData.hasAlbedo = hasTexture;
+            break;
+        case TextureSlot::NORMAL_TEXTURE_SLOT:
+            materialData.hasNormal = hasTexture;
+            break;
+        case TextureSlot::METALLIC_TEXTURE_SLOT:
+            materialData.hasMetallic = hasTexture;
+            break;
+        case TextureSlot::ROUGHNESS_TEXTURE_SLOT:
+            materialData.hasRoughness = hasTexture;
+            break;
+        case TextureSlot::AO_TEXTURE_SLOT:
+            materialData.hasAO = hasTexture;
+            break;
+        default:
+            R_ASSERT(false, "Unknown texture slot!");
+    }
+}
+
+static void BindTextures(MaterialData& material, const TextureData& textures)
+{
+    TryTextureBind(material, textures.albedo, TextureSlot::ALBEDO_TEXTURE_SLOT);
+    TryTextureBind(material, textures.normal, TextureSlot::NORMAL_TEXTURE_SLOT);
+    TryTextureBind(material, textures.metallic, TextureSlot::METALLIC_TEXTURE_SLOT);
+    TryTextureBind(material, textures.roughness, TextureSlot::ROUGHNESS_TEXTURE_SLOT);
+    TryTextureBind(material, textures.ao, TextureSlot::AO_TEXTURE_SLOT);
+}
+
+
 std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene, GeometryType type)
 {
     auto node = scene->CreateEntity();
@@ -44,7 +94,7 @@ std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<S
             break;
     }
     node->AddComponent<Mesh>(std::move(*mesh));
-    auto& textureData = node->GetComponent<Mesh>().GetMaterial()->GetTextureData();
+    auto& textureData = node->GetComponent<Mesh>().GetMaterial()->textureData;
     textureData.normal = sceneData.normalTexture;
     textureData.ao = sceneData.aoTexture;
     textureData.albedo = sceneData.albedoTexture;
@@ -62,13 +112,13 @@ void SandboxLayer::OnAttach()
     sceneData.aoTexture = std::make_shared<Texture>("/Assets/Textures/ao.png");
 
     sceneData.camera = std::make_shared<RightEngine::EditorCamera>(glm::vec3(0, 5, -15),
-                                                                    glm::vec3(0, 1, 0));
+                                                                   glm::vec3(0, 1, 0));
     scene = Scene::Create();
 
     const auto cube1 = CreateTestSceneNode(scene, GeometryType::CUBE);
-    cube1->GetComponent<Transform>().SetPosition({0, 0.0f, 0});
+    cube1->GetComponent<Transform>().SetPosition({ 0, 0.0f, 0 });
     const auto cube2 = CreateTestSceneNode(scene, GeometryType::CUBE);
-    cube2->GetComponent<Transform>().SetPosition({5.0f, 2.0f, 0});
+    cube2->GetComponent<Transform>().SetPosition({ 5.0f, 2.0f, 0 });
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
@@ -100,36 +150,20 @@ void SandboxLayer::OnUpdate(float ts)
     RightEngine::RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     renderer->Configure();
     renderer->BeginScene(scene);
-
     for (const auto& entity: scene->GetRegistry().view<Mesh>())
     {
-        const auto& mesh = scene->GetRegistry().get<Mesh>(entity);
-        auto data = mesh.GetMaterial()->GetMaterialData();
-        const auto& textureData = mesh.GetMaterial()->GetTextureData();
-        // TODO: Generate albedo and roughness flat textures for sliders value
-        if (textureData.albedo)
-        {
-            data.albedo.x = -1.0f;
-            textureData.albedo->Bind();
-        }
-        if (textureData.metallic)
-        {
-            data.metallic = -1.0;
-            textureData.metallic->Bind(2);
-        }
-        if (textureData.roughness)
-        {
-            data.roughness = -1.0;
-            textureData.roughness->Bind(3);
-        }
-        textureData.normal->Bind(1);
-        textureData.ao->Bind(4);
-        shader->Bind();
         const auto& transform = scene->GetRegistry().get<Transform>(entity);
+        const auto& mesh = scene->GetRegistry().get<Mesh>(entity);
+
+        auto& materialData = mesh.GetMaterial()->materialData;
+        const auto& textureData = mesh.GetMaterial()->textureData;
+        BindTextures(materialData, textureData);
+
+        shader->Bind();
         shader->SetUniform1iv("u_Textures", { 0, 1, 2, 3, 4 });
         shader->SetUniform3f("camPos", sceneData.camera->GetPosition());
 
-        sceneData.materialUniformBuffer->SetData(&data, sizeof(MaterialData));
+        sceneData.materialUniformBuffer->SetData(&materialData, sizeof(MaterialData));
         renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());
     }
 
