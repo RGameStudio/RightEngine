@@ -4,9 +4,10 @@
 
 using namespace RightEngine;
 
-std::shared_ptr<RendererAPI> RendererAPI::Create(GPU_API api)
+std::shared_ptr<RendererAPI> RendererAPI::Create(GPU_API GpuApi)
 {
-    switch (api)
+    api = GpuApi;
+    switch (GpuApi)
     {
         case GPU_API::OpenGL:
             return std::make_shared<OpenGLRendererAPI>();
@@ -14,3 +15,10 @@ std::shared_ptr<RendererAPI> RendererAPI::Create(GPU_API api)
             R_CORE_ASSERT(false, "Unknown GPU API!");
     }
 }
+
+GPU_API RendererAPI::GetAPI()
+{
+    return api;
+}
+
+GPU_API RendererAPI::api = GPU_API::None;

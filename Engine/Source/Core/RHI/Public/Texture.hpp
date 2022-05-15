@@ -2,12 +2,15 @@
 
 #include <cstdint>
 #include <string>
+#include <memory>
 
 namespace RightEngine
 {
     enum class TextureFormat
     {
         None = 0,
+        RED8,
+        RGB8,
         RGBA8,
         RGB16F
     };
@@ -17,18 +20,16 @@ namespace RightEngine
         int width{ 0 };
         int height{ 0 };
         int componentAmount{ 0 };
-        TextureFormat format{ TextureFormat::RGBA8 };
+        TextureFormat format{ TextureFormat::None };
     };
 
     class Texture
     {
     public:
-        explicit Texture(const std::string& path);
-        explicit Texture(const TextureSpecification& specification, const void* data);
-        ~Texture();
+        virtual ~Texture() = default;
 
-        void Bind(uint32_t slot = 0) const;
-        void UnBind() const;
+        virtual void Bind(uint32_t slot = 0) const = 0;
+        virtual void UnBind() const = 0;
 
         inline int GetWidth() const
         { return specification.width; }
@@ -39,11 +40,11 @@ namespace RightEngine
         inline uint32_t GetId() const
         { return id; }
 
-    private:
+        static std::shared_ptr<Texture> Create(const std::string& path);
+        static std::shared_ptr<Texture> Create(const TextureSpecification& aSpecification, const void* data);
+
+    protected:
         TextureSpecification specification;
         uint32_t id;
-
-    private:
-        void Generate(const void* data);
     };
 }

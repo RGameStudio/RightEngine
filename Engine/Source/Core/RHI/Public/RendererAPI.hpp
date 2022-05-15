@@ -24,9 +24,11 @@ namespace RightEngine
         virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
         virtual void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib) = 0;
-
         virtual void Draw(const std::shared_ptr<VertexBuffer>& vb) = 0;
 
-        static std::shared_ptr<RendererAPI> Create(GPU_API api);
+        static std::shared_ptr<RendererAPI> Create(GPU_API GpuApi);
+        static GPU_API GetAPI();
+    private:
+        static GPU_API api;
     };
 }

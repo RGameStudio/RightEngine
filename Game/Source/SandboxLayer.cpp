@@ -87,10 +87,10 @@ std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<S
     switch (type)
     {
         case GeometryType::CUBE:
-            mesh = RightEngine::MeshBuilder::CubeGeometry();
+            mesh = MeshBuilder::CubeGeometry();
             break;
         case GeometryType::PLANE:
-            mesh = RightEngine::MeshBuilder::PlaneGeometry();
+            mesh = MeshBuilder::PlaneGeometry();
             break;
     }
     node->AddComponent<Mesh>(std::move(*mesh));
@@ -105,13 +105,13 @@ std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<S
 
 void SandboxLayer::OnAttach()
 {
-    sceneData.albedoTexture = std::make_shared<Texture>("/Assets/Textures/albedo.png");
-    sceneData.normalTexture = std::make_shared<Texture>("/Assets/Textures/normal.png");
-    sceneData.roughnessTexture = std::make_shared<Texture>("/Assets/Textures/roughness.png");
-    sceneData.metallicTexture = std::make_shared<Texture>("/Assets/Textures/metallic.png");
-    sceneData.aoTexture = std::make_shared<Texture>("/Assets/Textures/ao.png");
+    sceneData.albedoTexture = Texture::Create("/Assets/Textures/albedo.png");
+    sceneData.normalTexture = Texture::Create("/Assets/Textures/normal.png");
+    sceneData.roughnessTexture = Texture::Create("/Assets/Textures/roughness.png");
+    sceneData.metallicTexture = Texture::Create("/Assets/Textures/metallic.png");
+    sceneData.aoTexture = Texture::Create("/Assets/Textures/ao.png");
 
-    sceneData.camera = std::make_shared<RightEngine::EditorCamera>(glm::vec3(0, 5, -15),
+    sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 5, -15),
                                                                    glm::vec3(0, 1, 0));
     scene = Scene::Create();
 
@@ -124,20 +124,20 @@ void SandboxLayer::OnAttach()
     scene->GetRootNode()->AddChild(cube2);
     shader = Shader::Create(GPU_API::OpenGL, "/Assets/Shaders/Basic/pbr.vert",
                             "/Assets/Shaders/Basic/pbr.frag");
-    renderer = std::make_shared<RightEngine::Renderer>();
+    renderer = std::make_shared<Renderer>();
 
-    RightEngine::FramebufferSpecification fbSpec;
+    FramebufferSpecification fbSpec;
     fbSpec.width = 1280;
     fbSpec.height = 720;
-    fbSpec.attachments = RightEngine::FramebufferAttachmentSpecification(
+    fbSpec.attachments = FramebufferAttachmentSpecification(
             {
-                    RightEngine::FramebufferTextureSpecification(RightEngine::FramebufferTextureFormat::RGBA8),
-                    RightEngine::FramebufferTextureSpecification(RightEngine::FramebufferTextureFormat::RGBA8),
-                    RightEngine::FramebufferTextureSpecification(RightEngine::FramebufferTextureFormat::Depth),
+                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
+                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
+                    FramebufferTextureSpecification(FramebufferTextureFormat::Depth),
             }
     );
 
-    frameBuffer = std::make_shared<RightEngine::Framebuffer>(fbSpec);
+    frameBuffer = std::make_shared<Framebuffer>(fbSpec);
 
     sceneData.materialUniformBuffer = UniformBuffer::Create(GPU_API::OpenGL, sizeof(MaterialData), 0);
 }
@@ -147,7 +147,7 @@ void SandboxLayer::OnUpdate(float ts)
     scene->OnUpdate();
 
     frameBuffer->Bind();
-    RightEngine::RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     renderer->Configure();
     renderer->BeginScene(scene);
     for (const auto& entity: scene->GetRegistry().view<Mesh>())

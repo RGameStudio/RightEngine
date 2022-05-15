@@ -35,6 +35,8 @@ namespace RightEngine
 
         RendererSettings& GetSettings();
 
+        static GPU_API GetAPI();
+
     private:
         SceneData sceneData;
         RendererSettings settings;

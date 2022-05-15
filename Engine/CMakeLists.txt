@@ -20,7 +20,6 @@ set(ENGINE_SRC
         Source/Core/Scene/Camera.cpp
         Source/Core/Scene/Entity.cpp
         Source/Core/Scene/Scene.cpp
-        Source/Core/RHI/Texture.cpp
         Source/Core/RHI/Material.cpp
         Source/Core/Utils/Path.cpp
         Source/Core/RHI/MeshBuilder.cpp
@@ -34,7 +33,7 @@ set(ENGINE_SRC
         Source/Core/Scene/EditorCamera.cpp
         Source/Core/Scene/Components/Transform.cpp
         Source/Core/Scene/Mesh.cpp
-        Source/Core/RHI/OpenGL/OpenGLShader.cpp Source/Core/RHI/Public/UniformBuffer.hpp Source/Core/RHI/UniformBuffer.cpp Source/Core/RHI/OpenGL/OpenGLUniformBuffer.hpp Source/Core/RHI/OpenGL/OpenGLUniformBuffer.cpp)
+        Source/Core/RHI/OpenGL/OpenGLShader.cpp Source/Core/RHI/Public/UniformBuffer.hpp Source/Core/RHI/UniformBuffer.cpp Source/Core/RHI/OpenGL/OpenGLUniformBuffer.hpp Source/Core/RHI/OpenGL/OpenGLUniformBuffer.cpp Source/Core/RHI/OpenGL/OpenGLTexture.cpp Source/Core/RHI/OpenGL/OpenGLTexture.hpp Source/Core/RHI/Texture.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

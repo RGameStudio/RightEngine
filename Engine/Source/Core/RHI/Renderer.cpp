@@ -52,3 +52,8 @@ RendererSettings& Renderer::GetSettings()
 {
     return settings;
 }
+
+GPU_API Renderer::GetAPI()
+{
+    return RendererAPI::GetAPI();
+}
