@@ -11,6 +11,8 @@ set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
              ${GLSL_ROOT_DIR}/Basic/basic.vert
              ${GLSL_ROOT_DIR}/Basic/pbr.frag
              ${GLSL_ROOT_DIR}/Basic/pbr.vert
+             ${GLSL_ROOT_DIR}/Basic/hdr_to_cubemap.frag
+             ${GLSL_ROOT_DIR}/Basic/hdr_to_cubemap.vert
         )
 
 include_directories(Lib/Glad/include)

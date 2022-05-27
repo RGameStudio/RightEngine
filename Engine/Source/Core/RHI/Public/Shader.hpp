@@ -27,6 +27,6 @@ namespace RightEngine
         virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) = 0;
         virtual void SetUniform1iv(const std::string& name, const std::vector<int>& v) = 0;
 
-        static std::shared_ptr<Shader> Create(GPU_API api, const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+        static std::shared_ptr<Shader> Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
     };
 }

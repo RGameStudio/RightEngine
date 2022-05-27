@@ -35,6 +35,9 @@ struct LayerSceneData
     std::shared_ptr<Texture> roughnessTexture;
     std::shared_ptr<Texture> aoTexture;
     std::shared_ptr<EditorCamera> camera;
+    std::shared_ptr<Entity> hdrCube;
+    std::shared_ptr<Shader> hdrShader;
+    std::shared_ptr<Texture> hdrTexture;
 };
 
 static LayerSceneData sceneData;
@@ -80,9 +83,10 @@ static void BindTextures(MaterialData& material, const TextureData& textures)
 }
 
 
-std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene, GeometryType type)
+std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene,
+                                                         GeometryType type)
 {
-    auto node = scene->CreateEntity();
+    std::shared_ptr<Entity> node = scene->CreateEntity();
     Mesh* mesh = nullptr;
     switch (type)
     {
@@ -122,7 +126,7 @@ void SandboxLayer::OnAttach()
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
-    shader = Shader::Create(GPU_API::OpenGL, "/Assets/Shaders/Basic/pbr.vert",
+    shader = Shader::Create("/Assets/Shaders/Basic/pbr.vert",
                             "/Assets/Shaders/Basic/pbr.frag");
     renderer = std::make_shared<Renderer>();
 
@@ -140,6 +144,15 @@ void SandboxLayer::OnAttach()
     frameBuffer = std::make_shared<Framebuffer>(fbSpec);
 
     sceneData.materialUniformBuffer = UniformBuffer::Create(GPU_API::OpenGL, sizeof(MaterialData), 0);
+
+    sceneData.hdrShader = Shader::Create("/Assets/Shaders/Basic/hdr_to_cubemap.vert",
+                                         "/Assets/Shaders/Basic/hdr_to_cubemap.frag");
+    sceneData.hdrTexture = Texture::Create("/Assets/Textures/env1.hdr");
+    sceneData.hdrCube = CreateTestSceneNode(scene, GeometryType::CUBE);
+    //Turn off all textures
+    sceneData.hdrCube->GetComponent<Mesh>().GetMaterial()->textureData = TextureData();
+    sceneData.hdrCube->GetComponent<Transform>().SetPosition({ 0.0f, -2.0f, 5.0f });
+    scene->GetRootNode()->AddChild(sceneData.hdrCube);
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -166,15 +179,38 @@ void SandboxLayer::OnUpdate(float ts)
         sceneData.materialUniformBuffer->SetData(&materialData, sizeof(MaterialData));
         renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());
     }
-
-    renderer->EndScene();
+    shader->UnBind();
     frameBuffer->UnBind();
+
+    FramebufferSpecification fbSpec;
+    fbSpec.width = 1280;
+    fbSpec.height = 720;
+    fbSpec.attachments = FramebufferAttachmentSpecification(
+            {
+                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
+                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
+                    FramebufferTextureSpecification(FramebufferTextureFormat::Depth),
+            }
+    );
+
+    auto fb = std::make_shared<Framebuffer>(fbSpec);
+    fb->Bind();
+    RendererCommand::Clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    sceneData.hdrShader->Bind();
+    sceneData.hdrTexture->Bind();
+    sceneData.hdrShader->SetUniform1i("u_EquirectangularMap", 0);
+    renderer->SubmitMesh(sceneData.hdrShader, sceneData.hdrCube->GetComponent<Mesh>(),
+            sceneData.hdrCube->GetComponent<Transform>().GetWorldTransformMatrix());
+    sceneData.hdrShader->UnBind();
+    fb->UnBind();
+    renderer->EndScene();
 }
 
 void SandboxLayer::OnImGuiRender()
 {
     // TODO: viewport scaling
     ImGui::Begin("Scene view");
+    // TODO: viewport rotate
     id = frameBuffer->GetColorAttachment();
     ImGui::Image((void*) id, ImVec2(1280, 720));
     ImGui::End();
