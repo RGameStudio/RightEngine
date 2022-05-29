@@ -37,6 +37,7 @@ include_directories(Engine/Source/Core/Shader/Public)
 include_directories(Engine/Source/Core/Utils/Public)
 include_directories(Engine/Source/Core/Scene/Public)
 include_directories(Engine/Source/Core/UI/Public)
+include_directories(Engine/Source/Core/Loaders/Public)
 
 add_subdirectory(Engine)
 add_subdirectory(Game)

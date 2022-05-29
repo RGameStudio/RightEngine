@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Assert.hpp"
 #include <cstdint>
 #include <string>
 #include <memory>
@@ -12,7 +13,8 @@ namespace RightEngine
         RED8,
         RGB8,
         RGBA8,
-        RGB16F
+        RGB16F,
+        RGB32F
     };
 
     struct TextureSpecification
@@ -21,6 +23,31 @@ namespace RightEngine
         int height{ 0 };
         int componentAmount{ 0 };
         TextureFormat format{ TextureFormat::None };
+
+        /**
+         * @return Texture size in bytes
+         */
+        inline size_t GetTextureSize() const
+        {
+            R_CORE_ASSERT(format != TextureFormat::None
+                          && width > 0
+                          && height > 0
+                          && componentAmount > 0, "");
+            size_t size = width * height * componentAmount;
+            switch (format)
+            {
+                case TextureFormat::RED8:
+                case TextureFormat::RGB8:
+                case TextureFormat::RGBA8:
+                    return sizeof(uint8_t) * size;
+                case TextureFormat::RGB16F:
+                    return sizeof(float) / 2 * size;
+                case TextureFormat::RGB32F:
+                    return sizeof(float) * size;
+                default:
+                    return 0;
+            }
+        }
     };
 
     class Texture

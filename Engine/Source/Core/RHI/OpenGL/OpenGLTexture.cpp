@@ -2,53 +2,17 @@
 #include "Logger.hpp"
 #include "Path.hpp"
 #include "Assert.hpp"
-#include <stb_image.h>
+#include "TextureLoader.hpp"
 #include <glad/glad.h>
 
 using namespace RightEngine;
 
 OpenGLTexture::OpenGLTexture(const std::string& path)
 {
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* localBuffer = stbi_load(Path::ConvertEnginePathToOSPath(path).c_str(),
-                                           &specification.width,
-                                           &specification.height,
-                                           &specification.componentAmount,
-                                           0);
-    // TODO: Move that to a separate texture loader
-    const std::string hdr = ".hdr";
-    if (std::equal(hdr.rbegin(), hdr.rend(), path.rbegin()))
-    {
-        specification.format = TextureFormat::RGB16F;
-    }
-
-    switch (specification.componentAmount)
-    {
-        case 1:
-            specification.format = TextureFormat::RED8;
-            break;
-        case 3:
-            specification.format = TextureFormat::RGB8;
-            break;
-        case 4:
-            specification.format = TextureFormat::RGBA8;
-            break;
-        default:
-            R_CORE_ASSERT(false, "");
-    }
-    if (localBuffer)
-    {
-        Generate(localBuffer);
-        R_CORE_INFO("Load texture at path {0} successfully. {1}x{2} {3} components!", path,
-                                                                        specification.width,
-                                                                        specification.height,
-                                                                        specification.componentAmount);
-    }
-    else
-    {
-        R_CORE_ERROR("Failed to load texture at path: {0}", path);
-    }
-    stbi_image_free(localBuffer);
+    TextureLoader loader;
+    const auto [data, spec] = loader.Load(path);
+    specification = spec;
+    Generate(data.data());
 }
 
 OpenGLTexture::OpenGLTexture(const TextureSpecification& aSpecification, const void* data)
@@ -79,8 +43,6 @@ void OpenGLTexture::Generate(const void* buffer)
                          && specification.componentAmount > 0
                          && specification.format != TextureFormat::None, "Texture data is incorrect!");
 
-
-
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_2D, id);
 
@@ -107,6 +69,12 @@ void OpenGLTexture::Generate(const void* buffer)
         case TextureFormat::RGB16F:
             glTexImage2D(GL_TEXTURE_2D, 0,
                          GL_RGB16F,
+                         specification.width,
+                         specification.height, 0, GL_RGB, GL_FLOAT, buffer);
+            break;
+        case TextureFormat::RGB32F:
+            glTexImage2D(GL_TEXTURE_2D, 0,
+                         GL_RGB32F,
                          specification.width,
                          specification.height, 0, GL_RGB, GL_FLOAT, buffer);
             break;
