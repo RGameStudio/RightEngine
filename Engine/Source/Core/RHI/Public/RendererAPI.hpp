@@ -10,6 +10,14 @@ namespace RightEngine
 {
     struct RendererSettings;
 
+    struct Viewport
+    {
+        int32_t x;
+        int32_t y;
+        int32_t width;
+        int32_t height;
+    };
+
     class RendererAPI
     {
     public:
@@ -21,7 +29,8 @@ namespace RightEngine
 
         virtual void Clear(uint32_t clearBits) = 0;
 
-        virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
+        virtual void SetViewport(const Viewport& viewport) = 0;
+        virtual Viewport GetViewport() = 0;
 
         virtual void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib) = 0;
         virtual void Draw(const std::shared_ptr<VertexBuffer>& vb) = 0;

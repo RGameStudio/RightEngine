@@ -208,10 +208,9 @@ void SandboxLayer::OnUpdate(float ts)
 
 void SandboxLayer::OnImGuiRender()
 {
-    // TODO: viewport scaling
+    // TODO: viewport scaling with imgui window size change
     ImGui::Begin("Scene view");
-    // TODO: viewport rotate
     id = frameBuffer->GetColorAttachment();
-    ImGui::Image((void*) id, ImVec2(1280, 720));
+    ImGui::Image((void*) id, ImVec2(1280, 720), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 }

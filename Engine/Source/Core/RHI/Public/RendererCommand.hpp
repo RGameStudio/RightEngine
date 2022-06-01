@@ -15,7 +15,8 @@ namespace RightEngine
 
         static void Clear(uint32_t clearBits);
 
-        static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+        static void SetViewport(const Viewport& viewport);
+        static Viewport GetViewport();
 
         static void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib);
 

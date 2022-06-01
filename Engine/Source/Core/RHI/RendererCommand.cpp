@@ -20,9 +20,14 @@ void RendererCommand::Clear(uint32_t clearBits)
     rendererAPI->Clear(clearBits);
 }
 
-void RendererCommand::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void RendererCommand::SetViewport(const Viewport& viewport)
 {
-    rendererAPI->SetViewport(x, y, width, height);
+    rendererAPI->SetViewport(viewport);
+}
+
+Viewport RendererCommand::GetViewport()
+{
+    return rendererAPI->GetViewport();
 }
 
 void RendererCommand::DrawIndexed(const std::shared_ptr<IndexBuffer>& ib)

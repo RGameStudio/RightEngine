@@ -21,9 +21,16 @@ void RightEngine::OpenGLRendererAPI::Clear(uint32_t clearBits)
     glClear(clearBits);
 }
 
-void RightEngine::OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void RightEngine::OpenGLRendererAPI::SetViewport(const Viewport& viewport)
 {
-    glViewport(x, y, width, height);
+    glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+}
+
+RightEngine::Viewport RightEngine::OpenGLRendererAPI::GetViewport()
+{
+    int32_t viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    return { viewport[0], viewport[1], viewport[2], viewport[3] };
 }
 
 void RightEngine::OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<IndexBuffer>& ib)
