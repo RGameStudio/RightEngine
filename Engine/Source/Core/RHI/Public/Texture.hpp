@@ -48,6 +48,14 @@ namespace RightEngine
                     return 0;
             }
         }
+
+        inline bool operator==(const TextureSpecification& otherSpec)
+        {
+            return width == otherSpec.width
+                   && height == otherSpec.height
+                   && componentAmount == otherSpec.componentAmount
+                   && format == otherSpec.format;
+        }
     };
 
     class Texture

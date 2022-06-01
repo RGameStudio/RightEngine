@@ -11,18 +11,17 @@ namespace
     bool isHDR(const std::string& path)
     {
         const std::string hdr = ".hdr";
-        if (std::equal(hdr.rbegin(), hdr.rend(), path.rbegin()))
-        {
-            return true;
-        }
-        return false;
+        bool isHdr = false;
+        isHdr |= stbi_is_hdr(path.c_str());
+        isHdr |= std::equal(hdr.rbegin(), hdr.rend(), path.rbegin());
+        return isHdr;
     }
 }
 
 TextureLoader::TextureLoader(const TextureLoaderOptions& options) : options(options)
 {}
 
-std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const std::string& path)
+std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const std::string& path) const
 {
     bool isHdr = isHDR(path);
     TextureSpecification specification;

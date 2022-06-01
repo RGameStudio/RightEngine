@@ -17,7 +17,7 @@ namespace RightEngine
         TextureLoader(const TextureLoaderOptions& options = TextureLoaderOptions());
 
         //TODO: Investigate why returning struct here leads to crash
-        std::pair<std::vector<uint8_t>, TextureSpecification> Load(const std::string& path);
+        std::pair<std::vector<uint8_t>, TextureSpecification> Load(const std::string& path) const;
     private:
         TextureLoaderOptions options;
     };
