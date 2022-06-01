@@ -16,7 +16,7 @@ namespace RightEngine
 
         const std::vector<uint8_t>& GetFaceData(uint32_t index) const
         {
-            R_CORE_ASSERT(index > 0 && index < 6, "");
+            R_CORE_ASSERT(index >= 0 && index < 6, "");
             switch (index)
             {
                 case 0:
@@ -36,33 +36,40 @@ namespace RightEngine
 
         void SetFaceData(const std::vector<uint8_t>& data, uint32_t index)
         {
-            R_CORE_ASSERT(index > 0 && index < 6, "");
+            R_CORE_ASSERT(index >= 0 && index < 6, "");
             switch (index)
             {
                 case 0:
                     R_CORE_ASSERT(face1.empty(), "");
                     face1 = data;
+                    break;
                 case 1:
                     R_CORE_ASSERT(face2.empty(), "");
                     face2 = data;
+                    break;
                 case 2:
                     R_CORE_ASSERT(face3.empty(), "");
                     face3 = data;
+                    break;
                 case 3:
                     R_CORE_ASSERT(face4.empty(), "");
                     face4 = data;
+                    break;
                 case 4:
                     R_CORE_ASSERT(face5.empty(), "");
                     face5 = data;
+                    break;
                 case 5:
                     R_CORE_ASSERT(face6.empty(), "");
                     face6 = data;
+                    break;
             }
         }
     };
 
     class Texture3D : public Texture
     {
+    public:
         static std::shared_ptr<Texture3D> Create(const std::array<std::string, 6>& texturesPath);
     };
 }

@@ -5,7 +5,7 @@
 
 using namespace RightEngine;
 
-std::shared_ptr<Texture3D> Create(const std::array<std::string, 6>& texturesPath)
+std::shared_ptr<Texture3D> Texture3D::Create(const std::array<std::string, 6>& texturesPath)
 {
     switch (Renderer::GetAPI())
     {
