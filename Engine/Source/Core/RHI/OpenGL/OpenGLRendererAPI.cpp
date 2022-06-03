@@ -1,49 +1,68 @@
 #include "OpenGLRendererAPI.hpp"
 #include "Renderer.hpp"
 
-RightEngine::OpenGLRendererAPI::OpenGLRendererAPI()
+using namespace RightEngine;
+
+namespace
+{
+    int DepthTestEnumToGLEnum(DepthTestMode mode)
+    {
+        switch (mode)
+        {
+            case DepthTestMode::LESS:
+                return GL_LESS;
+            case DepthTestMode::LEQUAL:
+                return GL_LEQUAL;
+            default:
+                R_CORE_ASSERT(false, "");
+                return -1;
+        }
+    }
+}
+
+OpenGLRendererAPI::OpenGLRendererAPI()
 {
     Init();
 }
 
-void RightEngine::OpenGLRendererAPI::Init()
+void OpenGLRendererAPI::Init()
 {
     // TODO: Move OpenGL debug code here
 }
 
-void RightEngine::OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
+void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
 {
     glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void RightEngine::OpenGLRendererAPI::Clear(uint32_t clearBits)
+void OpenGLRendererAPI::Clear(uint32_t clearBits)
 {
     glClear(clearBits);
 }
 
-void RightEngine::OpenGLRendererAPI::SetViewport(const Viewport& viewport)
+void OpenGLRendererAPI::SetViewport(const Viewport& viewport)
 {
     glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
 }
 
-RightEngine::Viewport RightEngine::OpenGLRendererAPI::GetViewport()
+Viewport OpenGLRendererAPI::GetViewport()
 {
     int32_t viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     return { viewport[0], viewport[1], viewport[2], viewport[3] };
 }
 
-void RightEngine::OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<IndexBuffer>& ib)
+void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<IndexBuffer>& ib)
 {
     glDrawElements(GL_TRIANGLES, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
 }
 
-void RightEngine::OpenGLRendererAPI::Draw(const std::shared_ptr<VertexBuffer>& vb)
+void OpenGLRendererAPI::Draw(const std::shared_ptr<VertexBuffer>& vb)
 {
     glDrawArrays(GL_TRIANGLES, 0, vb->GetSize());
 }
 
-void RightEngine::OpenGLRendererAPI::Configure(const RightEngine::RendererSettings& settings)
+void OpenGLRendererAPI::Configure(const RendererSettings& settings)
 {
     if (settings.hasDepthTest)
     {
@@ -53,4 +72,6 @@ void RightEngine::OpenGLRendererAPI::Configure(const RightEngine::RendererSettin
     {
         glDisable(GL_DEPTH_TEST);
     }
+
+    glDepthFunc(DepthTestEnumToGLEnum(settings.depthTestMode));
 }

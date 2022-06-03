@@ -55,8 +55,12 @@ namespace RightEngine
         const std::shared_ptr<Material>& GetMaterial() const;
         void SetMaterial(const std::shared_ptr<Material>& newMaterial);
 
+        inline bool IsVisible() const { return isVisible; }
+        void SetVisibility(bool aIsVisible) { isVisible = aIsVisible; }
+
     private:
         std::shared_ptr<VertexArray> vertexArray;
         std::shared_ptr<Material> material;
+        bool isVisible{ true };
     };
 }

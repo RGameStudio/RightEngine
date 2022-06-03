@@ -16,9 +16,22 @@ namespace RightEngine
         glm::mat4 viewProjectionMatrix{ 1.0f };
     };
 
+    enum class DepthTestMode
+    {
+        NEVER,
+        LESS,
+        EQUAL,
+        LEQUAL,
+        GREATER,
+        NOTEQUAL,
+        GEQUAL,
+        ALWAYS
+    };
+
     struct RendererSettings
     {
         bool hasDepthTest{ true };
+        DepthTestMode depthTestMode{ DepthTestMode::LESS };
     };
 
     class Renderer

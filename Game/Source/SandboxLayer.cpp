@@ -201,9 +201,9 @@ void SandboxLayer::OnAttach()
     sceneData.hdrTexture = Texture::Create("/Assets/Textures/env1.hdr");
     sceneData.hdrCube = CreateTestSceneNode(scene, GeometryType::CUBE);
     //Turn off all textures
-    sceneData.hdrCube->GetComponent<Mesh>().GetMaterial()->textureData = TextureData();
-    sceneData.hdrCube->GetComponent<Transform>().SetPosition({ 0.0f, -2.0f, 5.0f });
-    scene->GetRootNode()->AddChild(sceneData.hdrCube);
+//    sceneData.hdrCube->GetComponent<Mesh>().GetMaterial()->textureData = TextureData();
+//    sceneData.hdrCube->GetComponent<Transform>().SetPosition({ 0.0f, -2.0f, 5.0f });
+//    scene->GetRootNode()->AddChild(sceneData.hdrCube);
 
     sceneData.skyboxShader = Shader::Create("/Assets/Shaders/Basic/skybox.vert",
                                             "/Assets/Shaders/Basic/skybox.frag");
@@ -223,7 +223,9 @@ void SandboxLayer::OnAttach()
     auto vertexArray = std::make_shared<VertexArray>();
     vertexArray->AddBuffer(std::make_shared<VertexBuffer>(skyboxVertices, sizeof(skyboxVertices)), layout);
     mesh.SetVertexArray(vertexArray);
+    mesh.SetVisibility(false);
     sceneData.skyboxCube->AddComponent<Mesh>(mesh);
+
     sceneData.skyboxCube->GetComponent<Transform>().SetPosition({ 0.0f, -0.0f, 0.0f });
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 }
@@ -240,6 +242,10 @@ void SandboxLayer::OnUpdate(float ts)
     {
         const auto& transform = scene->GetRegistry().get<Transform>(entity);
         const auto& mesh = scene->GetRegistry().get<Mesh>(entity);
+        if (!mesh.IsVisible())
+        {
+            continue;
+        }
 
         auto& materialData = mesh.GetMaterial()->materialData;
         const auto& textureData = mesh.GetMaterial()->textureData;
@@ -266,19 +272,9 @@ void SandboxLayer::OnUpdate(float ts)
             }
     );
 
-    auto fb = std::make_shared<Framebuffer>(fbSpec);
-    fb->Bind();
-    RendererCommand::Clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    sceneData.hdrShader->Bind();
-    sceneData.hdrTexture->Bind();
-    sceneData.hdrShader->SetUniform1i("u_EquirectangularMap", 0);
-    renderer->SubmitMesh(sceneData.hdrShader, sceneData.hdrCube->GetComponent<Mesh>(),
-            sceneData.hdrCube->GetComponent<Transform>().GetWorldTransformMatrix());
-    sceneData.hdrShader->UnBind();
-    fb->UnBind();
     sceneData.skyboxFramebuffer = std::make_shared<Framebuffer>(fbSpec);
-    sceneData.skyboxFramebuffer->Bind();
-    RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    frameBuffer->Bind();
+//    RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     sceneData.skyboxShader->Bind();
     sceneData.skyboxTexture->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
@@ -289,13 +285,15 @@ void SandboxLayer::OnUpdate(float ts)
     const auto viewMatrix = glm::mat4(glm::mat3(scene->GetCamera()->GetViewMatrix()));
     sceneData.skyboxShader->SetUniformMat4f("u_Projection", projectionMatrix);
     sceneData.skyboxShader->SetUniformMat4f("u_View", viewMatrix);
-    //TODO: Remove GL call to RendererAPI
-    glDepthFunc(GL_LEQUAL);
+    auto& rendererSettings = renderer->GetSettings();
+    rendererSettings.depthTestMode = RightEngine::DepthTestMode::LEQUAL;
+    renderer->Configure();
     renderer->SubmitMesh(sceneData.skyboxShader,
                          sceneData.skyboxCube->GetComponent<Mesh>(),
                          sceneData.skyboxCube->GetComponent<Transform>().GetWorldTransformMatrix());
-    glDepthFunc(GL_LESS);
-    sceneData.skyboxFramebuffer->UnBind();
+    rendererSettings.depthTestMode = RightEngine::DepthTestMode::LESS;
+    renderer->Configure();
+    frameBuffer->UnBind();
     renderer->EndScene();
 }
 
@@ -303,7 +301,7 @@ void SandboxLayer::OnImGuiRender()
 {
     // TODO: viewport scaling with imgui window size change
     ImGui::Begin("Scene view");
-    id = sceneData.skyboxFramebuffer->GetColorAttachment();
+    id = frameBuffer->GetColorAttachment();
     ImGui::Image((void*) id, ImVec2(1280, 720), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 }
