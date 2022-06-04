@@ -14,46 +14,46 @@
 float skyboxVertices[] = {
         // back face
         -1.0f, -1.0f, -1.0f,   // bottom-left
-        1.0f,  1.0f, -1.0f,   // top-right
+        1.0f, 1.0f, -1.0f,   // top-right
         1.0f, -1.0f, -1.0f,   // bottom-right
-        1.0f,  1.0f, -1.0f,   // top-right
+        1.0f, 1.0f, -1.0f,   // top-right
         -1.0f, -1.0f, -1.0f,   // bottom-left
-        -1.0f,  1.0f, -1.0f,   // top-left
+        -1.0f, 1.0f, -1.0f,   // top-left
         // front face
-        -1.0f, -1.0f,  1.0f,   // bottom-left
-        1.0f, -1.0f,  1.0f,   // bottom-right
-        1.0f,  1.0f,  1.0f,   // top-right
-        1.0f,  1.0f,  1.0f,   // top-right
-        -1.0f,  1.0f,  1.0f,   // top-left
-        -1.0f, -1.0f,  1.0f,   // bottom-left
+        -1.0f, -1.0f, 1.0f,   // bottom-left
+        1.0f, -1.0f, 1.0f,   // bottom-right
+        1.0f, 1.0f, 1.0f,   // top-right
+        1.0f, 1.0f, 1.0f,   // top-right
+        -1.0f, 1.0f, 1.0f,   // top-left
+        -1.0f, -1.0f, 1.0f,   // bottom-left
         // left face
-        -1.0f,  1.0f,  1.0f,  // top-right
-        -1.0f,  1.0f, -1.0f,  // top-left
+        -1.0f, 1.0f, 1.0f,  // top-right
+        -1.0f, 1.0f, -1.0f,  // top-left
         -1.0f, -1.0f, -1.0f,  // bottom-left
         -1.0f, -1.0f, -1.0f,  // bottom-left
-        -1.0f, -1.0f,  1.0f,  // bottom-right
-        -1.0f,  1.0f,  1.0f,  // top-right
+        -1.0f, -1.0f, 1.0f,  // bottom-right
+        -1.0f, 1.0f, 1.0f,  // top-right
         // right face
-        1.0f,  1.0f,  1.0f,   // top-left
+        1.0f, 1.0f, 1.0f,   // top-left
         1.0f, -1.0f, -1.0f,   // bottom-right
-        1.0f,  1.0f, -1.0f,   // top-right
+        1.0f, 1.0f, -1.0f,   // top-right
         1.0f, -1.0f, -1.0f,  // bottom-right
-        1.0f,  1.0f,  1.0f,   // top-left
-        1.0f, -1.0f,  1.0f,   // bottom-left
+        1.0f, 1.0f, 1.0f,   // top-left
+        1.0f, -1.0f, 1.0f,   // bottom-left
         // bottom face
         -1.0f, -1.0f, -1.0f,   // top-right
         1.0f, -1.0f, -1.0f,   // top-left
-        1.0f, -1.0f,  1.0f,   // bottom-left
-        1.0f, -1.0f,  1.0f,   // bottom-left
-        -1.0f, -1.0f,  1.0f,   // bottom-right
+        1.0f, -1.0f, 1.0f,   // bottom-left
+        1.0f, -1.0f, 1.0f,   // bottom-left
+        -1.0f, -1.0f, 1.0f,   // bottom-right
         -1.0f, -1.0f, -1.0f,   // top-right
         // top face
-        -1.0f,  1.0f, -1.0f,  // top-left
-        1.0f,  1.0f , 1.0f,   // bottom-right
-        1.0f,  1.0f, -1.0f,   // top-right
-        1.0f,  1.0f,  1.0f,   // bottom-right
-        -1.0f,  1.0f, -1.0f,   // top-left
-        -1.0f,  1.0f,  1.0f,    // bottom-left
+        -1.0f, 1.0f, -1.0f,  // top-left
+        1.0f, 1.0f, 1.0f,   // bottom-right
+        1.0f, 1.0f, -1.0f,   // top-right
+        1.0f, 1.0f, 1.0f,   // bottom-right
+        -1.0f, 1.0f, -1.0f,   // top-left
+        -1.0f, 1.0f, 1.0f,    // bottom-left
 };
 
 enum class TextureSlot
@@ -64,6 +64,7 @@ enum class TextureSlot
     ROUGHNESS_TEXTURE_SLOT,
     AO_TEXTURE_SLOT,
     SKYBOX_TEXTURE_SLOT,
+    RADIANCE_TEXTURE_SLOT,
     IRRADIANCE_TEXTURE_SLOT
 };
 
@@ -91,6 +92,8 @@ struct LayerSceneData
     std::shared_ptr<Shader> skyboxShader;
     std::shared_ptr<Texture3D> skyboxTexture;
     std::shared_ptr<Framebuffer> skyboxFramebuffer;
+    std::shared_ptr<Texture3D> radianceTexture;
+    std::shared_ptr<Texture3D> irradianceTexture;
 };
 
 static LayerSceneData sceneData;
@@ -122,7 +125,7 @@ static void TryTextureBind(MaterialData& materialData, const std::shared_ptr<Tex
             materialData.hasAO = hasTexture;
             break;
         default:
-            R_ASSERT(false, "Unknown texture slot!");
+        R_ASSERT(false, "Unknown texture slot!");
     }
 }
 
@@ -168,7 +171,7 @@ void SandboxLayer::OnAttach()
     sceneData.aoTexture = Texture::Create("/Assets/Textures/ao.png");
 
     sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 5, -15),
-                                                                   glm::vec3(0, 1, 0));
+                                                      glm::vec3(0, 1, 0));
     scene = Scene::Create();
 
     const auto cube1 = CreateTestSceneNode(scene, GeometryType::CUBE);
@@ -205,14 +208,14 @@ void SandboxLayer::OnAttach()
     sceneData.skyboxShader = Shader::Create("/Assets/Shaders/Basic/skybox.vert",
                                             "/Assets/Shaders/Basic/skybox.frag");
     sceneData.skyboxTexture = Texture3D::Create(
-    {
-        "/Assets/Textures/output_irr_posx.hdr",
-        "/Assets/Textures/output_irr_negx.hdr",
-        "/Assets/Textures/output_irr_posy.hdr",
-        "/Assets/Textures/output_irr_negy.hdr",
-        "/Assets/Textures/output_irr_posz.hdr",
-        "/Assets/Textures/output_irr_negz.hdr",
-    });
+            {
+                    "/Assets/Textures/output_skybox_posx.hdr",
+                    "/Assets/Textures/output_skybox_negx.hdr",
+                    "/Assets/Textures/output_skybox_posy.hdr",
+                    "/Assets/Textures/output_skybox_negy.hdr",
+                    "/Assets/Textures/output_skybox_posz.hdr",
+                    "/Assets/Textures/output_skybox_negz.hdr",
+            });
     sceneData.skyboxCube = scene->CreateEntity();
     VertexBufferLayout layout;
     layout.Push<float>(3);
@@ -225,6 +228,25 @@ void SandboxLayer::OnAttach()
 
     sceneData.skyboxCube->GetComponent<Transform>().SetPosition({ 0.0f, -0.0f, 0.0f });
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
+
+    sceneData.irradianceTexture = Texture3D::Create(
+            {
+                    "/Assets/Textures/output_irr_posx.hdr",
+                    "/Assets/Textures/output_irr_negx.hdr",
+                    "/Assets/Textures/output_irr_posy.hdr",
+                    "/Assets/Textures/output_irr_negy.hdr",
+                    "/Assets/Textures/output_irr_posz.hdr",
+                    "/Assets/Textures/output_irr_negz.hdr",
+            });
+    sceneData.radianceTexture = Texture3D::Create(
+            {
+                    "/Assets/Textures/output_rad_posx.hdr",
+                    "/Assets/Textures/output_rad_negx.hdr",
+                    "/Assets/Textures/output_rad_posy.hdr",
+                    "/Assets/Textures/output_rad_negy.hdr",
+                    "/Assets/Textures/output_rad_posz.hdr",
+                    "/Assets/Textures/output_rad_negz.hdr",
+            });
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -251,8 +273,10 @@ void SandboxLayer::OnUpdate(float ts)
         shader->Bind();
         shader->SetUniform1iv("u_Textures", { 0, 1, 2, 3, 4 });
         shader->SetUniform3f("camPos", sceneData.camera->GetPosition());
-        sceneData.skyboxTexture->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
-        shader->SetUniform1i("u_IrradianceMap", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
+        sceneData.irradianceTexture->Bind(static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
+        shader->SetUniform1i("u_IrradianceMap", static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
+        sceneData.radianceTexture->Bind(static_cast<uint32_t>(TextureSlot::RADIANCE_TEXTURE_SLOT));
+        shader->SetUniform1i("u_RadianceMap", static_cast<uint32_t>(TextureSlot::RADIANCE_TEXTURE_SLOT));
 
         sceneData.materialUniformBuffer->SetData(&materialData, sizeof(MaterialData));
         renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());
@@ -260,24 +284,12 @@ void SandboxLayer::OnUpdate(float ts)
     shader->UnBind();
     frameBuffer->UnBind();
 
-    FramebufferSpecification fbSpec;
-    fbSpec.width = 1280;
-    fbSpec.height = 720;
-    fbSpec.attachments = FramebufferAttachmentSpecification(
-            {
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
-                    FramebufferTextureSpecification(FramebufferTextureFormat::Depth),
-            }
-    );
-
-    sceneData.skyboxFramebuffer = std::make_shared<Framebuffer>(fbSpec);
     frameBuffer->Bind();
     sceneData.skyboxShader->Bind();
     sceneData.skyboxTexture->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     const auto projectionMatrix = glm::perspective(glm::radians(45.0f),
-                                                   16.0f/ 9.0f,
+                                                   16.0f / 9.0f,
                                                    0.1f,
                                                    300.0f);
     const auto viewMatrix = glm::mat4(glm::mat3(scene->GetCamera()->GetViewMatrix()));
@@ -301,5 +313,14 @@ void SandboxLayer::OnImGuiRender()
     ImGui::Begin("Scene view");
     id = frameBuffer->GetColorAttachment();
     ImGui::Image((void*) id, ImVec2(1280, 720), ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::End();
+
+    ImGui::Begin("Material props");
+    auto& cube = scene->GetRootNode()->GetChildren()[1];
+    auto& mesh = cube->GetComponent<Mesh>();
+    auto& material = mesh.GetMaterial();
+    auto& materialData = material->materialData;
+    ImGui::SliderFloat("Metallic", &materialData.metallic, 0.0f, 1.0f);
+    ImGui::SliderFloat("Roughness", &materialData.roughness, 0.0f, 1.0f);
     ImGui::End();
 }
