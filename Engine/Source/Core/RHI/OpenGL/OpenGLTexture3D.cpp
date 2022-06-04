@@ -7,10 +7,10 @@ using namespace RightEngine;
 OpenGLTexture3D::OpenGLTexture3D(const std::array<std::string, 6>& texturesPath)
 {
     CubeMapFaces faces;
-    const auto textureLoader = TextureLoader({ false });
+    const auto textureLoader = TextureLoader();
     for (int i = 0; i < texturesPath.size(); i++)
     {
-        const auto [data, spec] = textureLoader.Load(texturesPath[i]);
+        const auto [data, spec] = textureLoader.Load(texturesPath[i], false);
         if (specification.format != TextureFormat::None)
         {
             R_CORE_ASSERT(specification == spec, "");

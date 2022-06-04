@@ -6,11 +6,11 @@ uniform mat4 u_Transform;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
 
-out vec3 f_TexCoords;
+out vec3 f_WorldPos;
 
 void main()
 {
-    f_TexCoords = vec3(aPosition.x, aPosition.y, aPosition.z);
+    f_WorldPos = aPosition;
     vec4 pos = u_Projection * u_View * vec4(aPosition, 1.0);
     gl_Position = pos.xyww;
 }

@@ -13,7 +13,7 @@ out vec3 f_WorldPos;
 void main()
 {
     f_UV = aUv;
-    f_Normal = aNormal;
+    f_Normal = mat3(u_Transform) * aNormal;
     f_WorldPos = vec3(u_Transform * vec4(aPosition, 1.0));
-    gl_Position = u_ViewProjection * u_Transform * vec4((aPosition), 1.0);
+    gl_Position = u_ViewProjection * vec4(f_WorldPos, 1.0);
 }

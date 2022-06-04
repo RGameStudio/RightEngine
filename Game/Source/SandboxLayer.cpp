@@ -12,48 +12,48 @@
 #include <imgui.h>
 
 float skyboxVertices[] = {
-        // positions
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        -1.0f,  1.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-        1.0f, -1.0f,  1.0f
+        // back face
+        -1.0f, -1.0f, -1.0f,   // bottom-left
+        1.0f,  1.0f, -1.0f,   // top-right
+        1.0f, -1.0f, -1.0f,   // bottom-right
+        1.0f,  1.0f, -1.0f,   // top-right
+        -1.0f, -1.0f, -1.0f,   // bottom-left
+        -1.0f,  1.0f, -1.0f,   // top-left
+        // front face
+        -1.0f, -1.0f,  1.0f,   // bottom-left
+        1.0f, -1.0f,  1.0f,   // bottom-right
+        1.0f,  1.0f,  1.0f,   // top-right
+        1.0f,  1.0f,  1.0f,   // top-right
+        -1.0f,  1.0f,  1.0f,   // top-left
+        -1.0f, -1.0f,  1.0f,   // bottom-left
+        // left face
+        -1.0f,  1.0f,  1.0f,  // top-right
+        -1.0f,  1.0f, -1.0f,  // top-left
+        -1.0f, -1.0f, -1.0f,  // bottom-left
+        -1.0f, -1.0f, -1.0f,  // bottom-left
+        -1.0f, -1.0f,  1.0f,  // bottom-right
+        -1.0f,  1.0f,  1.0f,  // top-right
+        // right face
+        1.0f,  1.0f,  1.0f,   // top-left
+        1.0f, -1.0f, -1.0f,   // bottom-right
+        1.0f,  1.0f, -1.0f,   // top-right
+        1.0f, -1.0f, -1.0f,  // bottom-right
+        1.0f,  1.0f,  1.0f,   // top-left
+        1.0f, -1.0f,  1.0f,   // bottom-left
+        // bottom face
+        -1.0f, -1.0f, -1.0f,   // top-right
+        1.0f, -1.0f, -1.0f,   // top-left
+        1.0f, -1.0f,  1.0f,   // bottom-left
+        1.0f, -1.0f,  1.0f,   // bottom-left
+        -1.0f, -1.0f,  1.0f,   // bottom-right
+        -1.0f, -1.0f, -1.0f,   // top-right
+        // top face
+        -1.0f,  1.0f, -1.0f,  // top-left
+        1.0f,  1.0f , 1.0f,   // bottom-right
+        1.0f,  1.0f, -1.0f,   // top-right
+        1.0f,  1.0f,  1.0f,   // bottom-right
+        -1.0f,  1.0f, -1.0f,   // top-left
+        -1.0f,  1.0f,  1.0f,    // bottom-left
 };
 
 enum class TextureSlot
@@ -63,7 +63,8 @@ enum class TextureSlot
     METALLIC_TEXTURE_SLOT,
     ROUGHNESS_TEXTURE_SLOT,
     AO_TEXTURE_SLOT,
-    SKYBOX_TEXTURE_SLOT
+    SKYBOX_TEXTURE_SLOT,
+    IRRADIANCE_TEXTURE_SLOT
 };
 
 enum class GeometryType
@@ -200,21 +201,17 @@ void SandboxLayer::OnAttach()
                                          "/Assets/Shaders/Basic/hdr_to_cubemap.frag");
     sceneData.hdrTexture = Texture::Create("/Assets/Textures/env1.hdr");
     sceneData.hdrCube = CreateTestSceneNode(scene, GeometryType::CUBE);
-    //Turn off all textures
-//    sceneData.hdrCube->GetComponent<Mesh>().GetMaterial()->textureData = TextureData();
-//    sceneData.hdrCube->GetComponent<Transform>().SetPosition({ 0.0f, -2.0f, 5.0f });
-//    scene->GetRootNode()->AddChild(sceneData.hdrCube);
 
     sceneData.skyboxShader = Shader::Create("/Assets/Shaders/Basic/skybox.vert",
                                             "/Assets/Shaders/Basic/skybox.frag");
     sceneData.skyboxTexture = Texture3D::Create(
     {
-        "/Assets/Textures/cube_c00.hdr",
-        "/Assets/Textures/cube_c01.hdr",
-        "/Assets/Textures/cube_c02.hdr",
-        "/Assets/Textures/cube_c03.hdr",
-        "/Assets/Textures/cube_c04.hdr",
-        "/Assets/Textures/cube_c05.hdr",
+        "/Assets/Textures/output_irr_posx.hdr",
+        "/Assets/Textures/output_irr_negx.hdr",
+        "/Assets/Textures/output_irr_posy.hdr",
+        "/Assets/Textures/output_irr_negy.hdr",
+        "/Assets/Textures/output_irr_posz.hdr",
+        "/Assets/Textures/output_irr_negz.hdr",
     });
     sceneData.skyboxCube = scene->CreateEntity();
     VertexBufferLayout layout;
@@ -254,6 +251,8 @@ void SandboxLayer::OnUpdate(float ts)
         shader->Bind();
         shader->SetUniform1iv("u_Textures", { 0, 1, 2, 3, 4 });
         shader->SetUniform3f("camPos", sceneData.camera->GetPosition());
+        sceneData.skyboxTexture->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
+        shader->SetUniform1i("u_IrradianceMap", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
 
         sceneData.materialUniformBuffer->SetData(&materialData, sizeof(MaterialData));
         renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());
@@ -274,7 +273,6 @@ void SandboxLayer::OnUpdate(float ts)
 
     sceneData.skyboxFramebuffer = std::make_shared<Framebuffer>(fbSpec);
     frameBuffer->Bind();
-//    RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     sceneData.skyboxShader->Bind();
     sceneData.skyboxTexture->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));

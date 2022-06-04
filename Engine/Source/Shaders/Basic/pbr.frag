@@ -19,6 +19,7 @@ layout(std140, binding = 0) uniform MaterialData
 };
 
 uniform sampler2D u_Textures[5];
+uniform samplerCube u_IrradianceMap;
 
 // lights
 vec3 lightPositions[4];
@@ -198,7 +199,12 @@ void main()
 
     // ambient lighting (note that the next IBL tutorial will replace
     // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+    vec3 irradiance = texture(u_IrradianceMap, N).rgb;
+    vec3 diffuse      = irradiance * albedo;
+    vec3 ambient = (kD * diffuse) * ao;
 
     vec3 color = ambient + Lo;
 

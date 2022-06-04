@@ -21,11 +21,11 @@ namespace
 TextureLoader::TextureLoader(const TextureLoaderOptions& options) : options(options)
 {}
 
-std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const std::string& path) const
+std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const std::string& path, bool flipVertically) const
 {
     bool isHdr = isHDR(path);
     TextureSpecification specification;
-    if (options.flipVertically)
+    if (flipVertically)
     {
         stbi_set_flip_vertically_on_load(true);
     }
