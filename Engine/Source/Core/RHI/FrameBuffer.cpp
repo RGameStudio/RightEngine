@@ -193,11 +193,7 @@ void RightEngine::Framebuffer::Invalidate()
 
 void RightEngine::Framebuffer::Resize(uint32_t width, uint32_t height)
 {
-    if (width == 0 || height == 0 || width > maxFramebufferSize || height > maxFramebufferSize)
-    {
-        R_CORE_WARN("Attempted to resize framebuffer to {0}, {1}", width, height);
-        return;
-    }
+    R_CORE_ASSERT(width > 0 && height > 0 && width < maxFramebufferSize && height < maxFramebufferSize, "");
     specification.width = width;
     specification.height = height;
 

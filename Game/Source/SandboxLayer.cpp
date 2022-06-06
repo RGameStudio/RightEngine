@@ -11,6 +11,8 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <imgui.h>
 
+using namespace RightEngine;
+
 float skyboxVertices[] = {
         // back face
         -1.0f, -1.0f, -1.0f,   // bottom-left
@@ -74,7 +76,8 @@ enum class GeometryType
     PLANE
 };
 
-using namespace RightEngine;
+const uint32_t width = 1280;
+const uint32_t height = 720;
 
 struct LayerSceneData
 {
@@ -85,15 +88,13 @@ struct LayerSceneData
     std::shared_ptr<Texture> roughnessTexture;
     std::shared_ptr<Texture> aoTexture;
     std::shared_ptr<EditorCamera> camera;
-    std::shared_ptr<Entity> hdrCube;
-    std::shared_ptr<Shader> hdrShader;
-    std::shared_ptr<Texture> hdrTexture;
     std::shared_ptr<Entity> skyboxCube;
     std::shared_ptr<Shader> skyboxShader;
     std::shared_ptr<Texture3D> skyboxTexture;
-    std::shared_ptr<Framebuffer> skyboxFramebuffer;
     std::shared_ptr<Texture3D> radianceTexture;
     std::shared_ptr<Texture3D> irradianceTexture;
+    bool resizeViewport{ false };
+    ImVec2 viewportSize{ width, height };
 };
 
 static LayerSceneData sceneData;
@@ -186,8 +187,8 @@ void SandboxLayer::OnAttach()
     renderer = std::make_shared<Renderer>();
 
     FramebufferSpecification fbSpec;
-    fbSpec.width = 1280;
-    fbSpec.height = 720;
+    fbSpec.width = sceneData.viewportSize.x;
+    fbSpec.height = sceneData.viewportSize.y;
     fbSpec.attachments = FramebufferAttachmentSpecification(
             {
                     FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
@@ -199,11 +200,6 @@ void SandboxLayer::OnAttach()
     frameBuffer = std::make_shared<Framebuffer>(fbSpec);
 
     sceneData.materialUniformBuffer = UniformBuffer::Create(GPU_API::OpenGL, sizeof(MaterialData), 0);
-
-    sceneData.hdrShader = Shader::Create("/Assets/Shaders/Basic/hdr_to_cubemap.vert",
-                                         "/Assets/Shaders/Basic/hdr_to_cubemap.frag");
-    sceneData.hdrTexture = Texture::Create("/Assets/Textures/env1.hdr");
-    sceneData.hdrCube = CreateTestSceneNode(scene, GeometryType::CUBE);
 
     sceneData.skyboxShader = Shader::Create("/Assets/Shaders/Basic/skybox.vert",
                                             "/Assets/Shaders/Basic/skybox.frag");
@@ -225,8 +221,6 @@ void SandboxLayer::OnAttach()
     mesh.SetVertexArray(vertexArray);
     mesh.SetVisibility(false);
     sceneData.skyboxCube->AddComponent<Mesh>(mesh);
-
-    sceneData.skyboxCube->GetComponent<Transform>().SetPosition({ 0.0f, -0.0f, 0.0f });
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
     sceneData.irradianceTexture = Texture3D::Create(
@@ -309,18 +303,18 @@ void SandboxLayer::OnUpdate(float ts)
 
 void SandboxLayer::OnImGuiRender()
 {
-    // TODO: viewport scaling with imgui window size change
-    ImGui::Begin("Scene view");
+    ImGui::Begin("Viewport");
     id = frameBuffer->GetColorAttachment();
-    ImGui::Image((void*) id, ImVec2(1280, 720), ImVec2(0, 1), ImVec2(1, 0));
-    ImGui::End();
-
-    ImGui::Begin("Material props");
-    auto& cube = scene->GetRootNode()->GetChildren()[1];
-    auto& mesh = cube->GetComponent<Mesh>();
-    auto& material = mesh.GetMaterial();
-    auto& materialData = material->materialData;
-    ImGui::SliderFloat("Metallic", &materialData.metallic, 0.0f, 1.0f);
-    ImGui::SliderFloat("Roughness", &materialData.roughness, 0.0f, 1.0f);
+    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+    if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y) {
+        if (viewportSize.y < 0)
+        {
+            viewportSize.y = 1;
+        }
+        // TODO: Show image while resizing
+        frameBuffer->Resize(static_cast<uint32_t>(viewportSize.x), static_cast<uint32_t>(viewportSize.y));
+        sceneData.viewportSize = viewportSize;
+    }
+    ImGui::Image((void*) id, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 }
