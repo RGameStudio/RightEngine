@@ -6,6 +6,15 @@
 
 namespace RightEngine
 {
+    struct Tag
+    {
+        Tag(const std::string& name, uint32_t id = 0) : name(name), id(id) {}
+        Tag() {}
+
+        std::string name{ "Entity" };
+        uint32_t id;
+    };
+
     // TODO: Add dirty flag, so we can recalculate transform only when needed
     class Transform
     {
@@ -55,8 +64,11 @@ namespace RightEngine
         const std::shared_ptr<Material>& GetMaterial() const;
         void SetMaterial(const std::shared_ptr<Material>& newMaterial);
 
-        inline bool IsVisible() const { return isVisible; }
-        void SetVisibility(bool aIsVisible) { isVisible = aIsVisible; }
+        inline bool IsVisible() const
+        { return isVisible; }
+
+        void SetVisibility(bool aIsVisible)
+        { isVisible = aIsVisible; }
 
     private:
         std::shared_ptr<VertexArray> vertexArray;

@@ -13,154 +13,178 @@
 
 using namespace RightEngine;
 
-float skyboxVertices[] = {
-        // back face
-        -1.0f, -1.0f, -1.0f,   // bottom-left
-        1.0f, 1.0f, -1.0f,   // top-right
-        1.0f, -1.0f, -1.0f,   // bottom-right
-        1.0f, 1.0f, -1.0f,   // top-right
-        -1.0f, -1.0f, -1.0f,   // bottom-left
-        -1.0f, 1.0f, -1.0f,   // top-left
-        // front face
-        -1.0f, -1.0f, 1.0f,   // bottom-left
-        1.0f, -1.0f, 1.0f,   // bottom-right
-        1.0f, 1.0f, 1.0f,   // top-right
-        1.0f, 1.0f, 1.0f,   // top-right
-        -1.0f, 1.0f, 1.0f,   // top-left
-        -1.0f, -1.0f, 1.0f,   // bottom-left
-        // left face
-        -1.0f, 1.0f, 1.0f,  // top-right
-        -1.0f, 1.0f, -1.0f,  // top-left
-        -1.0f, -1.0f, -1.0f,  // bottom-left
-        -1.0f, -1.0f, -1.0f,  // bottom-left
-        -1.0f, -1.0f, 1.0f,  // bottom-right
-        -1.0f, 1.0f, 1.0f,  // top-right
-        // right face
-        1.0f, 1.0f, 1.0f,   // top-left
-        1.0f, -1.0f, -1.0f,   // bottom-right
-        1.0f, 1.0f, -1.0f,   // top-right
-        1.0f, -1.0f, -1.0f,  // bottom-right
-        1.0f, 1.0f, 1.0f,   // top-left
-        1.0f, -1.0f, 1.0f,   // bottom-left
-        // bottom face
-        -1.0f, -1.0f, -1.0f,   // top-right
-        1.0f, -1.0f, -1.0f,   // top-left
-        1.0f, -1.0f, 1.0f,   // bottom-left
-        1.0f, -1.0f, 1.0f,   // bottom-left
-        -1.0f, -1.0f, 1.0f,   // bottom-right
-        -1.0f, -1.0f, -1.0f,   // top-right
-        // top face
-        -1.0f, 1.0f, -1.0f,  // top-left
-        1.0f, 1.0f, 1.0f,   // bottom-right
-        1.0f, 1.0f, -1.0f,   // top-right
-        1.0f, 1.0f, 1.0f,   // bottom-right
-        -1.0f, 1.0f, -1.0f,   // top-left
-        -1.0f, 1.0f, 1.0f,    // bottom-left
-};
-
-enum class TextureSlot
+namespace
 {
-    ALBEDO_TEXTURE_SLOT = 0,
-    NORMAL_TEXTURE_SLOT,
-    METALLIC_TEXTURE_SLOT,
-    ROUGHNESS_TEXTURE_SLOT,
-    AO_TEXTURE_SLOT,
-    SKYBOX_TEXTURE_SLOT,
-    RADIANCE_TEXTURE_SLOT,
-    IRRADIANCE_TEXTURE_SLOT
-};
+    float skyboxVertices[] = {
+            // back face
+            -1.0f, -1.0f, -1.0f,   // bottom-left
+            1.0f, 1.0f, -1.0f,   // top-right
+            1.0f, -1.0f, -1.0f,   // bottom-right
+            1.0f, 1.0f, -1.0f,   // top-right
+            -1.0f, -1.0f, -1.0f,   // bottom-left
+            -1.0f, 1.0f, -1.0f,   // top-left
+            // front face
+            -1.0f, -1.0f, 1.0f,   // bottom-left
+            1.0f, -1.0f, 1.0f,   // bottom-right
+            1.0f, 1.0f, 1.0f,   // top-right
+            1.0f, 1.0f, 1.0f,   // top-right
+            -1.0f, 1.0f, 1.0f,   // top-left
+            -1.0f, -1.0f, 1.0f,   // bottom-left
+            // left face
+            -1.0f, 1.0f, 1.0f,  // top-right
+            -1.0f, 1.0f, -1.0f,  // top-left
+            -1.0f, -1.0f, -1.0f,  // bottom-left
+            -1.0f, -1.0f, -1.0f,  // bottom-left
+            -1.0f, -1.0f, 1.0f,  // bottom-right
+            -1.0f, 1.0f, 1.0f,  // top-right
+            // right face
+            1.0f, 1.0f, 1.0f,   // top-left
+            1.0f, -1.0f, -1.0f,   // bottom-right
+            1.0f, 1.0f, -1.0f,   // top-right
+            1.0f, -1.0f, -1.0f,  // bottom-right
+            1.0f, 1.0f, 1.0f,   // top-left
+            1.0f, -1.0f, 1.0f,   // bottom-left
+            // bottom face
+            -1.0f, -1.0f, -1.0f,   // top-right
+            1.0f, -1.0f, -1.0f,   // top-left
+            1.0f, -1.0f, 1.0f,   // bottom-left
+            1.0f, -1.0f, 1.0f,   // bottom-left
+            -1.0f, -1.0f, 1.0f,   // bottom-right
+            -1.0f, -1.0f, -1.0f,   // top-right
+            // top face
+            -1.0f, 1.0f, -1.0f,  // top-left
+            1.0f, 1.0f, 1.0f,   // bottom-right
+            1.0f, 1.0f, -1.0f,   // top-right
+            1.0f, 1.0f, 1.0f,   // bottom-right
+            -1.0f, 1.0f, -1.0f,   // top-left
+            -1.0f, 1.0f, 1.0f,    // bottom-left
+    };
 
-enum class GeometryType
-{
-    CUBE,
-    PLANE
-};
-
-const uint32_t width = 1280;
-const uint32_t height = 720;
-
-struct LayerSceneData
-{
-    std::shared_ptr<UniformBuffer> materialUniformBuffer;
-    std::shared_ptr<Texture> albedoTexture;
-    std::shared_ptr<Texture> normalTexture;
-    std::shared_ptr<Texture> metallicTexture;
-    std::shared_ptr<Texture> roughnessTexture;
-    std::shared_ptr<Texture> aoTexture;
-    std::shared_ptr<EditorCamera> camera;
-    std::shared_ptr<Entity> skyboxCube;
-    std::shared_ptr<Shader> skyboxShader;
-    std::shared_ptr<Texture3D> skyboxTexture;
-    std::shared_ptr<Texture3D> radianceTexture;
-    std::shared_ptr<Texture3D> irradianceTexture;
-    bool resizeViewport{ false };
-    ImVec2 viewportSize{ width, height };
-};
-
-static LayerSceneData sceneData;
-
-static void TryTextureBind(MaterialData& materialData, const std::shared_ptr<Texture>& texture, TextureSlot slot)
-{
-    bool hasTexture = false;
-    if (texture)
+    enum class TextureSlot
     {
-        texture->Bind(static_cast<uint32_t>(slot));
-        hasTexture = true;
+        ALBEDO_TEXTURE_SLOT = 0,
+        NORMAL_TEXTURE_SLOT,
+        METALLIC_TEXTURE_SLOT,
+        ROUGHNESS_TEXTURE_SLOT,
+        AO_TEXTURE_SLOT,
+        SKYBOX_TEXTURE_SLOT,
+        RADIANCE_TEXTURE_SLOT,
+        IRRADIANCE_TEXTURE_SLOT
+    };
+
+    enum class GeometryType
+    {
+        CUBE,
+        PLANE
+    };
+
+    const uint32_t width = 1280;
+    const uint32_t height = 720;
+
+    struct LayerSceneData
+    {
+        std::shared_ptr<UniformBuffer> materialUniformBuffer;
+        std::shared_ptr<Texture> albedoTexture;
+        std::shared_ptr<Texture> normalTexture;
+        std::shared_ptr<Texture> metallicTexture;
+        std::shared_ptr<Texture> roughnessTexture;
+        std::shared_ptr<Texture> aoTexture;
+        std::shared_ptr<EditorCamera> camera;
+        std::shared_ptr<Entity> skyboxCube;
+        std::shared_ptr<Shader> skyboxShader;
+        std::shared_ptr<Texture3D> skyboxTexture;
+        std::shared_ptr<Texture3D> radianceTexture;
+        std::shared_ptr<Texture3D> irradianceTexture;
+        ImVec2 viewportSize{ width, height };
+        uint32_t newEntityId{ 0 };
+    };
+
+    static LayerSceneData sceneData;
+
+
+    void TryTextureBind(MaterialData& materialData, const std::shared_ptr<Texture>& texture, TextureSlot slot)
+    {
+        bool hasTexture = false;
+        if (texture)
+        {
+            texture->Bind(static_cast<uint32_t>(slot));
+            hasTexture = true;
+        }
+
+        switch (slot)
+        {
+            case TextureSlot::ALBEDO_TEXTURE_SLOT:
+                materialData.hasAlbedo = hasTexture;
+                break;
+            case TextureSlot::NORMAL_TEXTURE_SLOT:
+                materialData.hasNormal = hasTexture;
+                break;
+            case TextureSlot::METALLIC_TEXTURE_SLOT:
+                materialData.hasMetallic = hasTexture;
+                break;
+            case TextureSlot::ROUGHNESS_TEXTURE_SLOT:
+                materialData.hasRoughness = hasTexture;
+                break;
+            case TextureSlot::AO_TEXTURE_SLOT:
+                materialData.hasAO = hasTexture;
+                break;
+            default:
+            R_ASSERT(false, "Unknown texture slot!");
+        }
     }
 
-    switch (slot)
+    void BindTextures(MaterialData& material, const TextureData& textures)
     {
-        case TextureSlot::ALBEDO_TEXTURE_SLOT:
-            materialData.hasAlbedo = hasTexture;
-            break;
-        case TextureSlot::NORMAL_TEXTURE_SLOT:
-            materialData.hasNormal = hasTexture;
-            break;
-        case TextureSlot::METALLIC_TEXTURE_SLOT:
-            materialData.hasMetallic = hasTexture;
-            break;
-        case TextureSlot::ROUGHNESS_TEXTURE_SLOT:
-            materialData.hasRoughness = hasTexture;
-            break;
-        case TextureSlot::AO_TEXTURE_SLOT:
-            materialData.hasAO = hasTexture;
-            break;
-        default:
-        R_ASSERT(false, "Unknown texture slot!");
+        TryTextureBind(material, textures.albedo, TextureSlot::ALBEDO_TEXTURE_SLOT);
+        TryTextureBind(material, textures.normal, TextureSlot::NORMAL_TEXTURE_SLOT);
+        TryTextureBind(material, textures.metallic, TextureSlot::METALLIC_TEXTURE_SLOT);
+        TryTextureBind(material, textures.roughness, TextureSlot::ROUGHNESS_TEXTURE_SLOT);
+        TryTextureBind(material, textures.ao, TextureSlot::AO_TEXTURE_SLOT);
     }
-}
 
-static void BindTextures(MaterialData& material, const TextureData& textures)
-{
-    TryTextureBind(material, textures.albedo, TextureSlot::ALBEDO_TEXTURE_SLOT);
-    TryTextureBind(material, textures.normal, TextureSlot::NORMAL_TEXTURE_SLOT);
-    TryTextureBind(material, textures.metallic, TextureSlot::METALLIC_TEXTURE_SLOT);
-    TryTextureBind(material, textures.roughness, TextureSlot::ROUGHNESS_TEXTURE_SLOT);
-    TryTextureBind(material, textures.ao, TextureSlot::AO_TEXTURE_SLOT);
-}
-
-std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene,
-                                                         GeometryType type)
-{
-    std::shared_ptr<Entity> node = scene->CreateEntity();
-    Mesh* mesh = nullptr;
-    switch (type)
+    std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene,
+                                                             GeometryType type)
     {
-        case GeometryType::CUBE:
-            mesh = MeshBuilder::CubeGeometry();
-            break;
-        case GeometryType::PLANE:
-            mesh = MeshBuilder::PlaneGeometry();
-            break;
+        std::shared_ptr<Entity> node = scene->CreateEntity();
+        Mesh* mesh = nullptr;
+        switch (type)
+        {
+            case GeometryType::CUBE:
+                mesh = MeshBuilder::CubeGeometry();
+                break;
+            case GeometryType::PLANE:
+                mesh = MeshBuilder::PlaneGeometry();
+                break;
+        }
+        node->AddComponent<Mesh>(std::move(*mesh));
+        auto& textureData = node->GetComponent<Mesh>().GetMaterial()->textureData;
+        Tag tag;
+        tag.id = sceneData.newEntityId++;
+        tag.name = "Entity" + std::to_string(tag.id);
+        node->AddComponent<Tag>(tag);
+        textureData.normal = sceneData.normalTexture;
+        textureData.ao = sceneData.aoTexture;
+        textureData.albedo = sceneData.albedoTexture;
+        textureData.metallic = sceneData.metallicTexture;
+        textureData.roughness = sceneData.roughnessTexture;
+        return node;
     }
-    node->AddComponent<Mesh>(std::move(*mesh));
-    auto& textureData = node->GetComponent<Mesh>().GetMaterial()->textureData;
-    textureData.normal = sceneData.normalTexture;
-    textureData.ao = sceneData.aoTexture;
-    textureData.albedo = sceneData.albedoTexture;
-    textureData.metallic = sceneData.metallicTexture;
-    textureData.roughness = sceneData.roughnessTexture;
-    return node;
+
+    void ImGuiAddTreeNodeChildren(const std::shared_ptr<Entity>& node)
+    {
+        for (const auto& entity: node->GetChildren())
+        {
+            const auto& tag = entity->GetComponent<Tag>();
+            ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+            bool node_open = ImGui::TreeNodeEx((void*) (intptr_t) tag.id, node_flags, "%s", tag.name.c_str());
+
+            if (node_open)
+            {
+                ImGuiAddTreeNodeChildren(entity);
+                ImGui::TreePop();
+            }
+        }
+    }
 }
 
 void SandboxLayer::OnAttach()
@@ -171,17 +195,23 @@ void SandboxLayer::OnAttach()
     sceneData.metallicTexture = Texture::Create("/Assets/Textures/metallic.png");
     sceneData.aoTexture = Texture::Create("/Assets/Textures/ao.png");
 
-    sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 5, -15),
+    sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 10, -15),
                                                       glm::vec3(0, 1, 0));
     scene = Scene::Create();
-
+    const auto plane = CreateTestSceneNode(scene, GeometryType::PLANE);
+    plane->GetComponent<Transform>().SetScale({ 10.0f, 0.0f, 10.0f });
+    plane->GetComponent<Transform>().SetPosition({ 0.0f, -1.0f, 0.0f });
+    plane->GetComponent<Transform>().SetRotation({ 180.0f, 0.0f, 0.0f });
+    scene->GetRootNode()->AddChild(plane);
+    plane->GetComponent<Mesh>().GetMaterial()->textureData = TextureData();
+    plane->GetComponent<Mesh>().GetMaterial()->textureData.albedo = Texture::Create("/Assets/Textures/WoodAlbedo.png");
     const auto cube1 = CreateTestSceneNode(scene, GeometryType::CUBE);
-    cube1->GetComponent<Transform>().SetPosition({ 0, 0.0f, 0 });
     const auto cube2 = CreateTestSceneNode(scene, GeometryType::CUBE);
-    cube2->GetComponent<Transform>().SetPosition({ 5.0f, 2.0f, 0 });
+    cube2->GetComponent<Transform>().SetPosition({ 5.0f, 2.0f, -1.0f });
+
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(cube1);
-    scene->GetRootNode()->AddChild(cube2);
+    plane->AddChild(cube2);
     shader = Shader::Create("/Assets/Shaders/Basic/pbr.vert",
                             "/Assets/Shaders/Basic/pbr.frag");
     renderer = std::make_shared<Renderer>();
@@ -221,6 +251,7 @@ void SandboxLayer::OnAttach()
     mesh.SetVertexArray(vertexArray);
     mesh.SetVisibility(false);
     sceneData.skyboxCube->AddComponent<Mesh>(mesh);
+    sceneData.skyboxCube->AddComponent<Tag>(Tag("Skybox", sceneData.newEntityId++));
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
     sceneData.irradianceTexture = Texture3D::Create(
@@ -303,18 +334,87 @@ void SandboxLayer::OnUpdate(float ts)
 
 void SandboxLayer::OnImGuiRender()
 {
+    bool dockspaceOpen = true;
+    ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
+
+    // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+    // because it would be confusing to have two docking targets within each others.
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                    ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+    // and handle the pass-thru hole, so we ask Begin() to not render a background.
+    if (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
+        window_flags |= ImGuiWindowFlags_NoBackground;
+
+    // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+    // This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+    // all active windows docked into it will lose their parent and become undocked.
+    // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+    // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+    ImGui::PopStyleVar(3);
+
+    // Submit the DockSpace
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+    {
+        ImGuiID dockspaceID = ImGui::GetID("MyDockSpace");
+        ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockspaceFlags);
+    }
+    else
+    {
+        R_ASSERT(false, "");
+    }
+
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("Options"))
+        {
+            if (ImGui::MenuItem("Exit"))
+            {
+                EventDispatcher::Get().Emit(ShutdownEvent());
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
+
+    ImGui::Begin("Scene Hierarchy");
+    if (ImGui::TreeNode("Root"))
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
+        const auto& node = scene->GetRootNode();
+        ImGuiAddTreeNodeChildren(node);
+        ImGui::TreePop();
+        ImGui::PopStyleVar();
+    }
+    ImGui::End();
+
     ImGui::Begin("Viewport");
     id = frameBuffer->GetColorAttachment();
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-    if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y) {
+    if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y)
+    {
         if (viewportSize.y < 0)
         {
             viewportSize.y = 1;
         }
-        // TODO: Show image while resizing
+        // TODO: Fix image flickering while resizing window
         frameBuffer->Resize(static_cast<uint32_t>(viewportSize.x), static_cast<uint32_t>(viewportSize.y));
         sceneData.viewportSize = viewportSize;
     }
-    ImGui::Image((void*) id, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::Image((void*)id, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::End();
+
     ImGui::End();
 }

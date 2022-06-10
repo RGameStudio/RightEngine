@@ -21,3 +21,7 @@ Just a bunch of screenshots, that show progress of engine development
 ## 02-04-2022 (Added rendering to imgui panel)
 
 ![02-04-2022.png](https://i.imgur.com/btZao5F.png)
+
+## 10-06-2022 (Implemented IBL and docking space)
+
+![10-06-2022.png](https://i.imgur.com/5GLng93.png)
