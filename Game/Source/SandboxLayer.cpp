@@ -6,6 +6,7 @@
 #include "Entity.hpp"
 #include "Components.hpp"
 #include "Texture3D.hpp"
+#include "Panels/PropertyPanel.hpp"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -96,7 +97,9 @@ namespace
         std::shared_ptr<Texture3D> radianceTexture;
         std::shared_ptr<Texture3D> irradianceTexture;
         ImVec2 viewportSize{ width, height };
-        uint32_t newEntityId{ 0 };
+        uint32_t newEntityId{ 1 };
+        uint32_t selectedNodeId{ 0 };
+        PropertyPanel propertyPanel;
     };
 
     static LayerSceneData sceneData;
@@ -175,9 +178,12 @@ namespace
         for (const auto& entity: node->GetChildren())
         {
             const auto& tag = entity->GetComponent<Tag>();
-            ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-            bool node_open = ImGui::TreeNodeEx((void*) (intptr_t) tag.id, node_flags, "%s", tag.name.c_str());
-
+            ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow;
+            bool node_open = ImGui::TreeNodeEx((void*)tag.id, node_flags, "%s", tag.name.c_str());
+            if (ImGui::IsItemClicked())
+            {
+                sceneData.propertyPanel.SetSelectedEntity(entity);
+            }
             if (node_open)
             {
                 ImGuiAddTreeNodeChildren(entity);
@@ -272,6 +278,8 @@ void SandboxLayer::OnAttach()
                     "/Assets/Textures/output_rad_posz.hdr",
                     "/Assets/Textures/output_rad_negz.hdr",
             });
+
+    sceneData.propertyPanel.SetScene(scene);
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -390,7 +398,7 @@ void SandboxLayer::OnImGuiRender()
     }
 
     ImGui::Begin("Scene Hierarchy");
-    if (ImGui::TreeNode("Root"))
+    if (ImGui::TreeNodeEx("Root", ImGuiTreeNodeFlags_OpenOnArrow))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
         const auto& node = scene->GetRootNode();
@@ -415,6 +423,8 @@ void SandboxLayer::OnImGuiRender()
     }
     ImGui::Image((void*)id, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
+
+    sceneData.propertyPanel.OnImGuiRender();
 
     ImGui::End();
 }

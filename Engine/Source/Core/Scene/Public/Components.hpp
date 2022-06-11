@@ -22,19 +22,19 @@ namespace RightEngine
         inline const glm::vec3& GetWorldPosition() const
         { return transformMatrix[3]; }
 
-        inline const glm::vec3& GetLocalPosition() const
+        inline glm::vec3& GetLocalPosition()
         { return position; }
 
         void SetPosition(const glm::vec3& newPosition)
         { position = newPosition; }
 
-        const glm::vec3& GetRotation() const
+        glm::vec3& GetRotation()
         { return rotation; }
 
         void SetRotation(const glm::vec3& newRotation)
         { rotation = newRotation; }
 
-        const glm::vec3& GetScale() const
+        glm::vec3& GetScale()
         { return scale; }
 
         void SetScale(const glm::vec3& newScale)
@@ -43,7 +43,7 @@ namespace RightEngine
         glm::mat4 GetLocalTransformMatrix() const;
         const glm::mat4& GetWorldTransformMatrix() const;
 
-        void RecalculateTransform(const Transform& parentTransform);
+        void RecalculateTransform(Transform& parentTransform);
         void RecalculateTransform();
 
     private:

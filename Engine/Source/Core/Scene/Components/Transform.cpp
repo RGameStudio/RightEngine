@@ -25,7 +25,7 @@ const glm::mat4& Transform::GetWorldTransformMatrix() const
     return transformMatrix;
 }
 
-void Transform::RecalculateTransform(const Transform& parentTransform)
+void Transform::RecalculateTransform(Transform& parentTransform)
 {
     const auto parentTransformMatrix = glm::translate(glm::mat4(1.0f), parentTransform.GetLocalPosition());
     transformMatrix = parentTransformMatrix * GetLocalTransformMatrix();
