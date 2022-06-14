@@ -1,5 +1,6 @@
 #include "FrameBuffer.hpp"
 #include "Assert.hpp"
+#include "Texture3D.hpp"
 #include <glad/glad.h>
 
 using namespace RightEngine;
@@ -245,4 +246,13 @@ uint32_t RightEngine::Framebuffer::GetColorAttachment(uint32_t index) const
 const RightEngine::FramebufferSpecification& RightEngine::Framebuffer::GetSpecification() const
 {
     return specification;
+}
+
+void Framebuffer::BindAttachmentToTexture3DFace(const std::shared_ptr<Texture3D>& texture3D,
+                                                uint32_t attachmentIndex,
+                                                uint32_t texture3DFace,
+                                                uint32_t mipmapLevel)
+{
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex,
+                           GL_TEXTURE_CUBE_MAP_POSITIVE_X + texture3DFace, texture3D->GetId(), mipmapLevel);
 }

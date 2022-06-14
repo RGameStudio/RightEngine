@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.19)
 
-add_executable(Game Source/Start.cpp Source/SandboxLayer.cpp Source/Panels/PropertyPanel.cpp)
+add_executable(Game Source/Start.cpp
+        Source/SandboxLayer.cpp
+        Source/Panels/PropertyPanel.cpp
+        Source/Utils/EnvironmentMapLoader.cpp)
 if (WIN32)
     target_link_libraries(Game Engine glad opengl32 easyargs glfw stb_image imgui)
 else()

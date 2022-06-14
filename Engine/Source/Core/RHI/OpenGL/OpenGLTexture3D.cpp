@@ -22,6 +22,19 @@ OpenGLTexture3D::OpenGLTexture3D(const std::array<std::string, 6>& texturesPath)
     Generate(faces);
 }
 
+OpenGLTexture3D::OpenGLTexture3D(const TextureSpecification& textureSpecification,
+                                 const std::array<std::vector<uint8_t>, 6>& data)
+{
+    specification = textureSpecification;
+    CubeMapFaces faces;
+    for (int i = 0; i < data.size(); i++)
+    {
+        faces.SetFaceData(data[i], i);
+    }
+
+    Generate(faces);
+}
+
 OpenGLTexture3D::~OpenGLTexture3D()
 {
     glDeleteTextures(1, &id);
@@ -39,6 +52,9 @@ void OpenGLTexture3D::UnBind() const
 
 void OpenGLTexture3D::Generate(const CubeMapFaces& faces)
 {
+    R_CORE_ASSERT(specification.format != TextureFormat::None
+                  && specification.height > 0
+                  && specification.width > 0, "");
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 

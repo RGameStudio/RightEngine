@@ -5,7 +5,7 @@
 
 using namespace RightEngine;
 
-std::shared_ptr<Texture> Texture::Create(const TextureSpecification& aSpecification, const void* data)
+std::shared_ptr<Texture> Texture::Create(const TextureSpecification& aSpecification, const std::vector<uint8_t>& data)
 {
     switch (Renderer::GetAPI())
     {

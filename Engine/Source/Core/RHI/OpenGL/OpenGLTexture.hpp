@@ -8,7 +8,7 @@ namespace RightEngine
     {
     public:
         OpenGLTexture(const std::string& path);
-        OpenGLTexture(const TextureSpecification& aSpecification, const void* data);
+        OpenGLTexture(const TextureSpecification& aSpecification, const std::vector<uint8_t>& data);
         virtual ~OpenGLTexture() override;
 
         virtual void Bind(uint32_t slot = 0) const override;

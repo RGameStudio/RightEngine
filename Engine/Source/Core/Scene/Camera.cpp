@@ -12,6 +12,11 @@ RightEngine::Camera::Camera(const glm::vec3& position, const glm::vec3& worldUp)
     EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(Camera::OnEvent));
 }
 
+RightEngine::Camera::~Camera()
+{
+    EventDispatcher::Get().UnSubscribe(MouseMovedEvent::descriptor, CallbackContext(nullptr, this));
+}
+
 void RightEngine::Camera::OnUpdate()
 {
     actualSpeed = movementSpeed * Input::deltaTime;

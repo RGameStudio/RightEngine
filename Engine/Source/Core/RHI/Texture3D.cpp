@@ -16,3 +16,16 @@ std::shared_ptr<Texture3D> Texture3D::Create(const std::array<std::string, 6>& t
             return nullptr;
     }
 }
+
+std::shared_ptr<Texture3D>
+Texture3D::Create(const TextureSpecification& textureSpecification, const std::array<std::vector<uint8_t>, 6>& data)
+{
+    switch (Renderer::GetAPI())
+    {
+        case GPU_API::OpenGL:
+            return std::make_shared<OpenGLTexture3D>(textureSpecification, data);
+        default:
+        R_CORE_ASSERT(false, "GPU API");
+            return nullptr;
+    }
+}

@@ -1,5 +1,7 @@
 # Code style
 
+
+## C++ Style
 - Include order
 ```c++
 // Engine include
@@ -61,4 +63,14 @@ void RightEngine::Geometry::CreateVertexArray(const VertexBufferLayout& layout)
 {
     //...
 }
+```
+
+## GLSL Style
+- Uniforms must have `u_` prefix and start with capital letter (e.g. `u_ViewProjection`)
+- Out variables in vertex shader must have `f_` prefix and start with capital letter (e.g. `f_LocalPos`)
+- Constant variable in shaders must have `k` prefix (e.g. `kAngle`)
+- Input and output layout variables must have `a` prefix
+```glsl
+layout (location = 0) out vec4 aAlbedo;
+layout (location = 1) out vec4 aNormal;
 ```

@@ -71,5 +71,7 @@ namespace RightEngine
     {
     public:
         static std::shared_ptr<Texture3D> Create(const std::array<std::string, 6>& texturesPath);
+        static std::shared_ptr<Texture3D> Create(const TextureSpecification& textureSpecification,
+                                                 const std::array<std::vector<uint8_t>, 6>& data);
     };
 }

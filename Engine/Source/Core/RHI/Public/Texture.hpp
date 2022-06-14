@@ -76,7 +76,7 @@ namespace RightEngine
         { return id; }
 
         static std::shared_ptr<Texture> Create(const std::string& path);
-        static std::shared_ptr<Texture> Create(const TextureSpecification& aSpecification, const void* data);
+        static std::shared_ptr<Texture> Create(const TextureSpecification& aSpecification, const std::vector<uint8_t>& data);
 
     protected:
         TextureSpecification specification;

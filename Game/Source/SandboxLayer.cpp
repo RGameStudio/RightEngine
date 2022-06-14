@@ -7,6 +7,7 @@
 #include "Components.hpp"
 #include "Texture3D.hpp"
 #include "Panels/PropertyPanel.hpp"
+#include "Utils/EnvironmentMapLoader.hpp"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -195,6 +196,8 @@ namespace
 
 void SandboxLayer::OnAttach()
 {
+
+
     sceneData.albedoTexture = Texture::Create("/Assets/Textures/albedo.png");
     sceneData.normalTexture = Texture::Create("/Assets/Textures/normal.png");
     sceneData.roughnessTexture = Texture::Create("/Assets/Textures/roughness.png");
@@ -239,15 +242,11 @@ void SandboxLayer::OnAttach()
 
     sceneData.skyboxShader = Shader::Create("/Assets/Shaders/Basic/skybox.vert",
                                             "/Assets/Shaders/Basic/skybox.frag");
-    sceneData.skyboxTexture = Texture3D::Create(
-            {
-                    "/Assets/Textures/output_skybox_posx.hdr",
-                    "/Assets/Textures/output_skybox_negx.hdr",
-                    "/Assets/Textures/output_skybox_posy.hdr",
-                    "/Assets/Textures/output_skybox_negy.hdr",
-                    "/Assets/Textures/output_skybox_posz.hdr",
-                    "/Assets/Textures/output_skybox_negz.hdr",
-            });
+
+    EnvironmentMapLoader mapLoader;
+    mapLoader.Load("/Assets/Textures/env_helipad.hdr", true);
+
+    sceneData.skyboxTexture = mapLoader.GetEnvironmentContext().envMap;
     sceneData.skyboxCube = scene->CreateEntity();
     VertexBufferLayout layout;
     layout.Push<float>(3);

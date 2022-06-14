@@ -4,9 +4,14 @@ void EventDispatcher::Subscribe(const char* descriptor, CallbackContext context)
 {
     observers[descriptor].push_back(context);
 }
-
+//TODO: Fix crash on engine finish
 void EventDispatcher::UnSubscribe(const char* descriptor, CallbackContext context)
 {
+    if (observers.find(descriptor) == observers.end())
+    {
+        return;
+    }
+
     std::vector<CallbackContext> newCallbacks;
     for (auto&& callbackContext: observers.at(descriptor))
     {
@@ -27,9 +32,9 @@ void EventDispatcher::Emit(const Event& event) const
         return;
     }
 
-    auto&& observersList = observers.at(type);
+    const auto& observersList = observers.at(type);
 
-    for (auto&& observer: observersList)
+    for (const auto& observer: observersList)
     {
         observer.callback(event);
     }

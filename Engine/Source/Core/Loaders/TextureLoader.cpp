@@ -29,6 +29,10 @@ std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const 
     {
         stbi_set_flip_vertically_on_load(true);
     }
+    else
+    {
+        stbi_set_flip_vertically_on_load(false);
+    }
 
     void* buffer = nullptr;
     if (isHdr)

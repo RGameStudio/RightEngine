@@ -15,10 +15,10 @@ OpenGLTexture::OpenGLTexture(const std::string& path)
     Generate(data.data());
 }
 
-OpenGLTexture::OpenGLTexture(const TextureSpecification& aSpecification, const void* data)
+OpenGLTexture::OpenGLTexture(const TextureSpecification& aSpecification, const std::vector<uint8_t>& data)
 {
     specification = aSpecification;
-    Generate(data);
+    Generate(data.data());
 }
 
 OpenGLTexture::~OpenGLTexture()

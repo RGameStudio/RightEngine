@@ -8,6 +8,8 @@ namespace RightEngine
     {
     public:
         OpenGLTexture3D(const std::array<std::string, 6>& texturesPath);
+        OpenGLTexture3D(const TextureSpecification& textureSpecification,
+                        const std::array<std::vector<uint8_t>, 6>& data);
         virtual ~OpenGLTexture3D() override;
 
         virtual void Bind(uint32_t slot = 0) const override;

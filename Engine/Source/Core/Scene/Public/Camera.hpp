@@ -11,7 +11,7 @@ namespace RightEngine
     {
     public:
         Camera(const glm::vec3& position, const glm::vec3& worldUp);
-        ~Camera() = default;
+        ~Camera();
 
         virtual void OnUpdate();
 

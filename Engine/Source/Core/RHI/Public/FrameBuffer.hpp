@@ -2,9 +2,12 @@
 
 #include <initializer_list>
 #include <vector>
+#include <memory>
 
 namespace RightEngine
 {
+    class Texture3D;
+
     enum class FramebufferTextureFormat
     {
         None = 0,
@@ -66,10 +69,15 @@ namespace RightEngine
         void ReadPixels(uint32_t attachmentIndex, int x, int y, int width, int height, void* data);
 
         void ClearAttachment(uint32_t attachmentIndex, int value);
-
         uint32_t GetColorAttachment(uint32_t index = 0) const;
 
         const FramebufferSpecification& GetSpecification() const;
+
+        void BindAttachmentToTexture3DFace(const std::shared_ptr<Texture3D>& texture3D,
+                                           uint32_t attachmentIndex,
+                                           uint32_t texture3DFace,
+                                           uint32_t mipmapLevel = 0);
+
     private:
         uint32_t id;
         FramebufferSpecification specification;
