@@ -196,8 +196,6 @@ namespace
 
 void SandboxLayer::OnAttach()
 {
-
-
     sceneData.albedoTexture = Texture::Create("/Assets/Textures/albedo.png");
     sceneData.normalTexture = Texture::Create("/Assets/Textures/normal.png");
     sceneData.roughnessTexture = Texture::Create("/Assets/Textures/roughness.png");
@@ -245,8 +243,9 @@ void SandboxLayer::OnAttach()
 
     EnvironmentMapLoader mapLoader;
     mapLoader.Load("/Assets/Textures/env_helipad.hdr", true);
+    const auto envContext = mapLoader.GetEnvironmentContext();
 
-    sceneData.skyboxTexture = mapLoader.GetEnvironmentContext().envMap;
+    sceneData.skyboxTexture = envContext.envMap;
     sceneData.skyboxCube = scene->CreateEntity();
     VertexBufferLayout layout;
     layout.Push<float>(3);
@@ -259,15 +258,7 @@ void SandboxLayer::OnAttach()
     sceneData.skyboxCube->AddComponent<Tag>(Tag("Skybox", sceneData.newEntityId++));
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
-    sceneData.irradianceTexture = Texture3D::Create(
-            {
-                    "/Assets/Textures/output_irr_posx.hdr",
-                    "/Assets/Textures/output_irr_negx.hdr",
-                    "/Assets/Textures/output_irr_posy.hdr",
-                    "/Assets/Textures/output_irr_negy.hdr",
-                    "/Assets/Textures/output_irr_posz.hdr",
-                    "/Assets/Textures/output_irr_negz.hdr",
-            });
+    sceneData.irradianceTexture = envContext.irradianceMap;
     sceneData.radianceTexture = Texture3D::Create(
             {
                     "/Assets/Textures/output_rad_posx.hdr",

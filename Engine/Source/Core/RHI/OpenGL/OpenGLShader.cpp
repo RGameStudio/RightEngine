@@ -1,6 +1,7 @@
 #include "OpenGLShader.hpp"
 #include "Path.hpp"
 #include "Logger.hpp"
+#include "Assert.hpp"
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <fstream>
@@ -10,9 +11,17 @@ using namespace RightEngine;
 
 // TODO: Error handling
 
+namespace
+{
+    std::string _vertexShaderPath;
+    std::string _fragmentShaderPath;
+}
+
 ShaderProgramSource
 OpenGLShader::ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 {
+    _vertexShaderPath = vertexShaderPath;
+    _fragmentShaderPath = fragmentShaderPath;
     std::ifstream vertexShaderStream(Path::ConvertEnginePathToOSPath(vertexShaderPath));
     std::ifstream fragmentShaderStream(Path::ConvertEnginePathToOSPath(fragmentShaderPath));
 
@@ -75,9 +84,12 @@ uint32_t OpenGLShader::CompileShader(uint32_t type, const std::string& source)
         char* message = new char[length];
         glGetShaderInfoLog(shaderId, length, &length, message);
         std::string shaderType = (type == GL_VERTEX_SHADER ? "vertex" : "fragment");
-        R_CORE_ERROR("Failed to compile {0} shader!", shaderType);
-        R_CORE_ERROR("Error message: {0}", message);
+        R_CORE_ERROR("Failed to compile {0} shader at path: \"{1}\"!",
+                     shaderType,
+                     shaderType == "vertex" ? _vertexShaderPath : _fragmentShaderPath);
+        R_CORE_ERROR("Error message: \"{0}\"", message);
         glDeleteShader(shaderId);
+        R_CORE_ASSERT(false, "");
         return 0;
     }
 

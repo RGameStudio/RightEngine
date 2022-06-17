@@ -8,18 +8,34 @@ namespace RightEngine
     struct EnvironmentContext
     {
         std::shared_ptr<Texture3D> envMap;
+        std::shared_ptr<Texture3D> irradianceMap;
+    };
+
+    struct EnvironmentMapLoaderContext
+    {
+        std::string path;
+        bool flipVertically{ false };
+        TextureSpecification specification;
     };
 
     class EnvironmentMapLoader
     {
     public:
-        EnvironmentMapLoader() = default;
-        ~EnvironmentMapLoader() = default;
+        EnvironmentMapLoader();
+        ~EnvironmentMapLoader();
 
         void Load(const std::string& path, bool flipVertically = false);
 
-        inline const EnvironmentContext& GetEnvironmentContext() const { return currentContext; }
+        inline const EnvironmentContext& GetEnvironmentContext() const
+        { return environmentContext; }
+
     private:
-        EnvironmentContext currentContext;
+        void ComputeEnvironmentMap();
+        void ComputeIrradianceMap();
+        void ComputeRadianceMap();
+
+    private:
+        EnvironmentContext environmentContext;
+        EnvironmentMapLoaderContext loaderContext;
     };
 }
