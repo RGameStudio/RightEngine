@@ -17,6 +17,8 @@ namespace
     const uint32_t envTexHeight = 2048;
     const uint32_t irradianceTexWidth = 64;
     const uint32_t irradianceTexHeight = 64;
+    const uint32_t prefilterTexWidth = 128;
+    const uint32_t prefilterTexHeight = 128;
 
     const glm::mat4 captureViews[] =
             {
@@ -41,6 +43,7 @@ namespace
             };
     Mesh* cube;
     const auto projectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+    const uint32_t maxMipLevels = 5;
 }
 
 EnvironmentMapLoader::EnvironmentMapLoader()
@@ -146,5 +149,51 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
 
 void EnvironmentMapLoader::ComputeRadianceMap()
 {
+    TextureSpecification prefilterTextureSpec{ prefilterTexWidth, prefilterTexHeight, 3, TextureFormat::RGB32F };
+    const auto prefilterMapShader = Shader::Create("/Assets/Shaders/Utils/envmap_to_radiance_map.vert",
+                                                   "/Assets/Shaders/Utils/envmap_to_radiance_map.frag");
+    auto prefilteredMap = Texture3D::Create(prefilterTextureSpec, {});
+    prefilteredMap->SetSampler(Sampler::Create({
+                                                       SamplerFilter::Linear,
+                                                       SamplerFilter::Linear,
+                                                       SamplerFilter::Linear,
+                                                       false }));
+    prefilteredMap->GenerateMipmaps();
+    FramebufferSpecification fbSpec;
+    fbSpec.width = prefilterTexWidth;
+    fbSpec.height = prefilterTexHeight;
+    fbSpec.attachments = FramebufferAttachmentSpecification(
+            {
+                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
+            }
+    );
+    Framebuffer fb(fbSpec);
+    prefilteredMap->GetSampler()->Bind();
+    for (int mipLevel = 0; mipLevel < maxMipLevels; mipLevel++)
+    {
+        uint32_t mipWidth = prefilterTexWidth * std::pow(0.5, mipLevel);
+        uint32_t mipHeight = prefilterTexHeight * std::pow(0.5, mipLevel);
+        fb.Resize(mipWidth, mipHeight);
+        fb.Bind();
+        prefilterMapShader->Bind();
+        prefilteredMap->Bind();
+        environmentContext.envMap->Bind();
+        const auto& va = cube->GetVertexArray();
+        va->Bind();
+        va->GetVertexBuffer()->Bind();
 
+        float roughness = (float) mipLevel / (float) (maxMipLevels - 1);
+        prefilterMapShader->SetUniform1f("u_Roughness", roughness);
+        for (int i = 0; i < 6; i++)
+        {
+            prefilterMapShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
+            fb.BindAttachmentToTexture3DFace(prefilteredMap, 0, i, mipLevel);
+            RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            RendererCommand::Draw(va->GetVertexBuffer());
+        }
+    }
+    fb.UnBind();
+
+    environmentContext.prefilterMap = prefilteredMap;
+    R_CORE_TRACE("Finished computing prefilter map for texture \"{0}\"", loaderContext.path);
 }

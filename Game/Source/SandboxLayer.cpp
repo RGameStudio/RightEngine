@@ -70,7 +70,7 @@ namespace
         ROUGHNESS_TEXTURE_SLOT,
         AO_TEXTURE_SLOT,
         SKYBOX_TEXTURE_SLOT,
-        RADIANCE_TEXTURE_SLOT,
+        PREFILTER_TEXTURE_SLOT,
         IRRADIANCE_TEXTURE_SLOT
     };
 
@@ -95,7 +95,7 @@ namespace
         std::shared_ptr<Entity> skyboxCube;
         std::shared_ptr<Shader> skyboxShader;
         std::shared_ptr<Texture3D> skyboxTexture;
-        std::shared_ptr<Texture3D> radianceTexture;
+        std::shared_ptr<Texture3D> prefilterTexture;
         std::shared_ptr<Texture3D> irradianceTexture;
         ImVec2 viewportSize{ width, height };
         uint32_t newEntityId{ 1 };
@@ -259,15 +259,7 @@ void SandboxLayer::OnAttach()
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
     sceneData.irradianceTexture = envContext.irradianceMap;
-    sceneData.radianceTexture = Texture3D::Create(
-            {
-                    "/Assets/Textures/output_rad_posx.hdr",
-                    "/Assets/Textures/output_rad_negx.hdr",
-                    "/Assets/Textures/output_rad_posy.hdr",
-                    "/Assets/Textures/output_rad_negy.hdr",
-                    "/Assets/Textures/output_rad_posz.hdr",
-                    "/Assets/Textures/output_rad_negz.hdr",
-            });
+    sceneData.prefilterTexture = envContext.prefilterMap;
 
     sceneData.propertyPanel.SetScene(scene);
 }
@@ -298,8 +290,9 @@ void SandboxLayer::OnUpdate(float ts)
         shader->SetUniform3f("camPos", sceneData.camera->GetPosition());
         sceneData.irradianceTexture->Bind(static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
         shader->SetUniform1i("u_IrradianceMap", static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
-        sceneData.radianceTexture->Bind(static_cast<uint32_t>(TextureSlot::RADIANCE_TEXTURE_SLOT));
-        shader->SetUniform1i("u_RadianceMap", static_cast<uint32_t>(TextureSlot::RADIANCE_TEXTURE_SLOT));
+        sceneData.prefilterTexture->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
+        sceneData.prefilterTexture->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
+        shader->SetUniform1i("u_RadianceMap", static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
 
         sceneData.materialUniformBuffer->SetData(&materialData, sizeof(MaterialData));
         renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());

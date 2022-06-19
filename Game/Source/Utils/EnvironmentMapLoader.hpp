@@ -9,6 +9,7 @@ namespace RightEngine
     {
         std::shared_ptr<Texture3D> envMap;
         std::shared_ptr<Texture3D> irradianceMap;
+        std::shared_ptr<Texture3D> prefilterMap;
     };
 
     struct EnvironmentMapLoaderContext

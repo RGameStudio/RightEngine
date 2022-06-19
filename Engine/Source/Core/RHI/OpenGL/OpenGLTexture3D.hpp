@@ -15,6 +15,8 @@ namespace RightEngine
         virtual void Bind(uint32_t slot = 0) const override;
         virtual void UnBind() const override;
 
+        virtual void GenerateMipmaps() const override;
+
     private:
         void Generate(const CubeMapFaces& faces);
     };

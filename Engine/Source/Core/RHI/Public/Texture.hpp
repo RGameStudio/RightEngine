@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Assert.hpp"
+#include "Sampler.hpp"
 #include <cstdint>
 #include <string>
 #include <memory>
@@ -75,11 +76,18 @@ namespace RightEngine
         inline uint32_t GetId() const
         { return id; }
 
+        inline std::shared_ptr<Sampler> GetSampler() const
+        { return sampler; }
+
+        void SetSampler(const std::shared_ptr<Sampler>& aSampler)
+        { sampler = aSampler; }
+
         static std::shared_ptr<Texture> Create(const std::string& path);
         static std::shared_ptr<Texture> Create(const TextureSpecification& aSpecification, const std::vector<uint8_t>& data);
 
     protected:
         TextureSpecification specification;
         uint32_t id;
+        std::shared_ptr<Sampler> sampler;
     };
 }
