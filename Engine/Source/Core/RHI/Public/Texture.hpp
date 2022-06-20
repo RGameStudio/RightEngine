@@ -11,11 +11,20 @@ namespace RightEngine
     enum class TextureFormat
     {
         None = 0,
+
+        // 1 channel
         RED8,
+
+        // 2 channels
+        RG32F,
+
+        // 3 channels
         RGB8,
-        RGBA8,
         RGB16F,
-        RGB32F
+        RGB32F,
+
+        // 4 channels
+        RGBA8,
     };
 
     struct TextureSpecification

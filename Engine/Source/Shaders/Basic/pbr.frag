@@ -20,7 +20,8 @@ layout(std140, binding = 0) uniform MaterialData
 
 uniform sampler2D u_Textures[5];
 uniform samplerCube u_IrradianceMap;
-uniform samplerCube u_RadianceMap;
+uniform samplerCube u_PrefilterMap;
+uniform sampler2D u_BRDFLUT;
 
 // lights
 vec3 lightPositions[4];
@@ -214,8 +215,9 @@ void main()
     // ambient lighting (note that the next IBL tutorial will replace
     // this ambient lighting with environment lighting).
     const float MAX_REFLECTION_LOD = 1.2;
-    vec3 prefilteredColor = textureLod(u_RadianceMap, R, roughness * MAX_REFLECTION_LOD).rgb;
-    vec2 brdf = vec2(1.0, 0.0);
+    vec3 prefilteredColor = textureLod(u_PrefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 brdf = texture(u_BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+//    vec2 brdf = vec2(1.0, 1.0);
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
     vec3 ambient = (kD * diffuse + specular) * ao;

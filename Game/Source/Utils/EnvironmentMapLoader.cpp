@@ -19,6 +19,8 @@ namespace
     const uint32_t irradianceTexHeight = 64;
     const uint32_t prefilterTexWidth = 128;
     const uint32_t prefilterTexHeight = 128;
+    const uint32_t lutTexWidth = 512;
+    const uint32_t lutTexHeight = 512;
 
     const glm::mat4 captureViews[] =
             {
@@ -41,7 +43,7 @@ namespace
                                 glm::vec3(0.0f, 0.0f, -1.0f),
                                 glm::vec3(0.0f, -1.0f, 0.0f))
             };
-    Mesh* cube;
+    std::shared_ptr<Mesh> cube;
     const auto projectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
     const uint32_t maxMipLevels = 5;
 }
@@ -51,11 +53,6 @@ EnvironmentMapLoader::EnvironmentMapLoader()
     cube = MeshBuilder::CubeGeometry();
 }
 
-EnvironmentMapLoader::~EnvironmentMapLoader()
-{
-    delete cube;
-}
-
 void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
 {
     loaderContext.path = path;
@@ -63,6 +60,7 @@ void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
     ComputeEnvironmentMap();
     ComputeIrradianceMap();
     ComputeRadianceMap();
+    ComputeLUT();
 }
 
 void EnvironmentMapLoader::ComputeEnvironmentMap()
@@ -196,4 +194,42 @@ void EnvironmentMapLoader::ComputeRadianceMap()
 
     environmentContext.prefilterMap = prefilteredMap;
     R_CORE_TRACE("Finished computing prefilter map for texture \"{0}\"", loaderContext.path);
+}
+
+void EnvironmentMapLoader::ComputeLUT()
+{
+    TextureSpecification specification{ lutTexWidth, lutTexHeight, 3, TextureFormat::RGB32F };
+    auto lutTexture = Texture::Create(specification, {});
+    lutTexture->SetSampler(Sampler::Create({SamplerFilter::Linear,
+                                                   SamplerFilter::Linear,
+                                                   SamplerFilter::Linear,
+                                                   false }));
+    const auto lutShader = Shader::Create("/Assets/Shaders/Utils/brdf.vert",
+                                                   "/Assets/Shaders/Utils/brdf.frag");
+
+    FramebufferSpecification fbSpec;
+    fbSpec.width = lutTexWidth;
+    fbSpec.height = lutTexHeight;
+    fbSpec.attachments = FramebufferAttachmentSpecification(
+            {
+                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
+            }
+    );
+    Framebuffer fb(fbSpec);
+    const auto quad = MeshBuilder::QuadGeometry();
+    fb.Bind();
+    lutShader->Bind();
+    lutTexture->GetSampler()->Bind();
+    lutTexture->Bind();
+    const auto& va = quad->GetVertexArray();
+    va->Bind();
+    va->GetVertexBuffer()->Bind();
+
+    fb.BindAttachmentToTexture2D(lutTexture, 0);
+    RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    RendererCommand::Draw(va->GetVertexBuffer());
+
+    fb.UnBind();
+
+    environmentContext.brdfLut = lutTexture;
 }

@@ -71,7 +71,8 @@ namespace
         AO_TEXTURE_SLOT,
         SKYBOX_TEXTURE_SLOT,
         PREFILTER_TEXTURE_SLOT,
-        IRRADIANCE_TEXTURE_SLOT
+        IRRADIANCE_TEXTURE_SLOT,
+        BRDF_LUT_TEXTURE_SLOT
     };
 
     enum class GeometryType
@@ -97,6 +98,7 @@ namespace
         std::shared_ptr<Texture3D> skyboxTexture;
         std::shared_ptr<Texture3D> prefilterTexture;
         std::shared_ptr<Texture3D> irradianceTexture;
+        std::shared_ptr<Texture> brdfLUT;
         ImVec2 viewportSize{ width, height };
         uint32_t newEntityId{ 1 };
         uint32_t selectedNodeId{ 0 };
@@ -150,7 +152,7 @@ namespace
                                                              GeometryType type)
     {
         std::shared_ptr<Entity> node = scene->CreateEntity();
-        Mesh* mesh = nullptr;
+        std::shared_ptr<Mesh> mesh = nullptr;
         switch (type)
         {
             case GeometryType::CUBE:
@@ -205,20 +207,21 @@ void SandboxLayer::OnAttach()
     sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 10, -15),
                                                       glm::vec3(0, 1, 0));
     scene = Scene::Create();
-    const auto plane = CreateTestSceneNode(scene, GeometryType::PLANE);
-    plane->GetComponent<Transform>().SetScale({ 10.0f, 0.0f, 10.0f });
-    plane->GetComponent<Transform>().SetPosition({ 0.0f, -1.0f, 0.0f });
-    plane->GetComponent<Transform>().SetRotation({ 180.0f, 0.0f, 0.0f });
-    scene->GetRootNode()->AddChild(plane);
-    plane->GetComponent<Mesh>().GetMaterial()->textureData = TextureData();
-    plane->GetComponent<Mesh>().GetMaterial()->textureData.albedo = Texture::Create("/Assets/Textures/WoodAlbedo.png");
+//    const auto plane = CreateTestSceneNode(scene, GeometryType::PLANE);
+//    plane->GetComponent<Transform>().SetScale({ 10.0f, 0.0f, 10.0f });
+//    plane->GetComponent<Transform>().SetPosition({ 0.0f, -1.0f, 0.0f });
+//    plane->GetComponent<Transform>().SetRotation({ 180.0f, 0.0f, 0.0f });
+//    scene->GetRootNode()->AddChild(plane);
+//    plane->GetComponent<Mesh>().GetMaterial()->textureData = TextureData();
+//    plane->GetComponent<Mesh>().GetMaterial()->textureData.albedo = Texture::Create("/Assets/Textures/WoodAlbedo.png");
     const auto cube1 = CreateTestSceneNode(scene, GeometryType::CUBE);
     const auto cube2 = CreateTestSceneNode(scene, GeometryType::CUBE);
     cube2->GetComponent<Transform>().SetPosition({ 5.0f, 2.0f, -1.0f });
 
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(cube1);
-    plane->AddChild(cube2);
+    scene->GetRootNode()->AddChild(cube2);
+//    plane->AddChild(cube2);
     shader = Shader::Create("/Assets/Shaders/Basic/pbr.vert",
                             "/Assets/Shaders/Basic/pbr.frag");
     renderer = std::make_shared<Renderer>();
@@ -242,7 +245,7 @@ void SandboxLayer::OnAttach()
                                             "/Assets/Shaders/Basic/skybox.frag");
 
     EnvironmentMapLoader mapLoader;
-    mapLoader.Load("/Assets/Textures/env_helipad.hdr", true);
+    mapLoader.Load("/Assets/Textures/env_factory.hdr", true);
     const auto envContext = mapLoader.GetEnvironmentContext();
 
     sceneData.skyboxTexture = envContext.envMap;
@@ -260,12 +263,15 @@ void SandboxLayer::OnAttach()
 
     sceneData.irradianceTexture = envContext.irradianceMap;
     sceneData.prefilterTexture = envContext.prefilterMap;
+    sceneData.brdfLUT = envContext.brdfLut;
 
     sceneData.propertyPanel.SetScene(scene);
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
+//    EnvironmentMapLoader mapLoader;
+//    mapLoader.Load("/Assets/Textures/env_helipad.hdr", true);
     scene->OnUpdate();
 
     frameBuffer->Bind();
@@ -292,7 +298,10 @@ void SandboxLayer::OnUpdate(float ts)
         shader->SetUniform1i("u_IrradianceMap", static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
         sceneData.prefilterTexture->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
         sceneData.prefilterTexture->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
-        shader->SetUniform1i("u_RadianceMap", static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
+        shader->SetUniform1i("u_PrefilterMap", static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
+        sceneData.brdfLUT->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
+        sceneData.brdfLUT->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
+        shader->SetUniform1i("u_BRDFLUT", static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
 
         sceneData.materialUniformBuffer->SetData(&materialData, sizeof(MaterialData));
         renderer->SubmitMesh(shader, mesh, transform.GetWorldTransformMatrix());
@@ -396,7 +405,7 @@ void SandboxLayer::OnImGuiRender()
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
     if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y)
     {
-        if (viewportSize.y < 0)
+        if (viewportSize.y <= 0)
         {
             viewportSize.y = 1;
         }

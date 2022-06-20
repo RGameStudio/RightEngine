@@ -256,3 +256,10 @@ void Framebuffer::BindAttachmentToTexture3DFace(const std::shared_ptr<Texture3D>
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex,
                            GL_TEXTURE_CUBE_MAP_POSITIVE_X + texture3DFace, texture3D->GetId(), mipmapLevel);
 }
+
+void Framebuffer::BindAttachmentToTexture2D(const std::shared_ptr<Texture>& texture, uint32_t attachmentIndex,
+                                            uint32_t mipmapLevel)
+{
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex,
+                           GL_TEXTURE_2D, texture->GetId(), mipmapLevel);
+}
