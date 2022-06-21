@@ -207,13 +207,6 @@ void SandboxLayer::OnAttach()
     sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 10, -15),
                                                       glm::vec3(0, 1, 0));
     scene = Scene::Create();
-//    const auto plane = CreateTestSceneNode(scene, GeometryType::PLANE);
-//    plane->GetComponent<Transform>().SetScale({ 10.0f, 0.0f, 10.0f });
-//    plane->GetComponent<Transform>().SetPosition({ 0.0f, -1.0f, 0.0f });
-//    plane->GetComponent<Transform>().SetRotation({ 180.0f, 0.0f, 0.0f });
-//    scene->GetRootNode()->AddChild(plane);
-//    plane->GetComponent<Mesh>().GetMaterial()->textureData = TextureData();
-//    plane->GetComponent<Mesh>().GetMaterial()->textureData.albedo = Texture::Create("/Assets/Textures/WoodAlbedo.png");
     const auto cube1 = CreateTestSceneNode(scene, GeometryType::CUBE);
     const auto cube2 = CreateTestSceneNode(scene, GeometryType::CUBE);
     cube2->GetComponent<Transform>().SetPosition({ 5.0f, 2.0f, -1.0f });
@@ -221,7 +214,6 @@ void SandboxLayer::OnAttach()
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(cube1);
     scene->GetRootNode()->AddChild(cube2);
-//    plane->AddChild(cube2);
     shader = Shader::Create("/Assets/Shaders/Basic/pbr.vert",
                             "/Assets/Shaders/Basic/pbr.frag");
     renderer = std::make_shared<Renderer>();
@@ -245,7 +237,7 @@ void SandboxLayer::OnAttach()
                                             "/Assets/Shaders/Basic/skybox.frag");
 
     EnvironmentMapLoader mapLoader;
-    mapLoader.Load("/Assets/Textures/env_factory.hdr", true);
+    mapLoader.Load("/Assets/Textures/env_malibu.hdr", true);
     const auto envContext = mapLoader.GetEnvironmentContext();
 
     sceneData.skyboxTexture = envContext.envMap;
@@ -270,8 +262,6 @@ void SandboxLayer::OnAttach()
 
 void SandboxLayer::OnUpdate(float ts)
 {
-//    EnvironmentMapLoader mapLoader;
-//    mapLoader.Load("/Assets/Textures/env_helipad.hdr", true);
     scene->OnUpdate();
 
     frameBuffer->Bind();
@@ -311,6 +301,7 @@ void SandboxLayer::OnUpdate(float ts)
 
     frameBuffer->Bind();
     sceneData.skyboxShader->Bind();
+//    sceneData.skyboxTexture->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxTexture->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     const auto projectionMatrix = glm::perspective(glm::radians(45.0f),

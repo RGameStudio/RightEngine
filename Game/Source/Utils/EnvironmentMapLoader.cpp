@@ -155,7 +155,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
                                                        SamplerFilter::Linear,
                                                        SamplerFilter::Linear,
                                                        SamplerFilter::Linear,
-                                                       false }));
+                                                       true }));
     prefilteredMap->GenerateMipmaps();
     FramebufferSpecification fbSpec;
     fbSpec.width = prefilterTexWidth;
@@ -166,7 +166,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
             }
     );
     Framebuffer fb(fbSpec);
-    prefilteredMap->GetSampler()->Bind();
+    prefilteredMap->GetSampler()->Bind(1);
     for (int mipLevel = 0; mipLevel < maxMipLevels; mipLevel++)
     {
         uint32_t mipWidth = prefilterTexWidth * std::pow(0.5, mipLevel);
@@ -174,7 +174,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
         fb.Resize(mipWidth, mipHeight);
         fb.Bind();
         prefilterMapShader->Bind();
-        prefilteredMap->Bind();
+        prefilteredMap->Bind(1);
         environmentContext.envMap->Bind();
         const auto& va = cube->GetVertexArray();
         va->Bind();
