@@ -22,7 +22,7 @@ set(ENGINE_SRC
         Source/Core/Scene/Scene.cpp
         Source/Core/RHI/Material.cpp
         Source/Core/Utils/Path.cpp
-        Source/Core/RHI/MeshBuilder.cpp
+        Source/Core/Utils/MeshBuilder.cpp
         Source/Core/RHI/FrameBuffer.cpp
         Source/Core/Application/Layer.cpp
         Source/Core/RHI/OpenGL/OpenGLRendererAPI.cpp
@@ -43,7 +43,7 @@ set(ENGINE_SRC
         Source/Core/Loaders/TextureLoader.cpp
         Source/Core/RHI/Sampler.cpp
         Source/Core/RHI/OpenGL/OpenGLSampler.cpp
-        Source/Core/RHI/OpenGL/OpenGLConverters.cpp)
+        Source/Core/RHI/OpenGL/OpenGLConverters.cpp Source/Core/Utils/Public/String.hpp Source/Core/Utils/String.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC} Source/Core/RHI/OpenGL/OpenGLSampler.cpp)
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

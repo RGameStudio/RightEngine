@@ -8,6 +8,7 @@
 #include "Texture3D.hpp"
 #include "Panels/PropertyPanel.hpp"
 #include "Utils/EnvironmentMapLoader.hpp"
+#include "Utils/MeshLoader.hpp"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -77,6 +78,7 @@ namespace
 
     enum class GeometryType
     {
+        NONE,
         CUBE,
         PLANE
     };
@@ -103,6 +105,8 @@ namespace
         uint32_t newEntityId{ 1 };
         uint32_t selectedNodeId{ 0 };
         PropertyPanel propertyPanel;
+        MeshLoader meshLoader;
+        std::shared_ptr<MeshNode> gun;
     };
 
     static LayerSceneData sceneData;
@@ -148,31 +152,85 @@ namespace
         TryTextureBind(material, textures.ao, TextureSlot::AO_TEXTURE_SLOT);
     }
 
-    std::shared_ptr<RightEngine::Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene,
-                                                             GeometryType type)
+    void AddTag(std::shared_ptr<Entity>& entity, const std::string& name = "")
     {
-        std::shared_ptr<Entity> node = scene->CreateEntity();
-        std::shared_ptr<Mesh> mesh = nullptr;
-        switch (type)
-        {
-            case GeometryType::CUBE:
-                mesh = MeshBuilder::CubeGeometry();
-                break;
-            case GeometryType::PLANE:
-                mesh = MeshBuilder::PlaneGeometry();
-                break;
-        }
-        node->AddComponent<Mesh>(std::move(*mesh));
-        auto& textureData = node->GetComponent<Mesh>().GetMaterial()->textureData;
         Tag tag;
         tag.id = sceneData.newEntityId++;
-        tag.name = "Entity" + std::to_string(tag.id);
-        node->AddComponent<Tag>(tag);
-        textureData.normal = sceneData.normalTexture;
-        textureData.ao = sceneData.aoTexture;
-        textureData.albedo = sceneData.albedoTexture;
-        textureData.metallic = sceneData.metallicTexture;
-        textureData.roughness = sceneData.roughnessTexture;
+        if (name.empty())
+        {
+            tag.name = "Entity" + std::to_string(tag.id);
+        }
+        else
+        {
+            tag.name = name;
+        }
+        entity->AddComponent<Tag>(tag);
+    }
+
+    void CreateEntitiesFromMeshTree(std::shared_ptr<Entity>& entity,
+                                    const std::shared_ptr<MeshNode>& tree,
+                                    const std::shared_ptr<Scene>& scene)
+    {
+        if (!entity)
+        {
+            entity = scene->CreateEntity();
+            AddTag(entity);
+        }
+
+        for (auto& mesh : tree->meshes)
+        {
+            auto newMeshEntity = scene->CreateEntity();
+            AddTag(newMeshEntity);
+            newMeshEntity->AddComponent<Mesh>(*mesh);
+            entity->AddChild(newMeshEntity);
+        }
+
+        for (auto& child : tree->children)
+        {
+            if (child->meshes.empty())
+            {
+                continue;
+            }
+            auto newChild = scene->CreateEntity();
+            AddTag(newChild);
+            entity->AddChild(newChild);
+            CreateEntitiesFromMeshTree(newChild, child, scene);
+        }
+    }
+
+    std::shared_ptr<Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene,
+                                                const std::shared_ptr<MeshNode>& meshTree = nullptr,
+                                                GeometryType type = GeometryType::NONE)
+    {
+        std::shared_ptr<Entity> node = scene->CreateEntity();
+        if (meshTree)
+        {
+            CreateEntitiesFromMeshTree(node, meshTree, scene);
+        }
+        else
+        {
+            if (type != GeometryType::NONE)
+            {
+                std::shared_ptr<Mesh> mesh = nullptr;
+                switch (type)
+                {
+                    case GeometryType::CUBE:
+                        mesh = MeshBuilder::CubeGeometry();
+                        break;
+                    case GeometryType::PLANE:
+                        mesh = MeshBuilder::PlaneGeometry();
+                        break;
+                }
+                node->AddComponent<Mesh>(std::move(*mesh));
+                auto& textureData = node->GetComponent<Mesh>().GetMaterial()->textureData;
+                textureData.normal = sceneData.normalTexture;
+                textureData.ao = sceneData.aoTexture;
+                textureData.albedo = sceneData.albedoTexture;
+                textureData.metallic = sceneData.metallicTexture;
+                textureData.roughness = sceneData.roughnessTexture;
+            }
+        }
+        AddTag(node);
         return node;
     }
 
@@ -198,6 +256,8 @@ namespace
 
 void SandboxLayer::OnAttach()
 {
+    sceneData.gun = sceneData.meshLoader.Load("/Assets/Models/Gun/cerberus_2.fbx");
+
     sceneData.albedoTexture = Texture::Create("/Assets/Textures/albedo.png");
     sceneData.normalTexture = Texture::Create("/Assets/Textures/normal.png");
     sceneData.roughnessTexture = Texture::Create("/Assets/Textures/roughness.png");
@@ -207,13 +267,15 @@ void SandboxLayer::OnAttach()
     sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 10, -15),
                                                       glm::vec3(0, 1, 0));
     scene = Scene::Create();
-    const auto cube1 = CreateTestSceneNode(scene, GeometryType::CUBE);
-    const auto cube2 = CreateTestSceneNode(scene, GeometryType::CUBE);
-    cube2->GetComponent<Transform>().SetPosition({ 5.0f, 2.0f, -1.0f });
+
+    std::shared_ptr<Entity> gun = CreateTestSceneNode(scene, sceneData.gun);
+    gun->GetComponent<Tag>().name = "Gun";
+    auto& gunTransform = gun->GetComponent<Transform>();
+    gunTransform.SetScale({ 0.3f, 0.3f, 0.3f });
+    gunTransform.SetRotation({ -90.0f, 0.0f, 0.0f });
 
     scene->SetCamera(sceneData.camera);
-    scene->GetRootNode()->AddChild(cube1);
-    scene->GetRootNode()->AddChild(cube2);
+    scene->GetRootNode()->AddChild(gun);
     shader = Shader::Create("/Assets/Shaders/Basic/pbr.vert",
                             "/Assets/Shaders/Basic/pbr.frag");
     renderer = std::make_shared<Renderer>();
