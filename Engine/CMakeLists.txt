@@ -32,7 +32,7 @@ set(ENGINE_SRC
         Source/Core/UI/ImGuiBuild.cpp
         Source/Core/Scene/EditorCamera.cpp
         Source/Core/Scene/Components/Transform.cpp
-        Source/Core/Scene/Mesh.cpp
+        Source/Core/Scene/Components/Mesh.cpp
         Source/Core/RHI/OpenGL/OpenGLShader.cpp
         Source/Core/RHI/UniformBuffer.cpp
         Source/Core/RHI/OpenGL/OpenGLUniformBuffer.cpp

@@ -70,7 +70,7 @@ std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const 
         specification.format = TextureFormat::RGB32F;
     }
 
-    if (specification.format == TextureFormat::None)
+    if (specification.format == TextureFormat::NONE)
     {
         switch (specification.componentAmount)
         {
@@ -114,4 +114,11 @@ std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const 
 
     stbi_image_free(buffer);
     return { data, specification };
+}
+
+std::shared_ptr<Texture> TextureLoader::CreateTexture(const std::string& path, bool flipVertically) const
+{
+    const auto [data, spec] = Load(path, flipVertically);
+    auto texture = Texture::Create(spec, data);
+    return texture;
 }

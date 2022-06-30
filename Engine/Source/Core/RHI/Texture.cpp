@@ -9,20 +9,24 @@ std::shared_ptr<Texture> Texture::Create(const TextureSpecification& aSpecificat
 {
     switch (Renderer::GetAPI())
     {
-        case GPU_API::None:
-            R_CORE_ASSERT(false, "");
         case GPU_API::OpenGL:
             return std::make_shared<OpenGLTexture>(aSpecification, data);
+        default:
+        R_CORE_ASSERT(false, "GPU API");
+            return nullptr;
     }
 }
 
-std::shared_ptr<Texture> Texture::Create(const std::string& path)
+std::shared_ptr<Texture> Texture::Create(const TextureSpecification& aSpecification,
+                                         const std::array<std::vector<uint8_t>, 6>& data)
 {
     switch (Renderer::GetAPI())
     {
-        case GPU_API::None:
-            R_CORE_ASSERT(false, "");
         case GPU_API::OpenGL:
-            return std::make_shared<OpenGLTexture>(path);
+            return std::make_shared<OpenGLTexture>(aSpecification, data);
+        default:
+        R_CORE_ASSERT(false, "GPU API");
+            return nullptr;
     }
 }
+

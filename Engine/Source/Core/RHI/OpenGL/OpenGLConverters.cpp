@@ -45,3 +45,20 @@ GLenum OpenGLConverters::samplerFilter(SamplerFilter magFilter)
             return GL_LINEAR;
     }
 }
+
+GLenum OpenGLConverters::textureType(TextureType type)
+{
+    switch (type)
+    {
+        case TextureType::TEXTURE_2D:
+            return GL_TEXTURE_2D;
+        case TextureType::CUBEMAP:
+            return GL_TEXTURE_CUBE_MAP;
+    }
+}
+
+GLenum OpenGLConverters::cubeMapFace(uint8_t face)
+{
+    R_CORE_ASSERT(face < 6, "");
+    return GL_TEXTURE_CUBE_MAP_POSITIVE_X + face;
+}
