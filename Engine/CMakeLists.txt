@@ -38,8 +38,6 @@ set(ENGINE_SRC
         Source/Core/RHI/OpenGL/OpenGLUniformBuffer.cpp
         Source/Core/RHI/OpenGL/OpenGLTexture.cpp
         Source/Core/RHI/Texture.cpp
-        Source/Core/RHI/Texture3D.cpp
-        Source/Core/RHI/OpenGL/OpenGLTexture3D.cpp
         Source/Core/Loaders/TextureLoader.cpp
         Source/Core/RHI/Sampler.cpp
         Source/Core/RHI/OpenGL/OpenGLSampler.cpp

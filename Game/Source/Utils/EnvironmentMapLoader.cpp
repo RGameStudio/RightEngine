@@ -68,6 +68,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     TextureLoader textureLoader;
     auto [data, textureSpec] = textureLoader.Load(loaderContext.path, loaderContext.flipVertically);
     loaderContext.specification = textureSpec;
+    textureSpec.type = TextureType::TEXTURE_2D;
     const auto equirectMap = Texture::Create(textureSpec, data);
 
 
@@ -87,7 +88,8 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
 
     textureSpec.width = envTexWidth;
     textureSpec.height = envTexHeight;
-    auto cubemap = Texture3D::Create(textureSpec, {});
+    textureSpec.type = TextureType::CUBEMAP;
+    auto cubemap = Texture::Create(textureSpec, CubemapFaces());
     fb.Bind();
     envmapConverterShader->Bind();
     equirectMap->Bind();
@@ -97,7 +99,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     for (int i = 0; i < 6; i++)
     {
         envmapConverterShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-        fb.BindAttachmentToTexture3DFace(cubemap, 0, i);
+        fb.BindAttachmentToCubemapFace(cubemap, 0, i);
         RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         RendererCommand::Draw(va->GetVertexBuffer());
     }
@@ -125,7 +127,8 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
 
     texSpec.width = irradianceTexWidth;
     texSpec.height = irradianceTexHeight;
-    auto irradianceMap = Texture3D::Create(texSpec, {});
+    texSpec.type = TextureType::CUBEMAP;
+    auto irradianceMap = Texture::Create(texSpec, CubemapFaces());
     fb.Bind();
     irradianceMapShader->Bind();
     environmentContext.envMap->Bind();
@@ -135,7 +138,7 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
     for (int i = 0; i < 6; i++)
     {
         irradianceMapShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-        fb.BindAttachmentToTexture3DFace(irradianceMap, 0, i);
+        fb.BindAttachmentToCubemapFace(irradianceMap, 0, i);
         RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         RendererCommand::Draw(va->GetVertexBuffer());
     }
@@ -147,10 +150,14 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
 
 void EnvironmentMapLoader::ComputeRadianceMap()
 {
-    TextureSpecification prefilterTextureSpec{ prefilterTexWidth, prefilterTexHeight, 3, TextureFormat::RGB32F };
+    TextureSpecification prefilterTextureSpec{ prefilterTexWidth,
+                                               prefilterTexHeight,
+                                               3,
+                                               TextureType::CUBEMAP,
+                                               TextureFormat::RGB32F };
     const auto prefilterMapShader = Shader::Create("/Assets/Shaders/Utils/envmap_to_radiance_map.vert",
                                                    "/Assets/Shaders/Utils/envmap_to_radiance_map.frag");
-    auto prefilteredMap = Texture3D::Create(prefilterTextureSpec, {});
+    auto prefilteredMap = Texture::Create(prefilterTextureSpec, CubemapFaces());
     prefilteredMap->SetSampler(Sampler::Create({
                                                        SamplerFilter::Linear,
                                                        SamplerFilter::Linear,
@@ -185,7 +192,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
         for (int i = 0; i < 6; i++)
         {
             prefilterMapShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-            fb.BindAttachmentToTexture3DFace(prefilteredMap, 0, i, mipLevel);
+            fb.BindAttachmentToCubemapFace(prefilteredMap, 0, i, mipLevel);
             RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             RendererCommand::Draw(va->GetVertexBuffer());
         }
@@ -198,8 +205,12 @@ void EnvironmentMapLoader::ComputeRadianceMap()
 
 void EnvironmentMapLoader::ComputeLUT()
 {
-    TextureSpecification specification{ lutTexWidth, lutTexHeight, 3, TextureFormat::RGB32F };
-    auto lutTexture = Texture::Create(specification, {});
+    TextureSpecification specification{ lutTexWidth,
+                                        lutTexHeight,
+                                        3,
+                                        TextureType::TEXTURE_2D,
+                                        TextureFormat::RGB32F };
+    auto lutTexture = Texture::Create(specification, std::vector<uint8_t>());
     lutTexture->SetSampler(Sampler::Create({SamplerFilter::Linear,
                                                    SamplerFilter::Linear,
                                                    SamplerFilter::Linear,
@@ -225,7 +236,7 @@ void EnvironmentMapLoader::ComputeLUT()
     va->Bind();
     va->GetVertexBuffer()->Bind();
 
-    fb.BindAttachmentToTexture2D(lutTexture, 0);
+    fb.BindAttachmentToTexture(lutTexture, 0);
     RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     RendererCommand::Draw(va->GetVertexBuffer());
 

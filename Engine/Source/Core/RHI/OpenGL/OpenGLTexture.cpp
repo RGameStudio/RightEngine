@@ -13,16 +13,9 @@ OpenGLTexture::OpenGLTexture(const TextureSpecification& aSpecification, const s
     Generate(data.data());
 }
 
-OpenGLTexture::OpenGLTexture(const TextureSpecification& textureSpecification,
-                             const std::array<std::vector<uint8_t>, 6>& data)
+OpenGLTexture::OpenGLTexture(const TextureSpecification& aSpecification, const CubemapFaces& faces)
 {
-    specification = textureSpecification;
-    CubeMapFaces faces;
-    for (int i = 0; i < data.size(); i++)
-    {
-        faces.SetFaceData(data[i], i);
-    }
-
+    specification = aSpecification;
     Generate(faces);
 }
 
@@ -43,23 +36,15 @@ void OpenGLTexture::UnBind() const
 
 void OpenGLTexture::Generate(const void* buffer)
 {
-    R_CORE_ASSERT(specification.width > 0
-                  && specification.height > 0
-                  && specification.componentAmount > 0
-                  && specification.format != TextureFormat::NONE
-                  && specification.type != TextureType::NONE, "Texture data is incorrect!");
+    ValidateTextureData();
     Init();
     GenerateTexture(buffer, OpenGLConverters::textureType(specification.type));
     UnBind();
 }
 
-void OpenGLTexture::Generate(const CubeMapFaces& faces)
+void OpenGLTexture::Generate(const CubemapFaces& faces)
 {
-    R_CORE_ASSERT(specification.width > 0
-                  && specification.height > 0
-                  && specification.componentAmount > 0
-                  && specification.format != TextureFormat::NONE
-                  && specification.type != TextureType::NONE, "Texture data is incorrect!");
+    ValidateTextureData();
     Init();
     for (int i = 0; i < 6; i++)
     {
@@ -141,17 +126,29 @@ void OpenGLTexture::GenerateTexture(const void* buffer, GLenum type)
 void OpenGLTexture::GenerateMipmaps() const
 {
     Bind();
-    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    glGenerateMipmap(OpenGLConverters::textureType(specification.type));
     UnBind();
 }
 
 void OpenGLTexture::Init()
 {
     glGenTextures(1, &id);
-    Bind();
+    glBindTexture(OpenGLConverters::textureType(specification.type), id);
     glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    if (specification.type == TextureType::CUBEMAP)
+    {
+        glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    }
+}
+
+void OpenGLTexture::ValidateTextureData() const
+{
+    R_CORE_ASSERT(specification.width > 0
+                  && specification.height > 0
+                  && specification.componentAmount > 0
+                  && specification.format != TextureFormat::NONE
+                  && specification.type != TextureType::NONE, "Texture data is incorrect!");
 }

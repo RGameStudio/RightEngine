@@ -10,8 +10,7 @@ namespace RightEngine
     {
     public:
         OpenGLTexture(const TextureSpecification& aSpecification, const std::vector<uint8_t>& data);
-        OpenGLTexture(const TextureSpecification& textureSpecification,
-                        const std::array<std::vector<uint8_t>, 6>& data);
+        OpenGLTexture(const TextureSpecification& aSpecification, const CubemapFaces& faces);
         virtual ~OpenGLTexture() override;
 
         virtual void Bind(uint32_t slot = 0) const override;
@@ -22,7 +21,8 @@ namespace RightEngine
     private:
         void Init();
         void Generate(const void* buffer);
-        void Generate(const CubeMapFaces& faces);
+        void Generate(const CubemapFaces& faces);
         void GenerateTexture(const void* buffer, GLenum type);
+        inline void ValidateTextureData() const;
     };
 }

@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Texture3D.hpp"
+#include "Texture.hpp"
 #include <string>
 
 namespace RightEngine
 {
     struct EnvironmentContext
     {
-        std::shared_ptr<Texture3D> envMap;
-        std::shared_ptr<Texture3D> irradianceMap;
-        std::shared_ptr<Texture3D> prefilterMap;
+        std::shared_ptr<Texture> envMap;
+        std::shared_ptr<Texture> irradianceMap;
+        std::shared_ptr<Texture> prefilterMap;
         std::shared_ptr<Texture> brdfLut;
     };
 

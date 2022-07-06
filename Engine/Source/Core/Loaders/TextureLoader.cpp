@@ -3,6 +3,7 @@
 #include "Path.hpp"
 #include "Assert.hpp"
 #include <stb_image.h>
+#include <stb_image_write.h>
 
 using namespace RightEngine;
 
@@ -118,7 +119,9 @@ std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const 
 
 std::shared_ptr<Texture> TextureLoader::CreateTexture(const std::string& path, bool flipVertically) const
 {
-    const auto [data, spec] = Load(path, flipVertically);
+    auto [data, spec] = Load(path, flipVertically);
+    spec.type = TextureType::TEXTURE_2D;
     auto texture = Texture::Create(spec, data);
+//    stbi_write_bmp("tex.bmp", spec.width, spec.height, spec.componentAmount, data.data());
     return texture;
 }

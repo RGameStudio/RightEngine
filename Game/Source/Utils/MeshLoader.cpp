@@ -2,6 +2,7 @@
 #include "Logger.hpp"
 #include "Path.hpp"
 #include "String.hpp"
+#include "TextureLoader.hpp"
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -15,6 +16,8 @@ namespace
         glm::vec3 position;
         glm::vec3 normal;
         glm::vec2 uv;
+        glm::vec3 tangent;
+        glm::vec3 biTangent;
     };
 
     std::shared_ptr<Mesh> BuildMesh(const std::vector<Vertex>& vertices,
@@ -26,6 +29,8 @@ namespace
         layout.Push<float>(3);
         layout.Push<float>(3);
         layout.Push<float>(2);
+        layout.Push<float>(3);
+        layout.Push<float>(3);
 
         auto mesh = std::make_shared<Mesh>();
         auto vertexArray = std::make_shared<VertexArray>();
@@ -113,7 +118,25 @@ std::shared_ptr<Mesh> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene*
             vertex.uv = vec;
         }
         else
+        {
             vertex.uv = glm::vec2(0.0f, 0.0f);
+        }
+
+        if (mesh->HasTangentsAndBitangents())
+        {
+            glm::vec3 tangent;
+            tangent.x = mesh->mTangents[i].x;
+            tangent.y = mesh->mTangents[i].y;
+            tangent.z = mesh->mTangents[i].z;
+
+            glm::vec3 biTangent;
+            biTangent.x = mesh->mBitangents[i].x;
+            biTangent.y = mesh->mBitangents[i].y;
+            biTangent.z = mesh->mBitangents[i].z;
+
+            vertex.tangent = tangent;
+            vertex.biTangent = biTangent;
+        }
 
         vertices.push_back(vertex);
     }
@@ -131,6 +154,7 @@ std::shared_ptr<Mesh> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene*
     std::vector<std::shared_ptr<Texture>> normal;
     std::vector<std::shared_ptr<Texture>> specular;
     std::vector<std::shared_ptr<Texture>> roughness;
+#if 0
     if (mesh->mMaterialIndex >= 0)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -147,6 +171,7 @@ std::shared_ptr<Mesh> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene*
             roughness = LoadTextures(material, aiTextureType_SHININESS);
         }
     }
+#endif
 
     auto material = std::make_shared<Material>();
     if (!albedo.empty())
@@ -177,6 +202,7 @@ std::shared_ptr<Mesh> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene*
 std::vector<std::shared_ptr<Texture>> MeshLoader::LoadTextures(const aiMaterial* mat, aiTextureType type)
 {
     std::vector<std::shared_ptr<Texture>> textures;
+    TextureLoader textureLoader;
     for (uint32_t i = 0; i < mat->GetTextureCount(type); i++)
     {
         aiString str;
@@ -187,7 +213,7 @@ std::vector<std::shared_ptr<Texture>> MeshLoader::LoadTextures(const aiMaterial*
         std::string texName = meshDir + '/' + *(splittedPath.end() - 2) + '/' + *(splittedPath.end() - 1);
         if (loadedTextures.find(texName) == loadedTextures.end())
         {
-            auto texture = Texture::Create(texName);
+            auto texture = textureLoader.CreateTexture(texName);
             textures.push_back(texture);
             loadedTextures[texName] = texture;
         }

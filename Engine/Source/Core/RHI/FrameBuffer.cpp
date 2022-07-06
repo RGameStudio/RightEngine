@@ -1,13 +1,14 @@
 #include "FrameBuffer.hpp"
 #include "Assert.hpp"
-#include "Texture3D.hpp"
+#include "Texture.hpp"
 #include <glad/glad.h>
 
 using namespace RightEngine;
 
 static const uint32_t maxFramebufferSize = 8192;
 
-namespace Utils {
+namespace Utils
+{
 
     static GLenum TextureTarget(bool multisampled)
     {
@@ -24,7 +25,9 @@ namespace Utils {
         glBindTexture(TextureTarget(multisampled), id);
     }
 
-    static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index)
+    static void
+    AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height,
+                       int index)
     {
         bool multisampled = samples > 1;
         if (multisampled)
@@ -45,7 +48,8 @@ namespace Utils {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, TextureTarget(multisampled), id, 0);
     }
 
-    static void AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, uint32_t width, uint32_t height)
+    static void
+    AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, uint32_t width, uint32_t height)
     {
         bool multisampled = samples > 1;
         if (multisampled)
@@ -70,7 +74,8 @@ namespace Utils {
     {
         switch (format)
         {
-            case FramebufferTextureFormat::DEPTH24STENCIL8:  return true;
+            case FramebufferTextureFormat::DEPTH24STENCIL8:
+                return true;
         }
 
         return false;
@@ -80,8 +85,10 @@ namespace Utils {
     {
         switch (format)
         {
-            case FramebufferTextureFormat::RGBA8:       return GL_RGBA8;
-            case FramebufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
+            case FramebufferTextureFormat::RGBA8:
+                return GL_RGBA8;
+            case FramebufferTextureFormat::RED_INTEGER:
+                return GL_RED_INTEGER;
         }
 
         R_CORE_ASSERT(false, "");
@@ -90,9 +97,9 @@ namespace Utils {
 
 }
 
-RightEngine::Framebuffer::Framebuffer(const RightEngine::FramebufferSpecification& spec): specification(spec)
+RightEngine::Framebuffer::Framebuffer(const RightEngine::FramebufferSpecification& spec) : specification(spec)
 {
-    for (auto spec : specification.attachments.attachments)
+    for (auto spec: specification.attachments.attachments)
     {
         if (!Utils::IsDepthFormat(spec.textureFormat))
         {
@@ -154,10 +161,12 @@ void RightEngine::Framebuffer::Invalidate()
             switch (colorAttachmentSpecifications[i].textureFormat)
             {
                 case FramebufferTextureFormat::RGBA8:
-                    Utils::AttachColorTexture(colorAttachments[i], specification.samples, GL_RGBA8, GL_RGBA, specification.width, specification.height, i);
+                    Utils::AttachColorTexture(colorAttachments[i], specification.samples, GL_RGBA8, GL_RGBA,
+                                              specification.width, specification.height, i);
                     break;
                 case FramebufferTextureFormat::RED_INTEGER:
-                    Utils::AttachColorTexture(colorAttachments[i], specification.samples, GL_R32I, GL_RED_INTEGER, specification.width, specification.height, i);
+                    Utils::AttachColorTexture(colorAttachments[i], specification.samples, GL_R32I, GL_RED_INTEGER,
+                                              specification.width, specification.height, i);
                     break;
             }
         }
@@ -170,7 +179,8 @@ void RightEngine::Framebuffer::Invalidate()
         switch (depthAttachmentSpecification.textureFormat)
         {
             case FramebufferTextureFormat::DEPTH24STENCIL8:
-                Utils::AttachDepthTexture(depthAttachment, specification.samples, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, specification.width, specification.height);
+                Utils::AttachDepthTexture(depthAttachment, specification.samples, GL_DEPTH24_STENCIL8,
+                                          GL_DEPTH_STENCIL_ATTACHMENT, specification.width, specification.height);
                 break;
         }
     }
@@ -248,18 +258,26 @@ const RightEngine::FramebufferSpecification& RightEngine::Framebuffer::GetSpecif
     return specification;
 }
 
-void Framebuffer::BindAttachmentToTexture3DFace(const std::shared_ptr<Texture3D>& texture3D,
-                                                uint32_t attachmentIndex,
-                                                uint32_t texture3DFace,
-                                                uint32_t mipmapLevel)
+void Framebuffer::BindAttachmentToCubemapFace(const std::shared_ptr<Texture>& texture,
+                                              uint32_t attachmentIndex,
+                                              uint32_t texture3DFace,
+                                              uint32_t mipmapLevel)
 {
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex,
-                           GL_TEXTURE_CUBE_MAP_POSITIVE_X + texture3DFace, texture3D->GetId(), mipmapLevel);
+    R_CORE_ASSERT(texture->GetSpecification().type == TextureType::CUBEMAP, "");
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0 + attachmentIndex,
+                           GL_TEXTURE_CUBE_MAP_POSITIVE_X + texture3DFace,
+                           texture->GetId(),
+                           mipmapLevel);
 }
 
-void Framebuffer::BindAttachmentToTexture2D(const std::shared_ptr<Texture>& texture, uint32_t attachmentIndex,
-                                            uint32_t mipmapLevel)
+void Framebuffer::BindAttachmentToTexture(const std::shared_ptr<Texture>& texture,
+                                          uint32_t attachmentIndex,
+                                          uint32_t mipmapLevel)
 {
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex,
-                           GL_TEXTURE_2D, texture->GetId(), mipmapLevel);
+    R_CORE_ASSERT(texture->GetSpecification().type == TextureType::TEXTURE_2D, "");
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0 + attachmentIndex,
+                           GL_TEXTURE_2D,
+                           texture->GetId(), mipmapLevel);
 }

@@ -7,7 +7,6 @@
 namespace RightEngine
 {
     class Texture;
-    class Texture3D;
 
     enum class FramebufferTextureFormat
     {
@@ -74,11 +73,11 @@ namespace RightEngine
 
         const FramebufferSpecification& GetSpecification() const;
 
-        void BindAttachmentToTexture3DFace(const std::shared_ptr<Texture3D>& texture3D,
+        void BindAttachmentToCubemapFace(const std::shared_ptr<Texture>& texture,
                                            uint32_t attachmentIndex,
                                            uint32_t texture3DFace,
                                            uint32_t mipmapLevel = 0);
-        void BindAttachmentToTexture2D(const std::shared_ptr<Texture>& texture,
+        void BindAttachmentToTexture(const std::shared_ptr<Texture>& texture,
                                            uint32_t attachmentIndex,
                                            uint32_t mipmapLevel = 0);
 

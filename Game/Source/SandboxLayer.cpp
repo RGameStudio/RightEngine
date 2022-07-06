@@ -5,7 +5,8 @@
 #include "UniformBuffer.hpp"
 #include "Entity.hpp"
 #include "Components.hpp"
-#include "Texture3D.hpp"
+#include "Texture.hpp"
+#include "TextureLoader.hpp"
 #include "Panels/PropertyPanel.hpp"
 #include "Utils/EnvironmentMapLoader.hpp"
 #include "Utils/MeshLoader.hpp"
@@ -89,17 +90,12 @@ namespace
     struct LayerSceneData
     {
         std::shared_ptr<UniformBuffer> materialUniformBuffer;
-        std::shared_ptr<Texture> albedoTexture;
-        std::shared_ptr<Texture> normalTexture;
-        std::shared_ptr<Texture> metallicTexture;
-        std::shared_ptr<Texture> roughnessTexture;
-        std::shared_ptr<Texture> aoTexture;
         std::shared_ptr<EditorCamera> camera;
         std::shared_ptr<Entity> skyboxCube;
         std::shared_ptr<Shader> skyboxShader;
-        std::shared_ptr<Texture3D> skyboxTexture;
-        std::shared_ptr<Texture3D> prefilterTexture;
-        std::shared_ptr<Texture3D> irradianceTexture;
+        std::shared_ptr<Texture> skyboxTexture;
+        std::shared_ptr<Texture> prefilterTexture;
+        std::shared_ptr<Texture> irradianceTexture;
         std::shared_ptr<Texture> brdfLUT;
         ImVec2 viewportSize{ width, height };
         uint32_t newEntityId{ 1 };
@@ -107,6 +103,7 @@ namespace
         PropertyPanel propertyPanel;
         MeshLoader meshLoader;
         std::shared_ptr<MeshNode> gun;
+        TextureLoader textureLoader;
     };
 
     static LayerSceneData sceneData;
@@ -222,12 +219,6 @@ namespace
                         break;
                 }
                 node->AddComponent<Mesh>(std::move(*mesh));
-                auto& textureData = node->GetComponent<Mesh>().GetMaterial()->textureData;
-                textureData.normal = sceneData.normalTexture;
-                textureData.ao = sceneData.aoTexture;
-                textureData.albedo = sceneData.albedoTexture;
-                textureData.metallic = sceneData.metallicTexture;
-                textureData.roughness = sceneData.roughnessTexture;
             }
         }
         AddTag(node);
@@ -258,12 +249,6 @@ void SandboxLayer::OnAttach()
 {
     sceneData.gun = sceneData.meshLoader.Load("/Assets/Models/Gun/cerberus_2.fbx");
 
-    sceneData.albedoTexture = Texture::Create("/Assets/Textures/albedo.png");
-    sceneData.normalTexture = Texture::Create("/Assets/Textures/normal.png");
-    sceneData.roughnessTexture = Texture::Create("/Assets/Textures/roughness.png");
-    sceneData.metallicTexture = Texture::Create("/Assets/Textures/metallic.png");
-    sceneData.aoTexture = Texture::Create("/Assets/Textures/ao.png");
-
     sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 10, -15),
                                                       glm::vec3(0, 1, 0));
     scene = Scene::Create();
@@ -272,7 +257,13 @@ void SandboxLayer::OnAttach()
     gun->GetComponent<Tag>().name = "Gun";
     auto& gunTransform = gun->GetComponent<Transform>();
     gunTransform.SetScale({ 0.3f, 0.3f, 0.3f });
-    gunTransform.SetRotation({ -90.0f, 0.0f, 0.0f });
+//    gunTransform.SetRotation({ -0.0f, 0.0f, 0.0f });
+
+    auto& textureData = gun->GetChildren().back()->GetComponent<Mesh>().GetMaterial()->textureData;
+    textureData.albedo = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_A.tga");
+    textureData.normal = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_N.tga");
+//    textureData.roughness = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_R.tga");
+    textureData.metallic = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_M.tga");
 
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(gun);
@@ -345,7 +336,7 @@ void SandboxLayer::OnUpdate(float ts)
 
         shader->Bind();
         shader->SetUniform1iv("u_Textures", { 0, 1, 2, 3, 4 });
-        shader->SetUniform3f("camPos", sceneData.camera->GetPosition());
+        shader->SetUniform3f("u_CameraPosition", sceneData.camera->GetPosition());
         sceneData.irradianceTexture->Bind(static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
         shader->SetUniform1i("u_IrradianceMap", static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
         sceneData.prefilterTexture->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));

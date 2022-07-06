@@ -75,7 +75,7 @@ namespace RightEngine
         }
     };
 
-    struct CubeMapFaces
+    struct CubemapFaces
     {
         std::vector<uint8_t> face1;
         std::vector<uint8_t> face2;
@@ -142,9 +142,6 @@ namespace RightEngine
     public:
         virtual ~Texture() = default;
 
-        virtual void Bind(uint32_t slot = 0) const = 0;
-        virtual void UnBind() const = 0;
-
         inline int GetWidth() const
         { return specification.width; }
 
@@ -160,12 +157,18 @@ namespace RightEngine
         void SetSampler(const std::shared_ptr<Sampler>& aSampler)
         { sampler = aSampler; }
 
+        inline const TextureSpecification& GetSpecification() const
+        { return specification; }
+
         virtual void GenerateMipmaps() const = 0;
+
+        virtual void Bind(uint32_t slot = 0) const = 0;
+        virtual void UnBind() const = 0;
 
         static std::shared_ptr<Texture> Create(const TextureSpecification& aSpecification,
                                                const std::vector<uint8_t>& data);
         static std::shared_ptr<Texture> Create(const TextureSpecification& aSpecification,
-                                               const std::array<std::vector<uint8_t>, 6>& data);
+                                               const CubemapFaces& faces);
 
     protected:
         uint32_t id;

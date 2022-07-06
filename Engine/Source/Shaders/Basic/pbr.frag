@@ -5,6 +5,7 @@ layout (location = 1) out vec4 aNormal;
 in vec2 f_UV;
 in vec3 f_Normal;
 in vec3 f_WorldPos;
+in mat3 f_TBN;
 
 layout(std140, binding = 0) uniform MaterialData
 {
@@ -27,14 +28,10 @@ uniform sampler2D u_BRDFLUT;
 vec3 lightPositions[4];
 vec3 lightColors[4];
 
-uniform vec3 camPos;
+uniform vec3 u_CameraPosition;
 
 const float PI = 3.14159265359;
-// ----------------------------------------------------------------------------
-// Easy trick to get tangent-normals to world-space to keep PBR code simplified.
-// Don't worry if you don't get what's going on; you generally want to do normal
-// mapping the usual way for performance anways; I do plan make a note of this
-// technique somewhere later in the normal mapping tutorial.
+
 vec3 getNormalFromMap()
 {
     vec3 tangentNormal = texture(u_Textures[1], f_UV).xyz * 2.0 - 1.0;
@@ -51,6 +48,7 @@ vec3 getNormalFromMap()
 
     return normalize(TBN * tangentNormal);
 }
+
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -101,7 +99,7 @@ void main()
 {
     lightPositions[0] = vec3(0, 0, -15);
     lightPositions[1] = vec3(10, 0, -15);
-    lightPositions[2] = vec3(14, 0, -15);
+    lightPositions[2] =  vec3(14, 0, -15);
     lightPositions[3] = vec3(0, 10, -15);
     lightColors[0] = vec3(150, 150, 150);
     lightColors[1] = vec3(247, 239, 79);
@@ -125,7 +123,16 @@ void main()
 
     if (u_HasNormal)
     {
-        N = getNormalFromMap();
+//        N = getNormalFromMap();
+        N = texture(u_Textures[1], f_UV).rgb;
+        albedo = vec3(f_UV, 0.0);
+//        N = normalize(N * 2.0 - 1.0);
+//        N = abs(N);
+//        if (N.x < 0.0 && N.y < 0.0 && N.z < 0.0)
+//        {
+//            albedo = N;
+//        }
+//        N = f_Normal;
     }
     else
     {
@@ -144,10 +151,20 @@ void main()
     if (u_HasRoughness)
     {
         roughness = texture(u_Textures[3], f_UV).r;
+//        if (roughness > 0.5)
+//        {
+//            albedo = vec3(0, 1, 0);
+//        }
+//        else
+//        {
+//            albedo = vec3(1, 0, 0);
+//        }
+//        roughness = 0;
     }
     else
     {
         roughness = u_Roughness;
+//        roughness = 1;
     }
 
     if (u_HasAO)
@@ -159,7 +176,7 @@ void main()
         ao = 1.0f;
     }
 
-    vec3 V = normalize(camPos - f_WorldPos);
+    vec3 V = normalize(u_CameraPosition - f_WorldPos);
     vec3 R = reflect(-V, N);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
