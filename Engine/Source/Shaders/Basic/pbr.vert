@@ -27,6 +27,4 @@ void main()
     f_TBN = TBN;
 
     gl_Position = u_ViewProjection * vec4(f_WorldPos, 1.0);
-
-    f_WorldPos = f_WorldPos;
 }

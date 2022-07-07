@@ -19,7 +19,7 @@ namespace RightEngine
         virtual void GenerateMipmaps() const override;
 
     private:
-        void Init();
+        void Create();
         void Generate(const void* buffer);
         void Generate(const CubemapFaces& faces);
         void GenerateTexture(const void* buffer, GLenum type);

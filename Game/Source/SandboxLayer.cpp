@@ -255,13 +255,16 @@ void SandboxLayer::OnAttach()
 
     std::shared_ptr<Entity> gun = CreateTestSceneNode(scene, sceneData.gun);
     gun->GetComponent<Tag>().name = "Gun";
-    auto& gunTransform = gun->GetComponent<Transform>();
-    gunTransform.SetScale({ 0.3f, 0.3f, 0.3f });
-//    gunTransform.SetRotation({ -0.0f, 0.0f, 0.0f });
 
-    auto& textureData = gun->GetChildren().back()->GetComponent<Mesh>().GetMaterial()->textureData;
+    auto& gunMesh = gun->GetChildren().back();
+    auto& gunTransform = gunMesh->GetComponent<Transform>();
+    gunTransform.SetScale({ 0.3f, 0.3f, 0.3f });
+    gunTransform.SetRotation({ -90.0f, 0.0f, 0.0f });
+    auto& textureData = gunMesh->GetComponent<Mesh>().GetMaterial()->textureData;
     textureData.albedo = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_A.tga");
     textureData.normal = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_N.tga");
+    // TODO: Investigate why do we need mipmaps for normal texture
+    textureData.normal->GenerateMipmaps();
     textureData.roughness = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_R.tga");
     textureData.metallic = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_M.tga");
 
@@ -354,7 +357,6 @@ void SandboxLayer::OnUpdate(float ts)
 
     frameBuffer->Bind();
     sceneData.skyboxShader->Bind();
-//    sceneData.skyboxTexture->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxTexture->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     const auto projectionMatrix = glm::perspective(glm::radians(45.0f),
@@ -445,7 +447,7 @@ void SandboxLayer::OnImGuiRender()
     ImGui::End();
 
     ImGui::Begin("Viewport");
-    id = frameBuffer->GetColorAttachment(1);
+    id = frameBuffer->GetColorAttachment();
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
     if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y)
     {

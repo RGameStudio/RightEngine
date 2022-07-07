@@ -37,7 +37,7 @@ void OpenGLTexture::UnBind() const
 void OpenGLTexture::Generate(const void* buffer)
 {
     ValidateTextureData();
-    Init();
+    Create();
     GenerateTexture(buffer, OpenGLConverters::textureType(specification.type));
     UnBind();
 }
@@ -45,7 +45,7 @@ void OpenGLTexture::Generate(const void* buffer)
 void OpenGLTexture::Generate(const CubemapFaces& faces)
 {
     ValidateTextureData();
-    Init();
+    Create();
     for (int i = 0; i < 6; i++)
     {
         GenerateTexture(faces.GetFaceData(i).data(), OpenGLConverters::cubeMapFace(i));
@@ -121,6 +121,12 @@ void OpenGLTexture::GenerateTexture(const void* buffer, GLenum type)
         default:
         R_CORE_ASSERT(false, "Unsupported texture format!");
     }
+
+    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 }
 
 void OpenGLTexture::GenerateMipmaps() const
@@ -130,19 +136,10 @@ void OpenGLTexture::GenerateMipmaps() const
     UnBind();
 }
 
-void OpenGLTexture::Init()
+void OpenGLTexture::Create()
 {
     glGenTextures(1, &id);
     glBindTexture(OpenGLConverters::textureType(specification.type), id);
-    glGenerateMipmap(OpenGLConverters::textureType(specification.type));
-    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_T, GL_REPEAT);
-    if (specification.type == TextureType::CUBEMAP)
-    {
-        glTexParameteri(OpenGLConverters::textureType(specification.type), GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    }
 }
 
 void OpenGLTexture::ValidateTextureData() const

@@ -34,6 +34,7 @@ const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
 {
+    // TODO: Calculate light in tangent space
     vec3 tangentNormal = texture(u_Textures[1], f_UV).xyz;
 
     vec3 Q1  = dFdx(f_WorldPos);
@@ -99,7 +100,7 @@ void main()
 {
     lightPositions[0] = vec3(0, 0, -15);
     lightPositions[1] = vec3(10, 0, -15);
-    lightPositions[2] =  vec3(14, 0, -15);
+    lightPositions[2] = vec3(14, 0, -15);
     lightPositions[3] = vec3(0, 10, -15);
     lightColors[0] = vec3(150, 150, 150);
     lightColors[1] = vec3(247, 239, 79);
@@ -124,15 +125,6 @@ void main()
     if (u_HasNormal)
     {
         N = getNormalFromMap();
-//        N = texture(u_Textures[1], f_UV).rgb;
-//        albedo = vec3(f_UV, 0.0);
-//        N = normalize(N * 2.0 - 1.0);
-//        N = abs(N);
-//        if (N.x < 0.0 && N.y < 0.0 && N.z < 0.0)
-//        {
-//            albedo = N;
-//        }
-//        N = f_Normal;
     }
     else
     {
@@ -151,20 +143,10 @@ void main()
     if (u_HasRoughness)
     {
         roughness = texture(u_Textures[3], f_UV).r;
-//        if (roughness > 0.5)
-//        {
-//            albedo = vec3(0, 1, 0);
-//        }
-//        else
-//        {
-//            albedo = vec3(1, 0, 0);
-//        }
-//        roughness = 0;
     }
     else
     {
         roughness = u_Roughness;
-//        roughness = 1;
     }
 
     if (u_HasAO)

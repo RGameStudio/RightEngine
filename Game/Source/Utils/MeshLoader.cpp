@@ -137,6 +137,11 @@ std::shared_ptr<Mesh> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene*
             vertex.tangent = tangent;
             vertex.biTangent = biTangent;
         }
+        else
+        {
+            // TODO: Implement manual tangent and biTangent calculation
+            R_CORE_ASSERT(false, "");
+        }
 
         vertices.push_back(vertex);
     }
