@@ -262,7 +262,7 @@ void SandboxLayer::OnAttach()
     auto& textureData = gun->GetChildren().back()->GetComponent<Mesh>().GetMaterial()->textureData;
     textureData.albedo = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_A.tga");
     textureData.normal = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_N.tga");
-//    textureData.roughness = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_R.tga");
+    textureData.roughness = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_R.tga");
     textureData.metallic = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_M.tga");
 
     scene->SetCamera(sceneData.camera);
@@ -445,7 +445,7 @@ void SandboxLayer::OnImGuiRender()
     ImGui::End();
 
     ImGui::Begin("Viewport");
-    id = frameBuffer->GetColorAttachment();
+    id = frameBuffer->GetColorAttachment(1);
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
     if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y)
     {

@@ -34,7 +34,7 @@ const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
 {
-    vec3 tangentNormal = texture(u_Textures[1], f_UV).xyz * 2.0 - 1.0;
+    vec3 tangentNormal = texture(u_Textures[1], f_UV).xyz;
 
     vec3 Q1  = dFdx(f_WorldPos);
     vec3 Q2  = dFdy(f_WorldPos);
@@ -123,9 +123,9 @@ void main()
 
     if (u_HasNormal)
     {
-//        N = getNormalFromMap();
-        N = texture(u_Textures[1], f_UV).rgb;
-        albedo = vec3(f_UV, 0.0);
+        N = getNormalFromMap();
+//        N = texture(u_Textures[1], f_UV).rgb;
+//        albedo = vec3(f_UV, 0.0);
 //        N = normalize(N * 2.0 - 1.0);
 //        N = abs(N);
 //        if (N.x < 0.0 && N.y < 0.0 && N.z < 0.0)
