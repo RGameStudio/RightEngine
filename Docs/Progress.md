@@ -25,3 +25,7 @@ Just a bunch of screenshots, that show progress of engine development
 ## 10-06-2022 (Implemented IBL and docking space)
 
 ![10-06-2022.png](https://i.imgur.com/5GLng93.png)
+
+## 07-07-2022 (Asset loading)
+
+![10-06-2022.png](https://i.imgur.com/j3F7MqZ.png)
