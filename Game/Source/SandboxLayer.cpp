@@ -64,6 +64,22 @@ namespace
             -1.0f, 1.0f, 1.0f,    // bottom-left
     };
 
+    struct ShaderLight
+    {
+        glm::vec4 color;
+        glm::vec4 position;
+        glm::vec4 rotation;
+        float intensity;
+        int type;
+        glm::vec2 _padding_;
+    };
+
+    struct LightBuffer
+    {
+        glm::ivec4 lightsAmount;
+        ShaderLight light[30];
+    };
+
     enum class TextureSlot
     {
         ALBEDO_TEXTURE_SLOT = 0,
@@ -104,6 +120,7 @@ namespace
         MeshLoader meshLoader;
         std::shared_ptr<MeshNode> gun;
         TextureLoader textureLoader;
+        std::shared_ptr<UniformBuffer> lightUniformBuffer;
     };
 
     static LayerSceneData sceneData;
@@ -174,7 +191,7 @@ namespace
             AddTag(entity);
         }
 
-        for (auto& mesh : tree->meshes)
+        for (auto& mesh: tree->meshes)
         {
             auto newMeshEntity = scene->CreateEntity();
             AddTag(newMeshEntity);
@@ -182,7 +199,7 @@ namespace
             entity->AddChild(newMeshEntity);
         }
 
-        for (auto& child : tree->children)
+        for (auto& child: tree->children)
         {
             if (child->meshes.empty())
             {
@@ -231,7 +248,7 @@ namespace
         {
             const auto& tag = entity->GetComponent<Tag>();
             ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow;
-            bool node_open = ImGui::TreeNodeEx((void*)tag.id, node_flags, "%s", tag.name.c_str());
+            bool node_open = ImGui::TreeNodeEx((void*) tag.id, node_flags, "%s", tag.name.c_str());
             if (ImGui::IsItemClicked())
             {
                 sceneData.propertyPanel.SetSelectedEntity(entity);
@@ -287,13 +304,14 @@ void SandboxLayer::OnAttach()
 
     frameBuffer = std::make_shared<Framebuffer>(fbSpec);
 
-    sceneData.materialUniformBuffer = UniformBuffer::Create(GPU_API::OpenGL, sizeof(MaterialData), 0);
+    sceneData.materialUniformBuffer = UniformBuffer::Create(sizeof(MaterialData), 0);
+    sceneData.lightUniformBuffer = UniformBuffer::Create(sizeof(LightBuffer), 1);
 
     sceneData.skyboxShader = Shader::Create("/Assets/Shaders/Basic/skybox.vert",
                                             "/Assets/Shaders/Basic/skybox.frag");
 
     EnvironmentMapLoader mapLoader;
-    mapLoader.Load("/Assets/Textures/env_malibu.hdr", true);
+    mapLoader.Load("/Assets/Textures/env_black.hdr", true);
     const auto envContext = mapLoader.GetEnvironmentContext();
 
     sceneData.skyboxTexture = envContext.envMap;
@@ -314,6 +332,25 @@ void SandboxLayer::OnAttach()
     sceneData.brdfLUT = envContext.brdfLut;
 
     sceneData.propertyPanel.SetScene(scene);
+
+    auto light = CreateTestSceneNode(scene, nullptr, GeometryType::NONE);
+    light->GetComponent<Tag>().name = "Light";
+    auto lightComponent = Light();
+    lightComponent.intensity = 1000.0f;
+    lightComponent.color = glm::vec3(1.0f, 0.0f, 0.0f);
+    light->AddComponent<Light>(lightComponent);
+    light->GetComponent<Transform>().SetPosition(glm::vec3(0, 10, -15));
+
+    auto light1 = CreateTestSceneNode(scene, nullptr, GeometryType::NONE);
+    light1->GetComponent<Tag>().name = "Light1";
+    auto lightComponent1 = Light();
+    lightComponent1.intensity = 1000.0f;
+    lightComponent1.color = glm::vec3(1.0f, 0.0f, 0.0f);
+    light1->AddComponent<Light>(lightComponent);
+    light1->GetComponent<Transform>().SetPosition(glm::vec3(0, 10, 15));
+
+    scene->GetRootNode()->AddChild(light);
+    scene->GetRootNode()->AddChild(light1);
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -324,6 +361,33 @@ void SandboxLayer::OnUpdate(float ts)
     RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     renderer->Configure();
     renderer->BeginScene(scene);
+
+    LightBuffer lightBuffer;
+    std::memset(&lightBuffer, 0, sizeof(LightBuffer));
+    for (const auto& entityID: scene->GetRegistry().view<Light>())
+    {
+        const auto& transform = scene->GetRegistry().get<Transform>(entityID);
+        const auto& light = scene->GetRegistry().get<Light>(entityID);
+        ShaderLight shaderLight;
+        shaderLight.type = static_cast<int>(light.type);
+        shaderLight.position = glm::vec4(transform.GetWorldPosition(), 1);
+        shaderLight.color = glm::vec4(light.color, 1);
+        shaderLight.intensity = light.intensity;
+        lightBuffer.light[lightBuffer.lightsAmount.x] = shaderLight;
+        lightBuffer.lightsAmount.x += 1;
+        switch (light.type)
+        {
+            case LightType::DIRECTIONAL:
+                lightBuffer.lightsAmount.y += 1;
+                break;
+            default:
+            R_ASSERT(false, "");
+        }
+    }
+
+    R_ASSERT(lightBuffer.lightsAmount.x < 30, "");
+    sceneData.lightUniformBuffer->SetData(&lightBuffer, sizeof(LightBuffer));
+
     for (const auto& entity: scene->GetRegistry().view<Mesh>())
     {
         const auto& transform = scene->GetRegistry().get<Transform>(entity);
@@ -459,7 +523,7 @@ void SandboxLayer::OnImGuiRender()
         frameBuffer->Resize(static_cast<uint32_t>(viewportSize.x), static_cast<uint32_t>(viewportSize.y));
         sceneData.viewportSize = viewportSize;
     }
-    ImGui::Image((void*)id, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::Image((void*) id, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 
     sceneData.propertyPanel.OnImGuiRender();

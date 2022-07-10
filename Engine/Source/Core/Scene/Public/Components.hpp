@@ -8,8 +8,11 @@ namespace RightEngine
 {
     struct Tag
     {
-        Tag(const std::string& name, uint32_t id = 0) : name(name), id(id) {}
-        Tag() {}
+        Tag(const std::string& name, uint32_t id = 0) : name(name), id(id)
+        {}
+
+        Tag()
+        {}
 
         std::string name{ "Entity" };
         uint32_t id;
@@ -74,5 +77,17 @@ namespace RightEngine
         std::shared_ptr<VertexArray> vertexArray;
         std::shared_ptr<Material> material;
         bool isVisible{ true };
+    };
+
+    enum class LightType
+    {
+        DIRECTIONAL = 0
+    };
+
+    struct Light
+    {
+        LightType type{ LightType::DIRECTIONAL };
+        glm::vec3 color{ 1.0f, 1.0f, 1.0f };
+        float intensity{ 1000.0f };
     };
 }

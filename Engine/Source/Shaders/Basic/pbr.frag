@@ -24,9 +24,25 @@ uniform samplerCube u_IrradianceMap;
 uniform samplerCube u_PrefilterMap;
 uniform sampler2D u_BRDFLUT;
 
-// lights
-vec3 lightPositions[4];
-vec3 lightColors[4];
+struct Light
+{
+    vec4 color;
+    vec4 position;
+    vec4 rotation;
+    float intensity;
+    int type;
+    vec2 _padding_;
+};
+
+layout(std140, binding = 1) uniform LightBuffer
+{
+// X - Overall lights amount
+// Y - Directional lights amount
+// Z - Point lights amount
+// W - TBD
+    ivec4 u_LightsAmount;
+    Light u_Light[30];
+};
 
 uniform vec3 u_CameraPosition;
 
@@ -98,15 +114,6 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 
 void main()
 {
-    lightPositions[0] = vec3(0, 0, -15);
-    lightPositions[1] = vec3(10, 0, -15);
-    lightPositions[2] = vec3(14, 0, -15);
-    lightPositions[3] = vec3(0, 10, -15);
-    lightColors[0] = vec3(150, 150, 150);
-    lightColors[1] = vec3(247, 239, 79);
-    lightColors[2] = vec3(150, 150, 150);
-    lightColors[3] = vec3(150, 150, 150);
-
     vec3 albedo;
     vec3 N;
     float metallic;
@@ -168,22 +175,30 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < 4; ++i)
+    for (int i = 0; i < u_LightsAmount.x; ++i)
     {
+        if (u_Light[i].type > 0)
+        {
+            albedo += 0.1f;
+        }
+        if (u_Light[i]._padding_.x > 0)
+        {
+            albedo += 0.1f;
+        }
         // calculate per-light radiance
-        vec3 L = normalize(lightPositions[i] - f_WorldPos);
+        vec3 L = normalize(vec3(u_Light[i].position) - f_WorldPos);
         vec3 H = normalize(V + L);
-        float distance = length(lightPositions[i] - f_WorldPos);
+        float distance = length(vec3(u_Light[i].position) - f_WorldPos);
         float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = lightColors[i] * attenuation;
-
+        vec3 radiance = vec3(u_Light[i].color) * u_Light[i].intensity * attenuation;
+        //        albedo = u_Light[i].color * u_Light[i].intensity;
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(N, H, roughness);
         float G   = GeometrySmith(N, V, L, roughness);
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
 
         vec3 numerator    = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;// + 0.0001 to prevent divide by zero
         vec3 specular = numerator / denominator;
 
         // kS is equal to Fresnel
@@ -201,7 +216,7 @@ void main()
         float NdotL = max(dot(N, L), 0.0);
 
         // add to outgoing radiance Lo
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
@@ -216,7 +231,7 @@ void main()
     const float MAX_REFLECTION_LOD = 1.2;
     vec3 prefilteredColor = textureLod(u_PrefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
     vec2 brdf = texture(u_BRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-//    vec2 brdf = vec2(1.0, 1.0);
+    //    vec2 brdf = vec2(1.0, 1.0);
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
     vec3 ambient = (kD * diffuse + specular) * ao;
