@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.19)
 add_executable(Game Source/Start.cpp
         Source/SandboxLayer.cpp
         Source/Panels/PropertyPanel.cpp
-        Source/Utils/EnvironmentMapLoader.cpp
+        ../Engine/Source/Core/Loaders/EnvironmentMapLoader.cpp
         Source/Utils/MeshLoader.cpp)
 
 set_target_properties(Game

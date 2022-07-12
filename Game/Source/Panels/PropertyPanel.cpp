@@ -1,7 +1,11 @@
 #include "PropertyPanel.hpp"
 #include "Components.hpp"
-#include <imgui_internal.h>
+#include "String.hpp"
+#include "Path.hpp"
 #include <imgui.h>
+#include <imgui_internal.h>
+#include <imfilebrowser.h>
+#include <filesystem>
 
 using namespace RightEngine;
 
@@ -72,6 +76,8 @@ namespace
 
         ImGui::PopID();
     }
+
+    ImGui::FileBrowser fileDialog;
 }
 
 PropertyPanel::PropertyPanel(const std::shared_ptr<Scene>& aScene)
@@ -135,6 +141,45 @@ void PropertyPanel::OnImGuiRender()
             DrawVec3Control("Rotation", rotation);
             auto& scale = component.GetScale();
             DrawVec3Control("Scale", scale);
+        });
+
+        DrawComponent<Skybox>("Skybox", selectedEntity, [](auto& component)
+        {
+            ImGui::LabelText("Image name", "%s", component.environment.name.c_str());
+            ImGui::Separator();
+            ImGui::Image((void*) component.environment.equirectangularTexture->GetId(),
+                         ImVec2(512, 256),
+                         ImVec2(0, 1),
+                         ImVec2(1, 0));
+
+            fileDialog.SetTitle("Open new environment map");
+            fileDialog.SetTypeFilters({ ".hdr" });
+            if (ImGui::Button("Open"))
+            {
+                fileDialog.Open();
+            }
+            fileDialog.Display();
+            if (fileDialog.HasSelected())
+            {
+                const auto filePath = fileDialog.GetSelected().string();
+                // TODO: Add delimiters for other OSs
+                const auto filename = String::Split(filePath, "\\").back();
+                const std::filesystem::path from = filePath;
+                const std::filesystem::path to = Path::ConvertEnginePathToOSPath("/Assets/Textures/") + filename;
+                try
+                {
+                    std::filesystem::copy(from, to, std::filesystem::copy_options::update_existing);
+                }
+                catch (std::exception& ex)
+                {
+                    R_CORE_ASSERT(false, ex.what());
+                }
+                fileDialog.ClearSelected();
+
+                EnvironmentMapLoader loader;
+                loader.Load("/Assets/Textures/" + filename, true);
+                component.environment = loader.GetEnvironmentContext();
+            }
         });
     }
     ImGui::End();

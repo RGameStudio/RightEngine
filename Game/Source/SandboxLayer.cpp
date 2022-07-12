@@ -8,7 +8,7 @@
 #include "Texture.hpp"
 #include "TextureLoader.hpp"
 #include "Panels/PropertyPanel.hpp"
-#include "Utils/EnvironmentMapLoader.hpp"
+#include "EnvironmentMapLoader.hpp"
 #include "Utils/MeshLoader.hpp"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -109,10 +109,6 @@ namespace
         std::shared_ptr<EditorCamera> camera;
         std::shared_ptr<Entity> skyboxCube;
         std::shared_ptr<Shader> skyboxShader;
-        std::shared_ptr<Texture> skyboxTexture;
-        std::shared_ptr<Texture> prefilterTexture;
-        std::shared_ptr<Texture> irradianceTexture;
-        std::shared_ptr<Texture> brdfLUT;
         ImVec2 viewportSize{ width, height };
         uint32_t newEntityId{ 1 };
         uint32_t selectedNodeId{ 0 };
@@ -311,10 +307,9 @@ void SandboxLayer::OnAttach()
                                             "/Assets/Shaders/Basic/skybox.frag");
 
     EnvironmentMapLoader mapLoader;
-    mapLoader.Load("/Assets/Textures/env_black.hdr", true);
+    mapLoader.Load("/Assets/Textures/env_malibu.hdr", true);
     const auto envContext = mapLoader.GetEnvironmentContext();
 
-    sceneData.skyboxTexture = envContext.envMap;
     sceneData.skyboxCube = scene->CreateEntity();
     VertexBufferLayout layout;
     layout.Push<float>(3);
@@ -325,11 +320,9 @@ void SandboxLayer::OnAttach()
     mesh.SetVisibility(false);
     sceneData.skyboxCube->AddComponent<Mesh>(mesh);
     sceneData.skyboxCube->AddComponent<Tag>(Tag("Skybox", sceneData.newEntityId++));
+    auto& skyboxComponent = sceneData.skyboxCube->AddComponent<Skybox>();
+    skyboxComponent.environment = envContext;
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
-
-    sceneData.irradianceTexture = envContext.irradianceMap;
-    sceneData.prefilterTexture = envContext.prefilterMap;
-    sceneData.brdfLUT = envContext.brdfLut;
 
     sceneData.propertyPanel.SetScene(scene);
 
@@ -388,6 +381,13 @@ void SandboxLayer::OnUpdate(float ts)
     R_ASSERT(lightBuffer.lightsAmount.x < 30, "");
     sceneData.lightUniformBuffer->SetData(&lightBuffer, sizeof(LightBuffer));
 
+    const auto skyboxView = scene->GetRegistry().view<Skybox>();
+    // TODO: Add black skybox for fallback
+    R_ASSERT(!skyboxView.empty(), "No skybox was set!");
+    R_ASSERT(skyboxView.size() == 1, "There must only 1 skybox in scene!");
+    const auto& skyboxEntityID = skyboxView.front();
+    const auto& skybox = scene->GetRegistry().get<Skybox>(skyboxEntityID);
+
     for (const auto& entity: scene->GetRegistry().view<Mesh>())
     {
         const auto& transform = scene->GetRegistry().get<Transform>(entity);
@@ -404,13 +404,13 @@ void SandboxLayer::OnUpdate(float ts)
         shader->Bind();
         shader->SetUniform1iv("u_Textures", { 0, 1, 2, 3, 4 });
         shader->SetUniform3f("u_CameraPosition", sceneData.camera->GetPosition());
-        sceneData.irradianceTexture->Bind(static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
+        skybox.environment.irradianceMap->Bind(static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
         shader->SetUniform1i("u_IrradianceMap", static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
-        sceneData.prefilterTexture->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
-        sceneData.prefilterTexture->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
+        skybox.environment.prefilterMap->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
+        skybox.environment.prefilterMap->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
         shader->SetUniform1i("u_PrefilterMap", static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
-        sceneData.brdfLUT->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
-        sceneData.brdfLUT->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
+        skybox.environment.brdfLut->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
+        skybox.environment.brdfLut->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
         shader->SetUniform1i("u_BRDFLUT", static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
 
         sceneData.materialUniformBuffer->SetData(&materialData, sizeof(MaterialData));
@@ -421,7 +421,7 @@ void SandboxLayer::OnUpdate(float ts)
 
     frameBuffer->Bind();
     sceneData.skyboxShader->Bind();
-    sceneData.skyboxTexture->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
+    skybox.environment.envMap->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     const auto projectionMatrix = glm::perspective(glm::radians(45.0f),
                                                    16.0f / 9.0f,

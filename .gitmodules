@@ -19,3 +19,6 @@
 [submodule "Lib/assimp"]
 	path = Lib/assimp
 	url = git@github.com:assimp/assimp.git
+[submodule "Lib/imgui-filebrowser"]
+	path = Lib/imgui-filebrowser
+	url = git@github.com:AirGuanZ/imgui-filebrowser.git

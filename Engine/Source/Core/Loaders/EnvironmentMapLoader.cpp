@@ -6,6 +6,7 @@
 #include "Camera.hpp"
 #include "Renderer.hpp"
 #include "RendererCommand.hpp"
+#include "String.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
@@ -46,6 +47,12 @@ namespace
     std::shared_ptr<Mesh> cube;
     const auto projectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
     const uint32_t maxMipLevels = 5;
+
+    std::string GetTextureName(const std::string& path)
+    {
+        const auto splittedPath = String::Split(path, "/");
+        return splittedPath.back();
+    }
 }
 
 EnvironmentMapLoader::EnvironmentMapLoader()
@@ -57,6 +64,7 @@ void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
 {
     loaderContext.path = path;
     loaderContext.flipVertically = flipVertically;
+    environmentContext.name = GetTextureName(path);
     ComputeEnvironmentMap();
     ComputeIrradianceMap();
     ComputeRadianceMap();
@@ -106,6 +114,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     fb.UnBind();
 
     environmentContext.envMap = cubemap;
+    environmentContext.equirectangularTexture = equirectMap;
     R_CORE_TRACE("Finished computing environment map for texture \"{0}\"", loaderContext.path);
 }
 

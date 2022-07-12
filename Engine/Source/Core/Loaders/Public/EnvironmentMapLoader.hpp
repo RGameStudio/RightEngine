@@ -11,6 +11,10 @@ namespace RightEngine
         std::shared_ptr<Texture> irradianceMap;
         std::shared_ptr<Texture> prefilterMap;
         std::shared_ptr<Texture> brdfLut;
+
+        //TODO: Add EDITOR compile flag
+        std::shared_ptr<Texture> equirectangularTexture;
+        std::string name;
     };
 
     struct EnvironmentMapLoaderContext

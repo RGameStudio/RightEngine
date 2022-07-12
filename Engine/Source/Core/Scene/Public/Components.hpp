@@ -2,6 +2,7 @@
 
 #include "VertexArray.hpp"
 #include "Material.hpp"
+#include "EnvironmentMapLoader.hpp"
 #include <glm/glm.hpp>
 
 namespace RightEngine
@@ -89,5 +90,16 @@ namespace RightEngine
         LightType type{ LightType::DIRECTIONAL };
         glm::vec3 color{ 1.0f, 1.0f, 1.0f };
         float intensity{ 1000.0f };
+    };
+
+    enum class SkyboxType
+    {
+        CUBE = 0
+    };
+
+    struct Skybox
+    {
+        SkyboxType type;
+        EnvironmentContext environment;
     };
 }
