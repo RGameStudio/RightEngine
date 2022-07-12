@@ -181,6 +181,13 @@ void PropertyPanel::OnImGuiRender()
                 component.environment = loader.GetEnvironmentContext();
             }
         });
+
+        DrawComponent<Mesh>("Mesh", selectedEntity, [](auto& component)
+        {
+            bool isVisible = component.IsVisible();
+            ImGui::Checkbox("Is visible", &isVisible);
+            component.SetVisibility(isVisible);
+        });
     }
     ImGui::End();
 }
