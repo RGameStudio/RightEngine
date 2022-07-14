@@ -164,7 +164,7 @@ namespace
 
     void AddTag(std::shared_ptr<Entity>& entity, const std::string& name = "")
     {
-        Tag tag;
+        TagComponent tag;
         tag.id = sceneData.newEntityId++;
         if (name.empty())
         {
@@ -174,7 +174,7 @@ namespace
         {
             tag.name = name;
         }
-        entity->AddComponent<Tag>(tag);
+        entity->AddComponent<TagComponent>(tag);
     }
 
     void CreateEntitiesFromMeshTree(std::shared_ptr<Entity>& entity,
@@ -191,7 +191,7 @@ namespace
         {
             auto newMeshEntity = scene->CreateEntity();
             AddTag(newMeshEntity);
-            newMeshEntity->AddComponent<Mesh>(*mesh);
+            newMeshEntity->AddComponent<MeshComponent>(*mesh);
             entity->AddChild(newMeshEntity);
         }
 
@@ -221,7 +221,7 @@ namespace
         {
             if (type != GeometryType::NONE)
             {
-                std::shared_ptr<Mesh> mesh = nullptr;
+                std::shared_ptr<MeshComponent> mesh = nullptr;
                 switch (type)
                 {
                     case GeometryType::CUBE:
@@ -231,7 +231,7 @@ namespace
                         mesh = MeshBuilder::PlaneGeometry();
                         break;
                 }
-                node->AddComponent<Mesh>(std::move(*mesh));
+                node->AddComponent<MeshComponent>(std::move(*mesh));
             }
         }
         AddTag(node);
@@ -242,7 +242,7 @@ namespace
     {
         for (const auto& entity: node->GetChildren())
         {
-            const auto& tag = entity->GetComponent<Tag>();
+            const auto& tag = entity->GetComponent<TagComponent>();
             ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow;
             bool node_open = ImGui::TreeNodeEx((void*) tag.id, node_flags, "%s", tag.name.c_str());
             if (ImGui::IsItemClicked())
@@ -267,13 +267,13 @@ void SandboxLayer::OnAttach()
     scene = Scene::Create();
 
     std::shared_ptr<Entity> gun = CreateTestSceneNode(scene, sceneData.gun);
-    gun->GetComponent<Tag>().name = "Gun";
+    gun->GetComponent<TagComponent>().name = "Gun";
 
     auto& gunMesh = gun->GetChildren().back();
-    auto& gunTransform = gunMesh->GetComponent<Transform>();
+    auto& gunTransform = gunMesh->GetComponent<TransformComponent>();
     gunTransform.SetScale({ 0.3f, 0.3f, 0.3f });
     gunTransform.SetRotation({ -90.0f, 0.0f, 0.0f });
-    auto& textureData = gunMesh->GetComponent<Mesh>().GetMaterial()->textureData;
+    auto& textureData = gunMesh->GetComponent<MeshComponent>().GetMaterial()->textureData;
     textureData.albedo = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_A.tga");
     textureData.normal = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_N.tga");
     // TODO: Investigate why do we need mipmaps for normal texture
@@ -313,34 +313,34 @@ void SandboxLayer::OnAttach()
     sceneData.skyboxCube = scene->CreateEntity();
     VertexBufferLayout layout;
     layout.Push<float>(3);
-    Mesh mesh;
+    MeshComponent mesh;
     auto vertexArray = std::make_shared<VertexArray>();
     vertexArray->AddBuffer(std::make_shared<VertexBuffer>(skyboxVertices, sizeof(skyboxVertices)), layout);
     mesh.SetVertexArray(vertexArray);
     mesh.SetVisibility(false);
-    sceneData.skyboxCube->AddComponent<Mesh>(mesh);
-    sceneData.skyboxCube->AddComponent<Tag>(Tag("Skybox", sceneData.newEntityId++));
-    auto& skyboxComponent = sceneData.skyboxCube->AddComponent<Skybox>();
+    sceneData.skyboxCube->AddComponent<MeshComponent>(mesh);
+    sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("SkyboxComponent", sceneData.newEntityId++));
+    auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
     skyboxComponent.environment = envContext;
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
     sceneData.propertyPanel.SetScene(scene);
 
     auto light = CreateTestSceneNode(scene, nullptr, GeometryType::NONE);
-    light->GetComponent<Tag>().name = "Light";
-    auto lightComponent = Light();
+    light->GetComponent<TagComponent>().name = "LightComponent";
+    auto lightComponent = LightComponent();
     lightComponent.intensity = 1000.0f;
     lightComponent.color = glm::vec3(1.0f, 0.0f, 0.0f);
-    light->AddComponent<Light>(lightComponent);
-    light->GetComponent<Transform>().SetPosition(glm::vec3(0, 10, -15));
+    light->AddComponent<LightComponent>(lightComponent);
+    light->GetComponent<TransformComponent>().SetPosition(glm::vec3(0, 10, -15));
 
     auto light1 = CreateTestSceneNode(scene, nullptr, GeometryType::NONE);
-    light1->GetComponent<Tag>().name = "Light1";
-    auto lightComponent1 = Light();
+    light1->GetComponent<TagComponent>().name = "Light1";
+    auto lightComponent1 = LightComponent();
     lightComponent1.intensity = 1000.0f;
     lightComponent1.color = glm::vec3(1.0f, 0.0f, 0.0f);
-    light1->AddComponent<Light>(lightComponent);
-    light1->GetComponent<Transform>().SetPosition(glm::vec3(0, 10, 15));
+    light1->AddComponent<LightComponent>(lightComponent);
+    light1->GetComponent<TransformComponent>().SetPosition(glm::vec3(0, 10, 15));
 
     scene->GetRootNode()->AddChild(light);
     scene->GetRootNode()->AddChild(light1);
@@ -357,10 +357,10 @@ void SandboxLayer::OnUpdate(float ts)
 
     LightBuffer lightBuffer;
     std::memset(&lightBuffer, 0, sizeof(LightBuffer));
-    for (const auto& entityID: scene->GetRegistry().view<Light>())
+    for (const auto& entityID: scene->GetRegistry().view<LightComponent>())
     {
-        const auto& transform = scene->GetRegistry().get<Transform>(entityID);
-        const auto& light = scene->GetRegistry().get<Light>(entityID);
+        const auto& transform = scene->GetRegistry().get<TransformComponent>(entityID);
+        const auto& light = scene->GetRegistry().get<LightComponent>(entityID);
         ShaderLight shaderLight;
         shaderLight.type = static_cast<int>(light.type);
         shaderLight.position = glm::vec4(transform.GetWorldPosition(), 1);
@@ -381,17 +381,17 @@ void SandboxLayer::OnUpdate(float ts)
     R_ASSERT(lightBuffer.lightsAmount.x < 30, "");
     sceneData.lightUniformBuffer->SetData(&lightBuffer, sizeof(LightBuffer));
 
-    const auto skyboxView = scene->GetRegistry().view<Skybox>();
+    const auto skyboxView = scene->GetRegistry().view<SkyboxComponent>();
     // TODO: Add black skybox for fallback
     R_ASSERT(!skyboxView.empty(), "No skybox was set!");
     R_ASSERT(skyboxView.size() == 1, "There must only 1 skybox in scene!");
     const auto& skyboxEntityID = skyboxView.front();
-    const auto& skybox = scene->GetRegistry().get<Skybox>(skyboxEntityID);
+    const auto& skybox = scene->GetRegistry().get<SkyboxComponent>(skyboxEntityID);
 
-    for (const auto& entity: scene->GetRegistry().view<Mesh>())
+    for (const auto& entity: scene->GetRegistry().view<MeshComponent>())
     {
-        const auto& transform = scene->GetRegistry().get<Transform>(entity);
-        const auto& mesh = scene->GetRegistry().get<Mesh>(entity);
+        const auto& transform = scene->GetRegistry().get<TransformComponent>(entity);
+        const auto& mesh = scene->GetRegistry().get<MeshComponent>(entity);
         if (!mesh.IsVisible())
         {
             continue;
@@ -434,8 +434,8 @@ void SandboxLayer::OnUpdate(float ts)
     rendererSettings.depthTestMode = RightEngine::DepthTestMode::LEQUAL;
     renderer->Configure();
     renderer->SubmitMesh(sceneData.skyboxShader,
-                         sceneData.skyboxCube->GetComponent<Mesh>(),
-                         sceneData.skyboxCube->GetComponent<Transform>().GetWorldTransformMatrix());
+                         sceneData.skyboxCube->GetComponent<MeshComponent>(),
+                         sceneData.skyboxCube->GetComponent<TransformComponent>().GetWorldTransformMatrix());
     rendererSettings.depthTestMode = RightEngine::DepthTestMode::LESS;
     renderer->Configure();
     frameBuffer->UnBind();

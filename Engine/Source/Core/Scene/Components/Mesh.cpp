@@ -2,27 +2,27 @@
 
 using namespace RightEngine;
 
-Mesh::Mesh()
+MeshComponent::MeshComponent()
 {
     material = std::make_shared<Material>();
 }
 
-const std::shared_ptr<VertexArray>& Mesh::GetVertexArray() const
+const std::shared_ptr<VertexArray>& MeshComponent::GetVertexArray() const
 {
     return vertexArray;
 }
 
-const std::shared_ptr<Material>& Mesh::GetMaterial() const
+const std::shared_ptr<Material>& MeshComponent::GetMaterial() const
 {
     return material;
 }
 
-void Mesh::SetMaterial(const std::shared_ptr<Material>& newMaterial)
+void MeshComponent::SetMaterial(const std::shared_ptr<Material>& newMaterial)
 {
     material = newMaterial;
 }
 
-void Mesh::SetVertexArray(std::shared_ptr<VertexArray>& newVertexArray)
+void MeshComponent::SetVertexArray(std::shared_ptr<VertexArray>& newVertexArray)
 {
     vertexArray = newVertexArray;
 }

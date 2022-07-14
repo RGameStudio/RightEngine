@@ -3,7 +3,7 @@
 
 using namespace RightEngine;
 
-glm::mat4 Transform::GetLocalTransformMatrix() const
+glm::mat4 TransformComponent::GetLocalTransformMatrix() const
 {
     glm::mat4 model(1);
     const glm::mat4 transformX = glm::rotate(glm::mat4(1.0f),
@@ -20,18 +20,18 @@ glm::mat4 Transform::GetLocalTransformMatrix() const
     return glm::translate(glm::mat4(1.0f), position) * rotationMatrix * glm::scale(glm::mat4(1.0f), scale);
 }
 
-const glm::mat4& Transform::GetWorldTransformMatrix() const
+const glm::mat4& TransformComponent::GetWorldTransformMatrix() const
 {
     return transformMatrix;
 }
 
-void Transform::RecalculateTransform(Transform& parentTransform)
+void TransformComponent::RecalculateTransform(TransformComponent& parentTransform)
 {
     const auto parentTransformMatrix = glm::translate(glm::mat4(1.0f), parentTransform.GetLocalPosition());
     transformMatrix = parentTransformMatrix * GetLocalTransformMatrix();
 }
 
-void Transform::RecalculateTransform()
+void TransformComponent::RecalculateTransform()
 {
     transformMatrix = GetLocalTransformMatrix();
 }

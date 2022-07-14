@@ -44,7 +44,7 @@ namespace
                                 glm::vec3(0.0f, 0.0f, -1.0f),
                                 glm::vec3(0.0f, -1.0f, 0.0f))
             };
-    std::shared_ptr<Mesh> cube;
+    std::shared_ptr<MeshComponent> cube;
     const auto projectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
     const uint32_t maxMipLevels = 5;
 

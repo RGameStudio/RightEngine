@@ -40,7 +40,7 @@ const std::shared_ptr<Entity>& Scene::GetRootNode() const
 std::shared_ptr<Entity> Scene::CreateEntity()
 {
     std::shared_ptr<Entity> entity = std::make_shared<Entity>(registry.create(), shared_from_this());
-    entity->AddComponent<Transform>();
+    entity->AddComponent<TransformComponent>();
     return entity;
 }
 
@@ -51,11 +51,11 @@ void Scene::DestroyEntity(const std::shared_ptr<Entity>& node)
 
 void Scene::UpdateNodeTransformRecursively(const std::shared_ptr<Entity>& node)
 {
-    auto& transform = node->GetComponent<Transform>();
+    auto& transform = node->GetComponent<TransformComponent>();
     const auto parentPtr = node->parent.lock();
     if (parentPtr)
     {
-        transform.RecalculateTransform(parentPtr->GetComponent<Transform>());
+        transform.RecalculateTransform(parentPtr->GetComponent<TransformComponent>());
     }
     else
     {

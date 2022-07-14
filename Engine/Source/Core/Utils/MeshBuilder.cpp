@@ -76,41 +76,41 @@ namespace
     };
 }
 
-std::shared_ptr<Mesh> MeshBuilder::CubeGeometry()
+std::shared_ptr<MeshComponent> MeshBuilder::CubeGeometry()
 {
     VertexBufferLayout layout;
     layout.Push<float>(3);
     layout.Push<float>(3);
     layout.Push<float>(2);
 
-    auto mesh = std::make_shared<Mesh>();
+    auto mesh = std::make_shared<MeshComponent>();
     auto vertexArray = std::make_shared<VertexArray>();
     vertexArray->AddBuffer(std::make_shared<VertexBuffer>(cubeVertexData, sizeof(cubeVertexData)), layout);
     mesh->SetVertexArray(vertexArray);
     return mesh;
 }
 
-std::shared_ptr<Mesh> MeshBuilder::PlaneGeometry()
+std::shared_ptr<MeshComponent> MeshBuilder::PlaneGeometry()
 {
     VertexBufferLayout layout;
     layout.Push<float>(3);
     layout.Push<float>(3);
     layout.Push<float>(2);
 
-    auto mesh = std::make_shared<Mesh>();
+    auto mesh = std::make_shared<MeshComponent>();
     auto vertexArray = std::make_shared<VertexArray>();
     vertexArray->AddBuffer(std::make_shared<VertexBuffer>(planeVertexData, sizeof(planeVertexData)), layout);
     mesh->SetVertexArray(vertexArray);
     return mesh;
 }
 
-std::shared_ptr<Mesh> MeshBuilder::QuadGeometry()
+std::shared_ptr<MeshComponent> MeshBuilder::QuadGeometry()
 {
     VertexBufferLayout layout;
     layout.Push<float>(3);
     layout.Push<float>(2);
 
-    auto mesh = std::make_shared<Mesh>();
+    auto mesh = std::make_shared<MeshComponent>();
     auto vertexArray = std::make_shared<VertexArray>();
     vertexArray->AddBuffer(std::make_shared<VertexBuffer>(quadVertices, sizeof(quadVertices)), layout);
     mesh->SetVertexArray(vertexArray);

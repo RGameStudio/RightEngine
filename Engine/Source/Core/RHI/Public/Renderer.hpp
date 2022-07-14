@@ -38,7 +38,7 @@ namespace RightEngine
     {
     public:
         void SubmitMesh(const std::shared_ptr<Shader>& shader,
-                            const Mesh& mesh,
+                            const MeshComponent& mesh,
                             const glm::mat4& transform);
 
         void BeginScene(const std::shared_ptr<Scene>& scene);

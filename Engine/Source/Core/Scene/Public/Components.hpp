@@ -7,12 +7,12 @@
 
 namespace RightEngine
 {
-    struct Tag
+    struct TagComponent
     {
-        Tag(const std::string& name, uint32_t id = 0) : name(name), id(id)
+        TagComponent(const std::string& name, uint32_t id = 0) : name(name), id(id)
         {}
 
-        Tag()
+        TagComponent()
         {}
 
         std::string name{ "Entity" };
@@ -20,7 +20,7 @@ namespace RightEngine
     };
 
     // TODO: Add dirty flag, so we can recalculate transform only when needed
-    class Transform
+    class TransformComponent
     {
     public:
         inline const glm::vec3& GetWorldPosition() const
@@ -47,7 +47,7 @@ namespace RightEngine
         glm::mat4 GetLocalTransformMatrix() const;
         const glm::mat4& GetWorldTransformMatrix() const;
 
-        void RecalculateTransform(Transform& parentTransform);
+        void RecalculateTransform(TransformComponent& parentTransform);
         void RecalculateTransform();
 
     private:
@@ -57,10 +57,10 @@ namespace RightEngine
         glm::mat4 transformMatrix{ glm::mat4(1.0f) };
     };
 
-    class Mesh
+    class MeshComponent
     {
     public:
-        Mesh();
+        MeshComponent();
 
         const std::shared_ptr<VertexArray>& GetVertexArray() const;
         void SetVertexArray(std::shared_ptr<VertexArray>& newVertexArray);
@@ -85,7 +85,7 @@ namespace RightEngine
         DIRECTIONAL = 0
     };
 
-    struct Light
+    struct LightComponent
     {
         LightType type{ LightType::DIRECTIONAL };
         glm::vec3 color{ 1.0f, 1.0f, 1.0f };
@@ -97,7 +97,7 @@ namespace RightEngine
         CUBE = 0
     };
 
-    struct Skybox
+    struct SkyboxComponent
     {
         SkyboxType type;
         EnvironmentContext environment;

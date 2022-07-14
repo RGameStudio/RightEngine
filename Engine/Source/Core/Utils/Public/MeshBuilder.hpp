@@ -8,8 +8,8 @@ namespace RightEngine
     class MeshBuilder
     {
     public:
-        static std::shared_ptr<Mesh> CubeGeometry();
-        static std::shared_ptr<Mesh> PlaneGeometry();
-        static std::shared_ptr<Mesh> QuadGeometry();
+        static std::shared_ptr<MeshComponent> CubeGeometry();
+        static std::shared_ptr<MeshComponent> PlaneGeometry();
+        static std::shared_ptr<MeshComponent> QuadGeometry();
     };
 }

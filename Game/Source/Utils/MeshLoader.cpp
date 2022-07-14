@@ -20,9 +20,9 @@ namespace
         glm::vec3 biTangent;
     };
 
-    std::shared_ptr<Mesh> BuildMesh(const std::vector<Vertex>& vertices,
-                                    const std::vector<uint32_t>& indexes,
-                                    const std::shared_ptr<Material>& material)
+    std::shared_ptr<MeshComponent> BuildMesh(const std::vector<Vertex>& vertices,
+                                             const std::vector<uint32_t>& indexes,
+                                             const std::shared_ptr<Material>& material)
     {
         R_CORE_ASSERT(!vertices.empty() && material != nullptr, "");
         VertexBufferLayout layout;
@@ -32,7 +32,7 @@ namespace
         layout.Push<float>(3);
         layout.Push<float>(3);
 
-        auto mesh = std::make_shared<Mesh>();
+        auto mesh = std::make_shared<MeshComponent>();
         auto vertexArray = std::make_shared<VertexArray>();
         vertexArray->AddBuffer(std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex)), layout);
         if (!indexes.empty())
@@ -87,7 +87,7 @@ void MeshLoader::ProcessNode(const aiNode* node, const aiScene* scene, std::shar
     }
 }
 
-std::shared_ptr<Mesh> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene* scene)
+std::shared_ptr<MeshComponent> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indexes;

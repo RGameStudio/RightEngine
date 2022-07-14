@@ -120,7 +120,7 @@ void PropertyPanel::OnImGuiRender()
     ImGui::Begin("Properties");
     if (selectedEntity)
     {
-        DrawComponent<Tag>("Tag", selectedEntity, [](auto& component)
+        DrawComponent<TagComponent>("TagComponent", selectedEntity, [](auto& component)
         {
             const size_t bufSize = 256;
             char buf[bufSize];
@@ -133,7 +133,7 @@ void PropertyPanel::OnImGuiRender()
             ImGui::LabelText("Entity ID", "%d", component.id);
         });
 
-        DrawComponent<Transform>("Transform", selectedEntity, [](auto& component)
+        DrawComponent<TransformComponent>("TransformComponent", selectedEntity, [](auto& component)
         {
             auto& position = component.GetLocalPosition();
             DrawVec3Control("Position", position);
@@ -143,7 +143,7 @@ void PropertyPanel::OnImGuiRender()
             DrawVec3Control("Scale", scale);
         });
 
-        DrawComponent<Skybox>("Skybox", selectedEntity, [](auto& component)
+        DrawComponent<SkyboxComponent>("SkyboxComponent", selectedEntity, [](auto& component)
         {
             ImGui::LabelText("Image name", "%s", component.environment.name.c_str());
             ImGui::Separator();
@@ -182,7 +182,7 @@ void PropertyPanel::OnImGuiRender()
             }
         });
 
-        DrawComponent<Mesh>("Mesh", selectedEntity, [](auto& component)
+        DrawComponent<MeshComponent>("MeshComponent", selectedEntity, [](auto& component)
         {
             bool isVisible = component.IsVisible();
             ImGui::Checkbox("Is visible", &isVisible);

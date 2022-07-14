@@ -9,7 +9,7 @@ namespace RightEngine
 {
     struct MeshNode
     {
-        std::vector<std::shared_ptr<Mesh>> meshes;
+        std::vector<std::shared_ptr<MeshComponent>> meshes;
         std::vector<std::shared_ptr<MeshNode>> children;
     };
 
@@ -23,7 +23,7 @@ namespace RightEngine
 
     private:
         void ProcessNode(const aiNode* node, const aiScene* scene, std::shared_ptr<MeshNode>& meshNode);
-        std::shared_ptr<Mesh> ProcessMesh(const aiMesh* mesh, const aiScene* scene);
+        std::shared_ptr<MeshComponent> ProcessMesh(const aiMesh* mesh, const aiScene* scene);
         std::vector<std::shared_ptr<Texture>> LoadTextures(const aiMaterial* mat, aiTextureType type);
 
     private:

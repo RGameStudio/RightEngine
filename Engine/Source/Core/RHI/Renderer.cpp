@@ -7,7 +7,7 @@
 using namespace RightEngine;
 
 void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
-                              const Mesh& mesh,
+                              const MeshComponent& mesh,
                               const glm::mat4& transform)
 {
     shader->Bind();
