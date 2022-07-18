@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Event.hpp"
+#include <glm/vec2.hpp>
 
 class MouseMovedEvent : public Event
 {
@@ -42,5 +43,22 @@ public:
 
     explicit MouseButtonReleasedEvent(int button) : MouseButtonPressedEvent(button)
     {}
+};
+
+class MouseScrollEvent : public Event
+{
+public:
+    EVENT_BODY("MouseScrollEvent");
+
+    explicit MouseScrollEvent(double xOffset, double yOffset) : offset(xOffset, yOffset)
+    {}
+
+    const glm::vec2& GetOffset() const
+    {
+        return offset;
+    }
+
+private:
+    glm::vec2 offset;
 };
 

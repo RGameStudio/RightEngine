@@ -43,7 +43,7 @@ const glm::vec3& RightEngine::Camera::GetFront() const
     return front;
 }
 
-const float& RightEngine::Camera::GetCameraMovementSpeed() const
+float RightEngine::Camera::GetMovementSpeed() const
 {
     return movementSpeed;
 }

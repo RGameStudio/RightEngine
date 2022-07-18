@@ -30,13 +30,12 @@ void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
 
 void Renderer::BeginScene(const std::shared_ptr<Scene>& scene)
 {
-// TODO: Get FOV from camera
-// TODO: Get aspect ratio from camera
-    const auto projectionMatrix = glm::perspective(glm::radians(50.0f),
-                                                   16.0f/ 9.0f,
-                                                   0.1f,
-                                                   500.0f);
-    const auto viewMatrix = scene->GetCamera()->GetViewMatrix();
+    const auto& camera = scene->GetCamera();
+    const auto projectionMatrix = glm::perspective(camera->GetFOV(true),
+                                                   camera->GetAspectRatio(),
+                                                   camera->GetNear(),
+                                                   camera->GetFar());
+    const auto viewMatrix = camera->GetViewMatrix();
     sceneData.viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 

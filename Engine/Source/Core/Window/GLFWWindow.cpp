@@ -74,6 +74,11 @@ namespace RightEngine
                 }
             }
         });
+
+        glfwSetScrollCallback(window, [](GLFWwindow* window, double xOffset, double yOffset)
+        {
+            EventDispatcher::Get().Emit(MouseScrollEvent(xOffset, yOffset));
+        });
     }
 
     void GLFWWindow::OnUpdate()

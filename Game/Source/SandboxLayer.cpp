@@ -104,6 +104,11 @@ namespace
     const uint32_t width = 1280;
     const uint32_t height = 720;
 
+    struct UIState
+    {
+        bool isCameraOptionsOpen{ true };
+    };
+
     struct LayerSceneData
     {
         std::shared_ptr<UniformBuffer> materialUniformBuffer;
@@ -116,8 +121,8 @@ namespace
         PropertyPanel propertyPanel;
         MeshLoader meshLoader;
         std::shared_ptr<MeshNode> gun;
-        TextureLoader textureLoader;
         std::shared_ptr<UniformBuffer> lightUniformBuffer;
+        UIState uiState;
     };
 
     static LayerSceneData sceneData;
@@ -436,10 +441,10 @@ void SandboxLayer::OnUpdate(float ts)
     sceneData.skyboxShader->Bind();
     skybox.environment->envMap->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
-    const auto projectionMatrix = glm::perspective(glm::radians(45.0f),
-                                                   16.0f / 9.0f,
-                                                   0.1f,
-                                                   300.0f);
+    const auto projectionMatrix = glm::perspective(sceneData.camera->GetFOV(true),
+                                                   sceneData.camera->GetAspectRatio(),
+                                                   sceneData.camera->GetNear(),
+                                                   sceneData.camera->GetFar());
     const auto viewMatrix = glm::mat4(glm::mat3(scene->GetCamera()->GetViewMatrix()));
     sceneData.skyboxShader->SetUniformMat4f("u_Projection", projectionMatrix);
     sceneData.skyboxShader->SetUniformMat4f("u_View", viewMatrix);
@@ -509,7 +514,77 @@ void SandboxLayer::OnImGuiRender()
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Window"))
+        {
+            if (ImGui::MenuItem("Camera options"))
+            {
+                sceneData.uiState.isCameraOptionsOpen = true;
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenuBar();
+    }
+
+    if (sceneData.uiState.isCameraOptionsOpen)
+    {
+        if (ImGui::Begin("Camera Options", &sceneData.uiState.isCameraOptionsOpen))
+        {
+            auto& camera = sceneData.camera;
+
+            float speed = camera->GetMovementSpeed();
+            ImGui::SliderFloat("Movement speed", &speed, 40.0f, 150.0f);
+            camera->SetMovementSpeed(speed);
+
+            float fov = camera->GetFOV();
+            ImGui::SliderFloat("FOV", &fov, 30.0f, 100.0f);
+            camera->SetFOV(fov);
+
+            float zNear = camera->GetNear();
+            ImGui::SliderFloat("Z Near", &zNear, 0.1f, 1.0f);
+            camera->SetNear(zNear);
+
+            float zFar = camera->GetFar();
+            ImGui::SliderFloat("Z Far", &zFar, 10.0f, 1000.0f);
+            camera->SetFar(zFar);
+
+            std::array<const char*, 3> aspectRatios = { "16/9", "4/3", "Fit to window" };
+            static const char* currentRatio = aspectRatios[2];
+            if (ImGui::BeginCombo("Aspect ratio", currentRatio))
+            {
+                for (int i = 0; i < aspectRatios.size(); i++)
+                {
+                    bool isSelected = (currentRatio == aspectRatios[i]);
+                    if (ImGui::Selectable(aspectRatios[i], isSelected))
+                    {
+                        currentRatio = aspectRatios[i];
+                    }
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            if (currentRatio)
+            {
+                float newAspectRatio;
+                if (std::strcmp(currentRatio, aspectRatios[0]) == 0)
+                {
+                    newAspectRatio = 16.0f / 9.0f;
+                }
+                if (std::strcmp(currentRatio, aspectRatios[1]) == 0)
+                {
+                    newAspectRatio = 4.0f / 3.0f;
+                }
+                if (std::strcmp(currentRatio, aspectRatios[2]) == 0)
+                {
+                    newAspectRatio = camera->GetAspectRatio();
+                }
+                camera->SetAspectRatio(newAspectRatio);
+            }
+        }
+        ImGui::End();
     }
 
     ImGui::Begin("Scene Hierarchy");
@@ -537,6 +612,7 @@ void SandboxLayer::OnImGuiRender()
         sceneData.viewportSize = viewportSize;
     }
     ImGui::Image((void*) id, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+    sceneData.camera->SetAspectRatio(viewportSize.x / viewportSize.y);
     ImGui::End();
 
     sceneData.propertyPanel.OnImGuiRender();
