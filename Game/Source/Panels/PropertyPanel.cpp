@@ -2,6 +2,7 @@
 #include "Components.hpp"
 #include "String.hpp"
 #include "Path.hpp"
+#include "AssetManager.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imfilebrowser.h>
@@ -120,7 +121,7 @@ void PropertyPanel::OnImGuiRender()
     ImGui::Begin("Properties");
     if (selectedEntity)
     {
-        DrawComponent<TagComponent>("TagComponent", selectedEntity, [](auto& component)
+        DrawComponent<TagComponent>("Tag", selectedEntity, [](auto& component)
         {
             const size_t bufSize = 256;
             char buf[bufSize];
@@ -133,7 +134,7 @@ void PropertyPanel::OnImGuiRender()
             ImGui::LabelText("Entity ID", "%d", component.id);
         });
 
-        DrawComponent<TransformComponent>("TransformComponent", selectedEntity, [](auto& component)
+        DrawComponent<TransformComponent>("Transform", selectedEntity, [](auto& component)
         {
             auto& position = component.GetLocalPosition();
             DrawVec3Control("Position", position);
@@ -143,11 +144,11 @@ void PropertyPanel::OnImGuiRender()
             DrawVec3Control("Scale", scale);
         });
 
-        DrawComponent<SkyboxComponent>("SkyboxComponent", selectedEntity, [](auto& component)
+        DrawComponent<SkyboxComponent>("Skybox", selectedEntity, [](auto& component)
         {
-            ImGui::LabelText("Image name", "%s", component.environment.name.c_str());
+            ImGui::LabelText("Image name", "%s", component.environment->name.c_str());
             ImGui::Separator();
-            ImGui::Image((void*) component.environment.equirectangularTexture->GetId(),
+            ImGui::Image((void*) component.environment->equirectangularTexture->GetId(),
                          ImVec2(512, 256),
                          ImVec2(0, 1),
                          ImVec2(1, 0));
@@ -176,13 +177,13 @@ void PropertyPanel::OnImGuiRender()
                 }
                 fileDialog.ClearSelected();
 
-                EnvironmentMapLoader loader;
-                loader.Load("/Assets/Textures/" + filename, true);
-                component.environment = loader.GetEnvironmentContext();
+                LoaderOptions options{ true };
+                const auto id = String::Split(filename, ".").front();
+                component.environment = AssetManager::Get().LoadAsset<EnvironmentContext>("/Assets/Textures/" + filename, id, options);
             }
         });
 
-        DrawComponent<MeshComponent>("MeshComponent", selectedEntity, [](auto& component)
+        DrawComponent<MeshComponent>("Mesh", selectedEntity, [](auto& component)
         {
             bool isVisible = component.IsVisible();
             ImGui::Checkbox("Is visible", &isVisible);

@@ -7,6 +7,7 @@
 #include "Renderer.hpp"
 #include "RendererCommand.hpp"
 #include "String.hpp"
+#include "AssetManager.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
@@ -62,9 +63,10 @@ EnvironmentMapLoader::EnvironmentMapLoader()
 
 void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
 {
+    environmentContext = std::make_shared<EnvironmentContext>();
     loaderContext.path = path;
     loaderContext.flipVertically = flipVertically;
-    environmentContext.name = GetTextureName(path);
+    environmentContext->name = GetTextureName(path);
     ComputeEnvironmentMap();
     ComputeIrradianceMap();
     ComputeRadianceMap();
@@ -79,10 +81,10 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     textureSpec.type = TextureType::TEXTURE_2D;
     const auto equirectMap = Texture::Create(textureSpec, data);
 
-
-    //TODO: Cache shader in shader library
-    const auto envmapConverterShader = Shader::Create("/Assets/Shaders/Utils/envmap_to_cubemap.vert",
-                                                      "/Assets/Shaders/Utils/envmap_to_cubemap.frag");
+    const auto envmapConverterShader = AssetManager::Get().LoadAsset<Shader>(
+            "/Assets/Shaders/Utils/envmap_to_cubemap",
+            "envmap_to_cubemap",
+            LoaderOptions());
 
     FramebufferSpecification fbSpec;
     fbSpec.width = envTexWidth;
@@ -113,16 +115,16 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     }
     fb.UnBind();
 
-    environmentContext.envMap = cubemap;
-    environmentContext.equirectangularTexture = equirectMap;
+    environmentContext->envMap = cubemap;
+    environmentContext->equirectangularTexture = equirectMap;
     R_CORE_TRACE("Finished computing environment map for texture \"{0}\"", loaderContext.path);
 }
 
 void EnvironmentMapLoader::ComputeIrradianceMap()
 {
     TextureSpecification texSpec = loaderContext.specification;
-    const auto irradianceMapShader = Shader::Create("/Assets/Shaders/Utils/envmap_to_irr_map.vert",
-                                                    "/Assets/Shaders/Utils/envmap_to_irr_map.frag");
+    const auto irradianceMapShader = AssetManager::Get().LoadAsset<Shader>("/Assets/Shaders/Utils/envmap_to_irr_map",
+                                                                           "envmap_to_irr_map", LoaderOptions());
 
     FramebufferSpecification fbSpec;
     fbSpec.width = irradianceTexWidth;
@@ -140,7 +142,7 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
     auto irradianceMap = Texture::Create(texSpec, CubemapFaces());
     fb.Bind();
     irradianceMapShader->Bind();
-    environmentContext.envMap->Bind();
+    environmentContext->envMap->Bind();
     const auto& va = cube->GetVertexArray();
     va->Bind();
     va->GetVertexBuffer()->Bind();
@@ -153,7 +155,7 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
     }
     fb.UnBind();
 
-    environmentContext.irradianceMap = irradianceMap;
+    environmentContext->irradianceMap = irradianceMap;
     R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", loaderContext.path);
 }
 
@@ -164,8 +166,10 @@ void EnvironmentMapLoader::ComputeRadianceMap()
                                                3,
                                                TextureType::CUBEMAP,
                                                TextureFormat::RGB32F };
-    const auto prefilterMapShader = Shader::Create("/Assets/Shaders/Utils/envmap_to_radiance_map.vert",
-                                                   "/Assets/Shaders/Utils/envmap_to_radiance_map.frag");
+    const auto prefilterMapShader = AssetManager::Get().LoadAsset<Shader>(
+            "/Assets/Shaders/Utils/envmap_to_radiance_map",
+            "envmap_to_radiance_map",
+            LoaderOptions());
     auto prefilteredMap = Texture::Create(prefilterTextureSpec, CubemapFaces());
     prefilteredMap->SetSampler(Sampler::Create({
                                                        SamplerFilter::Linear,
@@ -191,7 +195,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
         fb.Bind();
         prefilterMapShader->Bind();
         prefilteredMap->Bind(1);
-        environmentContext.envMap->Bind();
+        environmentContext->envMap->Bind();
         const auto& va = cube->GetVertexArray();
         va->Bind();
         va->GetVertexBuffer()->Bind();
@@ -208,7 +212,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
     }
     fb.UnBind();
 
-    environmentContext.prefilterMap = prefilteredMap;
+    environmentContext->prefilterMap = prefilteredMap;
     R_CORE_TRACE("Finished computing prefilter map for texture \"{0}\"", loaderContext.path);
 }
 
@@ -220,12 +224,14 @@ void EnvironmentMapLoader::ComputeLUT()
                                         TextureType::TEXTURE_2D,
                                         TextureFormat::RGB32F };
     auto lutTexture = Texture::Create(specification, std::vector<uint8_t>());
-    lutTexture->SetSampler(Sampler::Create({SamplerFilter::Linear,
-                                                   SamplerFilter::Linear,
-                                                   SamplerFilter::Linear,
-                                                   false }));
-    const auto lutShader = Shader::Create("/Assets/Shaders/Utils/brdf.vert",
-                                                   "/Assets/Shaders/Utils/brdf.frag");
+    lutTexture->SetSampler(Sampler::Create({ SamplerFilter::Linear,
+                                             SamplerFilter::Linear,
+                                             SamplerFilter::Linear,
+                                             false }));
+    const auto lutShader = AssetManager::Get().LoadAsset<Shader>(
+            "/Assets/Shaders/Utils/brdf",
+            "brdf",
+            LoaderOptions());
 
     FramebufferSpecification fbSpec;
     fbSpec.width = lutTexWidth;
@@ -251,5 +257,5 @@ void EnvironmentMapLoader::ComputeLUT()
 
     fb.UnBind();
 
-    environmentContext.brdfLut = lutTexture;
+    environmentContext->brdfLut = lutTexture;
 }

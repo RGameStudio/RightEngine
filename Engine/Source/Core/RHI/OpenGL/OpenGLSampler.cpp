@@ -13,8 +13,9 @@ OpenGLSampler::OpenGLSampler(const SamplerDescriptor& desc) : Sampler(desc)
 void OpenGLSampler::Init()
 {
     // TODO: Add texture address mode and texture max and min LOD
-    glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, OpenGLConverters::samplerFilter(minFilter, mipMapFilter, isMipMapped));
-    glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, OpenGLConverters::samplerFilter(magFilter));
+    glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER,
+                        OpenGLConverters::GLSamplerFilter(minFilter, mipMapFilter, isMipMapped));
+    glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, OpenGLConverters::GLSamplerFilter(magFilter));
 
     glSamplerParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

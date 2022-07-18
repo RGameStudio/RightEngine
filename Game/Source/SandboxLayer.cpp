@@ -9,7 +9,8 @@
 #include "TextureLoader.hpp"
 #include "Panels/PropertyPanel.hpp"
 #include "EnvironmentMapLoader.hpp"
-#include "Utils/MeshLoader.hpp"
+#include "MeshLoader.hpp"
+#include "AssetManager.hpp"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -260,7 +261,9 @@ namespace
 
 void SandboxLayer::OnAttach()
 {
-    sceneData.gun = sceneData.meshLoader.Load("/Assets/Models/Gun/cerberus_2.fbx");
+    auto& assetManager = AssetManager::Get();
+    LoaderOptions options;
+    sceneData.gun = assetManager.LoadAsset<MeshNode>("/Assets/Models/Gun/cerberus_2.fbx", "gun_mesh", options);
 
     sceneData.camera = std::make_shared<EditorCamera>(glm::vec3(0, 10, -15),
                                                       glm::vec3(0, 1, 0));
@@ -274,17 +277,24 @@ void SandboxLayer::OnAttach()
     gunTransform.SetScale({ 0.3f, 0.3f, 0.3f });
     gunTransform.SetRotation({ -90.0f, 0.0f, 0.0f });
     auto& textureData = gunMesh->GetComponent<MeshComponent>().GetMaterial()->textureData;
-    textureData.albedo = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_A.tga");
-    textureData.normal = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_N.tga");
+
+    textureData.albedo = assetManager.LoadAsset<Texture>("/Assets/Textures/cerberus_Textures/Cerberus_A.tga",
+                                                         "gun_albedo", options);
+    textureData.normal = assetManager.LoadAsset<Texture>("/Assets/Textures/cerberus_Textures/Cerberus_N.tga",
+                                                         "gun_normal", options);
     // TODO: Investigate why do we need mipmaps for normal texture
     textureData.normal->GenerateMipmaps();
-    textureData.roughness = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_R.tga");
-    textureData.metallic = sceneData.textureLoader.CreateTexture("/Assets/Textures/cerberus_Textures/Cerberus_M.tga");
+    textureData.roughness = assetManager.LoadAsset<Texture>("/Assets/Textures/cerberus_Textures/Cerberus_R.tga",
+                                                            "gun_roughness", options);
+    textureData.metallic = assetManager.LoadAsset<Texture>("/Assets/Textures/cerberus_Textures/Cerberus_M.tga",
+                                                           "gun_metallic", options);
 
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(gun);
-    shader = Shader::Create("/Assets/Shaders/Basic/pbr.vert",
-                            "/Assets/Shaders/Basic/pbr.frag");
+    shader = assetManager.LoadAsset<Shader>(
+            "/Assets/Shaders/Basic/pbr",
+            "pbr",
+            options);
     renderer = std::make_shared<Renderer>();
 
     FramebufferSpecification fbSpec;
@@ -303,12 +313,14 @@ void SandboxLayer::OnAttach()
     sceneData.materialUniformBuffer = UniformBuffer::Create(sizeof(MaterialData), 0);
     sceneData.lightUniformBuffer = UniformBuffer::Create(sizeof(LightBuffer), 1);
 
-    sceneData.skyboxShader = Shader::Create("/Assets/Shaders/Basic/skybox.vert",
-                                            "/Assets/Shaders/Basic/skybox.frag");
+    sceneData.skyboxShader = assetManager.LoadAsset<Shader>(
+            "/Assets/Shaders/Basic/skybox",
+            "skybox",
+            options);
 
-    EnvironmentMapLoader mapLoader;
-    mapLoader.Load("/Assets/Textures/env_malibu.hdr", true);
-    const auto envContext = mapLoader.GetEnvironmentContext();
+    options.flipTextureVertically = true;
+    const auto envContext = assetManager.LoadAsset<EnvironmentContext>("/Assets/Textures/env_malibu.hdr", "env_malibu",
+                                                                       options);
 
     sceneData.skyboxCube = scene->CreateEntity();
     VertexBufferLayout layout;
@@ -319,7 +331,7 @@ void SandboxLayer::OnAttach()
     mesh.SetVertexArray(vertexArray);
     mesh.SetVisibility(false);
     sceneData.skyboxCube->AddComponent<MeshComponent>(mesh);
-    sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("SkyboxComponent", sceneData.newEntityId++));
+    sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("Skybox", sceneData.newEntityId++));
     auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
     skyboxComponent.environment = envContext;
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
@@ -327,7 +339,7 @@ void SandboxLayer::OnAttach()
     sceneData.propertyPanel.SetScene(scene);
 
     auto light = CreateTestSceneNode(scene, nullptr, GeometryType::NONE);
-    light->GetComponent<TagComponent>().name = "LightComponent";
+    light->GetComponent<TagComponent>().name = "Light";
     auto lightComponent = LightComponent();
     lightComponent.intensity = 1000.0f;
     lightComponent.color = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -404,13 +416,14 @@ void SandboxLayer::OnUpdate(float ts)
         shader->Bind();
         shader->SetUniform1iv("u_Textures", { 0, 1, 2, 3, 4 });
         shader->SetUniform3f("u_CameraPosition", sceneData.camera->GetPosition());
-        skybox.environment.irradianceMap->Bind(static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
+        skybox.environment->irradianceMap->Bind(static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
         shader->SetUniform1i("u_IrradianceMap", static_cast<uint32_t>(TextureSlot::IRRADIANCE_TEXTURE_SLOT));
-        skybox.environment.prefilterMap->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
-        skybox.environment.prefilterMap->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
+        skybox.environment->prefilterMap->GetSampler()->Bind(
+                static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
+        skybox.environment->prefilterMap->Bind(static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
         shader->SetUniform1i("u_PrefilterMap", static_cast<uint32_t>(TextureSlot::PREFILTER_TEXTURE_SLOT));
-        skybox.environment.brdfLut->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
-        skybox.environment.brdfLut->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
+        skybox.environment->brdfLut->GetSampler()->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
+        skybox.environment->brdfLut->Bind(static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
         shader->SetUniform1i("u_BRDFLUT", static_cast<uint32_t>(TextureSlot::BRDF_LUT_TEXTURE_SLOT));
 
         sceneData.materialUniformBuffer->SetData(&materialData, sizeof(MaterialData));
@@ -421,7 +434,7 @@ void SandboxLayer::OnUpdate(float ts)
 
     frameBuffer->Bind();
     sceneData.skyboxShader->Bind();
-    skybox.environment.envMap->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
+    skybox.environment->envMap->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
     const auto projectionMatrix = glm::perspective(glm::radians(45.0f),
                                                    16.0f / 9.0f,

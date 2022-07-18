@@ -1,12 +1,8 @@
 cmake_minimum_required(VERSION 3.19)
-#message(${EXECUTABLE_OUTPUT_PATH} ${CMAKE_CURRENT_BINARY_DIR})
-#set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(Game Source/Start.cpp
         Source/SandboxLayer.cpp
-        Source/Panels/PropertyPanel.cpp
-        ../Engine/Source/Core/Loaders/EnvironmentMapLoader.cpp
-        Source/Utils/MeshLoader.cpp)
+        Source/Panels/PropertyPanel.cpp)
 
 set_target_properties(Game
         PROPERTIES

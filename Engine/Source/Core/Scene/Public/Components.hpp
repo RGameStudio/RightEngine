@@ -100,6 +100,6 @@ namespace RightEngine
     struct SkyboxComponent
     {
         SkyboxType type;
-        EnvironmentContext environment;
+        std::shared_ptr<EnvironmentContext> environment;
     };
 }

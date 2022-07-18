@@ -41,9 +41,13 @@ set(ENGINE_SRC
         Source/Core/Loaders/TextureLoader.cpp
         Source/Core/RHI/Sampler.cpp
         Source/Core/RHI/OpenGL/OpenGLSampler.cpp
-        Source/Core/RHI/OpenGL/OpenGLConverters.cpp Source/Core/Utils/Public/String.hpp Source/Core/Utils/String.cpp)
+        Source/Core/RHI/OpenGL/OpenGLConverters.cpp
+        Source/Core/Utils/String.cpp
+        Source/Core/Scene/AssetManager.cpp
+        Source/Core/Loaders/EnvironmentMapLoader.cpp
+        Source/Core/Loaders/MeshLoader.cpp)
 
-add_library(Engine STATIC ${ENGINE_SRC} Source/Core/RHI/OpenGL/OpenGLSampler.cpp)
+add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)
 
 add_library(EngineTest STATIC ${ENGINE_SRC})

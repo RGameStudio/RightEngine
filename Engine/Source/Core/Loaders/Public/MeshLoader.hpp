@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssetBase.hpp"
 #include "Components.hpp"
 #include <assimp/scene.h>
 #include <vector>
@@ -7,8 +8,10 @@
 
 namespace RightEngine
 {
-    struct MeshNode
+    struct MeshNode : public AssetBase
     {
+        ASSET_BASE()
+
         std::vector<std::shared_ptr<MeshComponent>> meshes;
         std::vector<std::shared_ptr<MeshNode>> children;
     };

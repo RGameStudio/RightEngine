@@ -2,11 +2,11 @@
 
 using namespace RightEngine;
 
-GLenum OpenGLConverters::samplerFilter(SamplerFilter minFilter, SamplerFilter mipmapFilter, bool isMipMapped)
+GLenum OpenGLConverters::GLSamplerFilter(SamplerFilter minFilter, SamplerFilter mipmapFilter, bool isMipMapped)
 {
     if (!isMipMapped)
     {
-        return samplerFilter(minFilter);
+        return GLSamplerFilter(minFilter);
     }
 
     switch (minFilter)
@@ -35,7 +35,7 @@ GLenum OpenGLConverters::samplerFilter(SamplerFilter minFilter, SamplerFilter mi
     return 0;
 }
 
-GLenum OpenGLConverters::samplerFilter(SamplerFilter magFilter)
+GLenum OpenGLConverters::GLSamplerFilter(SamplerFilter magFilter)
 {
     switch (magFilter)
     {
@@ -46,7 +46,7 @@ GLenum OpenGLConverters::samplerFilter(SamplerFilter magFilter)
     }
 }
 
-GLenum OpenGLConverters::textureType(TextureType type)
+GLenum OpenGLConverters::GLTextureType(TextureType type)
 {
     switch (type)
     {
@@ -57,7 +57,7 @@ GLenum OpenGLConverters::textureType(TextureType type)
     }
 }
 
-GLenum OpenGLConverters::cubeMapFace(uint8_t face)
+GLenum OpenGLConverters::GLCubemapFace(uint8_t face)
 {
     R_CORE_ASSERT(face < 6, "");
     return GL_TEXTURE_CUBE_MAP_POSITIVE_X + face;

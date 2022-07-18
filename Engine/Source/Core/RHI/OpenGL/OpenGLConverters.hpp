@@ -9,10 +9,10 @@ namespace RightEngine
     class OpenGLConverters
     {
     public:
-        static GLenum samplerFilter(SamplerFilter minFilter, SamplerFilter mipmapFilter, bool isMipMapped);
-        static GLenum samplerFilter(SamplerFilter magFilter);
+        static GLenum GLSamplerFilter(SamplerFilter minFilter, SamplerFilter mipmapFilter, bool isMipMapped);
+        static GLenum GLSamplerFilter(SamplerFilter magFilter);
 
-        static GLenum textureType(TextureType type);
-        static GLenum cubeMapFace(uint8_t face);
+        static GLenum GLTextureType(TextureType type);
+        static GLenum GLCubemapFace(uint8_t face);
     };
 }

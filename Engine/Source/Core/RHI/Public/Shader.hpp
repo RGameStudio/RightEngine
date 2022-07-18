@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssetBase.hpp"
 #include "Types.hpp"
 #include <glm/matrix.hpp>
 #include <string>
@@ -8,9 +9,11 @@
 
 namespace RightEngine
 {
-    class Shader
+    class Shader : public AssetBase
     {
     public:
+        ASSET_BASE()
+
         virtual ~Shader() {};
 
         virtual void Bind() const = 0;

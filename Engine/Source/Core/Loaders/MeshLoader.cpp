@@ -3,9 +3,9 @@
 #include "Path.hpp"
 #include "String.hpp"
 #include "TextureLoader.hpp"
-#include <assimp/scene.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
+#include "assimp/scene.h"
+#include "assimp/Importer.hpp"
+#include "assimp/postprocess.h"
 
 using namespace RightEngine;
 

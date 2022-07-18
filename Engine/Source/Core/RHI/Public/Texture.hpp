@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Assert.hpp"
+#include "AssetBase.hpp"
 #include "Sampler.hpp"
 #include <cstdint>
 #include <string>
@@ -137,9 +138,11 @@ namespace RightEngine
         }
     };
 
-    class Texture
+    class Texture : public AssetBase
     {
     public:
+        ASSET_BASE()
+
         virtual ~Texture() = default;
 
         inline int GetWidth() const

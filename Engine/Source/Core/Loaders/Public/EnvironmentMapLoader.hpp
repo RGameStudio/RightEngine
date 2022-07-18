@@ -5,8 +5,10 @@
 
 namespace RightEngine
 {
-    struct EnvironmentContext
+    struct EnvironmentContext : public AssetBase
     {
+        ASSET_BASE()
+
         std::shared_ptr<Texture> envMap;
         std::shared_ptr<Texture> irradianceMap;
         std::shared_ptr<Texture> prefilterMap;
@@ -32,7 +34,7 @@ namespace RightEngine
 
         void Load(const std::string& path, bool flipVertically = false);
 
-        inline const EnvironmentContext& GetEnvironmentContext() const
+        inline const std::shared_ptr<EnvironmentContext>& GetEnvironmentContext() const
         { return environmentContext; }
 
     private:
@@ -42,7 +44,7 @@ namespace RightEngine
         void ComputeLUT();
 
     private:
-        EnvironmentContext environmentContext;
+        std::shared_ptr<EnvironmentContext> environmentContext;
         EnvironmentMapLoaderContext loaderContext;
     };
 }
