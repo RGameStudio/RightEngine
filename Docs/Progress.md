@@ -28,4 +28,8 @@ Just a bunch of screenshots, that show progress of engine development
 
 ## 07-07-2022 (Asset loading)
 
-![10-06-2022.png](https://i.imgur.com/j3F7MqZ.png)
+![07-07-2022.png](https://i.imgur.com/j3F7MqZ.png)
+
+## 19-07-2022 (Proper IBL reflections and camera options)
+
+![19-07-2022.png](https://i.imgur.com/sKRGyWH.png)
