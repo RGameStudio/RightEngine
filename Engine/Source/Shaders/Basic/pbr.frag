@@ -50,20 +50,9 @@ const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
 {
-    // TODO: Calculate light in tangent space
     vec3 tangentNormal = texture(u_Textures[1], f_UV).xyz;
-
-    vec3 Q1  = dFdx(f_WorldPos);
-    vec3 Q2  = dFdy(f_WorldPos);
-    vec2 st1 = dFdx(f_UV);
-    vec2 st2 = dFdy(f_UV);
-
-    vec3 N   = normalize(f_Normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
+    tangentNormal = tangentNormal * 2.0 - 1.0;
+    return normalize(f_TBN * tangentNormal);
 }
 
 // ----------------------------------------------------------------------------

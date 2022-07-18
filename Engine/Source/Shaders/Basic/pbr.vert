@@ -19,11 +19,10 @@ void main()
     f_Normal = mat3(u_Transform) * aNormal;
     f_WorldPos = vec3(u_Transform * vec4(aPosition, 1.0));
 
-    mat3 normalMatrix = transpose(inverse(mat3(u_Transform)));
-    vec3 T = normalize(normalMatrix * aTangent);
-    vec3 N = normalize(normalMatrix * aNormal);
-    T = normalize(T - dot(T, N) * N);
-    mat3 TBN = transpose(mat3(T, aBiTangent, N));
+    vec3 T = normalize(vec3(u_Transform * vec4(aTangent,   0.0)));
+    vec3 B = normalize(vec3(u_Transform * vec4(aBiTangent, 0.0)));
+    vec3 N = normalize(vec3(u_Transform * vec4(aNormal,    0.0)));
+    mat3 TBN = mat3(T, B, N);
     f_TBN = TBN;
 
     gl_Position = u_ViewProjection * vec4(f_WorldPos, 1.0);
