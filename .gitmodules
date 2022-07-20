@@ -22,3 +22,6 @@
 [submodule "Lib/imgui-filebrowser"]
 	path = Lib/imgui-filebrowser
 	url = git@github.com:AirGuanZ/imgui-filebrowser.git
+[submodule "Lib/glslang"]
+	path = Lib/glslang
+	url = git@github.com:KhronosGroup/glslang.git
