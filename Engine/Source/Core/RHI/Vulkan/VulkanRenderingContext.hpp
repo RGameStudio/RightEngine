@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RenderingContext.hpp"
+#include <vulkan/vulkan.h>
 
 namespace RightEngine
 {
@@ -9,6 +10,16 @@ namespace RightEngine
     public:
         VulkanRenderingContext(const std::shared_ptr<Window>& window);
 
-        virtual ~VulkanRenderingContext() = default;
+        virtual ~VulkanRenderingContext();
+
+        VkInstance GetInstance() const
+        { return instance; }
+
+    private:
+        VkInstance instance;
+        VkDebugUtilsMessengerEXT debugMessenger;
+
+        void Init();
+        void SetupDebugMessenger();
     };
 }

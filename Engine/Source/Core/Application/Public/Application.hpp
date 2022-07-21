@@ -29,6 +29,8 @@ namespace RightEngine
         void PushLayer(const std::shared_ptr<Layer>& layer);
         void PushOverlay(const std::shared_ptr<Layer>& layer);
 
+        const std::shared_ptr<RenderingContext>& GetRenderingContext() const
+        { return renderingContext; }
         const std::shared_ptr<Window>& GetWindow() const;
 
         void PostInit();

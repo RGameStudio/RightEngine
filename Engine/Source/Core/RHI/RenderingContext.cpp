@@ -6,7 +6,6 @@ using namespace RightEngine;
 
 std::shared_ptr<RenderingContext> RenderingContext::Create(const std::shared_ptr<Window>& window)
 {
-    auto api = Renderer::GetAPI();
     switch (Renderer::GetAPI())
     {
         case GPU_API::OpenGL:

@@ -8,6 +8,7 @@
 #include "ImGuiLayer.hpp"
 #include "Renderer.hpp"
 #include "Core.hpp"
+#include "Device.hpp"
 #include <memory>
 
 namespace RightEngine
@@ -38,9 +39,9 @@ namespace RightEngine
     {
         window.reset(Window::Create("Right Editor", 1920, 1080));
         RendererCommand::Init(GGPU_API);
-        auto ctx = RenderingContext::Create(window);
-        renderingContext = nullptr;
-
+        renderingContext = RenderingContext::Create(window);
+        auto device = Device::Get(renderingContext);
+        auto device2 = Device::Get();
         // TODO: Initialize imgui for Vulkan
 //        imGuiLayer = std::make_shared<ImGuiLayer>();
 
