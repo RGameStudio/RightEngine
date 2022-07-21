@@ -2,6 +2,7 @@
 #include "Core.hpp"
 #include "MouseEvent.hpp"
 #include "KeyEvent.hpp"
+#include <vulkan/vulkan.h>
 
 namespace RightEngine
 {
@@ -14,17 +15,9 @@ namespace RightEngine
     {
         R_CORE_ASSERT(glfwInit(), "GLFW init failed");
 
-        glfwWindowHint(GLFW_SAMPLES, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_MAJOR_VERSION);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_MINOR_VERSION);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-        window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
-        R_CORE_ASSERT(window, "GLFW window create failed");
-
-        // TODO: Create RenderingContext class
-        glfwMakeContextCurrent(window);
-        R_CORE_ASSERT(gladLoadGLLoader((GLADloadproc) glfwGetProcAddress), "Can't load glad!");
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        window = glfwCreateWindow(1920, 1080, title.c_str(), nullptr, nullptr);
+        R_CORE_ASSERT(window, "");
 
         glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
         {

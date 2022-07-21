@@ -8,7 +8,8 @@ namespace RightEngine
     enum class GPU_API
     {
         None = 0,
-        OpenGL
+        OpenGL,
+        Vulkan
     };
 
     enum class MouseButton

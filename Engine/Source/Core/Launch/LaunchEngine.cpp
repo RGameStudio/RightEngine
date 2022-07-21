@@ -3,9 +3,11 @@
 #include "LaunchEngine.hpp"
 #include "EventDispatcher.hpp"
 #include "Input.hpp"
+#include "Assert.hpp"
 
 bool GShouldStop = true;
 LaunchMode GLaunchMode = LaunchMode::Game;
+RightEngine::GPU_API GGPU_API = RightEngine::GPU_API::None;
 
 namespace RightEngine
 {
@@ -35,6 +37,7 @@ namespace RightEngine
         easyArgs = std::make_unique<EasyArgs>(argc, argv);
         easyArgs->Version("0.0.1");
         easyArgs->Value("-m", "--mode", "Engine launch modes [Game|Test].", false);
+        easyArgs->Value("-g", "--gpu-api", "Engine rendering backend [Vulkan].", false);
 
         ParseCmdArgs();
     }
@@ -49,6 +52,18 @@ namespace RightEngine
         else if (mode == "Test")
         {
             GLaunchMode = LaunchMode::Test;
+        }
+
+        std::string gpuApi = easyArgs->GetValueFor("--gpu-api");
+        GGPU_API = GPU_API::Vulkan;
+        if (gpuApi == "OpenGL")
+        {
+            R_CORE_WARN("OpenGL is deprecated!");
+            GGPU_API = GPU_API::OpenGL;
+        }
+        else
+        {
+            R_CORE_WARN("No GPU API was provided in cmd!");
         }
     }
 

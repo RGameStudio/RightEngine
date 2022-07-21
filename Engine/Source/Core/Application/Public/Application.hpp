@@ -9,6 +9,7 @@
 #include "Scene.hpp"
 #include "Layer.hpp"
 #include "ImGuiLayer.hpp"
+#include "RenderingContext.hpp"
 #include <memory>
 #include <chrono>
 
@@ -39,6 +40,7 @@ namespace RightEngine
 
     private:
         std::shared_ptr<Window> window;
+        std::shared_ptr<RenderingContext> renderingContext;
         std::vector<std::shared_ptr<Layer>> layers;
         std::shared_ptr<ImGuiLayer> imGuiLayer;
 

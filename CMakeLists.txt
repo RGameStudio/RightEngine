@@ -19,6 +19,11 @@ set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
              ${GLSL_ROOT_DIR}/Utils/envmap_to_cubemap.vert
         )
 
+find_package(Vulkan REQUIRED FATAL_ERROR)
+message(STATUS "Vulkan include directory: " ${Vulkan_INCLUDE_DIR})
+message(STATUS "Vulkan library directory: " ${Vulkan_LIBRARY})
+
+include_directories(${Vulkan_INCLUDE_DIR})
 include_directories(Lib/Glad/include)
 include_directories(Lib/spdlog/include)
 include_directories(Lib/easyargs/include)

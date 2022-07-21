@@ -21,6 +21,7 @@ target_link_libraries(Sandbox
         OGLCompiler
         OSDependent
         SPIRV
+        ${Vulkan_LIBRARY}
         )
 
 add_custom_target(CopyShaderFilesToSandbox ALL DEPENDS ${GLSL_ROOT_DIR})
