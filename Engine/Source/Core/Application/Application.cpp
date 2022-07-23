@@ -43,8 +43,9 @@ namespace RightEngine
         // TODO: Move renderer initialization to Renderer class
         RendererCommand::Init(GGPU_API);
         renderingContext = RenderingContext::Create(window);
-        auto surface = Surface::Create(window, renderingContext);
+        surface = Surface::Create(window, renderingContext);
         auto device = Device::Get(renderingContext, surface);
+        surface->CreateSwapchain(device);
         // TODO: Initialize imgui for Vulkan
 //        imGuiLayer = std::make_shared<ImGuiLayer>();
 

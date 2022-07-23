@@ -14,11 +14,14 @@ namespace RightEngine
 
         ~VulkanSurface();
 
+        virtual void CreateSwapchain(const std::shared_ptr<Device>& device) override;
+
         VkSurfaceKHR GetSurface() const
         { return surface; }
 
     private:
         VkSurfaceKHR surface;
+        std::weak_ptr<Window> window;
 
         void Init(const std::shared_ptr<Window>& window,
                   const std::shared_ptr<VulkanRenderingContext>& context);

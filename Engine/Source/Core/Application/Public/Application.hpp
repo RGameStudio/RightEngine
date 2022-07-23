@@ -43,6 +43,7 @@ namespace RightEngine
     private:
         std::shared_ptr<Window> window;
         std::shared_ptr<RenderingContext> renderingContext;
+        std::shared_ptr<Surface> surface;
         std::vector<std::shared_ptr<Layer>> layers;
         std::shared_ptr<ImGuiLayer> imGuiLayer;
 

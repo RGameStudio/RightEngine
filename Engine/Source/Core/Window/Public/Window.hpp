@@ -28,11 +28,6 @@ namespace RightEngine
         void SetSurface(const std::shared_ptr<Surface>& aSurface)
         { surface = aSurface; }
 
-        const std::shared_ptr<Swapchain>& GetSwapchain() const
-        { return swapchain; }
-        void SetSurface(const std::shared_ptr<Swapchain>& aSwapchain)
-        { swapchain = aSwapchain; }
-
         static Window *Create(std::string title, uint32_t width, uint32_t height);
 
     protected:
@@ -44,6 +39,5 @@ namespace RightEngine
         uint32_t width;
         uint32_t height;
         std::shared_ptr<Surface> surface;
-        std::shared_ptr<Swapchain> swapchain;
     };
 }

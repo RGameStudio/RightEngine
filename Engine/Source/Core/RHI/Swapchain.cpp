@@ -4,7 +4,9 @@
 
 using namespace RightEngine;
 
-std::shared_ptr<Swapchain> Swapchain::Create(const std::shared_ptr<Device>& device)
+std::shared_ptr<Swapchain> Swapchain::Create(const std::shared_ptr<Device>& device,
+                                             const std::shared_ptr<Surface>& surface,
+                                             const SwapchainDescriptor& descriptor)
 {
     switch (Renderer::GetAPI())
     {
@@ -13,6 +15,6 @@ std::shared_ptr<Swapchain> Swapchain::Create(const std::shared_ptr<Device>& devi
         R_CORE_ASSERT(false, "");
             break;
         case GPU_API::Vulkan:
-            return std::make_shared<VulkanSwapchain>(device);
+            return std::make_shared<VulkanSwapchain>(device, surface, descriptor);
     }
 }
