@@ -9,6 +9,8 @@
 #include "Renderer.hpp"
 #include "Core.hpp"
 #include "Device.hpp"
+#include "Surface.hpp"
+#include "Swapchain.hpp"
 #include <memory>
 
 namespace RightEngine
@@ -38,10 +40,11 @@ namespace RightEngine
     void Application::Init()
     {
         window.reset(Window::Create("Right Editor", 1920, 1080));
+        // TODO: Move renderer initialization to Renderer class
         RendererCommand::Init(GGPU_API);
         renderingContext = RenderingContext::Create(window);
-        auto device = Device::Get(renderingContext);
-        auto device2 = Device::Get();
+        auto surface = Surface::Create(window, renderingContext);
+        auto device = Device::Get(renderingContext, surface);
         // TODO: Initialize imgui for Vulkan
 //        imGuiLayer = std::make_shared<ImGuiLayer>();
 

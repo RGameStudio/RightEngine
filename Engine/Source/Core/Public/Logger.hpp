@@ -44,7 +44,7 @@ namespace RightEngine
 #define R_CORE_ERROR(...) ::RightEngine::Log::GetCoreLogger()->error(__VA_ARGS__)
 #define R_CORE_FATAL(...) ::RightEngine::Log::GetCoreLogger()->fatal(__VA_ARGS__)
 
-#define R_VULKAN_LOG(message) ("[Vulkan] " + std::string(message))
+#define R_VULKAN_LOG(message) ("[Vulkan]: " + std::string(message))
 
 //Client log macros
 #define R_TRACE(...)      ::RightEngine::Log::GetClientLogger()->trace(__VA_ARGS__)

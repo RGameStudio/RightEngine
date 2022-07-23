@@ -5,6 +5,8 @@
 
 namespace RightEngine
 {
+    class Surface;
+
     struct DeviceInfo
     {
 
@@ -17,15 +19,17 @@ namespace RightEngine
         { return info; }
 
         virtual ~Device() = default;
-        static std::shared_ptr<Device> Get(const std::shared_ptr<RenderingContext>& ctx = nullptr);
 
         Device(const Device& other) = delete;
         Device& operator=(const Device& other) = delete;
         Device(Device&& other) = delete;
         Device& operator=(Device&& other) = delete;
 
+        static std::shared_ptr<Device> Get(const std::shared_ptr<RenderingContext>& ctx = nullptr,
+                                           const std::shared_ptr<Surface>& surface = nullptr);
+
     protected:
-        Device(const std::shared_ptr<RenderingContext>& context)
+        Device(const std::shared_ptr<RenderingContext>& context, const std::shared_ptr<Surface>& surface)
         {}
 
         static std::shared_ptr<Device> device;
