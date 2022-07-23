@@ -17,6 +17,7 @@ namespace RightEngine
     private:
         VkSwapchainKHR swapChain;
         std::vector<VkImage> swapChainImages;
+        std::vector<VkImageView> swapChainImageViews;
         SwapchainSupportDetails details;
 
         void Init(const std::shared_ptr<VulkanDevice>& device,
