@@ -131,7 +131,7 @@ VulkanRenderingContext::VulkanRenderingContext(const std::shared_ptr<Window>& wi
 {
     vkEnumerateInstanceExtensionProperties(nullptr, &info.extensionAmount, nullptr);
     Init();
-    R_CORE_INFO("Successfully initialized Vulkan context with {0} extensions!", info.extensionAmount);
+    R_CORE_INFO(R_VULKAN_LOG("Successfully initialized Vulkan context with {0} extensions!"), info.extensionAmount);
 }
 
 void VulkanRenderingContext::Init()
@@ -188,6 +188,18 @@ void VulkanRenderingContext::SetupDebugMessenger()
     if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to set up debug messenger!");
+    }
+}
+
+std::vector<const char*> VulkanRenderingContext::GetValidationLayers() const
+{
+    if (enableValidationLayers)
+    {
+        return validationLayers;
+    }
+    else
+    {
+        return std::vector<const char*>();
     }
 }
 

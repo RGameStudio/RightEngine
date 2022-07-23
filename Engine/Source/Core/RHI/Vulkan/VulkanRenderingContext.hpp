@@ -2,6 +2,7 @@
 
 #include "RenderingContext.hpp"
 #include <vulkan/vulkan.h>
+#include <vector>
 
 namespace RightEngine
 {
@@ -14,6 +15,8 @@ namespace RightEngine
 
         VkInstance GetInstance() const
         { return instance; }
+
+        std::vector<const char*> GetValidationLayers() const;
 
     private:
         VkInstance instance;
