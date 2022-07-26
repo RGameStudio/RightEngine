@@ -46,6 +46,8 @@ namespace RightEngine
         surface = Surface::Create(window, renderingContext);
         auto device = Device::Get(renderingContext, surface);
         surface->CreateSwapchain(device);
+        auto shader = Shader::Create("/Assets/Shaders/simple.vert",
+                                     "/Assets/Shaders/simple.frag");
         // TODO: Initialize imgui for Vulkan
 //        imGuiLayer = std::make_shared<ImGuiLayer>();
 

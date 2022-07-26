@@ -54,7 +54,7 @@ set(ENGINE_SRC
         Source/Core/RHI/Vulkan/VulkanSwapchain.cpp
         Source/Core/RHI/Vulkan/VulkanSurface.cpp
         Source/Core/RHI/Surface.cpp
-        Source/Core/RHI/Swapchain.cpp)
+        Source/Core/RHI/Swapchain.cpp Source/Core/RHI/Vulkan/VulkanShader.cpp Source/Core/RHI/Vulkan/VulkanShader.hpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

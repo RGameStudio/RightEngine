@@ -3,6 +3,8 @@
 #include "RenderingContext.hpp"
 #include <memory>
 
+#define VK_DEVICE() std::static_pointer_cast<VulkanDevice>(Device::Get())
+
 namespace RightEngine
 {
     class Surface;

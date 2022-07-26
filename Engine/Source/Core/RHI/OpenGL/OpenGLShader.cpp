@@ -17,39 +17,39 @@ namespace
     std::string _fragmentShaderPath;
 }
 
-ShaderProgramSource
-OpenGLShader::ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
-{
-    _vertexShaderPath = vertexShaderPath;
-    _fragmentShaderPath = fragmentShaderPath;
-    std::ifstream vertexShaderStream(Path::ConvertEnginePathToOSPath(vertexShaderPath));
-    std::ifstream fragmentShaderStream(Path::ConvertEnginePathToOSPath(fragmentShaderPath));
-
-    if (!vertexShaderStream.is_open())
-    {
-        R_CORE_ERROR("Can't open vertex shader at path {0}", vertexShaderPath);
-    }
-
-    if (!fragmentShaderStream.is_open())
-    {
-        R_CORE_ERROR("Can't open fragment shader at path {0}", fragmentShaderPath);
-    }
-
-    std::string line;
-    std::stringstream ss[2];
-
-    while (std::getline(vertexShaderStream, line))
-    {
-        ss[0] << line << '\n';
-    }
-
-    while (std::getline(fragmentShaderStream, line))
-    {
-        ss[1] << line << '\n';
-    }
-
-    return {ss[0].str(), ss[1].str()};
-}
+//ShaderProgramSource
+//OpenGLShader::ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+//{
+//    _vertexShaderPath = vertexShaderPath;
+//    _fragmentShaderPath = fragmentShaderPath;
+//    std::ifstream vertexShaderStream(Path::ConvertEnginePathToOSPath(vertexShaderPath));
+//    std::ifstream fragmentShaderStream(Path::ConvertEnginePathToOSPath(fragmentShaderPath));
+//
+//    if (!vertexShaderStream.is_open())
+//    {
+//        R_CORE_ERROR("Can't open vertex shader at path {0}", vertexShaderPath);
+//    }
+//
+//    if (!fragmentShaderStream.is_open())
+//    {
+//        R_CORE_ERROR("Can't open fragment shader at path {0}", fragmentShaderPath);
+//    }
+//
+//    std::string line;
+//    std::stringstream ss[2];
+//
+//    while (std::getline(vertexShaderStream, line))
+//    {
+//        ss[0] << line << '\n';
+//    }
+//
+//    while (std::getline(fragmentShaderStream, line))
+//    {
+//        ss[1] << line << '\n';
+//    }
+//
+//    return {ss[0].str(), ss[1].str()};
+//}
 
 uint32_t OpenGLShader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
@@ -109,8 +109,8 @@ int OpenGLShader::GetUniformLocation(const std::string& name)
 
 OpenGLShader::OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 {
-    ShaderProgramSource source = ParseShaders(vertexShaderPath, fragmentShaderPath);
-    id = CreateShader(source.vertexSource, source.fragmentSource);
+//    ShaderProgramSource source = ParseShaders(vertexShaderPath, fragmentShaderPath);
+//    id = CreateShader(source.vertexSource, source.fragmentSource);
 }
 
 OpenGLShader::~OpenGLShader()

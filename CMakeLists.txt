@@ -35,6 +35,7 @@ include_directories(Lib/imgui)
 include_directories(Lib/entt/include)
 include_directories(Lib/assimp/include)
 include_directories(Lib/imgui-filebrowser)
+include_directories(Lib/glslang/)
 
 include_directories(Engine/Source/Public)
 include_directories(Engine/Source/Core/Public)

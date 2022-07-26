@@ -1,14 +1,23 @@
 #pragma once
 
 #include "Shader.hpp"
+#include <glslang/Include/glslang_c_interface.h>
+#include <vulkan/vulkan.h>
 
 namespace RightEngine
 {
-    class OpenGLShader : public Shader
+    struct ShaderProgramSource
+    {
+        std::string vertexSource;
+        std::string fragmentSource;
+    };
+
+    class VulkanShader : public Shader
     {
     public:
-        OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-        virtual ~OpenGLShader() override;
+        VulkanShader(const std::string& vertexShaderPath,
+                     const std::string& fragmentShaderPath);
+        virtual ~VulkanShader() override;
 
         virtual void Bind() const override;
         virtual void UnBind() const override;
@@ -25,13 +34,10 @@ namespace RightEngine
         virtual void SetUniform1iv(const std::string& name, const std::vector<int>& v) override;
 
     private:
-        std::string filePath;
-        uint32_t id;
-        std::unordered_map<std::string, int> uniformLocationCache;
+        VkShaderModule vertexShaderModule;
+        VkShaderModule fragShaderModule;
 
-    private:
-        uint32_t CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
-        uint32_t CompileShader(uint32_t type, const std::string& source);
-        int GetUniformLocation(const std::string& name);
+        ShaderProgramSource ParseShaders(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+        std::vector<uint32_t> CompileShader(glslang_stage_t stage, const char* shaderSource, const char* fileName);
     };
 }

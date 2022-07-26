@@ -22,6 +22,7 @@ target_link_libraries(Sandbox
         OSDependent
         SPIRV
         ${Vulkan_LIBRARY}
+        glslang-default-resource-limits
         )
 
 add_custom_target(CopyShaderFilesToSandbox ALL DEPENDS ${GLSL_ROOT_DIR})
