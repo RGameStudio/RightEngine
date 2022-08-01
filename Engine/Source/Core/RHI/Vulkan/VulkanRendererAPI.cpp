@@ -1,10 +1,14 @@
 #include "VulkanRendererAPI.hpp"
 #include "Assert.hpp"
 #include "Application.hpp"
-#include "VulkanRenderingContext.hpp"
-#include "VulkanSurface.hpp"
+#include "VulkanSwapchain.hpp"
 
 using namespace RightEngine;
+
+namespace
+{
+    std::vector<VkFramebuffer> framebuffers;
+}
 
 void VulkanRendererAPI::Init()
 {
@@ -21,12 +25,15 @@ void VulkanRendererAPI::Init()
     const auto window = Application::Get().GetWindow();
     const auto ctx = std::make_shared<VulkanRenderingContext>(window);
     context = ctx;
-
-    surface = std::make_shared<VulkanSurface>(window, context);
-
+    const auto surface = std::make_shared<VulkanSurface>(window, context);
     const auto device = Device::Get(context, surface);
-
-    surface->CreateSwapchain(device);
+    SwapchainDescriptor descriptor;
+    glm::ivec2 extent;
+    glfwGetFramebufferSize(static_cast<GLFWwindow*>(window->GetNativeHandle()), &extent.x, &extent.y);
+    descriptor.extent = extent;
+    descriptor.format = Format::B8G8R8A8_SRGB;
+    descriptor.presentMode = PresentMode::IMMEDIATE;
+    swapchain = std::make_shared<VulkanSwapchain>(device, surface, descriptor);
 }
 
 void VulkanRendererAPI::Configure(const RendererSettings& settings)

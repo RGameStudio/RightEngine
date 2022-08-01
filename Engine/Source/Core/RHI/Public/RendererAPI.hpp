@@ -22,9 +22,6 @@ namespace RightEngine
     class RendererAPI
     {
     public:
-        const std::shared_ptr<RenderingContext>& GetRenderingContext()
-        { return context; }
-
         virtual ~RendererAPI() = default;
 
         virtual void Init() = 0;
@@ -41,8 +38,6 @@ namespace RightEngine
 
     protected:
         static GPU_API api;
-        std::shared_ptr<RenderingContext> context;
-        std::shared_ptr<Surface> surface;
         bool isInitialized{ false };
     };
 }

@@ -10,7 +10,6 @@
 #include "Core.hpp"
 #include "Device.hpp"
 #include "Surface.hpp"
-#include "Swapchain.hpp"
 #include <memory>
 
 namespace RightEngine

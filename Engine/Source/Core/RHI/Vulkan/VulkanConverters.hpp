@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Swapchain.hpp"
+#include "VulkanSwapchain.hpp"
 #include <vulkan/vulkan.h>
 
 namespace RightEngine

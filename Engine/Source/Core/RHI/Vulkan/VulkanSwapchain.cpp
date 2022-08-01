@@ -54,7 +54,7 @@ namespace
 
 VulkanSwapchain::VulkanSwapchain(const std::shared_ptr<Device>& device,
                                  const std::shared_ptr<Surface>& surface,
-                                 const SwapchainDescriptor& descriptor) : Swapchain(device, surface, descriptor)
+                                 const SwapchainDescriptor& descriptor)
 {
     auto vulkanDevice = std::static_pointer_cast<VulkanDevice>(device);
     auto vulkanSurface = std::static_pointer_cast<VulkanSurface>(surface);
@@ -63,11 +63,12 @@ VulkanSwapchain::VulkanSwapchain(const std::shared_ptr<Device>& device,
 
 void VulkanSwapchain::Init(const std::shared_ptr<VulkanDevice>& device,
                            const std::shared_ptr<VulkanSurface>& surface,
-                           const SwapchainDescriptor& descriptor)
+                           const SwapchainDescriptor& aDescriptor)
 {
+    descriptor = aDescriptor;
     SwapchainSupportDetails details = device->GetSwapchainSupportDetails();
 
-    VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(details.formats);
+    imageFormat = ChooseSwapSurfaceFormat(details.formats);
     VkPresentModeKHR presentMode = VulkanConverters::PresentMode(descriptor.presentMode);
     VkExtent2D extent = ChooseSwapExtent(details.capabilities, descriptor);
 
@@ -82,8 +83,8 @@ void VulkanSwapchain::Init(const std::shared_ptr<VulkanDevice>& device,
     createInfo.surface = surface->GetSurface();
 
     createInfo.minImageCount = imageCount;
-    createInfo.imageFormat = surfaceFormat.format;
-    createInfo.imageColorSpace = surfaceFormat.colorSpace;
+    createInfo.imageFormat = imageFormat.format;
+    createInfo.imageColorSpace = imageFormat.colorSpace;
     createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -125,7 +126,7 @@ void VulkanSwapchain::Init(const std::shared_ptr<VulkanDevice>& device,
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         createInfo.image = swapChainImages[i];
         createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.format = surfaceFormat.format;
+        createInfo.format = imageFormat.format;
         createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
         createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
