@@ -22,9 +22,7 @@ namespace RightEngine
     }
 
     Application::Application()
-    {
-        Init();
-    }
+    {}
 
     Application::~Application()
     {
@@ -42,25 +40,18 @@ namespace RightEngine
         window.reset(Window::Create("Right Editor", 1920, 1080));
         // TODO: Move renderer initialization to Renderer class
         RendererCommand::Init(GGPU_API);
-        renderingContext = RenderingContext::Create(window);
-        surface = Surface::Create(window, renderingContext);
-        auto device = Device::Get(renderingContext, surface);
-        surface->CreateSwapchain(device);
         auto shader = Shader::Create("/Assets/Shaders/simple.vert",
                                      "/Assets/Shaders/simple.frag");
         // TODO: Initialize imgui for Vulkan
 //        imGuiLayer = std::make_shared<ImGuiLayer>();
 
-        R_CORE_INFO("Successfully initialized application!");
-    }
-
-    void Application::PostInit()
-    {
         static bool wasCalled = false;
         R_CORE_ASSERT(!wasCalled, "PostInit was called twice!");
         wasCalled = true;
 
 //        PushOverlay(imGuiLayer);
+
+        R_CORE_INFO("Successfully initialized application!");
     }
 
     void Application::OnUpdate()

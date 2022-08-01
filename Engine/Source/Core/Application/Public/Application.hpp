@@ -33,7 +33,7 @@ namespace RightEngine
         { return renderingContext; }
         const std::shared_ptr<Window>& GetWindow() const;
 
-        void PostInit();
+        void Init();
 
         Application(const Application& other) = delete;
         Application& operator=(const Application& other) = delete;
@@ -50,8 +50,6 @@ namespace RightEngine
     private:
         Application();
         ~Application();
-
-        void Init();
     };
 
 }

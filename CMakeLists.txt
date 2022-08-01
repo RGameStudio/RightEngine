@@ -19,6 +19,7 @@ set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
              ${GLSL_ROOT_DIR}/Utils/envmap_to_cubemap.vert
         )
 
+set(Vulkan_LIBRARY $ENV{Vulkan_LIBRARY})
 find_package(Vulkan REQUIRED FATAL_ERROR)
 message(STATUS "Vulkan include directory: " ${Vulkan_INCLUDE_DIR})
 message(STATUS "Vulkan library directory: " ${Vulkan_LIBRARY})
@@ -34,6 +35,7 @@ include_directories(Lib/stb_image/Public)
 include_directories(Lib/imgui)
 include_directories(Lib/entt/include)
 include_directories(Lib/assimp/include)
+include_directories(${CMAKE_BINARY_DIR}/Lib/assimp/include)
 include_directories(Lib/imgui-filebrowser)
 include_directories(Lib/glslang/)
 

@@ -20,8 +20,6 @@ namespace RightEngine
         const RenderingContextInfo& GetInfo()
         { return info; }
 
-        static std::shared_ptr<RenderingContext> Create(const std::shared_ptr<Window>& window);
-
     protected:
         std::weak_ptr<Window> window;
         RenderingContextInfo info;

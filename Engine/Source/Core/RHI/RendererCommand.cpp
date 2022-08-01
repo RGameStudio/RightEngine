@@ -7,6 +7,7 @@ std::shared_ptr<RendererAPI> RendererCommand::rendererAPI = nullptr;
 void RendererCommand::Init(GPU_API api)
 {
     rendererAPI = RendererAPI::Create(api);
+    rendererAPI->Init();
 }
 
 void RendererCommand::SetClearColor(const glm::vec4& color)

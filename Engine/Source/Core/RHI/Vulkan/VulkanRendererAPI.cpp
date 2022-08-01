@@ -1,12 +1,32 @@
 #include "VulkanRendererAPI.hpp"
 #include "Assert.hpp"
+#include "Application.hpp"
+#include "VulkanRenderingContext.hpp"
+#include "VulkanSurface.hpp"
 
 using namespace RightEngine;
 
-
 void VulkanRendererAPI::Init()
 {
-    R_CORE_ASSERT(false, "");
+    if (isInitialized)
+    {
+        R_CORE_ASSERT(false, "");
+        return;
+    }
+
+    if (context)
+    {
+        R_CORE_ASSERT(false, "");
+    }
+    const auto window = Application::Get().GetWindow();
+    const auto ctx = std::make_shared<VulkanRenderingContext>(window);
+    context = ctx;
+
+    surface = std::make_shared<VulkanSurface>(window, context);
+
+    const auto device = Device::Get(context, surface);
+
+    surface->CreateSwapchain(device);
 }
 
 void VulkanRendererAPI::Configure(const RendererSettings& settings)
@@ -43,4 +63,9 @@ void VulkanRendererAPI::Draw(const std::shared_ptr<VertexBuffer>& vb)
 void VulkanRendererAPI::SetClearColor(const glm::vec4& color)
 {
     R_CORE_ASSERT(false, "");
+}
+
+VulkanRendererAPI::~VulkanRendererAPI()
+{
+
 }

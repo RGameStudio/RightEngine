@@ -6,6 +6,7 @@ namespace RightEngine
 {
     class VulkanRendererAPI : public RendererAPI
     {
+    public:
         virtual void Init() override;
 
         virtual void Configure(const RendererSettings& settings) override;
@@ -19,5 +20,6 @@ namespace RightEngine
 
         virtual void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib) override;
         virtual void Draw(const std::shared_ptr<VertexBuffer>& vb) override;
+        virtual ~VulkanRendererAPI() override;
     };
 }

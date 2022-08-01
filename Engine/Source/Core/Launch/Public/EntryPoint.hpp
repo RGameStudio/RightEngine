@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 #endif
     RightEngine::LaunchEngine::Init(argc, argv);
     auto& application = RightEngine::Application::Get();
-    application.PostInit();
+    application.Init();
 
     if (GLaunchMode == LaunchMode::Game)
     {

@@ -20,9 +20,6 @@ namespace RightEngine
         const std::shared_ptr<Swapchain>& GetSwapchain() const
         { return swapchain; }
 
-        static std::shared_ptr<Surface> Create(const std::shared_ptr<Window>& window,
-                      const std::shared_ptr<RenderingContext>& context);
-
     protected:
         std::weak_ptr<RenderingContext> context;
         std::shared_ptr<Swapchain> swapchain;

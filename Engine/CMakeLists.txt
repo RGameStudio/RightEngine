@@ -46,14 +46,12 @@ set(ENGINE_SRC
         Source/Core/Scene/AssetManager.cpp
         Source/Core/Loaders/EnvironmentMapLoader.cpp
         Source/Core/Loaders/MeshLoader.cpp
-        Source/Core/RHI/RenderingContext.cpp
         Source/Core/RHI/Vulkan/VulkanRenderingContext.cpp
         Source/Core/RHI/Vulkan/VulkanRendererAPI.cpp
         Source/Core/RHI/Device.cpp
         Source/Core/RHI/Vulkan/VulkanDevice.cpp
         Source/Core/RHI/Vulkan/VulkanSwapchain.cpp
         Source/Core/RHI/Vulkan/VulkanSurface.cpp
-        Source/Core/RHI/Surface.cpp
         Source/Core/RHI/Swapchain.cpp Source/Core/RHI/Vulkan/VulkanShader.cpp Source/Core/RHI/Vulkan/VulkanShader.hpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
