@@ -39,8 +39,6 @@ namespace RightEngine
         window.reset(Window::Create("Right Editor", 1920, 1080));
         // TODO: Move renderer initialization to Renderer class
         RendererCommand::Init(GGPU_API);
-        auto shader = Shader::Create("/Assets/Shaders/simple.vert",
-                                     "/Assets/Shaders/simple.frag");
         // TODO: Initialize imgui for Vulkan
 //        imGuiLayer = std::make_shared<ImGuiLayer>();
 

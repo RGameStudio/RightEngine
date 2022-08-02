@@ -51,7 +51,10 @@ set(ENGINE_SRC
         Source/Core/RHI/Device.cpp
         Source/Core/RHI/Vulkan/VulkanDevice.cpp
         Source/Core/RHI/Vulkan/VulkanSwapchain.cpp
-        Source/Core/RHI/Vulkan/VulkanShader.cpp Source/Core/RHI/Vulkan/VulkanShader.hpp Source/Core/RHI/Public/Surface.hpp Source/Core/RHI/Vulkan/VulkanSurface.cpp Source/Core/RHI/Vulkan/VulkanSurface.hpp)
+        Source/Core/RHI/Vulkan/VulkanShader.cpp
+        Source/Core/RHI/Vulkan/VulkanSurface.cpp
+        Source/Core/RHI/Vulkan/VulkanGraphicsPipeline.cpp
+        )
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

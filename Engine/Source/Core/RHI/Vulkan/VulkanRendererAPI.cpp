@@ -2,6 +2,7 @@
 #include "Assert.hpp"
 #include "Application.hpp"
 #include "VulkanSwapchain.hpp"
+#include "VulkanConverters.hpp"
 
 using namespace RightEngine;
 
@@ -25,7 +26,7 @@ void VulkanRendererAPI::Init()
     const auto window = Application::Get().GetWindow();
     const auto ctx = std::make_shared<VulkanRenderingContext>(window);
     context = ctx;
-    const auto surface = std::make_shared<VulkanSurface>(window, context);
+    surface = std::make_shared<VulkanSurface>(window, context);
     const auto device = Device::Get(context, surface);
     SwapchainDescriptor descriptor;
     glm::ivec2 extent;
@@ -34,6 +35,15 @@ void VulkanRendererAPI::Init()
     descriptor.format = Format::B8G8R8A8_SRGB;
     descriptor.presentMode = PresentMode::IMMEDIATE;
     swapchain = std::make_shared<VulkanSwapchain>(device, surface, descriptor);
+
+    auto shader = Shader::Create("/Assets/Shaders/simple.vert",
+                                 "/Assets/Shaders/simple.frag");
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+    pipelineDescriptor.extent = extent;
+    RenderPassDescriptor renderPassDescriptor;
+    renderPassDescriptor.format = Format::B8G8R8A8_SRGB;
+    pipeline = std::make_shared<VulkanGraphicsPipeline>(pipelineDescriptor, renderPassDescriptor);
 }
 
 void VulkanRendererAPI::Configure(const RendererSettings& settings)

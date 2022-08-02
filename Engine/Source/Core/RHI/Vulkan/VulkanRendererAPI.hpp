@@ -4,6 +4,7 @@
 #include "VulkanRenderingContext.hpp"
 #include "VulkanSurface.hpp"
 #include "VulkanSwapchain.hpp"
+#include "VulkanGraphicsPipeline.hpp"
 
 namespace RightEngine
 {
@@ -29,5 +30,6 @@ namespace RightEngine
         std::shared_ptr<VulkanRenderingContext> context;
         std::shared_ptr<VulkanSurface> surface;
         std::shared_ptr<VulkanSwapchain> swapchain;
+        std::shared_ptr<VulkanGraphicsPipeline> pipeline;
     };
 }
