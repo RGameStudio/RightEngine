@@ -36,10 +36,10 @@ namespace RightEngine
         std::shared_ptr<VulkanGraphicsPipeline> pipeline;
         std::vector<VkFramebuffer> swapchainFramebuffers;
         VkCommandPool commandPool;
-        VkCommandBuffer commandBuffer;
-        VkSemaphore imageAvailableSemaphore;
-        VkSemaphore renderFinishedSemaphore;
-        VkFence inFlightFence;
+        std::vector<VkCommandBuffer> commandBuffers;
+        std::vector<VkSemaphore> imageAvailableSemaphores;
+        std::vector<VkSemaphore> renderFinishedSemaphores;
+        std::vector<VkFence> inFlightFences;
         uint32_t currentImageIndex;
 
         void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
