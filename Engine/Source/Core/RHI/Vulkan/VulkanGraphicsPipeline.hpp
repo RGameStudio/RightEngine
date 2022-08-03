@@ -26,6 +26,12 @@ namespace RightEngine
 
         ~VulkanGraphicsPipeline();
 
+        VkRenderPass GetRenderPass() const
+        { return renderPass; }
+
+        VkPipeline GetPipeline() const
+        { return graphicsPipeline; }
+
     private:
         VkPipeline graphicsPipeline;
         VkPipelineLayout pipelineLayout;

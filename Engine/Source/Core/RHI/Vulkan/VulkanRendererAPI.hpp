@@ -31,5 +31,10 @@ namespace RightEngine
         std::shared_ptr<VulkanSurface> surface;
         std::shared_ptr<VulkanSwapchain> swapchain;
         std::shared_ptr<VulkanGraphicsPipeline> pipeline;
+        std::vector<VkFramebuffer> swapchainFramebuffers;
+        VkCommandPool commandPool;
+        VkCommandBuffer commandBuffer;
+
+        void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
     };
 }
