@@ -45,3 +45,13 @@ void RendererCommand::Configure(const RendererSettings& settings)
 {
     rendererAPI->Configure(settings);
 }
+
+void RendererCommand::BeginFrame()
+{
+    rendererAPI->BeginFrame();
+}
+
+void RendererCommand::EndFrame()
+{
+    rendererAPI->EndFrame();
+}

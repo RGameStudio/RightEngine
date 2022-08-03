@@ -11,7 +11,7 @@ std::shared_ptr<RendererAPI> RendererAPI::Create(GPU_API GpuApi)
     switch (GpuApi)
     {
         case GPU_API::OpenGL:
-            return std::make_shared<OpenGLRendererAPI>();
+        R_CORE_ASSERT(false, "OpenGL is deprecated!");
         case GPU_API::Vulkan:
             return std::make_shared<VulkanRendererAPI>();
         default:

@@ -13,6 +13,9 @@ namespace RightEngine
     public:
         virtual void Init() override;
 
+        virtual void BeginFrame() override;
+        virtual void EndFrame() override;
+
         virtual void Configure(const RendererSettings& settings) override;
 
         virtual void SetClearColor(const glm::vec4& color) override;
@@ -34,7 +37,12 @@ namespace RightEngine
         std::vector<VkFramebuffer> swapchainFramebuffers;
         VkCommandPool commandPool;
         VkCommandBuffer commandBuffer;
+        VkSemaphore imageAvailableSemaphore;
+        VkSemaphore renderFinishedSemaphore;
+        VkFence inFlightFence;
+        uint32_t currentImageIndex;
 
         void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void CreateSyncObjects();
     };
 }

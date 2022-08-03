@@ -10,6 +10,8 @@ namespace RightEngine
     {
     public:
         static void Init(GPU_API api);
+        static void BeginFrame();
+        static void EndFrame();
 
         static void SetClearColor(const glm::vec4& color);
 

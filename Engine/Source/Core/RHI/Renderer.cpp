@@ -28,19 +28,15 @@ void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
     }
 }
 
-void Renderer::BeginScene(const std::shared_ptr<Scene>& scene)
+void Renderer::BeginFrame(const std::shared_ptr<Camera>& camera)
 {
-    const auto& camera = scene->GetCamera();
-    const auto projectionMatrix = glm::perspective(camera->GetFOV(true),
-                                                   camera->GetAspectRatio(),
-                                                   camera->GetNear(),
-                                                   camera->GetFar());
-    const auto viewMatrix = camera->GetViewMatrix();
-    sceneData.viewProjectionMatrix = projectionMatrix * viewMatrix;
+    RendererCommand::BeginFrame();
 }
 
-void Renderer::EndScene()
-{}
+void Renderer::EndFrame()
+{
+    RendererCommand::EndFrame();
+}
 
 void Renderer::Configure()
 {

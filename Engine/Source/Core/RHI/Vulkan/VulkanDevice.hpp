@@ -8,6 +8,11 @@
 
 namespace RightEngine
 {
+    enum class QueueType
+            {
+        PRESENT,
+        GRAPHICS,
+            };
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphicsFamily;
@@ -39,6 +44,17 @@ namespace RightEngine
 
         VkDevice GetDevice() const
         { return device; }
+
+        VkQueue GetQueue(QueueType type) const
+        {
+            switch (type)
+            {
+                case QueueType::PRESENT:
+                    return presentQueue;
+                case QueueType::GRAPHICS:
+                    return graphicsQueue;
+            }
+        }
 
         SwapchainSupportDetails GetSwapchainSupportDetails() const;
 

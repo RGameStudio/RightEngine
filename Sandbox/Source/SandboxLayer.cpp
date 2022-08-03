@@ -1,18 +1,21 @@
 #include "SandboxLayer.hpp"
-#include <glslang/Include/glslang_c_interface.h>
 
 using namespace RightEngine;
 
+namespace
+{
+    Renderer renderer;
+}
+
 void SandboxLayer::OnAttach()
 {
-    glslang_initialize_process();
-    glslang_finalize_process();
     std::cout << "Hello!" << std::endl;
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
-
+    renderer.BeginFrame(nullptr);
+    renderer.EndFrame();
 }
 
 void SandboxLayer::OnImGuiRender()

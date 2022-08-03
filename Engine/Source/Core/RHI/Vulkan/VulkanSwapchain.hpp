@@ -42,6 +42,9 @@ namespace RightEngine
         const VkSurfaceFormatKHR GetImageFormat() const
         { return imageFormat; }
 
+        const VkSwapchainKHR GetSwapchain() const
+        { return swapChain; }
+
     private:
         VkSwapchainKHR swapChain;
         std::vector<VkImage> swapChainImages;

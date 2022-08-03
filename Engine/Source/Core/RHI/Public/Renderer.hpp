@@ -41,8 +41,8 @@ namespace RightEngine
                             const MeshComponent& mesh,
                             const glm::mat4& transform);
 
-        void BeginScene(const std::shared_ptr<Scene>& scene);
-        void EndScene();
+        void BeginFrame(const std::shared_ptr<Camera>& camera);
+        void EndFrame();
 
         void Configure();
 
