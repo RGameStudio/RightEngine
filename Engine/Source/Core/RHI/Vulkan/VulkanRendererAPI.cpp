@@ -26,17 +26,12 @@ void VulkanRendererAPI::Init()
         R_CORE_ASSERT(false, "");
     }
     const auto window = Application::Get().GetWindow();
+    glm::ivec2 extent;
+    glfwGetFramebufferSize(static_cast<GLFWwindow*>(window->GetNativeHandle()), &extent.x, &extent.y);
     const auto ctx = std::make_shared<VulkanRenderingContext>(window);
     context = ctx;
     surface = std::make_shared<VulkanSurface>(window, context);
     const auto device = Device::Get(context, surface);
-    SwapchainDescriptor descriptor;
-    glm::ivec2 extent;
-    glfwGetFramebufferSize(static_cast<GLFWwindow*>(window->GetNativeHandle()), &extent.x, &extent.y);
-    descriptor.extent = extent;
-    descriptor.format = Format::B8G8R8A8_SRGB;
-    descriptor.presentMode = PresentMode::IMMEDIATE;
-    swapchain = std::make_shared<VulkanSwapchain>(device, surface, descriptor);
 
     auto shader = Shader::Create("/Assets/Shaders/simple.vert",
                                  "/Assets/Shaders/simple.frag");
@@ -47,29 +42,7 @@ void VulkanRendererAPI::Init()
     renderPassDescriptor.format = Format::B8G8R8A8_SRGB;
     pipeline = std::make_shared<VulkanGraphicsPipeline>(pipelineDescriptor, renderPassDescriptor);
 
-    auto swapchainImageViews = swapchain->GetImageViews();
-    swapchainFramebuffers.resize(swapchainImageViews.size());
-    for (int i = 0; i < swapchainImageViews.size(); i++)
-    {
-        VkImageView attachments[] =
-                {
-                swapchainImageViews[i]
-        };
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = pipeline->GetRenderPass();
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = extent.x;
-        framebufferInfo.height = extent.y;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(VK_DEVICE()->GetDevice(), &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS)
-        {
-            R_CORE_ASSERT(false,"failed to create framebuffer!");
-        }
-    }
+    CreateSwapchain();
 
     QueueFamilyIndices queueFamilyIndices = VK_DEVICE()->FindQueueFamilies();
 
@@ -96,6 +69,61 @@ void VulkanRendererAPI::Init()
     }
 
     CreateSyncObjects();
+}
+
+void VulkanRendererAPI::CreateSwapchain()
+{
+    if (swapchain)
+    {
+        vkDeviceWaitIdle(VK_DEVICE()->GetDevice());
+        DestroySwapchain();
+    }
+    const auto window = Application::Get().GetWindow();
+    SwapchainDescriptor descriptor;
+    glm::ivec2 extent;
+    glfwGetFramebufferSize(static_cast<GLFWwindow*>(window->GetNativeHandle()), &extent.x, &extent.y);
+    descriptor.extent = extent;
+    descriptor.format = Format::B8G8R8A8_SRGB;
+    descriptor.presentMode = PresentMode::IMMEDIATE;
+    swapchain = std::make_shared<VulkanSwapchain>(VK_DEVICE(), surface, descriptor);
+    CreateFramebuffers();
+}
+
+void VulkanRendererAPI::DestroySwapchain()
+{
+    for (int i = 0; i < swapchainFramebuffers.size(); i++)
+    {
+        vkDestroyFramebuffer(VK_DEVICE()->GetDevice(), swapchainFramebuffers[i], nullptr);
+    }
+
+    swapchain.reset();
+}
+
+void VulkanRendererAPI::CreateFramebuffers()
+{
+    auto swapchainImageViews = swapchain->GetImageViews();
+    swapchainFramebuffers.resize(swapchainImageViews.size());
+    for (int i = 0; i < swapchainImageViews.size(); i++)
+    {
+        VkImageView attachments[] =
+                {
+                        swapchainImageViews[i]
+                };
+
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = pipeline->GetRenderPass();
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = swapchain->GetDescriptor().extent.x;
+        framebufferInfo.height = swapchain->GetDescriptor().extent.y;
+        framebufferInfo.layers = 1;
+
+        if (vkCreateFramebuffer(VK_DEVICE()->GetDevice(), &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS)
+        {
+            R_CORE_ASSERT(false,"failed to create framebuffer!");
+        }
+    }
 }
 
 void VulkanRendererAPI::
@@ -170,16 +198,29 @@ void VulkanRendererAPI::CreateSyncObjects()
     }
 }
 
+// TODO: Add resize callback from GLFW event
+// TODO: Add rendering stop when window is minimized
 void VulkanRendererAPI::BeginFrame()
 {
     vkWaitForFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-    vkResetFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame]);
-    vkAcquireNextImageKHR(VK_DEVICE()->GetDevice(),
+    VkResult result = vkAcquireNextImageKHR(VK_DEVICE()->GetDevice(),
                           swapchain->GetSwapchain(),
                           UINT64_MAX,
                           imageAvailableSemaphores[currentFrame],
                           VK_NULL_HANDLE,
                           &currentImageIndex);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        CreateSwapchain();
+        return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+    {
+        R_CORE_ASSERT(false,"failed to acquire swap chain image!");
+    }
+
+    vkResetFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame]);
 
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     RecordCommandBuffer(commandBuffers[currentFrame], currentImageIndex);
@@ -216,7 +257,19 @@ void VulkanRendererAPI::EndFrame()
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &currentImageIndex;
     presentInfo.pResults = nullptr; // Optional
-    vkQueuePresentKHR(VK_DEVICE()->GetQueue(QueueType::PRESENT), &presentInfo);
+
+    VkResult result = vkQueuePresentKHR(VK_DEVICE()->GetQueue(QueueType::PRESENT), &presentInfo);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        CreateSwapchain();
+        return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+    {
+        R_CORE_ASSERT(false,"failed to acquire swap chain image!");
+    }
+
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
@@ -264,8 +317,5 @@ VulkanRendererAPI::~VulkanRendererAPI()
         vkDestroyFence(VK_DEVICE()->GetDevice(), inFlightFences[i], nullptr);
     }
     vkDestroyCommandPool(VK_DEVICE()->GetDevice(), commandPool, nullptr);
-    for (auto framebuffer : swapchainFramebuffers)
-    {
-        vkDestroyFramebuffer(VK_DEVICE()->GetDevice(), framebuffer, nullptr);
-    }
+    DestroySwapchain();
 }

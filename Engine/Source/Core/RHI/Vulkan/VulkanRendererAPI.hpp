@@ -44,5 +44,8 @@ namespace RightEngine
 
         void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
         void CreateSyncObjects();
+        void CreateFramebuffers();
+        void CreateSwapchain();
+        void DestroySwapchain();
     };
 }
