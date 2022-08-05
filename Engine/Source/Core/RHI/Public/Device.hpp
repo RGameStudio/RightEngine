@@ -1,12 +1,16 @@
 #pragma once
 
 #include "RenderingContext.hpp"
+#include "BufferDescriptor.hpp"
+#include "ShaderProgramDescriptor.hpp"
 #include <memory>
 
 #define VK_DEVICE() std::static_pointer_cast<VulkanDevice>(Device::Get())
 
 namespace RightEngine
 {
+    class Buffer;
+    class Shader;
     class Surface;
 
     struct DeviceInfo
@@ -21,6 +25,9 @@ namespace RightEngine
         { return info; }
 
         virtual ~Device() = default;
+
+        virtual std::shared_ptr<Buffer> CreateBuffer(const BufferDescriptor& bufferDescriptor, const void* data) = 0;
+        virtual std::shared_ptr<Shader> CreateShader(const ShaderProgramDescriptor& shaderProgramDescriptor) = 0;
 
         Device(const Device& other) = delete;
         Device& operator=(const Device& other) = delete;

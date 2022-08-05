@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Shader.hpp"
+#include "Device.hpp"
 #include <glslang/Include/glslang_c_interface.h>
 #include <vulkan/vulkan.h>
 
@@ -20,8 +21,7 @@ namespace RightEngine
     class VulkanShader : public Shader
     {
     public:
-        VulkanShader(const std::string& vertexShaderPath,
-                     const std::string& fragmentShaderPath);
+        VulkanShader(const std::shared_ptr<Device>& device, const ShaderProgramDescriptor& descriptor);
         virtual ~VulkanShader() override;
 
         virtual void Bind() const override;
@@ -47,6 +47,9 @@ namespace RightEngine
                     return fragShaderModule;
             }
         }
+
+        VkVertexInputBindingDescription GetVertexFormatDescription() const;
+        std::vector<VkVertexInputAttributeDescription> GetVertexFormatAttribute() const;
 
     private:
         VkShaderModule vertexShaderModule;

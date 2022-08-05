@@ -1,6 +1,8 @@
 #include "VulkanDevice.hpp"
 #include "Assert.hpp"
 #include "VulkanRenderingContext.hpp"
+#include "VulkanBuffer.hpp"
+#include "VulkanShader.hpp"
 #include <unordered_set>
 
 using namespace RightEngine;
@@ -243,4 +245,14 @@ QueueFamilyIndices VulkanDevice::FindQueueFamilies() const
 VulkanDevice::~VulkanDevice()
 {
     vkDestroyDevice(device, nullptr);
+}
+
+std::shared_ptr<Buffer> VulkanDevice::CreateBuffer(const BufferDescriptor& bufferDescriptor, const void* data)
+{
+    return std::make_shared<VulkanBuffer>(shared_from_this(), bufferDescriptor, data);
+}
+
+std::shared_ptr<Shader> VulkanDevice::CreateShader(const ShaderProgramDescriptor& shaderProgramDescriptor)
+{
+    return std::make_shared<VulkanShader>(shared_from_this(), shaderProgramDescriptor);
 }

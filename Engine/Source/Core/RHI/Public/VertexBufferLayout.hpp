@@ -1,18 +1,22 @@
 #pragma once
 
+#include "Types.hpp"
+#include <glm/glm.hpp>
 #include <vector>
 #include <cassert>
-#include <glad/glad.h>
 
 namespace RightEngine
 {
     struct VertexBufferElement
     {
-        uint32_t type;
+        Format type;
         uint32_t count;
-        uint8_t normalized;
+        bool normalized;
 
-        static unsigned int GetSizeOfType(unsigned int type);
+        uint32_t GetSize() const
+        { return GetSizeOfType(type) * count; }
+
+        static unsigned int GetSizeOfType(Format format);
     };
 
     class VertexBufferLayout
@@ -42,21 +46,42 @@ namespace RightEngine
     template<>
     inline void VertexBufferLayout::Push<float>(uint32_t count, bool normalized)
     {
-        elements.push_back({GL_FLOAT, count, (uint8_t) (normalized ? GL_TRUE : GL_FALSE)});
-        stride += count * VertexBufferElement::GetSizeOfType(GL_FLOAT);
+        elements.push_back({ Format::R32_SFLOAT, count, normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::R32_SFLOAT);
     }
 
     template<>
     inline void VertexBufferLayout::Push<uint32_t>(uint32_t count, bool normalized)
     {
-        elements.push_back({GL_UNSIGNED_INT, count, (uint8_t) (normalized ? GL_TRUE : GL_FALSE)});
-        stride += count * VertexBufferElement::GetSizeOfType(GL_UNSIGNED_INT);
+        elements.push_back({ Format::R32_UINT, count, normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::R32_UINT);
     }
 
     template<>
     inline void VertexBufferLayout::Push<uint8_t>(uint32_t count, bool normalized)
     {
-        elements.push_back({GL_UNSIGNED_BYTE, count, (unsigned char) (normalized ? GL_TRUE : GL_FALSE)});
-        stride += count * VertexBufferElement::GetSizeOfType(GL_UNSIGNED_BYTE);
+        elements.push_back({ Format::R8_UINT, count,  normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::R8_UINT);
+    }
+
+    template<>
+    inline void VertexBufferLayout::Push<glm::vec2>(uint32_t count, bool normalized)
+    {
+        elements.push_back({ Format::R32G32_SFLOAT, count,  normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::R32G32_SFLOAT);
+    }
+
+    template<>
+    inline void VertexBufferLayout::Push<glm::vec3>(uint32_t count, bool normalized)
+    {
+        elements.push_back({ Format::R32G32B32_SFLOAT, count,  normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::R32G32B32_SFLOAT);
+    }
+
+    template<>
+    inline void VertexBufferLayout::Push<glm::vec4>(uint32_t count, bool normalized)
+    {
+        elements.push_back({ Format::R32G32B32A32_SFLOAT, count,  normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::R32G32B32A32_SFLOAT);
     }
 }

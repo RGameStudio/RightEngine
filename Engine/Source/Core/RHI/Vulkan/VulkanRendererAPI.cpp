@@ -33,10 +33,10 @@ void VulkanRendererAPI::Init()
     surface = std::make_shared<VulkanSurface>(window, context);
     const auto device = Device::Get(context, surface);
 
-    auto shader = Shader::Create("/Assets/Shaders/simple.vert",
-                                 "/Assets/Shaders/simple.frag");
+//    auto shader = Shader::Create("/Assets/Shaders/simple.vert",
+//                                 "/Assets/Shaders/simple.frag");
     GraphicsPipelineDescriptor pipelineDescriptor;
-    pipelineDescriptor.shader = shader;
+//    pipelineDescriptor.shader = shader;
     pipelineDescriptor.extent = extent;
     RenderPassDescriptor renderPassDescriptor;
     renderPassDescriptor.format = Format::B8G8R8A8_SRGB;

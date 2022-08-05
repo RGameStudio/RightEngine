@@ -18,3 +18,8 @@ std::shared_ptr<Device> Device::Get(const std::shared_ptr<RenderingContext>& ctx
     }
     return device;
 }
+
+std::shared_ptr<Buffer> Device::CreateBuffer(const BufferDescriptor& bufferDescriptor, const void* data)
+{
+    return std::shared_ptr<Buffer>();
+}

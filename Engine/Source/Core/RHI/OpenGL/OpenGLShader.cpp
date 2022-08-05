@@ -107,12 +107,6 @@ int OpenGLShader::GetUniformLocation(const std::string& name)
     return location;
 }
 
-OpenGLShader::OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
-{
-//    ShaderProgramSource source = ParseShaders(vertexShaderPath, fragmentShaderPath);
-//    id = CreateShader(source.vertexSource, source.fragmentSource);
-}
-
 OpenGLShader::~OpenGLShader()
 {
     glDeleteProgram(id);

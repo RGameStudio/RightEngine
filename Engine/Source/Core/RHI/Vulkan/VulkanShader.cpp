@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "Device.hpp"
 #include "VulkanDevice.hpp"
+#include "VulkanConverters.hpp"
 #include <StandAlone/ResourceLimits.h>
 #include <vulkan/vulkan.h>
 #include <fstream>
@@ -32,8 +33,28 @@ namespace
     }
 }
 
-VulkanShader::VulkanShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+VulkanShader::VulkanShader(const std::shared_ptr<Device>& device, const ShaderProgramDescriptor& descriptor) : Shader(device, descriptor)
 {
+    ShaderDescriptor vertexShader;
+    ShaderDescriptor fragmentShader;
+
+    for (const auto& desc : descriptor.shaders)
+    {
+        switch (desc.type)
+        {
+            case ShaderType::VERTEX:
+                vertexShader = desc;
+                break;
+            case ShaderType::FRAGMENT:
+                fragmentShader = desc;
+                break;
+            default:
+                R_CORE_ASSERT(false, "");
+        }
+    }
+
+    const auto vertexShaderPath = vertexShader.path;
+    const auto fragmentShaderPath = fragmentShader.path;
     glslang_initialize_process();
     ShaderProgramSource source = ParseShaders(vertexShaderPath, fragmentShaderPath);
     const auto vertSpirv = CompileShader(GLSLANG_STAGE_VERTEX, source.vertexSource.c_str(), vertexShaderPath.c_str());
@@ -212,4 +233,29 @@ void VulkanShader::SetUniformMat4f(const std::string& name, const glm::mat4& mat
 void VulkanShader::SetUniform1iv(const std::string& name, const std::vector<int>& v)
 {
 
+}
+
+VkVertexInputBindingDescription VulkanShader::GetVertexFormatDescription() const
+{
+    VkVertexInputBindingDescription bindingDescription{};
+    bindingDescription.binding = 0;
+    bindingDescription.stride = descriptor.layout.GetStride();
+    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    return bindingDescription;
+}
+
+std::vector<VkVertexInputAttributeDescription> VulkanShader::GetVertexFormatAttribute() const
+{
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+
+    const auto layoutElements = descriptor.layout.GetElements();
+    for (int i = 0; i < layoutElements.size(); i++)
+    {
+        VkVertexInputAttributeDescription attributeDescription;
+        attributeDescription.binding = 0;
+        attributeDescription.location = i;
+        attributeDescription.format = VulkanConverters::Format(layoutElements[i].type);
+    }
+
+    return attributeDescriptions;
 }

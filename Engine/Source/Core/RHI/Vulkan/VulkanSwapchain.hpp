@@ -1,22 +1,11 @@
 #pragma once
 
 #include "VulkanDevice.hpp"
+#include "Types.hpp"
 #include <glm/vec2.hpp>
 
 namespace RightEngine
 {
-    enum class Format
-    {
-        B8G8R8A8_SRGB
-    };
-
-    enum class PresentMode
-    {
-        IMMEDIATE,
-        FIFO,
-        MAILBOX
-    };
-
     struct SwapchainDescriptor
     {
         Format format;

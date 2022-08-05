@@ -39,6 +39,9 @@ namespace RightEngine
                      const std::shared_ptr<Surface>& surface);
         virtual ~VulkanDevice() override;
 
+        virtual std::shared_ptr<Buffer> CreateBuffer( const BufferDescriptor& bufferDescriptor, const void* data) override;
+        virtual std::shared_ptr<Shader> CreateShader(const ShaderProgramDescriptor& shaderProgramDescriptor) override;
+
         VkPhysicalDevice GetPhysicalDevice() const
         { return physicalDevice; }
 

@@ -128,8 +128,8 @@ namespace RightEngine
             return asset;
         }
 
-        auto shader = Shader::Create(path + ".vert", path + ".frag");
-        CacheAsset(shader, id, AssetType::SHADER);
-        return shader;
+//        auto shader = Shader::Create(path + ".vert", path + ".frag");
+//        CacheAsset(shader, id, AssetType::SHADER);
+        return nullptr;
     }
 }

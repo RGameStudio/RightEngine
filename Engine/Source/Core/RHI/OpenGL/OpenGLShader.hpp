@@ -7,7 +7,6 @@ namespace RightEngine
     class OpenGLShader : public Shader
     {
     public:
-        OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
         virtual ~OpenGLShader() override;
 
         virtual void Bind() const override;
