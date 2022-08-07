@@ -9,7 +9,6 @@ set_target_properties(Sandbox
 target_link_libraries(Sandbox
         Engine
         glad
-        opengl32
         easyargs
         glfw
         stb_image
@@ -23,7 +22,12 @@ target_link_libraries(Sandbox
         SPIRV
         ${Vulkan_LIBRARY}
         glslang-default-resource-limits
-        )
+)
+
+if (WIN32)
+target_link_libraries(Sandbox opengl32)
+elseif (APPLE)
+endif()
 
 add_custom_target(CopyShaderFilesToSandbox ALL DEPENDS ${GLSL_ROOT_DIR})
 

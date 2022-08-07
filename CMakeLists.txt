@@ -5,6 +5,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 enable_testing()
 add_compile_definitions(R_ENABLE_ASSERTS)
+if (WIN32)
+    add_compile_definitions(R_WIN32)
+elseif (APPLE)
+    add_compile_definitions(R_APPLE)
+endif()
 
 set(GLSL_ROOT_DIR ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders)
 set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
@@ -18,9 +23,13 @@ set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
              ${GLSL_ROOT_DIR}/Utils/envmap_to_cubemap.frag
              ${GLSL_ROOT_DIR}/Utils/envmap_to_cubemap.vert
         )
+if (WIN32)
+    set(Vulkan_LIBRARY $ENV{Vulkan_LIBRARY})
+    find_package(Vulkan REQUIRED FATAL_ERROR)
+elseif (APPLE)
+    find_package(Vulkan REQUIRED FATAL_ERROR)
+endif()
 
-set(Vulkan_LIBRARY $ENV{Vulkan_LIBRARY})
-find_package(Vulkan REQUIRED FATAL_ERROR)
 message(STATUS "Vulkan include directory: " ${Vulkan_INCLUDE_DIR})
 message(STATUS "Vulkan library directory: " ${Vulkan_LIBRARY})
 

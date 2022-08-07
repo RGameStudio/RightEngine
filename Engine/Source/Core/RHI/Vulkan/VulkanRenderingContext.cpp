@@ -31,6 +31,11 @@ namespace
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
+#ifdef R_APPLE
+        extensions.push_back("VK_KHR_portability_enumeration");
+        extensions.push_back("VK_KHR_get_physical_device_properties2");
+#endif
+
         return extensions;
     }
 
@@ -151,6 +156,9 @@ void VulkanRenderingContext::Init()
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
+#ifdef R_APPLE
+    createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
     auto exts = GetRequiredExtensions();
     createInfo.enabledExtensionCount = exts.size();

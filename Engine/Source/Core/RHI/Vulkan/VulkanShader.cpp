@@ -35,6 +35,7 @@ namespace
 
 VulkanShader::VulkanShader(const std::shared_ptr<Device>& device, const ShaderProgramDescriptor& descriptor) : Shader(device, descriptor)
 {
+    R_CORE_ASSERT(descriptor.layout.GetElements().size() > 0, "");
     ShaderDescriptor vertexShader;
     ShaderDescriptor fragmentShader;
 
@@ -102,9 +103,17 @@ std::vector<uint32_t> VulkanShader::CompileShader(glslang_stage_t stage, const c
     input.language = GLSLANG_SOURCE_GLSL;
     input.stage = stage;
     input.client = GLSLANG_CLIENT_VULKAN;
-    input.client_version = GLSLANG_TARGET_VULKAN_1_3;
-    input.target_language = GLSLANG_TARGET_SPV;
+#ifdef R_APPLE
+    input.client_version = GLSLANG_TARGET_VULKAN_1_0;
+#else
     input.target_language_version = GLSLANG_TARGET_SPV_1_3;
+#endif
+    input.target_language = GLSLANG_TARGET_SPV;
+#ifdef R_APPLE
+    input.target_language_version = GLSLANG_TARGET_SPV_1_0;
+#else
+    input.target_language_version = GLSLANG_TARGET_SPV_1_3;
+#endif
     input.code = shaderSource;
     input.default_version = 100;
     input.default_profile = GLSLANG_NO_PROFILE;
@@ -249,12 +258,17 @@ std::vector<VkVertexInputAttributeDescription> VulkanShader::GetVertexFormatAttr
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
 
     const auto layoutElements = descriptor.layout.GetElements();
+    uint32_t offset = -layoutElements.front().GetSize();
     for (int i = 0; i < layoutElements.size(); i++)
     {
         VkVertexInputAttributeDescription attributeDescription;
         attributeDescription.binding = 0;
         attributeDescription.location = i;
         attributeDescription.format = VulkanConverters::Format(layoutElements[i].type);
+        attributeDescription.offset = offset + layoutElements[std::max(0, i - 1)].GetSize();
+        offset += layoutElements[i].GetSize();;
+
+        attributeDescriptions.emplace_back(attributeDescription);
     }
 
     return attributeDescriptions;

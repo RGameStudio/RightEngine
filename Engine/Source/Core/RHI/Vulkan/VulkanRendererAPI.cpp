@@ -33,10 +33,22 @@ void VulkanRendererAPI::Init()
     surface = std::make_shared<VulkanSurface>(window, context);
     const auto device = Device::Get(context, surface);
 
-//    auto shader = Shader::Create("/Assets/Shaders/simple.vert",
-//                                 "/Assets/Shaders/simple.frag");
+    ShaderProgramDescriptor descriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/simple.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/simple.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    descriptor.shaders = { vertexShader, fragmentShader };
+    VertexBufferLayout layout;
+    layout.Push<glm::vec2>();
+    layout.Push<glm::vec3>();
+    descriptor.layout = layout;
+    const auto shader = device->CreateShader(descriptor);
+
     GraphicsPipelineDescriptor pipelineDescriptor;
-//    pipelineDescriptor.shader = shader;
+    pipelineDescriptor.shader = shader;
     pipelineDescriptor.extent = extent;
     RenderPassDescriptor renderPassDescriptor;
     renderPassDescriptor.format = Format::B8G8R8A8_SRGB;

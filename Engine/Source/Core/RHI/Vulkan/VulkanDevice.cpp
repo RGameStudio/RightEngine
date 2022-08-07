@@ -11,7 +11,10 @@ namespace
 {
     const std::vector<const char*> deviceExtensions =
         {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef R_APPLE
+            "VK_KHR_portability_subset"
+#endif
         };
 
     std::weak_ptr<VulkanSurface> vulkanSurface;

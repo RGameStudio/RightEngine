@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Assert.hpp"
 #include "Types.hpp"
 #include <glm/glm.hpp>
 #include <vector>
@@ -32,9 +33,11 @@ namespace RightEngine
 
         template<typename T>
         void Push(uint32_t count, bool normalized = false)
-        {
-            static_assert(true, "");
-        }
+        { R_CORE_ASSERT(false, ""); }
+
+        template<typename T>
+        void Push()
+        { R_CORE_ASSERT(false, ""); }
 
         inline const std::vector<VertexBufferElement> GetElements() const &
         { return elements; }
@@ -83,5 +86,23 @@ namespace RightEngine
     {
         elements.push_back({ Format::R32G32B32A32_SFLOAT, count,  normalized });
         stride += count * VertexBufferElement::GetSizeOfType(Format::R32G32B32A32_SFLOAT);
+    }
+
+    template<>
+    inline void VertexBufferLayout::Push<glm::vec2>()
+    {
+        Push<glm::vec2>(1, false);
+    }
+
+    template<>
+    inline void VertexBufferLayout::Push<glm::vec3>()
+    {
+        Push<glm::vec3>(1, false);
+    }
+
+    template<>
+    inline void VertexBufferLayout::Push<glm::vec4>()
+    {
+        Push<glm::vec4>(1, false);
     }
 }
