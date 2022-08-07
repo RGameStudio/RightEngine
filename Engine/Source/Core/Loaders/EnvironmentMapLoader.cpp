@@ -111,7 +111,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
         envmapConverterShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
         fb.BindAttachmentToCubemapFace(cubemap, 0, i);
         RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        RendererCommand::Draw(va->GetVertexBuffer());
+//        RendererCommand::Draw(va->GetVertexBuffer());
     }
     fb.UnBind();
 
@@ -151,7 +151,7 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
         irradianceMapShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
         fb.BindAttachmentToCubemapFace(irradianceMap, 0, i);
         RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        RendererCommand::Draw(va->GetVertexBuffer());
+//        RendererCommand::Draw(va->GetVertexBuffer());
     }
     fb.UnBind();
 
@@ -207,7 +207,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
             prefilterMapShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
             fb.BindAttachmentToCubemapFace(prefilteredMap, 0, i, mipLevel);
             RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            RendererCommand::Draw(va->GetVertexBuffer());
+//            RendererCommand::Draw(va->GetVertexBuffer());
         }
     }
     fb.UnBind();
@@ -253,7 +253,7 @@ void EnvironmentMapLoader::ComputeLUT()
 
     fb.BindAttachmentToTexture(lutTexture, 0);
     RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    RendererCommand::Draw(va->GetVertexBuffer());
+//    RendererCommand::Draw(va->GetVertexBuffer());
 
     fb.UnBind();
 

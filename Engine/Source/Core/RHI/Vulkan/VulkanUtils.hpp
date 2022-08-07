@@ -8,6 +8,6 @@ namespace RightEngine
     {
     public:
         static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-        static VkDeviceMemory AllocateMemory(VkMemoryRequirements memRequirements, VkMemoryPropertyFlagBits flags);
+        static VkDeviceMemory AllocateMemory(VkMemoryRequirements memRequirements, VkMemoryPropertyFlags flags);
     };
 }

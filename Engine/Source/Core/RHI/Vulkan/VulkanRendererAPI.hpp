@@ -25,8 +25,7 @@ namespace RightEngine
         virtual void SetViewport(const Viewport& viewport) override;
         virtual Viewport GetViewport() override;
 
-        virtual void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib) override;
-        virtual void Draw(const std::shared_ptr<VertexBuffer>& vb) override;
+        virtual void Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer) override;
         virtual void Draw(const std::shared_ptr<Buffer>& buffer) override;
         virtual ~VulkanRendererAPI() override;
 

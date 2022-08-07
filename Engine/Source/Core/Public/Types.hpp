@@ -36,4 +36,13 @@ namespace RightEngine
         FIFO,
         MAILBOX
     };
+
+    #define BIT(x) 1 << x
+
+    enum MemoryType
+    {
+        MEMORY_TYPE_HOST_VISIBLE = BIT(0),
+        MEMORY_TYPE_HOST_COHERENT = BIT(1),
+        MEMORY_TYPE_DEVICE_LOCAL = BIT(2)
+    };
 }

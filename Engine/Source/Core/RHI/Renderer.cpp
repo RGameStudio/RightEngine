@@ -20,11 +20,11 @@ void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
     if (ib)
     {
         ib->Bind();
-        RendererCommand::DrawIndexed(ib);
+//        RendererCommand::DrawIndexed(ib);
     }
     else
     {
-        RendererCommand::Draw(vb);
+//        RendererCommand::Draw(vb);
     }
 }
 

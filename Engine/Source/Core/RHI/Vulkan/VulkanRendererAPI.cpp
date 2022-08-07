@@ -304,16 +304,6 @@ Viewport VulkanRendererAPI::GetViewport()
     return Viewport();
 }
 
-void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<IndexBuffer>& ib)
-{
-    R_CORE_ASSERT(false, "");
-}
-
-void VulkanRendererAPI::Draw(const std::shared_ptr<VertexBuffer>& vb)
-{
-    R_CORE_ASSERT(false, "");
-}
-
 void VulkanRendererAPI::Draw(const std::shared_ptr<Buffer>& buffer)
 {
     const auto vulkanBuffer = std::static_pointer_cast<VulkanBuffer>(buffer);
@@ -322,6 +312,20 @@ void VulkanRendererAPI::Draw(const std::shared_ptr<Buffer>& buffer)
     vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
 
     vkCmdDraw(commandBuffers[currentFrame], vulkanBuffer->GetDescriptor().size / pipeline->GetPipelineDescriptor().shader->GetShaderProgramDescriptor().layout.GetStride(), 1, 0, 0);
+}
+
+void VulkanRendererAPI::Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer)
+{
+    const auto vkVertexBuffer = std::static_pointer_cast<VulkanBuffer>(vertexBuffer);
+    VkBuffer vertexBuffers[] = { vkVertexBuffer->GetBuffer() };
+    VkDeviceSize offsets[] = {0};
+
+    const auto vkIndexBuffer = std::static_pointer_cast<VulkanBuffer>(indexBuffer);
+
+    vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+    // TODO: Check index size
+    vkCmdBindIndexBuffer(commandBuffers[currentFrame], vkIndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+    vkCmdDrawIndexed(commandBuffers[currentFrame], vkIndexBuffer->GetDescriptor().size / sizeof(uint32_t), 1, 0, 0, 0);
 }
 
 void VulkanRendererAPI::SetClearColor(const glm::vec4& color)

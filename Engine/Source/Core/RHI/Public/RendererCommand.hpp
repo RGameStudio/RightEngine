@@ -20,10 +20,8 @@ namespace RightEngine
         static void SetViewport(const Viewport& viewport);
         static Viewport GetViewport();
 
-        static void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib);
-
-        static void Draw(const std::shared_ptr<VertexBuffer>& vb);
         static void Draw(const std::shared_ptr<Buffer>& buffer);
+        static void DrawIndexed(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer);
 
         static void Configure(const RendererSettings& settings);
 

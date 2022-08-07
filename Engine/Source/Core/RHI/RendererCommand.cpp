@@ -31,16 +31,6 @@ Viewport RendererCommand::GetViewport()
     return rendererAPI->GetViewport();
 }
 
-void RendererCommand::DrawIndexed(const std::shared_ptr<IndexBuffer>& ib)
-{
-    rendererAPI->DrawIndexed(ib);
-}
-
-void RendererCommand::Draw(const std::shared_ptr<VertexBuffer>& vb)
-{
-    rendererAPI->Draw(vb);
-}
-
 void RendererCommand::Configure(const RendererSettings& settings)
 {
     rendererAPI->Configure(settings);
@@ -48,8 +38,17 @@ void RendererCommand::Configure(const RendererSettings& settings)
 
 void RendererCommand::Draw(const std::shared_ptr<Buffer>& buffer)
 {
-    R_CORE_ASSERT(buffer->GetDescriptor().type == BufferType::VERTEX, "");
+    R_CORE_ASSERT(buffer->GetDescriptor().type == BUFFER_TYPE_VERTEX, "");
     rendererAPI->Draw(buffer);
+}
+
+void RendererCommand::DrawIndexed(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer)
+{
+    R_CORE_ASSERT(vertexBuffer->GetDescriptor().type == BUFFER_TYPE_VERTEX
+    && indexBuffer->GetDescriptor().type == BUFFER_TYPE_INDEX
+    && vertexBuffer->GetDescriptor().size > 0
+    && indexBuffer->GetDescriptor().size > 0, "");
+    rendererAPI->Draw(vertexBuffer, indexBuffer);
 }
 
 void RendererCommand::BeginFrame()

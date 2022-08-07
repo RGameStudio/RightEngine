@@ -52,16 +52,6 @@ Viewport OpenGLRendererAPI::GetViewport()
     return { viewport[0], viewport[1], viewport[2], viewport[3] };
 }
 
-void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<IndexBuffer>& ib)
-{
-    glDrawElements(GL_TRIANGLES, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
-}
-
-void OpenGLRendererAPI::Draw(const std::shared_ptr<VertexBuffer>& vb)
-{
-    glDrawArrays(GL_TRIANGLES, 0, vb->GetSize());
-}
-
 void OpenGLRendererAPI::Configure(const RendererSettings& settings)
 {
     if (settings.hasDepthTest)

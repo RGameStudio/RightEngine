@@ -50,5 +50,47 @@ namespace RightEngine
                     R_CORE_ASSERT(false, "");
             }
         }
+
+        inline static VkBufferUsageFlags BufferUsage(BufferType type)
+        {
+            VkBufferUsageFlags flags = 0;
+            if (type & BUFFER_TYPE_VERTEX)
+            {
+                flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+            }
+            if (type & BUFFER_TYPE_TRANSFER_SRC)
+            {
+                flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+            }
+            if (type & BUFFER_TYPE_TRANSFER_DST)
+            {
+                flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+            }
+            if (type & BUFFER_TYPE_INDEX)
+            {
+                flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+            }
+
+            return flags;
+        }
+
+        inline static VkMemoryPropertyFlags MemoryProperty(MemoryType type)
+        {
+            VkMemoryPropertyFlags flags = 0;
+            if (type & MEMORY_TYPE_HOST_VISIBLE)
+            {
+                flags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            }
+            if (type & MEMORY_TYPE_HOST_VISIBLE)
+            {
+                flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+            }
+            if (type & MEMORY_TYPE_HOST_COHERENT)
+            {
+                flags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            }
+
+            return flags;
+        }
     };
 }

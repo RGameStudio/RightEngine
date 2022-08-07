@@ -20,7 +20,7 @@ uint32_t VulkanUtils::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags 
     return -1;
 }
 
-VkDeviceMemory VulkanUtils::AllocateMemory(VkMemoryRequirements memRequirements, VkMemoryPropertyFlagBits flags)
+VkDeviceMemory VulkanUtils::AllocateMemory(VkMemoryRequirements memRequirements, VkMemoryPropertyFlags flags)
 {
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
