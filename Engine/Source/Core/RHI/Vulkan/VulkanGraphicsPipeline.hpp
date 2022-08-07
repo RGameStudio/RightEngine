@@ -32,6 +32,12 @@ namespace RightEngine
         VkPipeline GetPipeline() const
         { return graphicsPipeline; }
 
+        const GraphicsPipelineDescriptor& GetPipelineDescriptor() const
+        { return pipelineDescriptor; }
+
+        const RenderPassDescriptor& GetRenderPassDescriptor() const
+        { return renderPassDescriptor; }
+
     private:
         VkPipeline graphicsPipeline;
         VkPipelineLayout pipelineLayout;

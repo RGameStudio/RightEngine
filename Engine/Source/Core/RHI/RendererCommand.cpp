@@ -46,6 +46,12 @@ void RendererCommand::Configure(const RendererSettings& settings)
     rendererAPI->Configure(settings);
 }
 
+void RendererCommand::Draw(const std::shared_ptr<Buffer>& buffer)
+{
+    R_CORE_ASSERT(buffer->GetDescriptor().type == BufferType::VERTEX, "");
+    rendererAPI->Draw(buffer);
+}
+
 void RendererCommand::BeginFrame()
 {
     rendererAPI->BeginFrame();

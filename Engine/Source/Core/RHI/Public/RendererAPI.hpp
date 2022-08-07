@@ -4,6 +4,7 @@
 #include "VertexBuffer.hpp"
 #include "Types.hpp"
 #include "RenderingContext.hpp"
+#include "Buffer.hpp"
 #include <glm/glm.hpp>
 #include <memory>
 
@@ -34,6 +35,7 @@ namespace RightEngine
         virtual Viewport GetViewport() = 0;
         virtual void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib) = 0;
         virtual void Draw(const std::shared_ptr<VertexBuffer>& vb) = 0;
+        virtual void Draw(const std::shared_ptr<Buffer>& buffer) = 0;
 
         static std::shared_ptr<RendererAPI> Create(GPU_API GpuApi);
         static GPU_API GetAPI();

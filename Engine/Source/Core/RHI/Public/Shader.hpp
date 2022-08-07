@@ -32,6 +32,9 @@ namespace RightEngine
         virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) = 0;
         virtual void SetUniform1iv(const std::string& name, const std::vector<int>& v) = 0;
 
+        inline const ShaderProgramDescriptor& GetShaderProgramDescriptor() const
+        { return descriptor; }
+
     protected:
         Shader(const std::shared_ptr<Device>& device, const ShaderProgramDescriptor& descriptor) : descriptor(descriptor)
         {}

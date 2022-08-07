@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Buffer.hpp"
+#include <vulkan/vulkan.h>
 
 namespace RightEngine
 {
@@ -10,5 +11,15 @@ namespace RightEngine
         VulkanBuffer(std::shared_ptr<Device> device, const BufferDescriptor& bufferDescriptor, const void* data);
 
         virtual ~VulkanBuffer() override;
+
+        virtual void* Map() const override;
+        virtual void UnMap() const override;
+
+        inline VkBuffer GetBuffer() const
+        { return buffer; }
+
+    private:
+        VkBuffer buffer;
+        VkDeviceMemory memory;
     };
 }

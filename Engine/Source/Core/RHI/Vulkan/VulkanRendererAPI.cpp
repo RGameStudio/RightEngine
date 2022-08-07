@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "VulkanSwapchain.hpp"
 #include "VulkanConverters.hpp"
+#include "VulkanBuffer.hpp"
 
 using namespace RightEngine;
 
@@ -138,8 +139,7 @@ void VulkanRendererAPI::CreateFramebuffers()
     }
 }
 
-void VulkanRendererAPI::
-RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void VulkanRendererAPI::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -178,15 +178,6 @@ RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     scissor.offset = {0, 0};
     scissor.extent = VulkanConverters::Extent(swapchain->GetDescriptor().extent);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-    vkCmdEndRenderPass(commandBuffer);
-
-    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-    {
-        R_CORE_ASSERT(false, "failed to record command buffer!");
-    }
 }
 
 void VulkanRendererAPI::CreateSyncObjects()
@@ -240,6 +231,13 @@ void VulkanRendererAPI::BeginFrame()
 
 void VulkanRendererAPI::EndFrame()
 {
+    vkCmdEndRenderPass(commandBuffers[currentFrame]);
+
+    if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
+    {
+        R_CORE_ASSERT(false, "failed to record command buffer!");
+    }
+
     VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
@@ -314,6 +312,16 @@ void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<IndexBuffer>& ib)
 void VulkanRendererAPI::Draw(const std::shared_ptr<VertexBuffer>& vb)
 {
     R_CORE_ASSERT(false, "");
+}
+
+void VulkanRendererAPI::Draw(const std::shared_ptr<Buffer>& buffer)
+{
+    const auto vulkanBuffer = std::static_pointer_cast<VulkanBuffer>(buffer);
+    VkBuffer vertexBuffers[] = { vulkanBuffer->GetBuffer() };
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+
+    vkCmdDraw(commandBuffers[currentFrame], vulkanBuffer->GetDescriptor().size / pipeline->GetPipelineDescriptor().shader->GetShaderProgramDescriptor().layout.GetStride(), 1, 0, 0);
 }
 
 void VulkanRendererAPI::SetClearColor(const glm::vec4& color)

@@ -23,6 +23,7 @@ namespace RightEngine
         static void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib);
 
         static void Draw(const std::shared_ptr<VertexBuffer>& vb);
+        static void Draw(const std::shared_ptr<Buffer>& buffer);
 
         static void Configure(const RendererSettings& settings);
 

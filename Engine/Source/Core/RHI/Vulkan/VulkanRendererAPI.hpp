@@ -27,6 +27,7 @@ namespace RightEngine
 
         virtual void DrawIndexed(const std::shared_ptr<IndexBuffer>& ib) override;
         virtual void Draw(const std::shared_ptr<VertexBuffer>& vb) override;
+        virtual void Draw(const std::shared_ptr<Buffer>& buffer) override;
         virtual ~VulkanRendererAPI() override;
 
     private:
