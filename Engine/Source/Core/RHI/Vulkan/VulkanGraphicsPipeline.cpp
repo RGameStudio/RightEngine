@@ -30,14 +30,11 @@ void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
     const auto shader = std::static_pointer_cast<VulkanShader>(descriptor.shader);
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
-    vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
     vertexInputInfo.vertexBindingDescriptionCount = 1;
     VkVertexInputBindingDescription bindingDescription[] = { shader->GetVertexFormatDescription() };
     vertexInputInfo.pVertexBindingDescriptions = bindingDescription;
     const auto vertexFormatAttribute = shader->GetVertexFormatAttribute();
+    vertexInputInfo.vertexAttributeDescriptionCount = vertexFormatAttribute.size();
     vertexInputInfo.pVertexAttributeDescriptions = vertexFormatAttribute.data();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
