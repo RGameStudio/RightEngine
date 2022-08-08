@@ -28,9 +28,12 @@ VulkanBuffer::VulkanBuffer(std::shared_ptr<Device> device, const BufferDescripto
     memory = VulkanUtils::AllocateMemory(memRequirements, VulkanConverters::MemoryProperty(bufferDescriptor.memoryType));
     vkBindBufferMemory(vulkanDevice->GetDevice(), buffer, memory, 0);
 
-    void* bufferPtr = Map();
-    memcpy(bufferPtr, data, bufferDescriptor.size);
-    UnMap();
+    if (data)
+    {
+        void* bufferPtr = Map();
+        memcpy(bufferPtr, data, bufferDescriptor.size);
+        UnMap();
+    }
 }
 
 void* VulkanBuffer::Map() const

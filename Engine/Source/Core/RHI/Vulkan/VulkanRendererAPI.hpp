@@ -46,6 +46,7 @@ namespace RightEngine
         void CreateSyncObjects();
         void CreateFramebuffers();
         void CreateSwapchain();
+        void CreateDescriptorSetLayout();
         void DestroySwapchain();
     };
 }

@@ -70,6 +70,10 @@ namespace RightEngine
             {
                 flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
             }
+            if (type & BUFFER_TYPE_UNIFORM)
+            {
+                flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+            }
 
             return flags;
         }

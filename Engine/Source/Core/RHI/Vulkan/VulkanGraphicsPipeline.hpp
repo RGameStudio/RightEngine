@@ -2,8 +2,10 @@
 
 #include "VulkanSwapchain.hpp"
 #include "Shader.hpp"
+#include "Buffer.hpp"
 #include <vulkan/vulkan.h>
 #include <glm/vec2.hpp>
+#include <unordered_map>
 
 namespace RightEngine
 {
@@ -11,6 +13,8 @@ namespace RightEngine
     {
         glm::ivec2 extent;
         std::shared_ptr<Shader> shader;
+        std::unordered_map<int, std::shared_ptr<Buffer>> vertexBuffers;
+        std::unordered_map<int, std::shared_ptr<Buffer>> buffers;
     };
 
     struct RenderPassDescriptor
@@ -40,13 +44,19 @@ namespace RightEngine
 
     private:
         VkPipeline graphicsPipeline;
+        VkDescriptorSetLayout descriptorSetLayout;
         VkPipelineLayout pipelineLayout;
         VkRenderPass renderPass;
+        VkDescriptorPool descriptorPool;
+        std::vector<VkDescriptorSet> descriptorSets;
         GraphicsPipelineDescriptor pipelineDescriptor;
         RenderPassDescriptor renderPassDescriptor;
 
         void Init(const GraphicsPipelineDescriptor& descriptorconst,
                   const RenderPassDescriptor& renderPassDescriptor);
         void CreateRenderPass(const RenderPassDescriptor& renderPassDescriptor);
+        void CreateDescriptorSetLayout();
+        void CreateDescriptorPool();
+        void CreateDescriptorSets();
     };
 }
