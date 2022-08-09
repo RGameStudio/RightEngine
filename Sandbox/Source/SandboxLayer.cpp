@@ -65,7 +65,7 @@ void SandboxLayer::OnUpdate(float ts)
     ubo.projection[1][1] *= -1;
     auto uboPtr = uboTransform->Map();
     memcpy(uboPtr, &ubo, sizeof(UBO));
-    RendererCommand::DrawIndexed(vertexBuffer, indexBuffer);
+    renderer.Draw(vertexBuffer, indexBuffer);
     uboTransform->UnMap();
     renderer.EndFrame();
 }

@@ -5,6 +5,7 @@
 #include "VulkanSurface.hpp"
 #include "VulkanSwapchain.hpp"
 #include "VulkanGraphicsPipeline.hpp"
+#include "VulkanCommandBuffer.hpp"
 
 namespace RightEngine
 {
@@ -13,8 +14,8 @@ namespace RightEngine
     public:
         virtual void Init() override;
 
-        virtual void BeginFrame() override;
-        virtual void EndFrame() override;
+        virtual void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd) override;
+        virtual void EndFrame(const std::shared_ptr<CommandBuffer>& cmd) override;
 
         virtual void Configure(const RendererSettings& settings) override;
 
@@ -25,8 +26,11 @@ namespace RightEngine
         virtual void SetViewport(const Viewport& viewport) override;
         virtual Viewport GetViewport() override;
 
-        virtual void Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer) override;
-        virtual void Draw(const std::shared_ptr<Buffer>& buffer) override;
+        virtual void Draw(const std::shared_ptr<CommandBuffer>& cmd,
+                          const std::shared_ptr<Buffer>& vertexBuffer,
+                          const std::shared_ptr<Buffer>& indexBuffer) override;
+        virtual void Draw(const std::shared_ptr<CommandBuffer>& cmd,
+                          const std::shared_ptr<Buffer>& buffer) override;
         virtual ~VulkanRendererAPI() override;
 
     private:
@@ -35,14 +39,12 @@ namespace RightEngine
         std::shared_ptr<VulkanSwapchain> swapchain;
         std::shared_ptr<VulkanGraphicsPipeline> pipeline;
         std::vector<VkFramebuffer> swapchainFramebuffers;
-        VkCommandPool commandPool;
-        std::vector<VkCommandBuffer> commandBuffers;
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
         uint32_t currentImageIndex;
 
-        void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void RecordCommandBuffer(const std::shared_ptr<VulkanCommandBuffer>& cmd, uint32_t imageIndex);
         void CreateSyncObjects();
         void CreateFramebuffers();
         void CreateSwapchain();

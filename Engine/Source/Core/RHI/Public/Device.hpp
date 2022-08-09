@@ -2,6 +2,7 @@
 
 #include "RenderingContext.hpp"
 #include "BufferDescriptor.hpp"
+#include "CommandBufferDescriptor.hpp"
 #include "ShaderProgramDescriptor.hpp"
 #include <memory>
 
@@ -10,6 +11,7 @@
 namespace RightEngine
 {
     class Buffer;
+    class CommandBuffer;
     class Shader;
     class Surface;
 
@@ -27,6 +29,7 @@ namespace RightEngine
         virtual ~Device() = default;
 
         virtual std::shared_ptr<Buffer> CreateBuffer(const BufferDescriptor& bufferDescriptor, const void* data) = 0;
+        virtual std::shared_ptr<CommandBuffer> CreateCommandBuffer(const CommandBufferDescriptor& descriptor) = 0;
         virtual std::shared_ptr<Shader> CreateShader(const ShaderProgramDescriptor& shaderProgramDescriptor) = 0;
 
         Device(const Device& other) = delete;

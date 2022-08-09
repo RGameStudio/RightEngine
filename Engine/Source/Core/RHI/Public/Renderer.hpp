@@ -37,12 +37,16 @@ namespace RightEngine
     class Renderer
     {
     public:
+        Renderer();
+
         void SubmitMesh(const std::shared_ptr<Shader>& shader,
                             const MeshComponent& mesh,
                             const glm::mat4& transform);
 
         void BeginFrame(const std::shared_ptr<Camera>& camera);
         void EndFrame();
+
+        void Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer = nullptr);
 
         void Configure();
 
@@ -53,5 +57,6 @@ namespace RightEngine
     private:
         SceneData sceneData;
         RendererSettings settings;
+        std::shared_ptr<CommandBuffer> commandBuffer;
     };
 }

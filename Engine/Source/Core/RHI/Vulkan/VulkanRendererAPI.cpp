@@ -4,12 +4,13 @@
 #include "VulkanSwapchain.hpp"
 #include "VulkanConverters.hpp"
 #include "VulkanBuffer.hpp"
+#include "VulkanCommandBuffer.hpp"
 
 using namespace RightEngine;
 
 namespace
 {
-    const int MAX_FRAMES_IN_FLIGHT = 2;
+    const int MAX_FRAMES_IN_FLIGHT = 1;
     uint32_t currentFrame = 0;
     std::vector<VkFramebuffer> framebuffers;
 }
@@ -56,31 +57,6 @@ void VulkanRendererAPI::Init()
     pipeline = std::make_shared<VulkanGraphicsPipeline>(pipelineDescriptor, renderPassDescriptor);
 
     CreateSwapchain();
-
-    QueueFamilyIndices queueFamilyIndices = VK_DEVICE()->FindQueueFamilies();
-
-    VkCommandPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-
-    if (vkCreateCommandPool(VK_DEVICE()->GetDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
-    {
-        R_CORE_ASSERT(false,"failed to create command pool!");
-    }
-
-    commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = commandBuffers.size();
-
-    if (vkAllocateCommandBuffers(VK_DEVICE()->GetDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS)
-    {
-        R_CORE_ASSERT(false, "failed to allocate command buffers!");
-    }
-
     CreateSyncObjects();
 }
 
@@ -160,14 +136,14 @@ void VulkanRendererAPI::CreateSyncObjects()
     }
 }
 
-void VulkanRendererAPI::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void VulkanRendererAPI::RecordCommandBuffer(const std::shared_ptr<VulkanCommandBuffer>& cmd, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = 0; // Optional
     beginInfo.pInheritanceInfo = nullptr; // Optional
 
-    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+    if (vkBeginCommandBuffer( cmd->GetBuffer(), &beginInfo) != VK_SUCCESS)
     {
         R_CORE_ASSERT(false, "failed to begin recording command buffer!");
     }
@@ -183,8 +159,13 @@ void VulkanRendererAPI::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     renderPassInfo.clearValueCount = 1;
     renderPassInfo.pClearValues = &clearColor;
 
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+    VkPipeline vkPipeline = pipeline->GetPipeline();
+
+    cmd->Enqueue([renderPassInfo, vkPipeline](auto buffer)
+    {
+        vkCmdBeginRenderPass(VK_CMD(buffer)->GetBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBindPipeline(VK_CMD(buffer)->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline);
+    });
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -193,17 +174,21 @@ void VulkanRendererAPI::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     viewport.height = static_cast<float>(swapchain->GetDescriptor().extent.y);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
     scissor.extent = VulkanConverters::Extent(swapchain->GetDescriptor().extent);
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    cmd->Enqueue([viewport, scissor](auto buffer)
+    {
+         vkCmdSetViewport(VK_CMD(buffer)->GetBuffer(), 0, 1, &viewport);
+         vkCmdSetScissor(VK_CMD(buffer)->GetBuffer(), 0, 1, &scissor);
+    });
 }
 
 // TODO: Add resize callback from GLFW event
 // TODO: Add rendering stop when window is minimized
-void VulkanRendererAPI::BeginFrame()
+void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd)
 {
     vkWaitForFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     VkResult result = vkAcquireNextImageKHR(VK_DEVICE()->GetDevice(),
@@ -225,22 +210,31 @@ void VulkanRendererAPI::BeginFrame()
 
     vkResetFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame]);
 
-    vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-    RecordCommandBuffer(commandBuffers[currentFrame], currentImageIndex);
+    const auto vkCommandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(cmd);
+    vkResetCommandBuffer(vkCommandBuffer->GetBuffer(), 0);
+    RecordCommandBuffer(vkCommandBuffer, currentImageIndex);
 }
 
-void VulkanRendererAPI::EndFrame()
+void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd)
 {
-    vkCmdEndRenderPass(commandBuffers[currentFrame]);
+    auto vkCmd = std::static_pointer_cast<VulkanCommandBuffer>(cmd);
+    cmd->Enqueue([](auto buffer)
+    {
+        vkCmdEndRenderPass(VK_CMD(buffer)->GetBuffer());
+    });
 
-    if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
+    cmd->Execute();
+
+    if (vkEndCommandBuffer(vkCmd->GetBuffer()) != VK_SUCCESS)
     {
         R_CORE_ASSERT(false, "failed to record command buffer!");
     }
 
+    // TODO: Move all synchronisation code to command buffer
     VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+    VkCommandBuffer cmdBuffers[] = { vkCmd->GetBuffer() };
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -248,7 +242,7 @@ void VulkanRendererAPI::EndFrame()
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+    submitInfo.pCommandBuffers = cmdBuffers;
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -304,17 +298,27 @@ Viewport VulkanRendererAPI::GetViewport()
     return Viewport();
 }
 
-void VulkanRendererAPI::Draw(const std::shared_ptr<Buffer>& buffer)
+void VulkanRendererAPI::Draw(const std::shared_ptr<CommandBuffer>& cmd,
+                             const std::shared_ptr<Buffer>& buffer)
 {
     const auto vulkanBuffer = std::static_pointer_cast<VulkanBuffer>(buffer);
     VkBuffer vertexBuffers[] = { vulkanBuffer->GetBuffer() };
     VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-
-    vkCmdDraw(commandBuffers[currentFrame], vulkanBuffer->GetDescriptor().size / pipeline->GetPipelineDescriptor().shader->GetShaderProgramDescriptor().layout.GetStride(), 1, 0, 0);
+    auto pipelinePtr = pipeline;
+    cmd->Enqueue([vertexBuffers, offsets, vulkanBuffer, pipeline = pipelinePtr](auto buffer)
+    {
+        vkCmdBindVertexBuffers(VK_CMD(buffer)->GetBuffer(), 0, 1, vertexBuffers, offsets);
+        vkCmdDraw(VK_CMD(buffer)->GetBuffer(),
+                  vulkanBuffer->GetDescriptor().size / pipeline->GetPipelineDescriptor().shader->GetShaderProgramDescriptor().layout.GetStride(),
+                  1,
+                  0,
+                  0);
+    });
 }
 
-void VulkanRendererAPI::Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer)
+void VulkanRendererAPI::Draw(const std::shared_ptr<CommandBuffer>& cmd,
+                             const std::shared_ptr<Buffer>& vertexBuffer,
+                             const std::shared_ptr<Buffer>& indexBuffer)
 {
     const auto vkVertexBuffer = std::static_pointer_cast<VulkanBuffer>(vertexBuffer);
     VkBuffer vertexBuffers[] = { vkVertexBuffer->GetBuffer() };
@@ -322,10 +326,18 @@ void VulkanRendererAPI::Draw(const std::shared_ptr<Buffer>& vertexBuffer, const 
 
     const auto vkIndexBuffer = std::static_pointer_cast<VulkanBuffer>(indexBuffer);
 
-    vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-    // TODO: Check index size
-    vkCmdBindIndexBuffer(commandBuffers[currentFrame], vkIndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-    vkCmdDrawIndexed(commandBuffers[currentFrame], vkIndexBuffer->GetDescriptor().size / sizeof(uint32_t), 1, 0, 0, 0);
+    cmd->Enqueue([vkIndexBuffer, vertexBuffers, offsets](auto buffer)
+    {
+        vkCmdBindVertexBuffers(VK_CMD(buffer)->GetBuffer(), 0, 1, vertexBuffers, offsets);
+        // TODO: Check index size
+        vkCmdBindIndexBuffer(VK_CMD(buffer)->GetBuffer(), vkIndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdDrawIndexed(VK_CMD(buffer)->GetBuffer(),
+                         vkIndexBuffer->GetDescriptor().size / sizeof(uint32_t),
+                         1,
+                         0,
+                         0,
+                         0);
+    });
 }
 
 void VulkanRendererAPI::SetClearColor(const glm::vec4& color)
@@ -340,6 +352,6 @@ VulkanRendererAPI::~VulkanRendererAPI()
         vkDestroySemaphore(VK_DEVICE()->GetDevice(), imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(VK_DEVICE()->GetDevice(), inFlightFences[i], nullptr);
     }
-    vkDestroyCommandPool(VK_DEVICE()->GetDevice(), commandPool, nullptr);
+
     DestroySwapchain();
 }

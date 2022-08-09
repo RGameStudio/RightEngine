@@ -6,6 +6,13 @@
 
 using namespace RightEngine;
 
+Renderer::Renderer()
+{
+    CommandBufferDescriptor descriptor;
+    descriptor.type = CommandBufferType::GRAPHICS;
+    commandBuffer = Device::Get()->CreateCommandBuffer(descriptor);
+}
+
 void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
                               const MeshComponent& mesh,
                               const glm::mat4& transform)
@@ -30,12 +37,22 @@ void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
 
 void Renderer::BeginFrame(const std::shared_ptr<Camera>& camera)
 {
-    RendererCommand::BeginFrame();
+    RendererCommand::BeginFrame(commandBuffer);
 }
 
 void Renderer::EndFrame()
 {
-    RendererCommand::EndFrame();
+    RendererCommand::EndFrame(commandBuffer);
+}
+
+void Renderer::Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer)
+{
+    if (indexBuffer)
+    {
+        RendererCommand::DrawIndexed(commandBuffer, vertexBuffer, indexBuffer);
+        return;
+    }
+    RendererCommand::Draw(commandBuffer, vertexBuffer);
 }
 
 void Renderer::Configure()

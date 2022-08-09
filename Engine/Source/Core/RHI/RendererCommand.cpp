@@ -36,27 +36,30 @@ void RendererCommand::Configure(const RendererSettings& settings)
     rendererAPI->Configure(settings);
 }
 
-void RendererCommand::Draw(const std::shared_ptr<Buffer>& buffer)
+void RendererCommand::Draw(const std::shared_ptr<CommandBuffer>& cmd,
+                           const std::shared_ptr<Buffer>& buffer)
 {
-    R_CORE_ASSERT(buffer->GetDescriptor().type == BUFFER_TYPE_VERTEX, "");
-    rendererAPI->Draw(buffer);
+    R_CORE_ASSERT(buffer->GetDescriptor().type == BUFFER_TYPE_VERTEX && buffer->GetDescriptor().size > 0, "");
+    rendererAPI->Draw(cmd, buffer);
 }
 
-void RendererCommand::DrawIndexed(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer)
+void RendererCommand::DrawIndexed(const std::shared_ptr<CommandBuffer>& cmd,
+                                  const std::shared_ptr<Buffer>& vertexBuffer,
+                                  const std::shared_ptr<Buffer>& indexBuffer)
 {
     R_CORE_ASSERT(vertexBuffer->GetDescriptor().type == BUFFER_TYPE_VERTEX
     && indexBuffer->GetDescriptor().type == BUFFER_TYPE_INDEX
     && vertexBuffer->GetDescriptor().size > 0
     && indexBuffer->GetDescriptor().size > 0, "");
-    rendererAPI->Draw(vertexBuffer, indexBuffer);
+    rendererAPI->Draw(cmd, vertexBuffer, indexBuffer);
 }
 
-void RendererCommand::BeginFrame()
+void RendererCommand::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd)
 {
-    rendererAPI->BeginFrame();
+    rendererAPI->BeginFrame(cmd);
 }
 
-void RendererCommand::EndFrame()
+void RendererCommand::EndFrame(const std::shared_ptr<CommandBuffer>& cmd)
 {
-    rendererAPI->EndFrame();
+    rendererAPI->EndFrame(cmd);
 }
