@@ -58,5 +58,6 @@ namespace RightEngine
         SceneData sceneData;
         RendererSettings settings;
         std::shared_ptr<CommandBuffer> commandBuffer;
+        std::shared_ptr<GraphicsPipeline> pipeline;
     };
 }

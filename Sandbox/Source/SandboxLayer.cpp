@@ -13,7 +13,7 @@ namespace
         alignas(16) glm::mat4 projection;
     };
 
-    Renderer renderer;
+    Renderer* renderer = nullptr;
 
     const float vertices[] =
             {
@@ -35,6 +35,7 @@ namespace
 
 void SandboxLayer::OnAttach()
 {
+    renderer = new Renderer();
     std::cout << "Hello!" << std::endl;
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BUFFER_TYPE_VERTEX;
@@ -57,7 +58,7 @@ void SandboxLayer::OnAttach()
 
 void SandboxLayer::OnUpdate(float ts)
 {
-    renderer.BeginFrame(nullptr);
+    renderer->BeginFrame(nullptr);
     UBO ubo;
     ubo.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -65,9 +66,9 @@ void SandboxLayer::OnUpdate(float ts)
     ubo.projection[1][1] *= -1;
     auto uboPtr = uboTransform->Map();
     memcpy(uboPtr, &ubo, sizeof(UBO));
-    renderer.Draw(vertexBuffer, indexBuffer);
+    renderer->Draw(vertexBuffer, indexBuffer);
     uboTransform->UnMap();
-    renderer.EndFrame();
+    renderer->EndFrame();
 }
 
 void SandboxLayer::OnImGuiRender()

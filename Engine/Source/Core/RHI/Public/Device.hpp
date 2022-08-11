@@ -4,6 +4,7 @@
 #include "BufferDescriptor.hpp"
 #include "CommandBufferDescriptor.hpp"
 #include "ShaderProgramDescriptor.hpp"
+#include "GraphicsPipelineDescriptor.hpp"
 #include <memory>
 
 #define VK_DEVICE() std::static_pointer_cast<VulkanDevice>(Device::Get())
@@ -14,6 +15,7 @@ namespace RightEngine
     class CommandBuffer;
     class Shader;
     class Surface;
+    class GraphicsPipeline;
 
     struct DeviceInfo
     {
@@ -31,6 +33,8 @@ namespace RightEngine
         virtual std::shared_ptr<Buffer> CreateBuffer(const BufferDescriptor& bufferDescriptor, const void* data) = 0;
         virtual std::shared_ptr<CommandBuffer> CreateCommandBuffer(const CommandBufferDescriptor& descriptor) = 0;
         virtual std::shared_ptr<Shader> CreateShader(const ShaderProgramDescriptor& shaderProgramDescriptor) = 0;
+        virtual std::shared_ptr<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor,
+                                                                         const RenderPassDescriptor& renderPassDescriptor) = 0;
 
         Device(const Device& other) = delete;
         Device& operator=(const Device& other) = delete;

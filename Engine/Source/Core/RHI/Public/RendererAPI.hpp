@@ -26,7 +26,8 @@ namespace RightEngine
         virtual ~RendererAPI() = default;
 
         virtual void Init() = 0;
-        virtual void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd) = 0;
+        virtual void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                                const std::shared_ptr<GraphicsPipeline>& pipeline) = 0;
         virtual void EndFrame(const std::shared_ptr<CommandBuffer>& cmd) = 0;
         virtual void Configure(const RendererSettings& settings) = 0;
         virtual void SetClearColor(const glm::vec4& color) = 0;
@@ -34,10 +35,14 @@ namespace RightEngine
         virtual void SetViewport(const Viewport& viewport) = 0;
         virtual Viewport GetViewport() = 0;
         virtual void Draw(const std::shared_ptr<CommandBuffer>& cmd,
-                          const std::shared_ptr<Buffer>& buffer) = 0;
+                          const std::shared_ptr<Buffer>& buffer,
+                          uint32_t vertexCount,
+                          uint32_t instanceCount = 1) = 0;
         virtual void Draw(const std::shared_ptr<CommandBuffer>& cmd,
                           const std::shared_ptr<Buffer>& vertexBuffer,
-                          const std::shared_ptr<Buffer>& indexBuffer) = 0;
+                          const std::shared_ptr<Buffer>& indexBuffer,
+                          uint32_t indexCount,
+                          uint32_t instanceCount = 1) = 0;
 
         static std::shared_ptr<RendererAPI> Create(GPU_API GpuApi);
         static GPU_API GetAPI();

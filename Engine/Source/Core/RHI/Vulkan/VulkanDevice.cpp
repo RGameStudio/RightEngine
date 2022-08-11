@@ -4,6 +4,7 @@
 #include "VulkanBuffer.hpp"
 #include "VulkanShader.hpp"
 #include "VulkanCommandBuffer.hpp"
+#include "VulkanGraphicsPipeline.hpp"
 #include <unordered_set>
 
 using namespace RightEngine;
@@ -264,4 +265,10 @@ std::shared_ptr<Shader> VulkanDevice::CreateShader(const ShaderProgramDescriptor
 std::shared_ptr<CommandBuffer> VulkanDevice::CreateCommandBuffer(const CommandBufferDescriptor& descriptor)
 {
     return std::make_shared<VulkanCommandBuffer>(shared_from_this(), descriptor);
+}
+
+std::shared_ptr<GraphicsPipeline> VulkanDevice::CreateGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor,
+                                     const RenderPassDescriptor& renderPassDescriptor)
+{
+    return std::make_shared<VulkanGraphicsPipeline>(descriptor, renderPassDescriptor);
 }

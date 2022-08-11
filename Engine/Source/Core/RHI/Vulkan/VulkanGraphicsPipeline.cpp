@@ -37,8 +37,7 @@ namespace
 }
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor,
-                                               const RenderPassDescriptor& renderPassDescriptor) : pipelineDescriptor(descriptor),
-                                                                                                   renderPassDescriptor(renderPassDescriptor)
+                                               const RenderPassDescriptor& renderPassDescriptor) : GraphicsPipeline(descriptor, renderPassDescriptor)
 {
     Init(descriptor, renderPassDescriptor);
 }

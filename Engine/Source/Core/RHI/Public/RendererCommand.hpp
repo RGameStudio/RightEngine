@@ -10,7 +10,8 @@ namespace RightEngine
     {
     public:
         static void Init(GPU_API api);
-        static void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd);
+        static void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                               const std::shared_ptr<GraphicsPipeline>& pipeline);
         static void EndFrame(const std::shared_ptr<CommandBuffer>& cmd);
 
         static void SetClearColor(const glm::vec4& color);
@@ -20,10 +21,15 @@ namespace RightEngine
         static void SetViewport(const Viewport& viewport);
         static Viewport GetViewport();
 
-        static void Draw(const std::shared_ptr<CommandBuffer>& cmd, const std::shared_ptr<Buffer>& buffer);
+        static void Draw(const std::shared_ptr<CommandBuffer>& cmd,
+                         const std::shared_ptr<Buffer>& buffer,
+                         uint32_t vertexCount,
+                         uint32_t instanceCount = 1);
         static void DrawIndexed(const std::shared_ptr<CommandBuffer>& cmd,
                                 const std::shared_ptr<Buffer>& vertexBuffer,
-                                const std::shared_ptr<Buffer>& indexBuffer);
+                                const std::shared_ptr<Buffer>& indexBuffer,
+                                uint32_t indexCount,
+                                uint32_t instanceCount = 1);
 
         static void Configure(const RendererSettings& settings);
 

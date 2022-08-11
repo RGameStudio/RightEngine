@@ -14,7 +14,8 @@ namespace RightEngine
     public:
         virtual void Init() override;
 
-        virtual void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd) override;
+        virtual void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                                const std::shared_ptr<GraphicsPipeline>& pipeline) override;
         virtual void EndFrame(const std::shared_ptr<CommandBuffer>& cmd) override;
 
         virtual void Configure(const RendererSettings& settings) override;
@@ -28,16 +29,19 @@ namespace RightEngine
 
         virtual void Draw(const std::shared_ptr<CommandBuffer>& cmd,
                           const std::shared_ptr<Buffer>& vertexBuffer,
-                          const std::shared_ptr<Buffer>& indexBuffer) override;
+                          const std::shared_ptr<Buffer>& indexBuffer,
+                          uint32_t vertexCount,
+                          uint32_t instanceCount) override;
         virtual void Draw(const std::shared_ptr<CommandBuffer>& cmd,
-                          const std::shared_ptr<Buffer>& buffer) override;
+                          const std::shared_ptr<Buffer>& buffer,
+                          uint32_t indexCount,
+                          uint32_t instanceCount) override;
         virtual ~VulkanRendererAPI() override;
 
     private:
         std::shared_ptr<VulkanRenderingContext> context;
         std::shared_ptr<VulkanSurface> surface;
         std::shared_ptr<VulkanSwapchain> swapchain;
-        std::shared_ptr<VulkanGraphicsPipeline> pipeline;
         std::vector<VkFramebuffer> swapchainFramebuffers;
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -46,7 +50,7 @@ namespace RightEngine
 
         void RecordCommandBuffer(const std::shared_ptr<VulkanCommandBuffer>& cmd, uint32_t imageIndex);
         void CreateSyncObjects();
-        void CreateFramebuffers();
+        void CreateFramebuffers(const std::shared_ptr<VulkanGraphicsPipeline>& pipeline);
         void CreateSwapchain();
         void CreateDescriptorSetLayout();
         void DestroySwapchain();

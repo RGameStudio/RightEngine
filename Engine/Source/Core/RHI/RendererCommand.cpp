@@ -37,26 +37,36 @@ void RendererCommand::Configure(const RendererSettings& settings)
 }
 
 void RendererCommand::Draw(const std::shared_ptr<CommandBuffer>& cmd,
-                           const std::shared_ptr<Buffer>& buffer)
+                           const std::shared_ptr<Buffer>& buffer,
+                           uint32_t vertexCount,
+                           uint32_t instanceCount)
 {
-    R_CORE_ASSERT(buffer->GetDescriptor().type == BUFFER_TYPE_VERTEX && buffer->GetDescriptor().size > 0, "");
-    rendererAPI->Draw(cmd, buffer);
+    R_CORE_ASSERT(buffer->GetDescriptor().type == BUFFER_TYPE_VERTEX
+                  && buffer->GetDescriptor().size > 0
+                  && vertexCount > 0
+                  && instanceCount > 0, "");
+    rendererAPI->Draw(cmd, buffer, vertexCount, instanceCount);
 }
 
 void RendererCommand::DrawIndexed(const std::shared_ptr<CommandBuffer>& cmd,
                                   const std::shared_ptr<Buffer>& vertexBuffer,
-                                  const std::shared_ptr<Buffer>& indexBuffer)
+                                  const std::shared_ptr<Buffer>& indexBuffer,
+                                  uint32_t indexCount,
+                                  uint32_t instanceCount)
 {
     R_CORE_ASSERT(vertexBuffer->GetDescriptor().type == BUFFER_TYPE_VERTEX
-    && indexBuffer->GetDescriptor().type == BUFFER_TYPE_INDEX
-    && vertexBuffer->GetDescriptor().size > 0
-    && indexBuffer->GetDescriptor().size > 0, "");
-    rendererAPI->Draw(cmd, vertexBuffer, indexBuffer);
+                  && indexBuffer->GetDescriptor().type == BUFFER_TYPE_INDEX
+                  && vertexBuffer->GetDescriptor().size > 0
+                  && indexBuffer->GetDescriptor().size > 0
+                  && indexCount > 0
+                  && instanceCount > 0, "");
+    rendererAPI->Draw(cmd, vertexBuffer, indexBuffer, indexCount, instanceCount);
 }
 
-void RendererCommand::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd)
+void RendererCommand::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                                 const std::shared_ptr<GraphicsPipeline>& pipeline)
 {
-    rendererAPI->BeginFrame(cmd);
+    rendererAPI->BeginFrame(cmd, pipeline);
 }
 
 void RendererCommand::EndFrame(const std::shared_ptr<CommandBuffer>& cmd)
