@@ -21,5 +21,7 @@ namespace RightEngine
     private:
         VkBuffer buffer;
         VkDeviceMemory memory;
+        // Is used only for constant buffer
+        mutable uint8_t* bufferData{ nullptr };
     };
 }

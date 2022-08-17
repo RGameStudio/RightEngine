@@ -50,9 +50,8 @@ void SandboxLayer::OnAttach()
     indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
 
     BufferDescriptor uboTransformDesc{};
-    uboTransformDesc.type = BUFFER_TYPE_UNIFORM;
+    uboTransformDesc.type = BUFFER_TYPE_CONSTANT;
     uboTransformDesc.size = sizeof(UBO);
-    uboTransformDesc.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
     uboTransform = Device::Get()->CreateBuffer(uboTransformDesc, nullptr);
 }
 
@@ -66,6 +65,7 @@ void SandboxLayer::OnUpdate(float ts)
     ubo.projection[1][1] *= -1;
     auto uboPtr = uboTransform->Map();
     memcpy(uboPtr, &ubo, sizeof(UBO));
+    renderer->UpdateBuffer(uboTransform, ShaderType::VERTEX);
     renderer->Draw(vertexBuffer, indexBuffer);
     uboTransform->UnMap();
     renderer->EndFrame();

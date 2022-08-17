@@ -11,6 +11,7 @@ namespace RightEngine
         BUFFER_TYPE_TRANSFER_DST = BIT(2),
         BUFFER_TYPE_INDEX = BIT(3),
         BUFFER_TYPE_UNIFORM = BIT(4),
+        BUFFER_TYPE_CONSTANT = BIT(5),
     };
 
     struct BufferDescriptor

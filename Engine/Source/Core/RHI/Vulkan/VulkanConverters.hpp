@@ -96,5 +96,18 @@ namespace RightEngine
 
             return flags;
         }
+
+        inline static VkShaderStageFlags ShaderStage(ShaderStage stage)
+        {
+            switch (stage)
+            {
+                case ShaderType::VERTEX:
+                    return VK_SHADER_STAGE_VERTEX_BIT;
+                case ShaderType::FRAGMENT:
+                    return VK_SHADER_STAGE_FRAGMENT_BIT;
+                default:
+                R_CORE_ASSERT(false, "");
+            }
+        }
     };
 }

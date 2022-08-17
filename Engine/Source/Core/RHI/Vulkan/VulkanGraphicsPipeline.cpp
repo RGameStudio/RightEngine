@@ -3,6 +3,7 @@
 #include "VulkanShader.hpp"
 #include "Assert.hpp"
 #include "VulkanBuffer.hpp"
+#include "VulkanConfig.hpp"
 #include <vector>
 
 using namespace RightEngine;
@@ -10,7 +11,7 @@ using namespace RightEngine;
 namespace
 {
     std::vector<VkWriteDescriptorSet> GetWriteDescriptorSets(const std::vector<VkDescriptorSet>& descriptorSets,
-                                                             std::unordered_map<int, std::shared_ptr<Buffer>>& buffers)
+                                                             const std::unordered_map<int, std::shared_ptr<Buffer>>& buffers)
     {
         std::vector<VkWriteDescriptorSet> writeDescriptorSet;
         for (const auto& [slot, buffer] : buffers)
@@ -33,6 +34,27 @@ namespace
         }
 
         return writeDescriptorSet;
+    }
+
+    void GetPushConstants(std::vector<VkPushConstantRange>& ranges,
+                          const std::unordered_map<int, std::shared_ptr<Buffer>>& buffers,
+                          VkShaderStageFlags stage)
+    {
+        uint32_t offset = 0;
+        for (const auto& [slot, buffer] : buffers)
+        {
+            if (buffer->GetDescriptor().type == BUFFER_TYPE_CONSTANT)
+            {
+                VkPushConstantRange range;
+                range.offset = offset;
+                R_CORE_ASSERT(range.offset < 128, "");
+                range.size = buffer->GetDescriptor().size;
+                R_CORE_ASSERT(range.size < MAX_PUSH_CONSTANT_SIZE, "");
+                range.stageFlags = stage;
+                ranges.emplace_back(range);
+                offset += range.size;
+            }
+        }
     }
 }
 
@@ -148,13 +170,22 @@ void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
     CreateDescriptorSetLayout();
     CreateDescriptorPool();
     CreateDescriptorSets();
+    CreatePushConstants();
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
-    pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
-    pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+    if (pushConstants.empty())
+    {
+        pipelineLayoutInfo.pushConstantRangeCount = 0;
+        pipelineLayoutInfo.pPushConstantRanges = nullptr;
+    }
+    else
+    {
+        pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
+        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+    }
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages{ vertShaderStageInfo, fragShaderStageInfo };
 
@@ -232,6 +263,14 @@ void VulkanGraphicsPipeline::CreateRenderPass(const RenderPassDescriptor& render
     {
         R_CORE_ASSERT(false, "failed to create render pass!");
     }
+}
+
+void VulkanGraphicsPipeline::CreatePushConstants()
+{
+    std::vector<VkPushConstantRange> constants;
+    GetPushConstants(constants, pipelineDescriptor.vertexBuffers, VK_SHADER_STAGE_VERTEX_BIT);
+    GetPushConstants(constants, pipelineDescriptor.buffers, VK_SHADER_STAGE_FRAGMENT_BIT);
+    pushConstants = constants;
 }
 
 void VulkanGraphicsPipeline::CreateDescriptorSetLayout()

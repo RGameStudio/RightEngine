@@ -20,6 +20,9 @@ namespace RightEngine
         VkPipeline GetPipeline() const
         { return graphicsPipeline; }
 
+        VkPipelineLayout GetPipelineLayout() const
+        { return pipelineLayout; }
+
     private:
         VkPipeline graphicsPipeline;
         VkDescriptorSetLayout descriptorSetLayout;
@@ -27,6 +30,7 @@ namespace RightEngine
         VkRenderPass renderPass;
         VkDescriptorPool descriptorPool;
         std::vector<VkDescriptorSet> descriptorSets;
+        std::vector<VkPushConstantRange> pushConstants;
 
         void Init(const GraphicsPipelineDescriptor& descriptorconst,
                   const RenderPassDescriptor& renderPassDescriptor);
@@ -34,5 +38,6 @@ namespace RightEngine
         void CreateDescriptorSetLayout();
         void CreateDescriptorPool();
         void CreateDescriptorSets();
+        void CreatePushConstants();
     };
 }

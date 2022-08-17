@@ -11,6 +11,7 @@ namespace RightEngine
         VERTEX,
         FRAGMENT
     };
+    typedef ShaderType ShaderStage;
 
     struct ShaderDescriptor
     {

@@ -40,8 +40,8 @@ Renderer::Renderer()
 }
 
 void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
-                              const MeshComponent& mesh,
-                              const glm::mat4& transform)
+                          const MeshComponent& mesh,
+                          const glm::mat4& transform)
 {
     shader->Bind();
     shader->SetUniformMat4f("u_ViewProjection", sceneData.viewProjectionMatrix);
@@ -54,8 +54,7 @@ void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
     {
         ib->Bind();
 //        RendererCommand::DrawIndexed(ib);
-    }
-    else
+    } else
     {
 //        RendererCommand::Draw(vb);
     }
@@ -80,7 +79,13 @@ void Renderer::Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shar
     }
     RendererCommand::Draw(commandBuffer,
                           vertexBuffer,
-                          vertexBuffer->GetDescriptor().size / pipeline->GetPipelineDescriptor().shader->GetShaderProgramDescriptor().layout.GetStride());
+                          vertexBuffer->GetDescriptor().size /
+                          pipeline->GetPipelineDescriptor().shader->GetShaderProgramDescriptor().layout.GetStride());
+}
+
+void Renderer::UpdateBuffer(const std::shared_ptr<Buffer>& buffer, ShaderStage stage)
+{
+    RendererCommand::UpdateBuffer(commandBuffer, pipeline, buffer, stage);
 }
 
 void Renderer::Configure()

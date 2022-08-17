@@ -30,6 +30,11 @@ namespace RightEngine
                                 const std::shared_ptr<Buffer>& indexBuffer,
                                 uint32_t indexCount,
                                 uint32_t instanceCount = 1);
+        static void UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
+                                  const std::shared_ptr<GraphicsPipeline>& pipeline,
+                                  const std::shared_ptr<Buffer>& buffer,
+                                  ShaderStage stage,
+                                  uint32_t offset = 0);
 
         static void Configure(const RendererSettings& settings);
 

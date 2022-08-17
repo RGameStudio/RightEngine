@@ -73,3 +73,12 @@ void RendererCommand::EndFrame(const std::shared_ptr<CommandBuffer>& cmd)
 {
     rendererAPI->EndFrame(cmd);
 }
+
+void RendererCommand::UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
+                                   const std::shared_ptr<GraphicsPipeline>& pipeline,
+                                   const std::shared_ptr<Buffer>& buffer,
+                                   ShaderStage stage,
+                                   uint32_t offset)
+{
+    rendererAPI->UpdateBuffer(cmd, pipeline, buffer, offset, stage);
+}

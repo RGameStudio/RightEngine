@@ -328,6 +328,26 @@ void VulkanRendererAPI::Draw(const std::shared_ptr<CommandBuffer>& cmd,
                  });
 }
 
+void VulkanRendererAPI::UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
+                                     const std::shared_ptr<GraphicsPipeline>& pipeline,
+                                     const std::shared_ptr<Buffer>& buffer,
+                                     uint32_t offset,
+                                     ShaderStage stage)
+{
+    if (buffer->GetDescriptor().type == BUFFER_TYPE_CONSTANT)
+    {
+        cmd->Enqueue([=](auto cmdBuffer)
+        {
+            vkCmdPushConstants(VK_CMD(cmdBuffer)->GetBuffer(),
+                               std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline)->GetPipelineLayout(),
+                               VulkanConverters::ShaderStage(stage),
+                               offset,
+                               buffer->GetDescriptor().size,
+                               buffer->Map());
+        });
+    }
+}
+
 void VulkanRendererAPI::SetClearColor(const glm::vec4& color)
 {
     R_CORE_ASSERT(false, "");

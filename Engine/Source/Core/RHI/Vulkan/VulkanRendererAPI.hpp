@@ -36,6 +36,11 @@ namespace RightEngine
                           const std::shared_ptr<Buffer>& buffer,
                           uint32_t indexCount,
                           uint32_t instanceCount) override;
+        virtual void UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
+                                  const std::shared_ptr<GraphicsPipeline>& pipeline,
+                                  const std::shared_ptr<Buffer>& buffer,
+                                  uint32_t offset,
+                                  ShaderStage shaderStage) override;
         virtual ~VulkanRendererAPI() override;
 
     private:

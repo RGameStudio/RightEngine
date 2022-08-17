@@ -43,6 +43,11 @@ namespace RightEngine
                           const std::shared_ptr<Buffer>& indexBuffer,
                           uint32_t indexCount,
                           uint32_t instanceCount = 1) = 0;
+        virtual void UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
+                                  const std::shared_ptr<GraphicsPipeline>& pipeline,
+                                  const std::shared_ptr<Buffer>& buffer,
+                                  uint32_t offset,
+                                  ShaderStage stage) = 0;
 
         static std::shared_ptr<RendererAPI> Create(GPU_API GpuApi);
         static GPU_API GetAPI();
