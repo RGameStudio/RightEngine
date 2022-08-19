@@ -49,6 +49,8 @@ namespace RightEngine
         void UpdateBuffer(const std::shared_ptr<Buffer>& buffer, ShaderStage stage);
         void Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer = nullptr);
 
+        void SetPipeline(const std::shared_ptr<GraphicsPipeline>& aPipeline);
+
         void Configure();
 
         RendererSettings& GetSettings();

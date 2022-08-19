@@ -13,13 +13,21 @@ namespace
     std::vector<VkWriteDescriptorSet> GetWriteDescriptorSets(const std::vector<VkDescriptorSet>& descriptorSets,
                                                              const std::unordered_map<int, std::shared_ptr<Buffer>>& buffers)
     {
+        static std::vector<VkDescriptorBufferInfo> bufferInfos;
         std::vector<VkWriteDescriptorSet> writeDescriptorSet;
         for (const auto& [slot, buffer] : buffers)
         {
+            if (buffer->GetDescriptor().type == BUFFER_TYPE_CONSTANT)
+            {
+                continue;
+            }
+
             VkDescriptorBufferInfo bufferInfo{};
             bufferInfo.buffer = std::static_pointer_cast<VulkanBuffer>(buffer)->GetBuffer();
             bufferInfo.offset = 0;
             bufferInfo.range = buffer->GetDescriptor().size;
+
+            bufferInfos.push_back(bufferInfo);
 
             VkWriteDescriptorSet descriptorWrite{};
             descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -28,9 +36,9 @@ namespace
             descriptorWrite.dstArrayElement = 0;
             descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrite.descriptorCount = 1;
-            descriptorWrite.pBufferInfo = &bufferInfo;
+            descriptorWrite.pBufferInfo = &bufferInfos.back();
 
-            writeDescriptorSet.emplace_back(descriptorWrite);
+            writeDescriptorSet.push_back(descriptorWrite);
         }
 
         return writeDescriptorSet;
@@ -167,15 +175,21 @@ void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
     fragShaderStageInfo.module = std::static_pointer_cast<VulkanShader>(descriptor.shader)->GetShaderModule(ShaderModuleType::FRAGMENT);
     fragShaderStageInfo.pName = "main";
 
-    CreateDescriptorSetLayout();
-    CreateDescriptorPool();
     CreateDescriptorSets();
     CreatePushConstants();
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+    if (descriptorSetLayout)
+    {
+        pipelineLayoutInfo.setLayoutCount = 1;
+        pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+    }
+    else
+    {
+        pipelineLayoutInfo.setLayoutCount = 0;
+        pipelineLayoutInfo.pSetLayouts = VK_NULL_HANDLE;
+    }
     if (pushConstants.empty())
     {
         pipelineLayoutInfo.pushConstantRangeCount = 0;
@@ -273,29 +287,40 @@ void VulkanGraphicsPipeline::CreatePushConstants()
     pushConstants = constants;
 }
 
-void VulkanGraphicsPipeline::CreateDescriptorSetLayout()
+void VulkanGraphicsPipeline::CreateDescriptorSets()
 {
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     for (const auto& [slot, buffer] : pipelineDescriptor.vertexBuffers)
     {
-        VkDescriptorSetLayoutBinding vertexUboLayoutBinding{};
-        vertexUboLayoutBinding.binding = slot;
-        vertexUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        vertexUboLayoutBinding.descriptorCount = 1;
-        vertexUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-        vertexUboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-        bindings.emplace_back(vertexUboLayoutBinding);
+        if (buffer->GetDescriptor().type == BUFFER_TYPE_UNIFORM)
+        {
+            VkDescriptorSetLayoutBinding vertexUboLayoutBinding{};
+            vertexUboLayoutBinding.binding = slot;
+            vertexUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            vertexUboLayoutBinding.descriptorCount = 1;
+            vertexUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            vertexUboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+            bindings.emplace_back(vertexUboLayoutBinding);
+        }
     }
 
     for (const auto& [slot, buffer] : pipelineDescriptor.buffers)
     {
-        VkDescriptorSetLayoutBinding vertexUboLayoutBinding{};
-        vertexUboLayoutBinding.binding = slot;
-        vertexUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        vertexUboLayoutBinding.descriptorCount = 1;
-        vertexUboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-        vertexUboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-        bindings.emplace_back(vertexUboLayoutBinding);
+        if (buffer->GetDescriptor().type == BUFFER_TYPE_UNIFORM)
+        {
+            VkDescriptorSetLayoutBinding vertexUboLayoutBinding{};
+            vertexUboLayoutBinding.binding = slot;
+            vertexUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            vertexUboLayoutBinding.descriptorCount = 1;
+            vertexUboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+            vertexUboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+            bindings.emplace_back(vertexUboLayoutBinding);
+        }
+    }
+
+    if (bindings.empty())
+    {
+        return;
     }
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -307,10 +332,7 @@ void VulkanGraphicsPipeline::CreateDescriptorSetLayout()
     {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
-}
 
-void VulkanGraphicsPipeline::CreateDescriptorPool()
-{
     VkDescriptorPoolSize poolSize{};
     poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSize.descriptorCount = pipelineDescriptor.vertexBuffers.size() + pipelineDescriptor.buffers.size();
@@ -325,10 +347,7 @@ void VulkanGraphicsPipeline::CreateDescriptorPool()
     {
         throw std::runtime_error("failed to create descriptor pool!");
     }
-}
 
-void VulkanGraphicsPipeline::CreateDescriptorSets()
-{
     std::vector<VkDescriptorSetLayout> layouts(1, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -346,7 +365,7 @@ void VulkanGraphicsPipeline::CreateDescriptorSets()
     const auto fragWriteDescSets = GetWriteDescriptorSets(descriptorSets, pipelineDescriptor.buffers);
     vertexWriteDescSets.insert(vertexWriteDescSets.end(), fragWriteDescSets.begin(), fragWriteDescSets.end());
 
-    vkUpdateDescriptorSets(VK_DEVICE()->GetDevice(), 1, vertexWriteDescSets.data(), 0, nullptr);
+    vkUpdateDescriptorSets(VK_DEVICE()->GetDevice(), vertexWriteDescSets.size(), vertexWriteDescSets.data(), 0, nullptr);
 }
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
@@ -354,6 +373,12 @@ VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
     vkDestroyPipeline(VK_DEVICE()->GetDevice(), graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(VK_DEVICE()->GetDevice(), pipelineLayout, nullptr);
     vkDestroyRenderPass(VK_DEVICE()->GetDevice(), renderPass, nullptr);
-    vkDestroyDescriptorPool(VK_DEVICE()->GetDevice(), descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(VK_DEVICE()->GetDevice(), descriptorSetLayout, nullptr);
+    if (descriptorPool)
+    {
+        vkDestroyDescriptorPool(VK_DEVICE()->GetDevice(), descriptorPool, nullptr);
+    }
+    if (descriptorSetLayout)
+    {
+        vkDestroyDescriptorSetLayout(VK_DEVICE()->GetDevice(), descriptorSetLayout, nullptr);
+    }
 }

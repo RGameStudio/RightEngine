@@ -6,11 +6,15 @@ using namespace RightEngine;
 
 namespace
 {
-    struct UBO
+    struct TransformConstant
     {
-        alignas(16) glm::mat4 transform;
-        alignas(16) glm::mat4 view;
-        alignas(16) glm::mat4 projection;
+        glm::mat4 transform;
+    };
+
+    struct SceneUBO
+    {
+        glm::mat4 view;
+        glm::mat4 projection;
     };
 
     Renderer* renderer = nullptr;
@@ -30,7 +34,9 @@ namespace
 
     std::shared_ptr<Buffer> vertexBuffer;
     std::shared_ptr<Buffer> indexBuffer;
-    std::shared_ptr<Buffer> uboTransform;
+    std::shared_ptr<Buffer> transformConstant;
+    std::shared_ptr<Buffer> sceneUBO;
+    std::shared_ptr<GraphicsPipeline> graphicsPipeline;
 }
 
 void SandboxLayer::OnAttach()
@@ -49,25 +55,64 @@ void SandboxLayer::OnAttach()
     indexBufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
     indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
 
-    BufferDescriptor uboTransformDesc{};
-    uboTransformDesc.type = BUFFER_TYPE_CONSTANT;
-    uboTransformDesc.size = sizeof(UBO);
-    uboTransform = Device::Get()->CreateBuffer(uboTransformDesc, nullptr);
+    BufferDescriptor transformConstantDesc{};
+    transformConstantDesc.type = BUFFER_TYPE_CONSTANT;
+    transformConstantDesc.size = sizeof(TransformConstant);
+    transformConstant = Device::Get()->CreateBuffer(transformConstantDesc, nullptr);
+
+    BufferDescriptor sceneUBODesc{};
+    sceneUBODesc.type = BUFFER_TYPE_UNIFORM;
+    sceneUBODesc.size = sizeof(SceneUBO);
+    sceneUBODesc.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    sceneUBO = Device::Get()->CreateBuffer(sceneUBODesc, nullptr);
+
+    ShaderProgramDescriptor shaderProgramDescriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/simple.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/simple.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    shaderProgramDescriptor.shaders = {vertexShader, fragmentShader};
+    VertexBufferLayout layout;
+    layout.Push<glm::vec2>();
+    layout.Push<glm::vec3>();
+    shaderProgramDescriptor.layout = layout;
+    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
+
+    const auto window = Application::Get().GetWindow();
+    glm::ivec2 extent;
+    glfwGetFramebufferSize(static_cast<GLFWwindow*>(window->GetNativeHandle()), &extent.x, &extent.y);
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+    pipelineDescriptor.extent = extent;
+    pipelineDescriptor.vertexBuffers[-1] = transformConstant;
+    pipelineDescriptor.vertexBuffers[0] = sceneUBO;
+    RenderPassDescriptor renderPassDescriptor;
+    renderPassDescriptor.format = Format::B8G8R8A8_SRGB;
+
+    graphicsPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+    renderer->SetPipeline(graphicsPipeline);
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
     renderer->BeginFrame(nullptr);
-    UBO ubo;
-    ubo.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080, 0.1f, 10.0f);
-    ubo.projection[1][1] *= -1;
-    auto uboPtr = uboTransform->Map();
-    memcpy(uboPtr, &ubo, sizeof(UBO));
-    renderer->UpdateBuffer(uboTransform, ShaderType::VERTEX);
+    TransformConstant transformConstantValue;
+    SceneUBO sceneUboValue;
+    transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+    sceneUboValue.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    sceneUboValue.projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080, 0.1f, 10.0f);
+    sceneUboValue.projection[1][1] *= -1;
+    auto transformConstantValuePtr = transformConstant->Map();
+    memcpy(transformConstantValuePtr, &transformConstantValue, sizeof(TransformConstant));
+    transformConstant->UnMap();
+    auto sceneUboPtr = sceneUBO->Map();
+    memcpy(sceneUboPtr, &sceneUboValue, sizeof(SceneUBO));
+    sceneUBO->UnMap();
+    renderer->UpdateBuffer(transformConstant, ShaderType::VERTEX);
+    renderer->UpdateBuffer(sceneUBO, ShaderType::VERTEX);
     renderer->Draw(vertexBuffer, indexBuffer);
-    uboTransform->UnMap();
     renderer->EndFrame();
 }
 

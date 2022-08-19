@@ -5,14 +5,19 @@ layout(location = 1) in vec3 inColor;
 
 layout(location = 0) out vec3 fragColor;
 
-layout(push_constant) uniform UniformBufferObject {
-    mat4 model;
+layout(push_constant) uniform TransformConstant
+{
+    mat4 transform;
+};
+
+layout(binding = 0) uniform SceneUBO
+{
     mat4 view;
-    mat4 proj;
-} ubo;
+    mat4 projection;
+};
 
 void main()
 {
-    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 0.0, 1.0);
+    gl_Position = projection * view * transform * vec4(inPosition, 0.0, 1.0);
     fragColor = inColor;
 }

@@ -15,12 +15,12 @@ namespace RightEngine
         virtual void* Map() const override;
         virtual void UnMap() const override;
 
-        inline VkBuffer GetBuffer() const
+        VkBuffer GetBuffer() const
         { return buffer; }
 
     private:
-        VkBuffer buffer;
-        VkDeviceMemory memory;
+        VkBuffer buffer{ VK_NULL_HANDLE };
+        VkDeviceMemory memory{ VK_NULL_HANDLE };
         // Is used only for constant buffer
         mutable uint8_t* bufferData{ nullptr };
     };
