@@ -1,5 +1,6 @@
 #include "SandboxLayer.hpp"
 #include "RendererCommand.hpp"
+#include "TextureLoader.hpp"
 #include <glm/gtx/transform.hpp>
 
 using namespace RightEngine;
@@ -83,6 +84,8 @@ namespace
     std::shared_ptr<Buffer> transformConstant;
     std::shared_ptr<Buffer> sceneUBO;
     std::shared_ptr<GraphicsPipeline> graphicsPipeline;
+    TextureLoader textureLoader;
+    std::shared_ptr<Texture> testTexture;
 }
 
 void SandboxLayer::OnAttach()
@@ -136,10 +139,14 @@ void SandboxLayer::OnAttach()
     pipelineDescriptor.vertexBuffers[-1] = transformConstant;
     pipelineDescriptor.vertexBuffers[0] = sceneUBO;
     RenderPassDescriptor renderPassDescriptor;
-    renderPassDescriptor.format = Format::B8G8R8A8_SRGB;
+    renderPassDescriptor.format = Format::BGRA8_SRGB;
 
     graphicsPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
     renderer->SetPipeline(graphicsPipeline);
+
+    auto [data, texDesc] = textureLoader.Load("/Assets/Textures/albedo.png");
+    texDesc.type = TextureType::TEXTURE_2D;
+    testTexture = Device::Get()->CreateTexture(texDesc, data);
 }
 
 void SandboxLayer::OnUpdate(float ts)

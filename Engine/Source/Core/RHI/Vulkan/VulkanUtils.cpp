@@ -31,9 +31,57 @@ VkDeviceMemory VulkanUtils::AllocateMemory(VkMemoryRequirements memRequirements,
 
     if (vkAllocateMemory(VK_DEVICE()->GetDevice(), &allocInfo, nullptr, &memory) != VK_SUCCESS)
     {
-        R_CORE_ASSERT(false, "failed to allocate vertex buffer memory!");
+        R_CORE_ASSERT(false, "failed to allocate memory!");
         return nullptr;
     }
 
     return memory;
+}
+
+void VulkanUtils::BeginCommandBuffer(const std::shared_ptr<VulkanCommandBuffer>& cmd, bool oneTimeUsage)
+{
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    if (oneTimeUsage)
+    {
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    }
+
+    vkBeginCommandBuffer(cmd->GetBuffer(), &beginInfo);
+}
+
+void VulkanUtils::EndCommandBuffer(const std::shared_ptr<VulkanDevice>& device,
+                              const std::shared_ptr<VulkanCommandBuffer>& cmd)
+{
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    cmd->Execute();
+    VkCommandBuffer commandBuffer = cmd->GetBuffer();
+
+    vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    vkQueueSubmit(device->GetQueue(QueueType::GRAPHICS), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(device->GetQueue(QueueType::GRAPHICS));
+}
+
+void VulkanUtils::CopyBuffer(const std::shared_ptr<VulkanCommandBuffer>& cmd, VkBuffer dst, VkBuffer src, size_t size)
+{
+    BeginCommandBuffer(cmd, true);
+
+    VkBufferCopy bufferCopy;
+    bufferCopy.size = size;
+
+    cmd->Enqueue([=](auto buffer)
+    {
+        vkCmdCopyBuffer(VK_CMD(buffer)->GetBuffer(), src, dst, 1, &bufferCopy);
+    });
+
+    EndCommandBuffer(VK_DEVICE(), cmd);
 }

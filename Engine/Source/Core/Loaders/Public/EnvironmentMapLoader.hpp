@@ -23,7 +23,7 @@ namespace RightEngine
     {
         std::string path;
         bool flipVertically{ false };
-        TextureSpecification specification;
+        TextureDescriptor specification;
     };
 
     class EnvironmentMapLoader

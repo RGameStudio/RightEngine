@@ -51,7 +51,7 @@ void VulkanRendererAPI::CreateSwapchain()
     glm::ivec2 extent;
     glfwGetFramebufferSize(static_cast<GLFWwindow*>(window->GetNativeHandle()), &extent.x, &extent.y);
     descriptor.extent = extent;
-    descriptor.format = Format::B8G8R8A8_SRGB;
+    descriptor.format = Format::BGRA8_SRGB;
     descriptor.presentMode = PresentMode::IMMEDIATE;
     swapchain = std::make_shared<VulkanSwapchain>(VK_DEVICE(), surface, descriptor);
 }

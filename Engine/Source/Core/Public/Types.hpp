@@ -21,13 +21,17 @@ namespace RightEngine
 
     enum class Format
     {
+        NONE,
         R32_SFLOAT,
         R32_UINT,
         R8_UINT,
-        R32G32_SFLOAT,
-        R32G32B32_SFLOAT,
-        R32G32B32A32_SFLOAT,
-        B8G8R8A8_SRGB,
+        RGB8_UINT,
+        RGBA8_UINT,
+        RGB16_SFLOAT,
+        RG32_SFLOAT,
+        RGB32_SFLOAT,
+        RGBA32_SFLOAT,
+        BGRA8_SRGB,
     };
 
     enum class PresentMode
@@ -44,5 +48,12 @@ namespace RightEngine
         MEMORY_TYPE_HOST_VISIBLE = BIT(0),
         MEMORY_TYPE_HOST_COHERENT = BIT(1),
         MEMORY_TYPE_DEVICE_LOCAL = BIT(2)
+    };
+
+    enum class TextureType
+    {
+        NONE,
+        TEXTURE_2D,
+        CUBEMAP
     };
 }

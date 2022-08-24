@@ -44,6 +44,8 @@ namespace RightEngine
         virtual std::shared_ptr<Shader> CreateShader(const ShaderProgramDescriptor& shaderProgramDescriptor) override;
         virtual std::shared_ptr<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor,
                                                                          const RenderPassDescriptor& renderPassDescriptor) override;
+        virtual std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& descriptor,
+                                                       const std::vector<uint8_t>& data) override;
 
         VkPhysicalDevice GetPhysicalDevice() const
         { return physicalDevice; }

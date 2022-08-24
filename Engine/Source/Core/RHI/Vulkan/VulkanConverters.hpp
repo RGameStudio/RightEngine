@@ -32,20 +32,22 @@ namespace RightEngine
         {
             switch (format)
             {
-                case Format::B8G8R8A8_SRGB:
+                case Format::BGRA8_SRGB:
                     return VK_FORMAT_B8G8R8A8_SRGB;
                 case Format::R32_SFLOAT:
                     return VK_FORMAT_R32_SFLOAT;
-                case Format::R32G32_SFLOAT:
+                case Format::RG32_SFLOAT:
                     return VK_FORMAT_R32G32_SFLOAT;
-                case Format::R32G32B32_SFLOAT:
+                case Format::RGB32_SFLOAT:
                     return VK_FORMAT_R32G32B32_SFLOAT;
-                case Format::R32G32B32A32_SFLOAT:
+                case Format::RGBA32_SFLOAT:
                     return VK_FORMAT_R32G32B32A32_SFLOAT;
                 case Format::R32_UINT:
                     return VK_FORMAT_R32_UINT;
                 case Format::R8_UINT:
                     return VK_FORMAT_R8_UINT;
+                case Format::RGBA8_UINT:
+                    return VK_FORMAT_R8G8B8_UINT;
                 default:
                     R_CORE_ASSERT(false, "");
             }
@@ -81,7 +83,7 @@ namespace RightEngine
         inline static VkMemoryPropertyFlags MemoryProperty(MemoryType type)
         {
             VkMemoryPropertyFlags flags = 0;
-            if (type & MEMORY_TYPE_HOST_VISIBLE)
+            if (type & MEMORY_TYPE_DEVICE_LOCAL)
             {
                 flags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
             }
@@ -105,6 +107,19 @@ namespace RightEngine
                     return VK_SHADER_STAGE_VERTEX_BIT;
                 case ShaderType::FRAGMENT:
                     return VK_SHADER_STAGE_FRAGMENT_BIT;
+                default:
+                R_CORE_ASSERT(false, "");
+            }
+        }
+
+        inline static VkImageType ImageType(TextureType type)
+        {
+            switch (type)
+            {
+                case TextureType::CUBEMAP:
+                    return VK_IMAGE_TYPE_3D;
+                case TextureType::TEXTURE_2D:
+                    return VK_IMAGE_TYPE_2D;
                 default:
                 R_CORE_ASSERT(false, "");
             }

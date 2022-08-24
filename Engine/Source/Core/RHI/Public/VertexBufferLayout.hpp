@@ -70,22 +70,22 @@ namespace RightEngine
     template<>
     inline void VertexBufferLayout::Push<glm::vec2>(uint32_t count, bool normalized)
     {
-        elements.push_back({ Format::R32G32_SFLOAT, count,  normalized });
-        stride += count * VertexBufferElement::GetSizeOfType(Format::R32G32_SFLOAT);
+        elements.push_back({ Format::RG32_SFLOAT, count, normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::RG32_SFLOAT);
     }
 
     template<>
     inline void VertexBufferLayout::Push<glm::vec3>(uint32_t count, bool normalized)
     {
-        elements.push_back({ Format::R32G32B32_SFLOAT, count,  normalized });
-        stride += count * VertexBufferElement::GetSizeOfType(Format::R32G32B32_SFLOAT);
+        elements.push_back({ Format::RGB32_SFLOAT, count, normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::RGB32_SFLOAT);
     }
 
     template<>
     inline void VertexBufferLayout::Push<glm::vec4>(uint32_t count, bool normalized)
     {
-        elements.push_back({ Format::R32G32B32A32_SFLOAT, count,  normalized });
-        stride += count * VertexBufferElement::GetSizeOfType(Format::R32G32B32A32_SFLOAT);
+        elements.push_back({ Format::RGBA32_SFLOAT, count, normalized });
+        stride += count * VertexBufferElement::GetSizeOfType(Format::RGBA32_SFLOAT);
     }
 
     template<>

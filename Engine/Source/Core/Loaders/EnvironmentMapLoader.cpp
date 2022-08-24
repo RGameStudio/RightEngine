@@ -122,7 +122,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
 
 void EnvironmentMapLoader::ComputeIrradianceMap()
 {
-    TextureSpecification texSpec = loaderContext.specification;
+    TextureDescriptor texSpec = loaderContext.specification;
     const auto irradianceMapShader = AssetManager::Get().LoadAsset<Shader>("/Assets/Shaders/Utils/envmap_to_irr_map",
                                                                            "envmap_to_irr_map", LoaderOptions());
 
@@ -161,11 +161,8 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
 
 void EnvironmentMapLoader::ComputeRadianceMap()
 {
-    TextureSpecification prefilterTextureSpec{ prefilterTexWidth,
-                                               prefilterTexHeight,
-                                               3,
-                                               TextureType::CUBEMAP,
-                                               TextureFormat::RGB32F };
+    R_CORE_ASSERT(false, "");
+    TextureDescriptor prefilterTextureSpec{};
     const auto prefilterMapShader = AssetManager::Get().LoadAsset<Shader>(
             "/Assets/Shaders/Utils/envmap_to_radiance_map",
             "envmap_to_radiance_map",
@@ -218,11 +215,8 @@ void EnvironmentMapLoader::ComputeRadianceMap()
 
 void EnvironmentMapLoader::ComputeLUT()
 {
-    TextureSpecification specification{ lutTexWidth,
-                                        lutTexHeight,
-                                        3,
-                                        TextureType::TEXTURE_2D,
-                                        TextureFormat::RGB32F };
+    R_CORE_ASSERT(false, "");
+    TextureDescriptor specification{};
     auto lutTexture = Texture::Create(specification, std::vector<uint8_t>());
     lutTexture->SetSampler(Sampler::Create({ SamplerFilter::Linear,
                                              SamplerFilter::Linear,

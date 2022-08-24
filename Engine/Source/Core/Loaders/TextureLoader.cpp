@@ -22,10 +22,10 @@ namespace
 TextureLoader::TextureLoader(const TextureLoaderOptions& options) : options(options)
 {}
 
-std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const std::string& path, bool flipVertically) const
+std::pair<std::vector<uint8_t>, TextureDescriptor> TextureLoader::Load(const std::string& path, bool flipVertically) const
 {
     bool isHdr = isHDR(path);
-    TextureSpecification specification;
+    TextureDescriptor specification{};
     if (flipVertically)
     {
         stbi_set_flip_vertically_on_load(true);
@@ -68,21 +68,21 @@ std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const 
 
     if (isHdr)
     {
-        specification.format = TextureFormat::RGB32F;
+        specification.format = Format::RGB32_SFLOAT;
     }
 
-    if (specification.format == TextureFormat::NONE)
+    if (specification.format == Format::NONE)
     {
         switch (specification.componentAmount)
         {
             case 1:
-                specification.format = TextureFormat::RED8;
+                specification.format = Format::R8_UINT;
                 break;
             case 3:
-                specification.format = TextureFormat::RGB8;
+                specification.format = Format::RGB8_UINT;
                 break;
             case 4:
-                specification.format = TextureFormat::RGBA8;
+                specification.format = Format::RGBA8_UINT;
                 break;
             default:
                 R_CORE_ASSERT(false, "");
@@ -95,15 +95,15 @@ std::pair<std::vector<uint8_t>, TextureSpecification> TextureLoader::Load(const 
     const size_t textureSize = specification.GetTextureSize();
     switch (specification.format)
     {
-        case TextureFormat::RED8:
+        case Format::R8_UINT:
             R_CORE_ASSERT(specification.componentAmount == 1, "");
             break;
-        case TextureFormat::RGB8:
-        case TextureFormat::RGB16F:
-        case TextureFormat::RGB32F:
+        case Format::RGB8_UINT:
+        case Format::RGB16_SFLOAT:
+        case Format::RGB32_SFLOAT:
             R_CORE_ASSERT(specification.componentAmount == 3, "");
             break;
-        case TextureFormat::RGBA8:
+        case Format::RGBA8_UINT:
             R_CORE_ASSERT(specification.componentAmount == 4, "");
             break;
         default:
