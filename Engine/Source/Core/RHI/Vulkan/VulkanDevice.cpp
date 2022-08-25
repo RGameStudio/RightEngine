@@ -6,6 +6,7 @@
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanGraphicsPipeline.hpp"
 #include "VulkanTexture.hpp"
+#include "VulkanSampler.hpp"
 #include <unordered_set>
 
 using namespace RightEngine;
@@ -125,12 +126,16 @@ namespace
         bool extensionsSupported = CheckDeviceExtensionSupport(device);
 
         bool swapchainAdequate = false;
-        if (extensionsSupported) {
+        if (extensionsSupported)
+        {
             SwapchainSupportDetails swapchainSupport = QuerySwapchainSupport(device);
             swapchainAdequate = !swapchainSupport.formats.empty() && !swapchainSupport.presentModes.empty();
         }
 
-        return indices.IsComplete() && extensionsSupported && swapchainAdequate;
+        VkPhysicalDeviceFeatures supportedFeatures;
+        vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
+        return indices.IsComplete() && extensionsSupported && swapchainAdequate && supportedFeatures.samplerAnisotropy;
     }
 }
 
@@ -203,6 +208,7 @@ void VulkanDevice::CreateLogicalDevice(const std::shared_ptr<VulkanRenderingCont
     }
 
     VkPhysicalDeviceFeatures deviceFeatures{};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -278,4 +284,9 @@ std::shared_ptr<Texture> VulkanDevice::CreateTexture(const TextureDescriptor& de
                                                      const std::vector<uint8_t>& data)
 {
     return std::make_shared<VulkanTexture>(shared_from_this(), descriptor, data);
+}
+
+std::shared_ptr<Sampler> VulkanDevice::CreateSampler(const SamplerDescriptor& descriptor)
+{
+    return std::make_shared<VulkanSampler>(shared_from_this(), descriptor);
 }

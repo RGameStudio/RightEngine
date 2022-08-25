@@ -6,6 +6,7 @@
 #include "ShaderProgramDescriptor.hpp"
 #include "GraphicsPipelineDescriptor.hpp"
 #include "TextureDescriptor.hpp"
+#include "SamplerDescriptor.hpp"
 
 #include <memory>
 
@@ -19,6 +20,7 @@ namespace RightEngine
     class Surface;
     class GraphicsPipeline;
     class Texture;
+    class Sampler;
 
     struct DeviceInfo
     {
@@ -40,6 +42,8 @@ namespace RightEngine
                                                                          const RenderPassDescriptor& renderPassDescriptor) = 0;
         virtual std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& descriptor,
                                                        const std::vector<uint8_t>& data) = 0;
+
+        virtual std::shared_ptr<Sampler> CreateSampler(const SamplerDescriptor& descriptor) = 0;
 
         Device(const Device& other) = delete;
         Device& operator=(const Device& other) = delete;

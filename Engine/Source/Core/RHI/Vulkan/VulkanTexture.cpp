@@ -167,6 +167,22 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     stagingBuffer.reset();
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = textureImage;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    if (vkCreateImageView(device->GetDevice(), &viewInfo, nullptr, &textureImageView) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create texture image view!");
+    }
 }
 
 
@@ -187,6 +203,7 @@ void VulkanTexture::UnBind() const
 
 VulkanTexture::~VulkanTexture()
 {
+    vkDestroyImageView(VK_DEVICE()->GetDevice(), textureImageView, nullptr);
     vkDestroyImage(VK_DEVICE()->GetDevice(), textureImage, nullptr);
     vkFreeMemory(VK_DEVICE()->GetDevice(), textureImageMemory, nullptr);
 }

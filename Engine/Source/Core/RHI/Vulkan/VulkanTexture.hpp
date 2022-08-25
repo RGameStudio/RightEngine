@@ -26,6 +26,7 @@ namespace RightEngine
         std::shared_ptr<Buffer> stagingBuffer;
         VkImage textureImage;
         VkDeviceMemory textureImageMemory;
+        VkImageView textureImageView;
         std::shared_ptr<VulkanCommandBuffer> commandBuffer;
     };
 }

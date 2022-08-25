@@ -47,6 +47,8 @@ namespace RightEngine
         virtual std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& descriptor,
                                                        const std::vector<uint8_t>& data) override;
 
+        virtual std::shared_ptr<Sampler> CreateSampler(const SamplerDescriptor& descriptor) override;
+
         VkPhysicalDevice GetPhysicalDevice() const
         { return physicalDevice; }
 

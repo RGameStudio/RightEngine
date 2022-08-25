@@ -168,11 +168,11 @@ void EnvironmentMapLoader::ComputeRadianceMap()
             "envmap_to_radiance_map",
             LoaderOptions());
     auto prefilteredMap = Texture::Create(prefilterTextureSpec, CubemapFaces());
-    prefilteredMap->SetSampler(Sampler::Create({
-                                                       SamplerFilter::Linear,
-                                                       SamplerFilter::Linear,
-                                                       SamplerFilter::Linear,
-                                                       true }));
+//    prefilteredMap->SetSampler(Sampler::Create({
+//                                                       SamplerFilter::Linear,
+//                                                       SamplerFilter::Linear,
+//                                                       SamplerFilter::Linear,
+//                                                       true }));
     prefilteredMap->GenerateMipmaps();
     FramebufferSpecification fbSpec;
     fbSpec.width = prefilterTexWidth;
@@ -183,7 +183,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
             }
     );
     Framebuffer fb(fbSpec);
-    prefilteredMap->GetSampler()->Bind(1);
+//    prefilteredMap->GetSampler()->Bind(1);
     for (int mipLevel = 0; mipLevel < maxMipLevels; mipLevel++)
     {
         uint32_t mipWidth = prefilterTexWidth * std::pow(0.5, mipLevel);
@@ -218,10 +218,10 @@ void EnvironmentMapLoader::ComputeLUT()
     R_CORE_ASSERT(false, "");
     TextureDescriptor specification{};
     auto lutTexture = Texture::Create(specification, std::vector<uint8_t>());
-    lutTexture->SetSampler(Sampler::Create({ SamplerFilter::Linear,
-                                             SamplerFilter::Linear,
-                                             SamplerFilter::Linear,
-                                             false }));
+//    lutTexture->SetSampler(Sampler::Create({ SamplerFilter::Linear,
+//                                             SamplerFilter::Linear,
+//                                             SamplerFilter::Linear,
+//                                             false }));
     const auto lutShader = AssetManager::Get().LoadAsset<Shader>(
             "/Assets/Shaders/Utils/brdf",
             "brdf",
@@ -239,7 +239,7 @@ void EnvironmentMapLoader::ComputeLUT()
     const auto quad = MeshBuilder::QuadGeometry();
     fb.Bind();
     lutShader->Bind();
-    lutTexture->GetSampler()->Bind();
+//    lutTexture->GetSampler()->Bind();
     lutTexture->Bind();
     const auto& va = quad->GetVertexArray();
     va->Bind();
