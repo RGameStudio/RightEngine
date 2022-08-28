@@ -176,7 +176,7 @@ void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
     fragShaderStageInfo.pName = "main";
 
     CreateDescriptorSets();
-    CreatePushConstants();
+//    CreatePushConstants();
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -282,40 +282,37 @@ void VulkanGraphicsPipeline::CreateRenderPass(const RenderPassDescriptor& render
 void VulkanGraphicsPipeline::CreatePushConstants()
 {
     std::vector<VkPushConstantRange> constants;
-    GetPushConstants(constants, pipelineDescriptor.vertexBuffers, VK_SHADER_STAGE_VERTEX_BIT);
-    GetPushConstants(constants, pipelineDescriptor.buffers, VK_SHADER_STAGE_FRAGMENT_BIT);
+//    GetPushConstants(constants, pipelineDescriptor.vertexBuffers, VK_SHADER_STAGE_VERTEX_BIT);
+//    GetPushConstants(constants, pipelineDescriptor.buffers, VK_SHADER_STAGE_FRAGMENT_BIT);
     pushConstants = constants;
 }
 
 void VulkanGraphicsPipeline::CreateDescriptorSets()
 {
     std::vector<VkDescriptorSetLayoutBinding> bindings;
-    for (const auto& [slot, buffer] : pipelineDescriptor.vertexBuffers)
+    for (const auto& [bufferRef, bufferType] : pipelineDescriptor.shader->GetShaderProgramDescriptor().reflection.buffers)
     {
-        if (buffer->GetDescriptor().type == BUFFER_TYPE_UNIFORM)
+        if (bufferType == BUFFER_TYPE_UNIFORM)
         {
-            VkDescriptorSetLayoutBinding vertexUboLayoutBinding{};
-            vertexUboLayoutBinding.binding = slot;
-            vertexUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            vertexUboLayoutBinding.descriptorCount = 1;
-            vertexUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-            vertexUboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-            bindings.emplace_back(vertexUboLayoutBinding);
+            VkDescriptorSetLayoutBinding bufferLayoutBinding{};
+            bufferLayoutBinding.binding = bufferRef.slot;
+            bufferLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            bufferLayoutBinding.descriptorCount = 1;
+            bufferLayoutBinding.stageFlags = bufferRef.stage == ShaderType::VERTEX ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
+            bufferLayoutBinding.pImmutableSamplers = nullptr; // Optional
+            bindings.emplace_back(bufferLayoutBinding);
         }
     }
 
-    for (const auto& [slot, buffer] : pipelineDescriptor.buffers)
+    for (const auto& slot : pipelineDescriptor.shader->GetShaderProgramDescriptor().reflection.textures)
     {
-        if (buffer->GetDescriptor().type == BUFFER_TYPE_UNIFORM)
-        {
-            VkDescriptorSetLayoutBinding vertexUboLayoutBinding{};
-            vertexUboLayoutBinding.binding = slot;
-            vertexUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            vertexUboLayoutBinding.descriptorCount = 1;
-            vertexUboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-            vertexUboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-            bindings.emplace_back(vertexUboLayoutBinding);
-        }
+        VkDescriptorSetLayoutBinding textureLayoutBinding{};
+        textureLayoutBinding.binding = slot;
+        textureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        textureLayoutBinding.descriptorCount = 1;
+        textureLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        textureLayoutBinding.pImmutableSamplers = nullptr; // Optional
+        bindings.emplace_back(textureLayoutBinding);
     }
 
     if (bindings.empty())
@@ -333,39 +330,39 @@ void VulkanGraphicsPipeline::CreateDescriptorSets()
         throw std::runtime_error("failed to create descriptor set layout!");
     }
 
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = pipelineDescriptor.vertexBuffers.size() + pipelineDescriptor.buffers.size();
+//    VkDescriptorPoolSize poolSize{};
+//    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+//    poolSize.descriptorCount = pipelineDescriptor.vertexBuffers.size() + pipelineDescriptor.buffers.size();
+//
+//    VkDescriptorPoolCreateInfo poolInfo{};
+//    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+//    poolInfo.poolSizeCount = 1;
+//    poolInfo.pPoolSizes = &poolSize;
+//    poolInfo.maxSets = 1;
+//
+//    if (vkCreateDescriptorPool(VK_DEVICE()->GetDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+//    {
+//        throw std::runtime_error("failed to create descriptor pool!");
+//    }
 
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = 1;
-
-    if (vkCreateDescriptorPool(VK_DEVICE()->GetDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to create descriptor pool!");
-    }
-
-    std::vector<VkDescriptorSetLayout> layouts(1, descriptorSetLayout);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = layouts.data();
-
-    descriptorSets.resize(1);
-    if (vkAllocateDescriptorSets(VK_DEVICE()->GetDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to allocate descriptor sets!");
-    }
-
-    auto vertexWriteDescSets = GetWriteDescriptorSets(descriptorSets, pipelineDescriptor.vertexBuffers);
-    const auto fragWriteDescSets = GetWriteDescriptorSets(descriptorSets, pipelineDescriptor.buffers);
-    vertexWriteDescSets.insert(vertexWriteDescSets.end(), fragWriteDescSets.begin(), fragWriteDescSets.end());
-
-    vkUpdateDescriptorSets(VK_DEVICE()->GetDevice(), vertexWriteDescSets.size(), vertexWriteDescSets.data(), 0, nullptr);
+//    std::vector<VkDescriptorSetLayout> layouts(1, descriptorSetLayout);
+//    VkDescriptorSetAllocateInfo allocInfo{};
+//    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+//    allocInfo.descriptorPool = descriptorPool;
+//    allocInfo.descriptorSetCount = 1;
+//    allocInfo.pSetLayouts = layouts.data();
+//
+//    descriptorSets.resize(1);
+//    if (vkAllocateDescriptorSets(VK_DEVICE()->GetDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+//    {
+//        throw std::runtime_error("failed to allocate descriptor sets!");
+//    }
+//
+//    auto vertexWriteDescSets = GetWriteDescriptorSets(descriptorSets, pipelineDescriptor.vertexBuffers);
+//    const auto fragWriteDescSets = GetWriteDescriptorSets(descriptorSets, pipelineDescriptor.buffers);
+//    vertexWriteDescSets.insert(vertexWriteDescSets.end(), fragWriteDescSets.begin(), fragWriteDescSets.end());
+//
+//    vkUpdateDescriptorSets(VK_DEVICE()->GetDevice(), vertexWriteDescSets.size(), vertexWriteDescSets.data(), 0, nullptr);
 }
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
@@ -373,10 +370,7 @@ VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
     vkDestroyPipeline(VK_DEVICE()->GetDevice(), graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(VK_DEVICE()->GetDevice(), pipelineLayout, nullptr);
     vkDestroyRenderPass(VK_DEVICE()->GetDevice(), renderPass, nullptr);
-    if (descriptorPool)
-    {
-        vkDestroyDescriptorPool(VK_DEVICE()->GetDevice(), descriptorPool, nullptr);
-    }
+
     if (descriptorSetLayout)
     {
         vkDestroyDescriptorSetLayout(VK_DEVICE()->GetDevice(), descriptorSetLayout, nullptr);

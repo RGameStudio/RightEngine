@@ -8,29 +8,6 @@
 
 namespace RightEngine
 {
-    struct BufferRef
-    {
-        int slot;
-        ShaderStage stage;
-
-        bool operator==(const BufferRef& other) const
-        {
-            return slot == other.slot && stage == other.stage;
-        }
-    };
-
-    struct BufferRefHash
-    {
-        size_t operator()(const BufferRef& p) const
-        {
-            size_t h = 0x1231;
-            Utils::CombineHash(h, p.slot);
-            Utils::CombineHash(h, p.stage);
-
-            return h;
-        }
-    };
-
     class RendererState
     {
     public:
@@ -43,7 +20,12 @@ namespace RightEngine
         const std::shared_ptr<Buffer>& GetVertexBuffer(int slot);
         void SetVertexBuffer(const std::shared_ptr<Buffer>& buffer, int slot);
 
-        virtual void OnUpdate() = 0;
+        virtual void OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipeline) = 0;
+
+        bool IsSyncNeeded() const
+        { return isSyncNeeded; }
+
+        virtual ~RendererState() = default;
 
     protected:
         std::unordered_map<int, std::shared_ptr<Texture>> textures;

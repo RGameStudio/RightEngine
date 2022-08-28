@@ -19,6 +19,9 @@ namespace RightEngine
         virtual void Bind(uint32_t slot) const override;
         virtual void UnBind() const override;
 
+        VkImageView GetImageView() const
+        { return textureImageView; }
+
     protected:
         void Init(const std::shared_ptr<VulkanDevice>& device,
              const std::vector<uint8_t>& data);

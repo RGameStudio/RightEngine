@@ -12,6 +12,9 @@ namespace RightEngine
 
         virtual ~VulkanSampler() override;
 
+        VkSampler GetSampler() const
+        { return sampler; }
+
     private:
         VkSampler sampler;
     };

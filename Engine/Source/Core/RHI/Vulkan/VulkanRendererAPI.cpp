@@ -334,6 +334,7 @@ void VulkanRendererAPI::UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
                                      uint32_t offset,
                                      ShaderStage stage)
 {
+    R_CORE_ASSERT(false, "");
     const auto vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
     switch (buffer->GetDescriptor().type)
     {
@@ -364,12 +365,12 @@ void VulkanRendererAPI::UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
                 {
                     case ShaderType::VERTEX:
                     {
-                        buffers = pipeline->GetPipelineDescriptor().vertexBuffers;
+//                        buffers = pipeline->GetPipelineDescriptor().vertexBuffers;
                         break;
                     }
                     case ShaderType::FRAGMENT:
                     {
-                        buffers = pipeline->GetPipelineDescriptor().buffers;
+//                        buffers = pipeline->GetPipelineDescriptor().buffers;
                         break;
                     }
                     default:

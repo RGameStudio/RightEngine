@@ -136,8 +136,8 @@ void SandboxLayer::OnAttach()
     GraphicsPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.shader = shader;
     pipelineDescriptor.extent = extent;
-    pipelineDescriptor.vertexBuffers[-1] = transformConstant;
-    pipelineDescriptor.vertexBuffers[0] = sceneUBO;
+//    pipelineDescriptor.vertexBuffers[-1] = transformConstant;
+//    pipelineDescriptor.vertexBuffers[0] = sceneUBO;
     RenderPassDescriptor renderPassDescriptor;
     renderPassDescriptor.format = Format::BGRA8_SRGB;
 

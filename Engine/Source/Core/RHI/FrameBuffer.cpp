@@ -7,9 +7,8 @@ using namespace RightEngine;
 
 static const uint32_t maxFramebufferSize = 8192;
 
-namespace Utils
+namespace
 {
-
     static GLenum TextureTarget(bool multisampled)
     {
         return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
@@ -101,7 +100,7 @@ RightEngine::Framebuffer::Framebuffer(const RightEngine::FramebufferSpecificatio
 {
     for (auto spec: specification.attachments.attachments)
     {
-        if (!Utils::IsDepthFormat(spec.textureFormat))
+        if (!IsDepthFormat(spec.textureFormat))
         {
             colorAttachmentSpecifications.emplace_back(spec);
         }
@@ -153,19 +152,19 @@ void RightEngine::Framebuffer::Invalidate()
     if (colorAttachmentSpecifications.size())
     {
         colorAttachments.resize(colorAttachmentSpecifications.size());
-        Utils::CreateTextures(multisample, colorAttachments.data(), colorAttachments.size());
+        CreateTextures(multisample, colorAttachments.data(), colorAttachments.size());
 
         for (size_t i = 0; i < colorAttachments.size(); i++)
         {
-            Utils::BindTexture(multisample, colorAttachments[i]);
+            BindTexture(multisample, colorAttachments[i]);
             switch (colorAttachmentSpecifications[i].textureFormat)
             {
                 case FramebufferTextureFormat::RGBA8:
-                    Utils::AttachColorTexture(colorAttachments[i], specification.samples, GL_RGBA8, GL_RGBA,
+                    AttachColorTexture(colorAttachments[i], specification.samples, GL_RGBA8, GL_RGBA,
                                               specification.width, specification.height, i);
                     break;
                 case FramebufferTextureFormat::RED_INTEGER:
-                    Utils::AttachColorTexture(colorAttachments[i], specification.samples, GL_R32I, GL_RED_INTEGER,
+                    AttachColorTexture(colorAttachments[i], specification.samples, GL_R32I, GL_RED_INTEGER,
                                               specification.width, specification.height, i);
                     break;
             }
@@ -174,12 +173,12 @@ void RightEngine::Framebuffer::Invalidate()
 
     if (depthAttachmentSpecification.textureFormat != FramebufferTextureFormat::None)
     {
-        Utils::CreateTextures(multisample, &depthAttachment, 1);
-        Utils::BindTexture(multisample, depthAttachment);
+        CreateTextures(multisample, &depthAttachment, 1);
+        BindTexture(multisample, depthAttachment);
         switch (depthAttachmentSpecification.textureFormat)
         {
             case FramebufferTextureFormat::DEPTH24STENCIL8:
-                Utils::AttachDepthTexture(depthAttachment, specification.samples, GL_DEPTH24_STENCIL8,
+                AttachDepthTexture(depthAttachment, specification.samples, GL_DEPTH24_STENCIL8,
                                           GL_DEPTH_STENCIL_ATTACHMENT, specification.width, specification.height);
                 break;
         }
@@ -244,7 +243,7 @@ void RightEngine::Framebuffer::ClearAttachment(uint32_t attachmentIndex, int val
 
     auto& spec = colorAttachmentSpecifications[attachmentIndex];
     glClearTexImage(colorAttachments[attachmentIndex], 0,
-                    Utils::FBTextureFormatToGL(spec.textureFormat), GL_INT, &value);
+                    FBTextureFormatToGL(spec.textureFormat), GL_INT, &value);
 }
 
 uint32_t RightEngine::Framebuffer::GetColorAttachment(uint32_t index) const

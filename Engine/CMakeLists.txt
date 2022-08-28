@@ -56,7 +56,8 @@ set(ENGINE_SRC
         Source/Core/RHI/Vulkan/VulkanCommandBuffer.cpp
         Source/Core/RHI/Vulkan/VulkanTexture.cpp
         Source/Core/RHI/Vulkan/VulkanSampler.cpp
-        Source/Core/RHI/RendererState.cpp)
+        Source/Core/RHI/RendererState.cpp
+        Source/Core/RHI/Vulkan/VulkanRendererState.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

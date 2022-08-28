@@ -13,8 +13,6 @@ namespace RightEngine
     {
         glm::ivec2 extent;
         std::shared_ptr<Shader> shader;
-        std::unordered_map<int, std::shared_ptr<Buffer>> vertexBuffers;
-        std::unordered_map<int, std::shared_ptr<Buffer>> buffers;
     };
 
     struct RenderPassDescriptor
