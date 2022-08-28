@@ -53,7 +53,10 @@ set(ENGINE_SRC
         Source/Core/RHI/Vulkan/VulkanGraphicsPipeline.cpp
         Source/Core/RHI/Vulkan/VulkanBuffer.cpp
         Source/Core/RHI/Vulkan/VulkanUtils.cpp
-        Source/Core/RHI/Vulkan/VulkanCommandBuffer.cpp Source/Core/RHI/Public/GraphicsPipeline.hpp Source/Core/RHI/Public/GraphicsPipelineDescriptor.hpp Source/Core/RHI/Vulkan/VulkanTexture.cpp Source/Core/RHI/Vulkan/VulkanTexture.hpp Source/Core/RHI/Vulkan/VulkanSampler.cpp Source/Core/RHI/Vulkan/VulkanSampler.hpp Source/Core/RHI/Public/SamplerDescriptor.hpp)
+        Source/Core/RHI/Vulkan/VulkanCommandBuffer.cpp
+        Source/Core/RHI/Vulkan/VulkanTexture.cpp
+        Source/Core/RHI/Vulkan/VulkanSampler.cpp
+        Source/Core/RHI/RendererState.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)
