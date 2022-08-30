@@ -308,7 +308,7 @@ void VulkanGraphicsPipeline::CreateDescriptorSets()
     {
         VkDescriptorSetLayoutBinding textureLayoutBinding{};
         textureLayoutBinding.binding = slot;
-        textureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        textureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         textureLayoutBinding.descriptorCount = 1;
         textureLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
         textureLayoutBinding.pImmutableSamplers = nullptr; // Optional

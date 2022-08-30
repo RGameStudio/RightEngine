@@ -63,6 +63,13 @@ void RendererCommand::DrawIndexed(const std::shared_ptr<CommandBuffer>& cmd,
     rendererAPI->Draw(cmd, vertexBuffer, indexBuffer, indexCount, instanceCount);
 }
 
+void RendererCommand::EncodeState(const std::shared_ptr<CommandBuffer>& cmd,
+                 const std::shared_ptr<GraphicsPipeline>& pipeline,
+                 const std::shared_ptr<RendererState>& state)
+{
+    rendererAPI->EncodeState(cmd, pipeline, state);
+}
+
 void RendererCommand::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
                                  const std::shared_ptr<GraphicsPipeline>& pipeline)
 {
@@ -74,11 +81,7 @@ void RendererCommand::EndFrame(const std::shared_ptr<CommandBuffer>& cmd)
     rendererAPI->EndFrame(cmd);
 }
 
-void RendererCommand::UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
-                                   const std::shared_ptr<GraphicsPipeline>& pipeline,
-                                   const std::shared_ptr<Buffer>& buffer,
-                                   ShaderStage stage,
-                                   uint32_t offset)
+std::shared_ptr<RendererState> RendererCommand::CreateRendererState()
 {
-    rendererAPI->UpdateBuffer(cmd, pipeline, buffer, offset, stage);
+    return rendererAPI->CreateRendererState();
 }

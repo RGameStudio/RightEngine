@@ -10,6 +10,9 @@ namespace RightEngine
     public:
         virtual void OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipeline) override;
 
+        const VkDescriptorSet GetDescriptorSet() const
+        { return descriptorSet; }
+
         virtual ~VulkanRendererState() override;
 
     private:

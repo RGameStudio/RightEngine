@@ -7,6 +7,7 @@
 #include "Shader.hpp"
 #include "Scene.hpp"
 #include "Types.hpp"
+#include "RendererState.hpp"
 #include <glm/matrix.hpp>
 
 namespace RightEngine
@@ -46,8 +47,8 @@ namespace RightEngine
         void BeginFrame(const std::shared_ptr<Camera>& camera);
         void EndFrame();
 
-        void UpdateBuffer(const std::shared_ptr<Buffer>& buffer, ShaderStage stage);
         void Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer = nullptr);
+        void EncodeState(const std::shared_ptr<RendererState>& state);
 
         void SetPipeline(const std::shared_ptr<GraphicsPipeline>& aPipeline);
 

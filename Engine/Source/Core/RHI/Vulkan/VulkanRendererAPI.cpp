@@ -5,6 +5,7 @@
 #include "VulkanConverters.hpp"
 #include "VulkanBuffer.hpp"
 #include "VulkanCommandBuffer.hpp"
+#include "VulkanRendererState.hpp"
 
 using namespace RightEngine;
 
@@ -328,91 +329,25 @@ void VulkanRendererAPI::Draw(const std::shared_ptr<CommandBuffer>& cmd,
                  });
 }
 
-void VulkanRendererAPI::UpdateBuffer(const std::shared_ptr<CommandBuffer>& cmd,
-                                     const std::shared_ptr<GraphicsPipeline>& pipeline,
-                                     const std::shared_ptr<Buffer>& buffer,
-                                     uint32_t offset,
-                                     ShaderStage stage)
+void VulkanRendererAPI::EncodeState(const std::shared_ptr<CommandBuffer>& cmd,
+                                    const std::shared_ptr<GraphicsPipeline>& pipeline,
+                                    const std::shared_ptr<RendererState>& state)
 {
-    R_CORE_ASSERT(false, "");
-    const auto vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
-    switch (buffer->GetDescriptor().type)
+    R_CORE_ASSERT(state, "");
+    auto vkState = std::static_pointer_cast<VulkanRendererState>(state);
+    auto vkPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
+    cmd->Enqueue([=](auto buffer)
     {
-        case BUFFER_TYPE_CONSTANT:
-        {
-            cmd->Enqueue([=](auto cmdBuffer)
-             {
-                 vkCmdPushConstants(VK_CMD(cmdBuffer)->GetBuffer(),
-                                    vulkanPipeline->GetPipelineLayout(),
-                                    VulkanConverters::ShaderStage(stage),
-                                    offset,
-                                    buffer->GetDescriptor().size,
-                                    buffer->Map());
-             });
-            break;
-        }
-        case BUFFER_TYPE_UNIFORM:
-        {
-            cmd->Enqueue([=](auto cmdBuffer)
-            {
-                VkDescriptorBufferInfo bufferInfo{};
-                bufferInfo.buffer = std::static_pointer_cast<VulkanBuffer>(buffer)->GetBuffer();
-                bufferInfo.offset = 0;
-                bufferInfo.range = buffer->GetDescriptor().size;
-
-                std::unordered_map<int, std::shared_ptr<Buffer>> buffers;
-                switch (stage)
-                {
-                    case ShaderType::VERTEX:
-                    {
-//                        buffers = pipeline->GetPipelineDescriptor().vertexBuffers;
-                        break;
-                    }
-                    case ShaderType::FRAGMENT:
-                    {
-//                        buffers = pipeline->GetPipelineDescriptor().buffers;
-                        break;
-                    }
-                    default:
-                    R_CORE_ASSERT(false, "");
-                }
-                int bufferSlot = -1;
-
-                for (const auto& [slot, bufferPtr] : buffers)
-                {
-                    if (bufferPtr == buffer)
-                    {
-                        bufferSlot = slot;
-                        break;
-                    }
-                }
-
-                R_CORE_ASSERT(bufferSlot != -1, "");
-
-                VkWriteDescriptorSet descriptorWrite{};
-                descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                descriptorWrite.dstSet = vulkanPipeline->GetDescriptorSets().front();
-                descriptorWrite.dstBinding = bufferSlot;
-                descriptorWrite.dstArrayElement = 0;
-                descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                descriptorWrite.descriptorCount = 1;
-                descriptorWrite.pBufferInfo = &bufferInfo;
-
-                vkUpdateDescriptorSets(VK_DEVICE()->GetDevice(), 1, &descriptorWrite, 0, nullptr);
-                vkCmdBindDescriptorSets(VK_CMD(cmdBuffer)->GetBuffer(),
-                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        vulkanPipeline->GetPipelineLayout(),
-                                        0,
-                                        1,
-                                        &vulkanPipeline->GetDescriptorSets().front(), 0, nullptr);
-            });
-            break;
-        }
-        default:
-        R_CORE_ASSERT(false, "");
-    }
-
+        auto ds = vkState->GetDescriptorSet();
+        vkCmdBindDescriptorSets(VK_CMD(buffer)->GetBuffer(),
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                vkPipeline->GetPipelineLayout(),
+                                0, 1,
+                                &ds,
+                                0, nullptr);
+    });
 }
+
 
 void VulkanRendererAPI::SetClearColor(const glm::vec4& color)
 {
@@ -429,4 +364,9 @@ VulkanRendererAPI::~VulkanRendererAPI()
     }
 
     DestroySwapchain();
+}
+
+std::shared_ptr<RendererState> VulkanRendererAPI::CreateRendererState()
+{
+    return std::make_shared<VulkanRendererState>();
 }

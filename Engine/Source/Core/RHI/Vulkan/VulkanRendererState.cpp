@@ -16,6 +16,10 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
             std::vector<VkWriteDescriptorSet> writeDescriptorSets;
             std::vector<VkDescriptorBufferInfo> bufferInfos;
             std::vector<VkDescriptorImageInfo> textureInfos;
+
+            bufferInfos.reserve(buffersToSync.size());
+            textureInfos.reserve(texturesToSync.size());
+
             for (const auto& [bufferRef, bufferPtr] : buffersToSync)
             {
                 if (!bufferPtr.expired())
@@ -70,6 +74,8 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
                                    writeDescriptorSets.size(),
                                    writeDescriptorSets.data(), 0,
                                    nullptr);
+
+            isSyncNeeded = false;
         }
     }
     else
@@ -81,8 +87,8 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
         bufferPoolSize.descriptorCount = shaderDescriptor.reflection.buffers.size();
 
         VkDescriptorPoolSize texturePoolSize{};
-        bufferPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        bufferPoolSize.descriptorCount = shaderDescriptor.reflection.textures.size();
+        texturePoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        texturePoolSize.descriptorCount = shaderDescriptor.reflection.textures.size();
 
         std::array<VkDescriptorPoolSize, 2> poolSizes = { bufferPoolSize, texturePoolSize };
 

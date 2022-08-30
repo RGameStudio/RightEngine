@@ -58,9 +58,9 @@ void Renderer::Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shar
                           pipeline->GetPipelineDescriptor().shader->GetShaderProgramDescriptor().layout.GetStride());
 }
 
-void Renderer::UpdateBuffer(const std::shared_ptr<Buffer>& buffer, ShaderStage stage)
+void Renderer::EncodeState(const std::shared_ptr<RendererState>& state)
 {
-    RendererCommand::UpdateBuffer(commandBuffer, pipeline, buffer, stage);
+    RendererCommand::EncodeState(commandBuffer, pipeline, state);
 }
 
 void Renderer::SetPipeline(const std::shared_ptr<GraphicsPipeline>& aPipeline)

@@ -1,6 +1,8 @@
 #include "SandboxLayer.hpp"
 #include "RendererCommand.hpp"
 #include "TextureLoader.hpp"
+#include "RendererState.hpp"
+#include "RendererCommand.hpp"
 #include <glm/gtx/transform.hpp>
 
 using namespace RightEngine;
@@ -81,11 +83,12 @@ namespace
 
     std::shared_ptr<Buffer> vertexBuffer;
     std::shared_ptr<Buffer> indexBuffer;
-    std::shared_ptr<Buffer> transformConstant;
+    std::shared_ptr<Buffer> transformUBO;
     std::shared_ptr<Buffer> sceneUBO;
     std::shared_ptr<GraphicsPipeline> graphicsPipeline;
     TextureLoader textureLoader;
     std::shared_ptr<Texture> testTexture;
+    std::shared_ptr<RendererState> rendererState;
 }
 
 void SandboxLayer::OnAttach()
@@ -105,9 +108,10 @@ void SandboxLayer::OnAttach()
     indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
 
     BufferDescriptor transformConstantDesc{};
-    transformConstantDesc.type = BUFFER_TYPE_CONSTANT;
+    transformConstantDesc.type = BUFFER_TYPE_UNIFORM;
     transformConstantDesc.size = sizeof(TransformConstant);
-    transformConstant = Device::Get()->CreateBuffer(transformConstantDesc, nullptr);
+    transformConstantDesc.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    transformUBO = Device::Get()->CreateBuffer(transformConstantDesc, nullptr);
 
     BufferDescriptor sceneUBODesc{};
     sceneUBODesc.type = BUFFER_TYPE_UNIFORM;
@@ -128,6 +132,9 @@ void SandboxLayer::OnAttach()
     layout.Push<glm::vec3>();
     layout.Push<glm::vec2>();
     shaderProgramDescriptor.layout = layout;
+    shaderProgramDescriptor.reflection.textures = { 2 };
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
+    shaderProgramDescriptor.reflection.buffers[{ 1, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
     const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
     const auto window = Application::Get().GetWindow();
@@ -136,8 +143,6 @@ void SandboxLayer::OnAttach()
     GraphicsPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.shader = shader;
     pipelineDescriptor.extent = extent;
-//    pipelineDescriptor.vertexBuffers[-1] = transformConstant;
-//    pipelineDescriptor.vertexBuffers[0] = sceneUBO;
     RenderPassDescriptor renderPassDescriptor;
     renderPassDescriptor.format = Format::BGRA8_SRGB;
 
@@ -149,6 +154,12 @@ void SandboxLayer::OnAttach()
     testTexture = Device::Get()->CreateTexture(texDesc, data);
     SamplerDescriptor samplerDescriptor{};
     testTexture->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));
+
+    rendererState = RendererCommand::CreateRendererState();
+    rendererState->SetVertexBuffer(sceneUBO, 0);
+    rendererState->SetVertexBuffer(transformUBO, 1);
+    rendererState->SetTexture(testTexture, 2);
+    rendererState->OnUpdate(graphicsPipeline);
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -160,14 +171,14 @@ void SandboxLayer::OnUpdate(float ts)
     sceneUboValue.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     sceneUboValue.projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080, 0.1f, 10.0f);
     sceneUboValue.projection[1][1] *= -1;
-    auto transformConstantValuePtr = transformConstant->Map();
+    auto transformConstantValuePtr = transformUBO->Map();
     memcpy(transformConstantValuePtr, &transformConstantValue, sizeof(TransformConstant));
-    transformConstant->UnMap();
+    transformUBO->UnMap();
     auto sceneUboPtr = sceneUBO->Map();
     memcpy(sceneUboPtr, &sceneUboValue, sizeof(SceneUBO));
     sceneUBO->UnMap();
-    renderer->UpdateBuffer(transformConstant, ShaderType::VERTEX);
-    renderer->UpdateBuffer(sceneUBO, ShaderType::VERTEX);
+    rendererState->OnUpdate(graphicsPipeline);
+    renderer->EncodeState(rendererState);
     renderer->Draw(vertexBuffer);
     renderer->EndFrame();
 }
