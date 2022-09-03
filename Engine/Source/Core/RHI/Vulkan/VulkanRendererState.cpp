@@ -9,6 +9,14 @@ using namespace RightEngine;
 
 void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipeline)
 {
+    for (auto& [bufferRef, buffer] : buffers)
+    {
+        if (buffer->IsSyncNeeded())
+        {
+            buffer->SetNeedToSync(false);
+        }
+    }
+
     if (descriptorSet)
     {
         if (isSyncNeeded)
@@ -76,6 +84,8 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
                                    nullptr);
 
             isSyncNeeded = false;
+            buffersToSync.clear();
+            texturesToSync.clear();
         }
     }
     else

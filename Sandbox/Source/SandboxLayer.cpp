@@ -156,27 +156,29 @@ void SandboxLayer::OnAttach()
     testTexture->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));
 
     rendererState = RendererCommand::CreateRendererState();
-    rendererState->SetVertexBuffer(sceneUBO, 0);
-    rendererState->SetVertexBuffer(transformUBO, 1);
+    rendererState->SetVertexBuffer(sceneUBO, 1);
+    rendererState->SetVertexBuffer(transformUBO, 0);
     rendererState->SetTexture(testTexture, 2);
     rendererState->OnUpdate(graphicsPipeline);
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
-    renderer->BeginFrame(nullptr);
     TransformConstant transformConstantValue;
     SceneUBO sceneUboValue;
-    transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
-    sceneUboValue.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
+    sceneUboValue.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     sceneUboValue.projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080, 0.1f, 10.0f);
     sceneUboValue.projection[1][1] *= -1;
     auto transformConstantValuePtr = transformUBO->Map();
     memcpy(transformConstantValuePtr, &transformConstantValue, sizeof(TransformConstant));
     transformUBO->UnMap();
+    transformUBO->SetNeedToSync(true);
     auto sceneUboPtr = sceneUBO->Map();
     memcpy(sceneUboPtr, &sceneUboValue, sizeof(SceneUBO));
     sceneUBO->UnMap();
+    sceneUBO->SetNeedToSync(true);
+    renderer->BeginFrame(nullptr);
     rendererState->OnUpdate(graphicsPipeline);
     renderer->EncodeState(rendererState);
     renderer->Draw(vertexBuffer);

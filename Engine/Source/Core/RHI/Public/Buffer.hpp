@@ -16,10 +16,17 @@ namespace RightEngine
         virtual void* Map() const = 0;
         virtual void UnMap() const = 0;
 
+        void SetNeedToSync(bool aIsSyncNeeded)
+        { isSyncNeeded = aIsSyncNeeded; }
+
+        bool IsSyncNeeded() const
+        { return isSyncNeeded; }
+
     protected:
         Buffer(const std::shared_ptr<Device>& device, const BufferDescriptor& bufferDescriptor, const void* data) : descriptor(bufferDescriptor)
         {}
 
         BufferDescriptor descriptor;
+        bool isSyncNeeded{ false };
     };
 }
