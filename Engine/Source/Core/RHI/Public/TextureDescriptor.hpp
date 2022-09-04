@@ -30,7 +30,10 @@ namespace RightEngine
                     return sizeof(float) / 2 * size;
                 case Format::RGBA32_SFLOAT:
                     return sizeof(float) * size;
+                case Format::RGBA8_SRGB:
+                    return sizeof(uint8_t) * size;
                 default:
+                R_CORE_ASSERT(false, "");
                     return 0;
             }
         }

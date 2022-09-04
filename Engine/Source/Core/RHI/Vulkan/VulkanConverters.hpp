@@ -32,6 +32,8 @@ namespace RightEngine
         {
             switch (format)
             {
+                case Format::RGBA8_SRGB:
+                    return VK_FORMAT_R8G8B8A8_SRGB;
                 case Format::BGRA8_SRGB:
                     return VK_FORMAT_B8G8R8A8_SRGB;
                 case Format::R32_SFLOAT:
@@ -48,6 +50,8 @@ namespace RightEngine
                     return VK_FORMAT_R8_UINT;
                 case Format::RGBA8_UINT:
                     return VK_FORMAT_R8G8B8_UINT;
+                case Format::D24_UNORM_S8_UINT:
+                    return VK_FORMAT_D24_UNORM_S8_UINT;
                 default:
                     R_CORE_ASSERT(false, "");
             }

@@ -5,7 +5,6 @@
 #include "Buffer.hpp"
 
 using namespace RightEngine;
-
 namespace
 {
     void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
@@ -103,6 +102,15 @@ namespace
 
         VulkanUtils::EndCommandBuffer(VK_DEVICE(), commandBuffer);
     }
+
+    bool IsDepthTexture(Format format)
+    {
+        if (format == RightEngine::Format::D24_UNORM_S8_UINT)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 VulkanTexture::VulkanTexture(const std::shared_ptr<Device>& device,
@@ -116,14 +124,17 @@ VulkanTexture::VulkanTexture(const std::shared_ptr<Device>& device,
 void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
                          const std::vector<uint8_t>& data)
 {
-    BufferDescriptor stagingBufferDesc;
-    stagingBufferDesc.size = specification.GetTextureSize();
-    stagingBufferDesc.type = BUFFER_TYPE_TRANSFER_SRC;
-    stagingBufferDesc.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
-    stagingBuffer = device->CreateBuffer(stagingBufferDesc, nullptr);
-    auto ptr = stagingBuffer->Map();
-    memcpy(ptr, data.data(), stagingBufferDesc.size);
-    stagingBuffer->UnMap();
+    if (!data.empty())
+    {
+        BufferDescriptor stagingBufferDesc;
+        stagingBufferDesc.size = specification.GetTextureSize();
+        stagingBufferDesc.type = BUFFER_TYPE_TRANSFER_SRC;
+        stagingBufferDesc.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+        stagingBuffer = device->CreateBuffer(stagingBufferDesc, nullptr);
+        auto ptr = stagingBuffer->Map();
+        memcpy(ptr, data.data(), stagingBufferDesc.size);
+        stagingBuffer->UnMap();
+    }
 
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -133,10 +144,17 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     imageInfo.extent.depth = 1;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
-    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    imageInfo.format = VulkanConverters::Format(specification.format);
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    if (IsDepthTexture(specification.format))
+    {
+        imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    }
+    else
+    {
+        imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    }
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.flags = 0; // Optional
@@ -152,28 +170,40 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     textureImageMemory = VulkanUtils::AllocateMemory(memRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     vkBindImageMemory(device->GetDevice(), textureImage, textureImageMemory, 0);
 
-    TransitionImageLayout(textureImage,
-                          VK_FORMAT_R8G8B8A8_SRGB,
-                          VK_IMAGE_LAYOUT_UNDEFINED,
-                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    CopyBufferToImage(std::static_pointer_cast<VulkanBuffer>(stagingBuffer)->GetBuffer(),
-                      textureImage,
-                      specification.width,
-                      specification.height);
+    if (!IsDepthTexture(specification.format))
+    {
+        TransitionImageLayout(textureImage,
+                              VK_FORMAT_R8G8B8A8_SRGB,
+                              VK_IMAGE_LAYOUT_UNDEFINED,
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        if (!data.empty())
+        {
+            CopyBufferToImage(std::static_pointer_cast<VulkanBuffer>(stagingBuffer)->GetBuffer(),
+                              textureImage,
+                              specification.width,
+                              specification.height);
 
-    TransitionImageLayout(textureImage,
-                          VK_FORMAT_R8G8B8A8_SRGB,
-                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-    stagingBuffer.reset();
+            stagingBuffer.reset();
+        }
+        TransitionImageLayout(textureImage,
+                              VK_FORMAT_R8G8B8A8_SRGB,
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
 
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = textureImage;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.format = VulkanConverters::Format(specification.format);
+    if (IsDepthTexture(specification.format))
+    {
+        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    }
+    else
+    {
+        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    }
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;

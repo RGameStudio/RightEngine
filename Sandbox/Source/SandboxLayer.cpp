@@ -151,6 +151,7 @@ void SandboxLayer::OnAttach()
 
     auto [data, texDesc] = textureLoader.Load("/Assets/Textures/albedo.png");
     texDesc.type = TextureType::TEXTURE_2D;
+    texDesc.format = Format::RGBA8_SRGB;
     testTexture = Device::Get()->CreateTexture(texDesc, data);
     SamplerDescriptor samplerDescriptor{};
     testTexture->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));

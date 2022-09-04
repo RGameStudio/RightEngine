@@ -6,6 +6,7 @@
 #include "VulkanBuffer.hpp"
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanRendererState.hpp"
+#include "VulkanTexture.hpp"
 
 using namespace RightEngine;
 
@@ -70,19 +71,23 @@ void VulkanRendererAPI::DestroySwapchain()
 void VulkanRendererAPI::CreateFramebuffers(const std::shared_ptr<VulkanGraphicsPipeline>& pipeline)
 {
     auto swapchainImageViews = swapchain->GetImageViews();
+    const auto swapchainDescriptor = swapchain->GetDescriptor();
     swapchainFramebuffers.resize(swapchainImageViews.size());
+    pipeline->CreateDepthStencilAttachment(swapchainDescriptor.extent.x, swapchainDescriptor.extent.y);
+    const auto depthImageView = std::static_pointer_cast<VulkanTexture>(pipeline->GetDepthStencilAttachment())->GetImageView();
     for (int i = 0; i < swapchainImageViews.size(); i++)
     {
-        VkImageView attachments[] =
+        std::vector<VkImageView> attachments =
                 {
-                        swapchainImageViews[i]
+                        swapchainImageViews[i],
+                        depthImageView
                 };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = pipeline->GetRenderPass();
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.attachmentCount = attachments.size();
+        framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = swapchain->GetDescriptor().extent.x;
         framebufferInfo.height = swapchain->GetDescriptor().extent.y;
         framebufferInfo.layers = 1;
@@ -164,20 +169,22 @@ void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
         R_CORE_ASSERT(false, "failed to begin recording command buffer!");
     }
 
-    VkRenderPassBeginInfo renderPassInfo{};
+    memset(&renderPassInfo, 0, sizeof(VkRenderPassBeginInfo));
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vkPipeline->GetRenderPass();
     renderPassInfo.framebuffer = swapchainFramebuffers[currentImageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = VulkanConverters::Extent(swapchain->GetDescriptor().extent);
 
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    static std::array<VkClearValue, 2> clearValues = {};
+    clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+    clearValues[1].depthStencil = { 1.0f, 0 };
+    renderPassInfo.clearValueCount = clearValues.size();
+    renderPassInfo.pClearValues = clearValues.data();
 
     VkPipeline nativePipeline = vkPipeline->GetPipeline();
 
-    cmd->Enqueue([renderPassInfo, nativePipeline](auto buffer)
+    cmd->Enqueue([this, nativePipeline](auto buffer)
                  {
                      vkCmdBeginRenderPass(VK_CMD(buffer)->GetBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
                      vkCmdBindPipeline(VK_CMD(buffer)->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, nativePipeline);

@@ -29,6 +29,8 @@ namespace RightEngine
         const std::vector<VkDescriptorSet>& GetDescriptorSets() const
         { return descriptorSets; }
 
+        virtual void CreateDepthStencilAttachment(int width, int height);
+
     private:
         VkPipeline graphicsPipeline;
         VkPipelineLayout pipelineLayout;

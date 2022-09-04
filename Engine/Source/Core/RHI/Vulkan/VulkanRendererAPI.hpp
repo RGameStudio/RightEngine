@@ -54,6 +54,7 @@ namespace RightEngine
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
         uint32_t currentImageIndex;
+        VkRenderPassBeginInfo renderPassInfo{};
 
         void RecordCommandBuffer(const std::shared_ptr<VulkanCommandBuffer>& cmd, uint32_t imageIndex);
         void CreateSyncObjects();
