@@ -26,10 +26,8 @@ namespace RightEngine
         VkDescriptorSetLayout GetDescriptorSetLayout() const
         { return descriptorSetLayout; }
 
-        const std::vector<VkDescriptorSet>& GetDescriptorSets() const
-        { return descriptorSets; }
-
-        virtual void CreateDepthStencilAttachment(int width, int height);
+        VkFramebuffer GetFramebuffer() const
+        { return framebuffer; }
 
     private:
         VkPipeline graphicsPipeline;
@@ -38,11 +36,12 @@ namespace RightEngine
         VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
         std::vector<VkDescriptorSet> descriptorSets;
         std::vector<VkPushConstantRange> pushConstants;
+        VkFramebuffer framebuffer;
 
         void Init(const GraphicsPipelineDescriptor& descriptorconst,
                   const RenderPassDescriptor& renderPassDescriptor);
         void CreateRenderPass(const RenderPassDescriptor& renderPassDescriptor);
         void CreateDescriptorSets();
-        void CreatePushConstants();
+        void CreateFramebuffer();
     };
 }

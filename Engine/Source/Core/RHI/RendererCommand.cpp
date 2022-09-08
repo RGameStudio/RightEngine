@@ -76,9 +76,10 @@ void RendererCommand::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
     rendererAPI->BeginFrame(cmd, pipeline);
 }
 
-void RendererCommand::EndFrame(const std::shared_ptr<CommandBuffer>& cmd)
+void RendererCommand::EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                               const std::shared_ptr<GraphicsPipeline>& pipeline)
 {
-    rendererAPI->EndFrame(cmd);
+    rendererAPI->EndFrame(cmd, pipeline);
 }
 
 std::shared_ptr<RendererState> RendererCommand::CreateRendererState()

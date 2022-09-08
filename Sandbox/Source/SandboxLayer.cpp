@@ -86,6 +86,7 @@ namespace
     std::shared_ptr<Buffer> transformUBO;
     std::shared_ptr<Buffer> sceneUBO;
     std::shared_ptr<GraphicsPipeline> graphicsPipeline;
+    std::shared_ptr<GraphicsPipeline> presentPipeline;
     TextureLoader textureLoader;
     std::shared_ptr<Texture> testTexture;
     std::shared_ptr<RendererState> rendererState;
@@ -142,12 +143,53 @@ void SandboxLayer::OnAttach()
     glfwGetFramebufferSize(static_cast<GLFWwindow*>(window->GetNativeHandle()), &extent.x, &extent.y);
     GraphicsPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.shader = shader;
-    pipelineDescriptor.extent = extent;
-    RenderPassDescriptor renderPassDescriptor;
-    renderPassDescriptor.format = Format::BGRA8_SRGB;
+
+    // Default offscreen rendering pipeline
+
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::BGRA8_SRGB;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = extent.x;
+    colorAttachmentDesc.height = extent.y;
+    const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D24_UNORM_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = extent.x;
+    depthAttachmentDesc.height = extent.y;
+    const auto depthAttachment =  Device::Get()->CreateTexture(depthAttachmentDesc, {});
+
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = extent;
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
 
     graphicsPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
     renderer->SetPipeline(graphicsPipeline);
+
+    // Pipeline for presenting on screen
+    GraphicsPipelineDescriptor presentPipelineDesc{};
+    presentPipelineDesc.shader = shader;
+    RenderPassDescriptor presentRenderPassDescriptor{};
+    presentRenderPassDescriptor.extent = extent;
+    presentRenderPassDescriptor.offscreen = false;
+    AttachmentDescriptor presentColor{};
+    presentColor.texture = colorAttachment;
+    presentColor.loadOperation = AttachmentLoadOperation::LOAD;
+    presentRenderPassDescriptor.colorAttachments = { presentColor };
+    presentRenderPassDescriptor.depthStencilAttachment = { depth };
+
+    presentPipeline = Device::Get()->CreateGraphicsPipeline(presentPipelineDesc,
+                                                            presentRenderPassDescriptor);
+
+    // Textures loading
 
     auto [data, texDesc] = textureLoader.Load("/Assets/Textures/albedo.png");
     texDesc.type = TextureType::TEXTURE_2D;
@@ -179,10 +221,15 @@ void SandboxLayer::OnUpdate(float ts)
     memcpy(sceneUboPtr, &sceneUboValue, sizeof(SceneUBO));
     sceneUBO->UnMap();
     sceneUBO->SetNeedToSync(true);
+    renderer->SetPipeline(graphicsPipeline);
     renderer->BeginFrame(nullptr);
     rendererState->OnUpdate(graphicsPipeline);
     renderer->EncodeState(rendererState);
     renderer->Draw(vertexBuffer);
+    renderer->EndFrame();
+
+    renderer->SetPipeline(presentPipeline);
+    renderer->BeginFrame(nullptr);
     renderer->EndFrame();
 }
 

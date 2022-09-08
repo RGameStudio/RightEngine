@@ -29,7 +29,8 @@ namespace RightEngine
         virtual void Init() = 0;
         virtual void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
                                 const std::shared_ptr<GraphicsPipeline>& pipeline) = 0;
-        virtual void EndFrame(const std::shared_ptr<CommandBuffer>& cmd) = 0;
+        virtual void EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                              const std::shared_ptr<GraphicsPipeline>& pipeline) = 0;
         virtual void Configure(const RendererSettings& settings) = 0;
         virtual void SetClearColor(const glm::vec4& color) = 0;
         virtual void Clear(uint32_t clearBits) = 0;

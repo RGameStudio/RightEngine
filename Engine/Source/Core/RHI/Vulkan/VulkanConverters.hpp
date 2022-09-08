@@ -128,5 +128,31 @@ namespace RightEngine
                 R_CORE_ASSERT(false, "");
             }
         }
+
+        inline static VkAttachmentLoadOp LoadOperation(AttachmentLoadOperation loadOp)
+        {
+            switch (loadOp)
+            {
+                case AttachmentLoadOperation::UNDEFINED:
+                    return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                case AttachmentLoadOperation::LOAD:
+                    return VK_ATTACHMENT_LOAD_OP_LOAD;
+                case AttachmentLoadOperation::CLEAR:
+                    return VK_ATTACHMENT_LOAD_OP_CLEAR;
+                default:
+                R_CORE_ASSERT(false, "");
+            }
+        }
+
+        inline static VkAttachmentStoreOp StoreOperation(AttachmentStoreOperation storeOp)
+        {
+            switch (storeOp)
+            {
+                case AttachmentStoreOperation::UNDEFINED:
+                    return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                case AttachmentStoreOperation::STORE:
+                    return VK_ATTACHMENT_STORE_OP_STORE;
+            }
+        }
     };
 }

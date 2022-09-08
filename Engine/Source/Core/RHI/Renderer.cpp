@@ -42,7 +42,7 @@ void Renderer::BeginFrame(const std::shared_ptr<Camera>& camera)
 
 void Renderer::EndFrame()
 {
-    RendererCommand::EndFrame(commandBuffer);
+    RendererCommand::EndFrame(commandBuffer, pipeline);
 }
 
 void Renderer::Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer)

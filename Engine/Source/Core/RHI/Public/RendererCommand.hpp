@@ -12,7 +12,8 @@ namespace RightEngine
         static void Init(GPU_API api);
         static void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
                                const std::shared_ptr<GraphicsPipeline>& pipeline);
-        static void EndFrame(const std::shared_ptr<CommandBuffer>& cmd);
+        static void EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                             const std::shared_ptr<GraphicsPipeline>& pipeline);
 
         static void SetClearColor(const glm::vec4& color);
 

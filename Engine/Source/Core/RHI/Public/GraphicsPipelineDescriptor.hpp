@@ -8,15 +8,46 @@ namespace RightEngine
 {
     class Shader;
     class Buffer;
+    class Texture;
 
     struct GraphicsPipelineDescriptor
     {
-        glm::ivec2 extent;
         std::shared_ptr<Shader> shader;
+    };
+
+    enum class AttachmentLoadOperation
+    {
+        UNDEFINED = 0,
+        LOAD,
+        CLEAR
+    };
+
+    enum class AttachmentStoreOperation
+    {
+        UNDEFINED = 0,
+        STORE
+    };
+
+    struct ClearValue
+    {
+        glm::vec4 color{0.0f, 0.0f, 0.0f, 1.0f};
+        float depth = 1.0f;
+        uint32_t stencil = 0;
+    };
+
+    struct AttachmentDescriptor
+    {
+        std::shared_ptr<Texture> texture;
+        ClearValue clearValue;
+        AttachmentLoadOperation loadOperation = AttachmentLoadOperation::CLEAR;
+        AttachmentStoreOperation storeOperation = AttachmentStoreOperation::STORE;
     };
 
     struct RenderPassDescriptor
     {
-        Format format;
+        glm::ivec2 extent{ 0, 0 };
+        bool offscreen{ false };
+        std::vector<AttachmentDescriptor> colorAttachments;
+        AttachmentDescriptor depthStencilAttachment;
     };
 }

@@ -7,6 +7,8 @@
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanRendererState.hpp"
 #include "VulkanTexture.hpp"
+#include "CommandBufferDescriptor.hpp"
+#include "VulkanUtils.hpp"
 
 using namespace RightEngine;
 
@@ -68,37 +70,6 @@ void VulkanRendererAPI::DestroySwapchain()
     swapchain.reset();
 }
 
-void VulkanRendererAPI::CreateFramebuffers(const std::shared_ptr<VulkanGraphicsPipeline>& pipeline)
-{
-    auto swapchainImageViews = swapchain->GetImageViews();
-    const auto swapchainDescriptor = swapchain->GetDescriptor();
-    swapchainFramebuffers.resize(swapchainImageViews.size());
-    pipeline->CreateDepthStencilAttachment(swapchainDescriptor.extent.x, swapchainDescriptor.extent.y);
-    const auto depthImageView = std::static_pointer_cast<VulkanTexture>(pipeline->GetDepthStencilAttachment())->GetImageView();
-    for (int i = 0; i < swapchainImageViews.size(); i++)
-    {
-        std::vector<VkImageView> attachments =
-                {
-                        swapchainImageViews[i],
-                        depthImageView
-                };
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = pipeline->GetRenderPass();
-        framebufferInfo.attachmentCount = attachments.size();
-        framebufferInfo.pAttachments = attachments.data();
-        framebufferInfo.width = swapchain->GetDescriptor().extent.x;
-        framebufferInfo.height = swapchain->GetDescriptor().extent.y;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(VK_DEVICE()->GetDevice(), &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS)
-        {
-            R_CORE_ASSERT(false, "failed to create framebuffer!");
-        }
-    }
-}
-
 void VulkanRendererAPI::CreateSyncObjects()
 {
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -122,39 +93,12 @@ void VulkanRendererAPI::CreateSyncObjects()
     }
 }
 
-void VulkanRendererAPI::RecordCommandBuffer(const std::shared_ptr<VulkanCommandBuffer>& cmd, uint32_t imageIndex)
-{
-
-}
-
 // TODO: Add resize callback from GLFW event
 // TODO: Add rendering stop when window is minimized
 void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
                                    const std::shared_ptr<GraphicsPipeline>& pipeline)
 {
     const auto vkPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
-    if (swapchainFramebuffers.empty())
-    {
-        CreateFramebuffers(vkPipeline);
-    }
-
-    vkWaitForFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-    VkResult result = vkAcquireNextImageKHR(VK_DEVICE()->GetDevice(),
-                                            swapchain->GetSwapchain(),
-                                            UINT64_MAX,
-                                            imageAvailableSemaphores[currentFrame],
-                                            VK_NULL_HANDLE,
-                                            &currentImageIndex);
-
-    if (result == VK_ERROR_OUT_OF_DATE_KHR)
-    {
-        CreateSwapchain();
-        return;
-    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-    {
-        R_CORE_ASSERT(false, "failed to acquire swap chain image!");
-    }
-
     vkResetFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame]);
 
     const auto vkCommandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(cmd);
@@ -172,13 +116,23 @@ void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
     memset(&renderPassInfo, 0, sizeof(VkRenderPassBeginInfo));
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vkPipeline->GetRenderPass();
-    renderPassInfo.framebuffer = swapchainFramebuffers[currentImageIndex];
+    renderPassInfo.framebuffer = vkPipeline->GetFramebuffer();
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = VulkanConverters::Extent(swapchain->GetDescriptor().extent);
+    renderPassInfo.renderArea.extent = VulkanConverters::Extent(vkPipeline->GetRenderPassDescriptor().extent);
 
-    static std::array<VkClearValue, 2> clearValues = {};
-    clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-    clearValues[1].depthStencil = { 1.0f, 0 };
+    static std::vector<VkClearValue> clearValues = {};
+    for (const auto& attachment : vkPipeline->GetRenderPassDescriptor().colorAttachments)
+    {
+        glm::vec4 color = attachment.clearValue.color;
+        VkClearValue clearValue;
+        clearValue.color = { color.r, color.g, color.b, color.a };
+        clearValues.push_back(clearValue);
+    }
+    VkClearValue clearValue;
+    clearValue.depthStencil = { vkPipeline->GetRenderPassDescriptor().depthStencilAttachment.clearValue.depth,
+                                vkPipeline->GetRenderPassDescriptor().depthStencilAttachment.clearValue.stencil };
+    clearValues.push_back(clearValue);
+
     renderPassInfo.clearValueCount = clearValues.size();
     renderPassInfo.pClearValues = clearValues.data();
 
@@ -193,14 +147,14 @@ void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(swapchain->GetDescriptor().extent.x);
-    viewport.height = static_cast<float>(swapchain->GetDescriptor().extent.y);
+    viewport.width = static_cast<float>(vkPipeline->GetRenderPassDescriptor().extent.x);
+    viewport.height = static_cast<float>(vkPipeline->GetRenderPassDescriptor().extent.y);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = VulkanConverters::Extent(swapchain->GetDescriptor().extent);
+    scissor.extent = VulkanConverters::Extent(vkPipeline->GetRenderPassDescriptor().extent);
 
     cmd->Enqueue([viewport, scissor](auto buffer)
                  {
@@ -209,7 +163,8 @@ void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
                  });
 }
 
-void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd)
+void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                                 const std::shared_ptr<GraphicsPipeline>& pipeline)
 {
     auto vkCmd = std::static_pointer_cast<VulkanCommandBuffer>(cmd);
     cmd->Enqueue([](auto buffer)
@@ -232,42 +187,89 @@ void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd)
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.waitSemaphoreCount = 0;
+    submitInfo.pWaitSemaphores = nullptr;
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = cmdBuffers;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
+    submitInfo.signalSemaphoreCount = 0;
+    submitInfo.pSignalSemaphores = nullptr;
 
     if (vkQueueSubmit(VK_DEVICE()->GetQueue(QueueType::GRAPHICS), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
     {
         R_CORE_ASSERT(false, "failed to submit draw command buffer!");
     }
 
-    VkPresentInfoKHR presentInfo{};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    vkWaitForFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = signalSemaphores;
-    VkSwapchainKHR swapChains[] = {swapchain->GetSwapchain()};
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = swapChains;
-    presentInfo.pImageIndices = &currentImageIndex;
-    presentInfo.pResults = nullptr; // Optional
-
-    VkResult result = vkQueuePresentKHR(VK_DEVICE()->GetQueue(QueueType::PRESENT), &presentInfo);
-
-    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    if (!pipeline->GetRenderPassDescriptor().offscreen)
     {
-        CreateSwapchain();
-        return;
-    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-    {
-        R_CORE_ASSERT(false, "failed to acquire swap chain image!");
+        uint32_t currentImageIndex = 0;
+        VkResult result = vkAcquireNextImageKHR(VK_DEVICE()->GetDevice(),
+                                                swapchain->GetSwapchain(),
+                                                UINT64_MAX,
+                                                imageAvailableSemaphores[currentFrame],
+                                                VK_NULL_HANDLE,
+                                                &currentImageIndex);
+
+        VkImage swapchainImage = swapchain->GetImages()[currentImageIndex];
+        const auto texture = std::static_pointer_cast<VulkanTexture>(pipeline->GetRenderPassDescriptor().colorAttachments[0].texture);
+        VkImage finalImage = texture->GetImage();
+
+        const auto copyCmdBuffer = std::static_pointer_cast<VulkanCommandBuffer>(Device::Get()->CreateCommandBuffer({ CommandBufferType::GRAPHICS }));
+        VulkanUtils::BeginCommandBuffer(copyCmdBuffer, true);
+        copyCmdBuffer->Enqueue([&](auto buffer)
+        {
+            VulkanTexture::ChangeImageLayout(texture->GetImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+            VulkanTexture::ChangeImageLayout(swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+            memset(&imageCopy, 0, sizeof(VkImageCopy));
+            imageCopy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            imageCopy.srcSubresource.layerCount = 1;
+            imageCopy.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            imageCopy.dstSubresource.layerCount = 1;
+            imageCopy.extent.width = texture->GetSpecification().width;
+            imageCopy.extent.height = texture->GetSpecification().height;
+            imageCopy.extent.depth = 1;
+            vkCmdCopyImage(VK_CMD(buffer)->GetBuffer(), finalImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                           swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
+        });
+        VulkanUtils::EndCommandBuffer(VK_DEVICE(), copyCmdBuffer);
+
+//    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+//    {
+//        CreateSwapchain();
+//        return;
+//    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+//    {
+//        R_CORE_ASSERT(false, "failed to acquire swap chain image!");
+//    }
+
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+        presentInfo.waitSemaphoreCount = 0;
+        presentInfo.pWaitSemaphores = nullptr;
+        VkSwapchainKHR swapChains[] = { swapchain->GetSwapchain() };
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &currentImageIndex;
+        presentInfo.pResults = nullptr; // Optional
+
+        VulkanTexture::ChangeImageLayout(swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+        result = vkQueuePresentKHR(VK_DEVICE()->GetQueue(QueueType::PRESENT), &presentInfo);
+
+//    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+//    {
+//        CreateSwapchain();
+//        return;
+//    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+//    {
+//        R_CORE_ASSERT(false, "failed to acquire swap chain image!");
+//    }
+
+        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
-
-    currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void VulkanRendererAPI::Configure(const RendererSettings& settings)

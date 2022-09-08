@@ -16,7 +16,8 @@ namespace RightEngine
 
         virtual void BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
                                 const std::shared_ptr<GraphicsPipeline>& pipeline) override;
-        virtual void EndFrame(const std::shared_ptr<CommandBuffer>& cmd) override;
+        virtual void EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
+                              const std::shared_ptr<GraphicsPipeline>& pipeline) override;
 
         virtual void Configure(const RendererSettings& settings) override;
 
@@ -53,14 +54,11 @@ namespace RightEngine
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
-        uint32_t currentImageIndex;
         VkRenderPassBeginInfo renderPassInfo{};
+        VkImageCopy imageCopy;
 
-        void RecordCommandBuffer(const std::shared_ptr<VulkanCommandBuffer>& cmd, uint32_t imageIndex);
         void CreateSyncObjects();
-        void CreateFramebuffers(const std::shared_ptr<VulkanGraphicsPipeline>& pipeline);
         void CreateSwapchain();
-        void CreateDescriptorSetLayout();
         void DestroySwapchain();
     };
 }

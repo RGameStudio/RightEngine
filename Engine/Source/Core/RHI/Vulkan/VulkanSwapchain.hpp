@@ -22,6 +22,9 @@ namespace RightEngine
 
         virtual ~VulkanSwapchain();
 
+        const std::vector<VkImage>& GetImages() const
+        { return swapChainImages; }
+
         const std::vector<VkImageView>& GetImageViews() const
         { return swapChainImageViews; }
 

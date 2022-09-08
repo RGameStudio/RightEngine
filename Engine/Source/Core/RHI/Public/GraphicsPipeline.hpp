@@ -13,11 +13,6 @@ namespace RightEngine
         const RenderPassDescriptor& GetRenderPassDescriptor() const
         { return renderPassDescriptor; }
 
-        const std::shared_ptr<Texture>& GetDepthStencilAttachment() const
-        { return depthStencilAttachment; }
-
-        virtual void CreateDepthStencilAttachment(int width, int height) = 0;
-
     protected:
         GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor,
                          const RenderPassDescriptor& renderPassDescriptor) : pipelineDescriptor(descriptor),
@@ -26,6 +21,5 @@ namespace RightEngine
 
         GraphicsPipelineDescriptor pipelineDescriptor;
         RenderPassDescriptor renderPassDescriptor;
-        std::shared_ptr<Texture> depthStencilAttachment;
     };
 }
