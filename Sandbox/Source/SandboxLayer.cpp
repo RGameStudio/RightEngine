@@ -95,7 +95,6 @@ namespace
 void SandboxLayer::OnAttach()
 {
     renderer = new Renderer();
-    std::cout << "Hello!" << std::endl;
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BUFFER_TYPE_VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
@@ -203,6 +202,15 @@ void SandboxLayer::OnAttach()
     rendererState->SetVertexBuffer(transformUBO, 0);
     rendererState->SetTexture(testTexture, 2);
     rendererState->OnUpdate(graphicsPipeline);
+
+    TextureDescriptor cubeDesc;
+    cubeDesc.type = TextureType::CUBEMAP;
+    cubeDesc.width = 1024;
+    cubeDesc.height = 1024;
+    cubeDesc.format = Format::RGBA16_SFLOAT;
+    cubeDesc.componentAmount = 3;
+    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
+    int kek;
 }
 
 void SandboxLayer::OnUpdate(float ts)

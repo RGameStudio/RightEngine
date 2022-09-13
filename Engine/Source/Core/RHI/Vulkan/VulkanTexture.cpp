@@ -7,7 +7,7 @@
 using namespace RightEngine;
 namespace
 {
-    void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
+    void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layerCount)
     {
         CommandBufferDescriptor commandBufferDescriptor;
         commandBufferDescriptor.type = CommandBufferType::GRAPHICS;
@@ -26,7 +26,7 @@ namespace
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = 1;
         barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount = 1;
+        barrier.subresourceRange.layerCount = layerCount;
 
         VkPipelineStageFlags sourceStage;
         VkPipelineStageFlags destinationStage;
@@ -170,7 +170,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     imageInfo.extent.height = specification.height;
     imageInfo.extent.depth = 1;
     imageInfo.mipLevels = 1;
-    imageInfo.arrayLayers = 1;
+    imageInfo.arrayLayers = specification.type == TextureType::CUBEMAP ? 6 : 1;
     imageInfo.format = VulkanConverters::Format(specification.format);
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -184,7 +184,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     }
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.flags = 0; // Optional
+    imageInfo.flags = specification.type == TextureType::CUBEMAP ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 
     if (vkCreateImage(device->GetDevice(), &imageInfo, nullptr, &textureImage) != VK_SUCCESS)
     {
@@ -201,7 +201,8 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     {
         TransitionImageLayout(textureImage,
                               VK_IMAGE_LAYOUT_UNDEFINED,
-                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                              specification.type == TextureType::CUBEMAP ? 6 : 1);
         if (!data.empty())
         {
             CopyBufferToImage(std::static_pointer_cast<VulkanBuffer>(stagingBuffer)->GetBuffer(),
@@ -213,13 +214,14 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
         }
         TransitionImageLayout(textureImage,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                              specification.type == TextureType::CUBEMAP ? 6 : 1);
     }
 
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = textureImage;
-    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.viewType = specification.type == TextureType::CUBEMAP ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = VulkanConverters::Format(specification.format);
     if (IsDepthTexture(specification.format))
     {
@@ -232,7 +234,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.layerCount = 1;
+    viewInfo.subresourceRange.layerCount = specification.type == TextureType::CUBEMAP ? 6 : 1;
 
     if (vkCreateImageView(device->GetDevice(), &viewInfo, nullptr, &textureImageView) != VK_SUCCESS)
     {
@@ -265,5 +267,5 @@ VulkanTexture::~VulkanTexture()
 
 void VulkanTexture::ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-    TransitionImageLayout(image, oldLayout, newLayout);
+    TransitionImageLayout(image, oldLayout, newLayout, 1);
 }

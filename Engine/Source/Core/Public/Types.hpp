@@ -30,7 +30,9 @@ namespace RightEngine
         RGB16_SFLOAT,
         RG32_SFLOAT,
         RGB32_SFLOAT,
+        RGBA16_SFLOAT,
         RGBA32_SFLOAT,
+        RGB16_UNORM,
         BGRA8_SRGB,
         RGBA8_SRGB,
 

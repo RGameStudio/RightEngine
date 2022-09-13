@@ -27,6 +27,7 @@ namespace RightEngine
                 case Format::RGBA8_UINT:
                     return sizeof(uint8_t) * size;
                 case Format::RGB16_SFLOAT:
+                case Format::RGBA16_SFLOAT:
                     return sizeof(float) / 2 * size;
                 case Format::RGBA32_SFLOAT:
                     return sizeof(float) * size;

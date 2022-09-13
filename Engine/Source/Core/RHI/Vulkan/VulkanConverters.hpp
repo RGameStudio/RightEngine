@@ -49,9 +49,15 @@ namespace RightEngine
                 case Format::R8_UINT:
                     return VK_FORMAT_R8_UINT;
                 case Format::RGBA8_UINT:
-                    return VK_FORMAT_R8G8B8_UINT;
+                    return VK_FORMAT_R8G8B8A8_UINT;
                 case Format::D24_UNORM_S8_UINT:
                     return VK_FORMAT_D24_UNORM_S8_UINT;
+                case Format::RGB16_SFLOAT:
+                    return VK_FORMAT_R16G16B16_SFLOAT;
+                case Format::RGB16_UNORM:
+                    return VK_FORMAT_R16G16B16_UNORM;
+                case Format::RGBA16_SFLOAT:
+                    return VK_FORMAT_R16G16B16A16_SFLOAT;
                 default:
                     R_CORE_ASSERT(false, "");
             }
@@ -121,7 +127,7 @@ namespace RightEngine
             switch (type)
             {
                 case TextureType::CUBEMAP:
-                    return VK_IMAGE_TYPE_3D;
+                    return VK_IMAGE_TYPE_2D;
                 case TextureType::TEXTURE_2D:
                     return VK_IMAGE_TYPE_2D;
                 default:
