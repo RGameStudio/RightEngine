@@ -160,5 +160,25 @@ namespace RightEngine
                     return VK_ATTACHMENT_STORE_OP_STORE;
             }
         }
+
+        inline static VkImageLayout TextureUsage(TextureUsage usage)
+        {
+            switch (usage)
+            {
+                case COLOR_ATTACHMENT:
+                    return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                case DEPTH_STENCIL_ATTACHMENT:
+                    return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+                case SHADER_READ_ONLY:
+                    return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                case TRANSFER_DST:
+                    return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                case TRANSFER_SRC:
+                    return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+                default:
+                    R_CORE_ASSERT(false, "");
+                    return VK_IMAGE_LAYOUT_UNDEFINED;
+            }
+        }
     };
 }

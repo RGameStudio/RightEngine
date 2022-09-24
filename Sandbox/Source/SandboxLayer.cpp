@@ -158,6 +158,14 @@ void SandboxLayer::OnAttach()
     depthAttachmentDesc.height = extent.y;
     const auto depthAttachment =  Device::Get()->CreateTexture(depthAttachmentDesc, {});
 
+    TextureDescriptor cubeDesc;
+    cubeDesc.type = TextureType::TEXTURE_2D;
+    cubeDesc.width = extent.x;
+    cubeDesc.height = extent.y;
+    cubeDesc.format = Format::RGBA16_SFLOAT;
+    cubeDesc.componentAmount = 3;
+    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
+
     RenderPassDescriptor renderPassDescriptor{};
     renderPassDescriptor.extent = extent;
     renderPassDescriptor.offscreen = true;
@@ -165,7 +173,7 @@ void SandboxLayer::OnAttach()
     depth.loadOperation = AttachmentLoadOperation::CLEAR;
     depth.texture = depthAttachment;
     AttachmentDescriptor color{};
-    color.texture = colorAttachment;
+    color.texture = cubemap;
     color.loadOperation = AttachmentLoadOperation::CLEAR;
     renderPassDescriptor.colorAttachments = { color };
     renderPassDescriptor.depthStencilAttachment = { depth };
@@ -203,18 +211,19 @@ void SandboxLayer::OnAttach()
     rendererState->SetTexture(testTexture, 2);
     rendererState->OnUpdate(graphicsPipeline);
 
-    TextureDescriptor cubeDesc;
-    cubeDesc.type = TextureType::CUBEMAP;
-    cubeDesc.width = 1024;
-    cubeDesc.height = 1024;
-    cubeDesc.format = Format::RGBA16_SFLOAT;
-    cubeDesc.componentAmount = 3;
-    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
-    int kek;
+//    TextureDescriptor cubeDesc;
+//    cubeDesc.type = TextureType::CUBEMAP;
+//    cubeDesc.width = 1024;
+//    cubeDesc.height = 1024;
+//    cubeDesc.format = Format::RGBA16_SFLOAT;
+//    cubeDesc.componentAmount = 3;
+//    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
+    EnvironmentMapLoader loader;
+    loader.Load("/Assets/Textures/env_helipad.hdr", false);
     TransformConstant transformConstantValue;
     SceneUBO sceneUboValue;
     transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));

@@ -22,6 +22,7 @@ target_link_libraries(Sandbox
         SPIRV
         ${Vulkan_LIBRARY}
         glslang-default-resource-limits
+        vk-tools
 )
 
 if (WIN32)

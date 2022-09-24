@@ -7,6 +7,7 @@ namespace RightEngine
         int width{ 0 };
         int height{ 0 };
         int componentAmount{ 0 };
+        int mipLevels{ 1 };
         TextureType type{ TextureType::NONE };
         Format format;
 
@@ -29,6 +30,7 @@ namespace RightEngine
                 case Format::RGB16_SFLOAT:
                 case Format::RGBA16_SFLOAT:
                     return sizeof(float) / 2 * size;
+                case Format::RGB32_SFLOAT:
                 case Format::RGBA32_SFLOAT:
                     return sizeof(float) * size;
                 case Format::RGBA8_SRGB:
@@ -83,30 +85,46 @@ namespace RightEngine
             switch (index)
             {
                 case 0:
-                    R_CORE_ASSERT(face1.empty(), "");
+                R_CORE_ASSERT(face1.empty(), "");
                     face1 = data;
                     break;
                 case 1:
-                    R_CORE_ASSERT(face2.empty(), "");
+                R_CORE_ASSERT(face2.empty(), "");
                     face2 = data;
                     break;
                 case 2:
-                    R_CORE_ASSERT(face3.empty(), "");
+                R_CORE_ASSERT(face3.empty(), "");
                     face3 = data;
                     break;
                 case 3:
-                    R_CORE_ASSERT(face4.empty(), "");
+                R_CORE_ASSERT(face4.empty(), "");
                     face4 = data;
                     break;
                 case 4:
-                    R_CORE_ASSERT(face5.empty(), "");
+                R_CORE_ASSERT(face5.empty(), "");
                     face5 = data;
                     break;
                 case 5:
-                    R_CORE_ASSERT(face6.empty(), "");
+                R_CORE_ASSERT(face6.empty(), "");
                     face6 = data;
                     break;
             }
         }
+    };
+
+    enum TextureUsage
+    {
+        COLOR_ATTACHMENT = 0,
+        DEPTH_STENCIL_ATTACHMENT = 1,
+        SHADER_READ_ONLY = 2,
+        TRANSFER_SRC = 3,
+        TRANSFER_DST = 4,
+    };
+
+    struct TextureCopy
+    {
+        int layerNum{ 0 };
+        int mipLevel{ 0 };
+        TextureUsage usage{ COLOR_ATTACHMENT };
     };
 }

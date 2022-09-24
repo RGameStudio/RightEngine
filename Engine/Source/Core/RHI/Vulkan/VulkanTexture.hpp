@@ -19,13 +19,15 @@ namespace RightEngine
         virtual void Bind(uint32_t slot) const override;
         virtual void UnBind() const override;
 
+        virtual void CopyFrom(const std::shared_ptr<Texture>& texture, const TextureCopy& srcCopy, const TextureCopy& dstCopy) override;
+
         VkImageView GetImageView() const
         { return textureImageView; }
 
         VkImage GetImage() const
         { return textureImage; }
 
-        static void ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
+        static void ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layers, int mipmaps);
 
     protected:
         void Init(const std::shared_ptr<VulkanDevice>& device,

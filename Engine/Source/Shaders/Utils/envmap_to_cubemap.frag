@@ -1,9 +1,9 @@
-#version 420 core
+#version 450 core
 layout (location = 0) out vec4 aAlbedo;
 
-in vec3 f_LocalPos;
+layout(location = 0) in vec3 f_LocalPos;
 
-layout(binding = 0) uniform sampler2D u_EquirectangularMap;
+layout(binding = 1) uniform sampler2D u_EquirectangularMap;
 
 const vec2 kInvAtan = vec2(0.1591, 0.3183);
 

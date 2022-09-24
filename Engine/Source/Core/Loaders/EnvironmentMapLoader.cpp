@@ -54,11 +54,57 @@ namespace
         const auto splittedPath = String::Split(path, "/");
         return splittedPath.back();
     }
+
+    const float cubeVertexData[] = {
+            // [position 3] [normal 3] [texture coodinate 2]
+            // back face
+            -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+            1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+            -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+            // front face
+            -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            // left face
+            -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-right
+            -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-left
+            -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
+            -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
+            -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
+            -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-right
+            // right face
+            1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            // bottom face
+            -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+            -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+            // top face
+            -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    };
 }
 
 EnvironmentMapLoader::EnvironmentMapLoader()
 {
-    cube = MeshBuilder::CubeGeometry();
+//    cube = MeshBuilder::CubeGeometry();
 }
 
 void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
@@ -68,56 +114,151 @@ void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
     loaderContext.flipVertically = flipVertically;
     environmentContext->name = GetTextureName(path);
     ComputeEnvironmentMap();
-    ComputeIrradianceMap();
-    ComputeRadianceMap();
-    ComputeLUT();
+//    ComputeIrradianceMap();
+//    ComputeRadianceMap();
+//    ComputeLUT();
 }
 
 void EnvironmentMapLoader::ComputeEnvironmentMap()
 {
     TextureLoader textureLoader;
     auto [data, textureSpec] = textureLoader.Load(loaderContext.path, loaderContext.flipVertically);
+    textureSpec.format = Format::RGBA16_SFLOAT;
     loaderContext.specification = textureSpec;
     textureSpec.type = TextureType::TEXTURE_2D;
-    const auto equirectMap = Texture::Create(textureSpec, data);
+    const auto equirectMap = Device::Get()->CreateTexture(textureSpec, data);
 
-    const auto envmapConverterShader = AssetManager::Get().LoadAsset<Shader>(
-            "/Assets/Shaders/Utils/envmap_to_cubemap",
-            "envmap_to_cubemap",
-            LoaderOptions());
+//    const auto envmapConverterShader = AssetManager::Get().LoadAsset<Shader>(
+//            "/Assets/Shaders/Utils/envmap_to_cubemap",
+//            "envmap_to_cubemap",
+//            LoaderOptions());
 
-    FramebufferSpecification fbSpec;
-    fbSpec.width = envTexWidth;
-    fbSpec.height = envTexHeight;
-    fbSpec.attachments = FramebufferAttachmentSpecification(
-            {
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
-            }
-    );
-    Framebuffer fb(fbSpec);
+    ShaderProgramDescriptor shaderProgramDescriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/Utils/envmap_to_cubemap.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/Utils/envmap_to_cubemap.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+    VertexBufferLayout layout;
+    layout.Push<glm::vec3>();
+    shaderProgramDescriptor.layout = layout;
+    shaderProgramDescriptor.reflection.textures = { 1 };
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
+    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
-    textureSpec.width = envTexWidth;
-    textureSpec.height = envTexHeight;
-    textureSpec.type = TextureType::CUBEMAP;
-    auto cubemap = Texture::Create(textureSpec, CubemapFaces());
-    fb.Bind();
-    envmapConverterShader->Bind();
-    equirectMap->Bind();
-    const auto& va = cube->GetVertexArray();
-    va->Bind();
-    va->GetVertexBuffer()->Bind();
-    for (int i = 0; i < 6; i++)
+    TextureDescriptor cubeDesc;
+    cubeDesc.type = TextureType::CUBEMAP;
+    cubeDesc.width = envTexWidth;
+    cubeDesc.height = envTexHeight;
+    cubeDesc.format = Format::RGBA16_SFLOAT;
+    cubeDesc.componentAmount = 3;
+    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
+
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::RGBA16_SFLOAT;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = envTexWidth;
+    colorAttachmentDesc.height = envTexHeight;
+    const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D24_UNORM_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = envTexWidth;
+    depthAttachmentDesc.height = envTexHeight;
+    const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
+
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = { envTexWidth, envTexHeight };
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+
+    const auto pipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+
+    Renderer renderer;
+    renderer.SetPipeline(pipeline);
+
+    const auto rendererState = RendererCommand::CreateRendererState();
+    struct Camera
     {
-        envmapConverterShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-        fb.BindAttachmentToCubemapFace(cubemap, 0, i);
-        RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        RendererCommand::Draw(va->GetVertexBuffer());
-    }
-    fb.UnBind();
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+    BufferDescriptor bufferDescriptor{};
+    bufferDescriptor.type = BUFFER_TYPE_VERTEX;
+    bufferDescriptor.size = sizeof(cubeVertexData);
+    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
-    environmentContext->envMap = cubemap;
-    environmentContext->equirectangularTexture = equirectMap;
-    R_CORE_TRACE("Finished computing environment map for texture \"{0}\"", loaderContext.path);
+    bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
+    bufferDescriptor.size = sizeof(Camera);
+    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
+    rendererState->SetVertexBuffer(buffer, 0);
+    rendererState->SetTexture(equirectMap, 1);
+
+    SamplerDescriptor samplerDescriptor{};
+    equirectMap->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));
+
+//    for (int i = 0; i < 6; i++)
+//    {
+        Camera camera;
+        camera.view = captureViews[0];
+        camera.projection = projectionMatrix;
+
+        void* ptr = buffer->Map();
+        memcpy(ptr, &camera, sizeof(Camera));
+        buffer->UnMap();
+        rendererState->OnUpdate(pipeline);
+        renderer.BeginFrame(nullptr);
+        renderer.EncodeState(rendererState);
+        renderer.Draw(vertexBuffer);
+        renderer.EndFrame();
+//    }
+
+//    FramebufferSpecification fbSpec;
+//    fbSpec.width = envTexWidth;
+//    fbSpec.height = envTexHeight;
+//    fbSpec.attachments = FramebufferAttachmentSpecification(
+//            {
+//                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
+//            }
+//    );
+//    Framebuffer fb(fbSpec);
+//
+//    textureSpec.width = envTexWidth;
+//    textureSpec.height = envTexHeight;
+//    textureSpec.type = TextureType::CUBEMAP;
+//    auto cubemap = Texture::Create(textureSpec, CubemapFaces());
+//    fb.Bind();
+//    envmapConverterShader->Bind();
+//    equirectMap->Bind();
+//    const auto& va = cube->GetVertexArray();
+//    va->Bind();
+//    va->GetVertexBuffer()->Bind();
+//    for (int i = 0; i < 6; i++)
+//    {
+//        envmapConverterShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
+//        fb.BindAttachmentToCubemapFace(cubemap, 0, i);
+//        RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+////        RendererCommand::Draw(va->GetVertexBuffer());
+//    }
+//    fb.UnBind();
+
+//    environmentContext->envMap = cubemap;
+//    environmentContext->equirectangularTexture = equirectMap;
+//    R_CORE_TRACE("Finished computing environment map for texture \"{0}\"", loaderContext.path);
 }
 
 void EnvironmentMapLoader::ComputeIrradianceMap()

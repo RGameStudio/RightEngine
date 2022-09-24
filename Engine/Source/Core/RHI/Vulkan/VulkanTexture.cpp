@@ -3,102 +3,39 @@
 #include "VulkanUtils.hpp"
 #include "VulkanBuffer.hpp"
 #include "Buffer.hpp"
+#include <vk-tools/VulkanTools.h>
 
 using namespace RightEngine;
 namespace
 {
-    void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layerCount)
+    void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layerCount, int mipmaps)
     {
         CommandBufferDescriptor commandBufferDescriptor;
         commandBufferDescriptor.type = CommandBufferType::GRAPHICS;
-        auto commandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(Device::Get()->CreateCommandBuffer(commandBufferDescriptor));
+        auto commandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(
+                Device::Get()->CreateCommandBuffer(commandBufferDescriptor));
 
         VulkanUtils::BeginCommandBuffer(commandBuffer, true);
-
-        VkImageMemoryBarrier barrier{};
-        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        barrier.oldLayout = oldLayout;
-        barrier.newLayout = newLayout;
-        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.image = image;
-        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        barrier.subresourceRange.baseMipLevel = 0;
-        barrier.subresourceRange.levelCount = 1;
-        barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount = layerCount;
-
-        VkPipelineStageFlags sourceStage;
-        VkPipelineStageFlags destinationStage;
-
-        if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED
-        && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-            barrier.srcAccessMask = 0;
-            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-            sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-        && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-        {
-            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-            destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
-        newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-        {
-            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-
-            sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
-                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-        {
-            barrier.srcAccessMask = 0;
-            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-            sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-                 && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
-        {
-            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
-
-            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-            destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        }
-        else
-        {
-            throw std::invalid_argument("unsupported layout transition!");
-        }
-
-        commandBuffer->Enqueue([=](auto buffer)
-        {
-            vkCmdPipelineBarrier(
-                    VK_CMD(buffer)->GetBuffer(),
-                    sourceStage, destinationStage,
-                    0,
-                    0, nullptr,
-                    0, nullptr,
-                    1, &barrier
-            );
-        });
+        VkImageSubresourceRange srcSubRange = {};
+        srcSubRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        srcSubRange.baseMipLevel = 0;
+        srcSubRange.levelCount = mipmaps;
+        srcSubRange.layerCount =  layerCount;
+        vks::tools::setImageLayout(commandBuffer->GetBuffer(),
+                                   image,
+                                   oldLayout,
+                                   newLayout,
+                                   srcSubRange);
 
         VulkanUtils::EndCommandBuffer(VK_DEVICE(), commandBuffer);
     }
 
-    void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
+    void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+    {
         CommandBufferDescriptor commandBufferDescriptor;
         commandBufferDescriptor.type = CommandBufferType::GRAPHICS;
-        auto commandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(Device::Get()->CreateCommandBuffer(commandBufferDescriptor));
+        auto commandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(
+                Device::Get()->CreateCommandBuffer(commandBufferDescriptor));
 
         VulkanUtils::BeginCommandBuffer(commandBuffer, true);
 
@@ -112,8 +49,8 @@ namespace
         region.imageSubresource.baseArrayLayer = 0;
         region.imageSubresource.layerCount = 1;
 
-        region.imageOffset = {0, 0, 0};
-        region.imageExtent = { width, height,1 };
+        region.imageOffset = { 0, 0, 0 };
+        region.imageExtent = { width, height, 1 };
 
         commandBuffer->Enqueue([=](auto cmdBuffer)
                                {
@@ -169,7 +106,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     imageInfo.extent.width = specification.width;
     imageInfo.extent.height = specification.height;
     imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = 1;
+    imageInfo.mipLevels = specification.mipLevels;
     imageInfo.arrayLayers = specification.type == TextureType::CUBEMAP ? 6 : 1;
     imageInfo.format = VulkanConverters::Format(specification.format);
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -180,7 +117,9 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     }
     else
     {
-        imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        imageInfo.usage =
+                VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     }
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -202,7 +141,8 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
         TransitionImageLayout(textureImage,
                               VK_IMAGE_LAYOUT_UNDEFINED,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                              specification.type == TextureType::CUBEMAP ? 6 : 1);
+                              specification.type == TextureType::CUBEMAP ? 6 : 1,
+                              specification.mipLevels);
         if (!data.empty())
         {
             CopyBufferToImage(std::static_pointer_cast<VulkanBuffer>(stagingBuffer)->GetBuffer(),
@@ -215,7 +155,8 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
         TransitionImageLayout(textureImage,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                              specification.type == TextureType::CUBEMAP ? 6 : 1);
+                              specification.type == TextureType::CUBEMAP ? 6 : 1,
+                              specification.mipLevels);
     }
 
     VkImageViewCreateInfo viewInfo{};
@@ -232,7 +173,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     }
     viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.levelCount = specification.mipLevels;
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = specification.type == TextureType::CUBEMAP ? 6 : 1;
 
@@ -265,7 +206,81 @@ VulkanTexture::~VulkanTexture()
     vkFreeMemory(VK_DEVICE()->GetDevice(), textureImageMemory, nullptr);
 }
 
-void VulkanTexture::ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
+void VulkanTexture::ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layers, int mipmaps)
 {
-    TransitionImageLayout(image, oldLayout, newLayout, 1);
+    TransitionImageLayout(image, oldLayout, newLayout, layers, mipmaps);
+}
+
+void VulkanTexture::CopyFrom(const std::shared_ptr<Texture>& texture,
+                             const TextureCopy& srcCopy,
+                             const TextureCopy& dstCopy)
+{
+    R_CORE_ASSERT(sampler && texture && texture->GetSampler(), "");
+    R_CORE_ASSERT(specification.width == texture->GetSpecification().width
+                  && specification.height == texture->GetSpecification().height, "");
+    const auto srcTexture = std::static_pointer_cast<VulkanTexture>(texture);
+    const auto copyCmdBuffer = std::static_pointer_cast<VulkanCommandBuffer>(
+            Device::Get()->CreateCommandBuffer({ CommandBufferType::GRAPHICS }));
+    VulkanUtils::BeginCommandBuffer(copyCmdBuffer, true);
+    VkImageSubresourceRange dstSubRange = {};
+    dstSubRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    dstSubRange.baseMipLevel = 0;
+    dstSubRange.levelCount = specification.mipLevels;
+    dstSubRange.layerCount = specification.type == TextureType::CUBEMAP ? 6 : 1;
+    vks::tools::setImageLayout(copyCmdBuffer->GetBuffer(),
+                               textureImage,
+                               VulkanConverters::TextureUsage(dstCopy.usage),
+                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                               dstSubRange);
+
+    VkImageSubresourceRange srcSubRange = {};
+    srcSubRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    srcSubRange.baseMipLevel = 0;
+    srcSubRange.levelCount = srcTexture->GetSpecification().mipLevels;
+    srcSubRange.layerCount = srcTexture->GetSpecification().type == TextureType::CUBEMAP ? 6 : 1;
+    vks::tools::setImageLayout(copyCmdBuffer->GetBuffer(),
+                               srcTexture->GetImage(),
+                               VulkanConverters::TextureUsage(srcCopy.usage),
+                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                               srcSubRange);
+
+    VkImageCopy copyRegion{};
+    copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copyRegion.srcSubresource.baseArrayLayer = srcCopy.layerNum;
+    copyRegion.srcSubresource.mipLevel = srcCopy.mipLevel;
+    copyRegion.srcSubresource.layerCount = 1;
+    copyRegion.srcOffset = { 0, 0, 0 };
+
+    copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copyRegion.dstSubresource.baseArrayLayer = dstCopy.layerNum;
+    copyRegion.dstSubresource.mipLevel = dstCopy.mipLevel;
+    copyRegion.dstSubresource.layerCount = 1;
+    copyRegion.dstOffset = { 0, 0, 0 };
+
+    copyRegion.extent.width = static_cast<uint32_t>(specification.width);
+    copyRegion.extent.height = static_cast<uint32_t>(specification.height);
+    copyRegion.extent.depth = 1;
+
+    vkCmdCopyImage(
+            copyCmdBuffer->GetBuffer(),
+            srcTexture->GetImage(),
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            textureImage,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1,
+            &copyRegion);
+
+    vks::tools::setImageLayout(copyCmdBuffer->GetBuffer(),
+                               textureImage,
+                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                               VulkanConverters::TextureUsage(dstCopy.usage),
+                               dstSubRange);
+
+    vks::tools::setImageLayout(copyCmdBuffer->GetBuffer(),
+                               srcTexture->GetImage(),
+                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                               VulkanConverters::TextureUsage(srcCopy.usage),
+                               srcSubRange);
+
+    VulkanUtils::EndCommandBuffer(VK_DEVICE(), commandBuffer);
 }

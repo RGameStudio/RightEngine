@@ -220,8 +220,8 @@ void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
         VulkanUtils::BeginCommandBuffer(copyCmdBuffer, true);
         copyCmdBuffer->Enqueue([&](auto buffer)
         {
-            VulkanTexture::ChangeImageLayout(texture->GetImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-            VulkanTexture::ChangeImageLayout(swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+            VulkanTexture::ChangeImageLayout(texture->GetImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, 1);
+            VulkanTexture::ChangeImageLayout(swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, 1);
             memset(&imageCopy, 0, sizeof(VkImageCopy));
             imageCopy.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             imageCopy.srcSubresource.layerCount = 1;
@@ -255,7 +255,7 @@ void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
         presentInfo.pImageIndices = &currentImageIndex;
         presentInfo.pResults = nullptr; // Optional
 
-        VulkanTexture::ChangeImageLayout(swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        VulkanTexture::ChangeImageLayout(swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, 1);
 
         result = vkQueuePresentKHR(VK_DEVICE()->GetQueue(QueueType::PRESENT), &presentInfo);
 
