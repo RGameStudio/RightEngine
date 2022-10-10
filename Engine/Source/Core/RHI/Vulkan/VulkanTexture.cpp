@@ -282,5 +282,5 @@ void VulkanTexture::CopyFrom(const std::shared_ptr<Texture>& texture,
                                VulkanConverters::TextureUsage(srcCopy.usage),
                                srcSubRange);
 
-    VulkanUtils::EndCommandBuffer(VK_DEVICE(), commandBuffer);
+    VulkanUtils::EndCommandBuffer(VK_DEVICE(), copyCmdBuffer);
 }

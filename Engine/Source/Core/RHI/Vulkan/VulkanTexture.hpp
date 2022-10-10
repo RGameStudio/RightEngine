@@ -37,6 +37,5 @@ namespace RightEngine
         VkImage textureImage;
         VkDeviceMemory textureImageMemory;
         VkImageView textureImageView;
-        std::shared_ptr<VulkanCommandBuffer> commandBuffer;
     };
 }

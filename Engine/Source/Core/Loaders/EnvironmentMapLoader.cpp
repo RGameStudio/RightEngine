@@ -204,14 +204,29 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     rendererState->SetTexture(equirectMap, 1);
 
     SamplerDescriptor samplerDescriptor{};
-    equirectMap->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));
+    const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
+    TextureDescriptor environmentCubemapDesc;
+    environmentCubemapDesc.type = TextureType::CUBEMAP;
+    environmentCubemapDesc.componentAmount = 4;
+    environmentCubemapDesc.format = Format::RGBA16_SFLOAT;
+    environmentCubemapDesc.height = envTexHeight;
+    environmentCubemapDesc.width = envTexWidth;
+    const auto environmentCubemap = Device::Get()->CreateTexture(environmentCubemapDesc, {});
+    
+    environmentCubemap->SetSampler(sampler);
+    colorAttachment->SetSampler(sampler);
+    equirectMap->SetSampler(sampler);
+    
+    TextureCopy src;
+    src.usage = SHADER_READ_ONLY;
+    src.layerNum = 0;
+    src.mipLevel = 0;
 
     for (int i = 0; i < 6; i++)
     {
         Camera camera;
         camera.view = captureViews[i];
         camera.projection = projectionMatrix;
-
         void* ptr = buffer->Map();
         memcpy(ptr, &camera, sizeof(Camera));
         buffer->UnMap();
@@ -220,7 +235,16 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
         renderer.EncodeState(rendererState);
         renderer.Draw(vertexBuffer);
         renderer.EndFrame();
+        
+        TextureCopy dst;
+        dst.usage = SHADER_READ_ONLY;
+        dst.layerNum = i;
+        dst.mipLevel = 0;
+        environmentCubemap->CopyFrom(colorAttachment, src, dst);
     }
+    
+    environmentContext->envMap = environmentCubemap;
+    environmentContext->equirectangularTexture = equirectMap;
 }
 
 void EnvironmentMapLoader::ComputeIrradianceMap()
