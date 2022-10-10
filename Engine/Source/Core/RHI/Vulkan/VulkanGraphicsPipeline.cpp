@@ -270,7 +270,7 @@ void VulkanGraphicsPipeline::CreateRenderPass(const RenderPassDescriptor& render
     }
 
     VkAttachmentDescription depthAttachment{};
-    depthAttachment.format = VK_FORMAT_D24_UNORM_S8_UINT;
+    depthAttachment.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
     depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     depthAttachment.loadOp = VulkanConverters::LoadOperation(renderPassDescriptor.depthStencilAttachment.loadOperation);
     depthAttachment.storeOp = VulkanConverters::StoreOperation(renderPassDescriptor.depthStencilAttachment.storeOperation);

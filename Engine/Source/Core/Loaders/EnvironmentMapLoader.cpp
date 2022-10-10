@@ -58,47 +58,47 @@ namespace
     const float cubeVertexData[] = {
             // [position 3] [normal 3] [texture coodinate 2]
             // back face
-            -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-            -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f,
+            1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, 1.0f, -1.0f,
+            -1.0f, -1.0f, -1.0f,
+            -1.0f, 1.0f, -1.0f,
             // front face
-            -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            -1.0f, -1.0f, 1.0f,
+            1.0f, -1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f,
+            -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f,
             // left face
-            -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-right
-            -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-left
-            -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
-            -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
-            -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
-            -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-right
+            -1.0f, 1.0f, 1.0f, // top-right
+            -1.0f, 1.0f, -1.0f,  // top-left
+            -1.0f, -1.0f, -1.0f, // bottom-left
+            -1.0f, -1.0f, -1.0f,   // bottom-left
+            -1.0f, -1.0f, 1.0f,   // bottom-right
+            -1.0f, 1.0f, 1.0f,  // top-right
             // right face
-            1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            1.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, 1.0f,
             // bottom face
-            -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-            -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-            -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, 1.0f,
+            1.0f, -1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f,
             // top face
-            -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-            -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+            -1.0f, 1.0f, -1.0f,
+            1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, -1.0f,
+            1.0f, 1.0f, 1.0f,
+            -1.0f, 1.0f, -1.0f,
+            -1.0f, 1.0f, 1.0f,
     };
 }
 
@@ -123,15 +123,10 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
 {
     TextureLoader textureLoader;
     auto [data, textureSpec] = textureLoader.Load(loaderContext.path, loaderContext.flipVertically);
-    textureSpec.format = Format::RGBA16_SFLOAT;
+    textureSpec.format = Format::RGBA8_SRGB;
     loaderContext.specification = textureSpec;
     textureSpec.type = TextureType::TEXTURE_2D;
     const auto equirectMap = Device::Get()->CreateTexture(textureSpec, data);
-
-//    const auto envmapConverterShader = AssetManager::Get().LoadAsset<Shader>(
-//            "/Assets/Shaders/Utils/envmap_to_cubemap",
-//            "envmap_to_cubemap",
-//            LoaderOptions());
 
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;
@@ -163,7 +158,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     colorAttachmentDesc.height = envTexHeight;
     const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
     TextureDescriptor depthAttachmentDesc{};
-    depthAttachmentDesc.format = Format::D24_UNORM_S8_UINT;
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
     depthAttachmentDesc.type = TextureType::TEXTURE_2D;
     depthAttachmentDesc.width = envTexWidth;
     depthAttachmentDesc.height = envTexHeight;
@@ -211,10 +206,10 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     SamplerDescriptor samplerDescriptor{};
     equirectMap->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));
 
-//    for (int i = 0; i < 6; i++)
-//    {
+    for (int i = 0; i < 6; i++)
+    {
         Camera camera;
-        camera.view = captureViews[0];
+        camera.view = captureViews[i];
         camera.projection = projectionMatrix;
 
         void* ptr = buffer->Map();
@@ -225,40 +220,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
         renderer.EncodeState(rendererState);
         renderer.Draw(vertexBuffer);
         renderer.EndFrame();
-//    }
-
-//    FramebufferSpecification fbSpec;
-//    fbSpec.width = envTexWidth;
-//    fbSpec.height = envTexHeight;
-//    fbSpec.attachments = FramebufferAttachmentSpecification(
-//            {
-//                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
-//            }
-//    );
-//    Framebuffer fb(fbSpec);
-//
-//    textureSpec.width = envTexWidth;
-//    textureSpec.height = envTexHeight;
-//    textureSpec.type = TextureType::CUBEMAP;
-//    auto cubemap = Texture::Create(textureSpec, CubemapFaces());
-//    fb.Bind();
-//    envmapConverterShader->Bind();
-//    equirectMap->Bind();
-//    const auto& va = cube->GetVertexArray();
-//    va->Bind();
-//    va->GetVertexBuffer()->Bind();
-//    for (int i = 0; i < 6; i++)
-//    {
-//        envmapConverterShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-//        fb.BindAttachmentToCubemapFace(cubemap, 0, i);
-//        RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-////        RendererCommand::Draw(va->GetVertexBuffer());
-//    }
-//    fb.UnBind();
-
-//    environmentContext->envMap = cubemap;
-//    environmentContext->equirectangularTexture = equirectMap;
-//    R_CORE_TRACE("Finished computing environment map for texture \"{0}\"", loaderContext.path);
+    }
 }
 
 void EnvironmentMapLoader::ComputeIrradianceMap()

@@ -69,7 +69,7 @@ namespace
 
     bool IsDepthTexture(Format format)
     {
-        if (format == RightEngine::Format::D24_UNORM_S8_UINT)
+        if (format == Format::D24_UNORM_S8_UINT || format == Format::D32_SFLOAT_S8_UINT)
         {
             return true;
         }

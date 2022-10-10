@@ -19,7 +19,6 @@ namespace
 #ifdef R_APPLE
             "VK_KHR_portability_subset",
 #endif
-            "VK_KHR_shader_non_semantic_info",
         };
 
     std::weak_ptr<VulkanSurface> vulkanSurface;

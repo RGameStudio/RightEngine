@@ -152,7 +152,7 @@ void SandboxLayer::OnAttach()
     colorAttachmentDesc.height = extent.y;
     const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
     TextureDescriptor depthAttachmentDesc{};
-    depthAttachmentDesc.format = Format::D24_UNORM_S8_UINT;
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
     depthAttachmentDesc.type = TextureType::TEXTURE_2D;
     depthAttachmentDesc.width = extent.x;
     depthAttachmentDesc.height = extent.y;
@@ -198,9 +198,10 @@ void SandboxLayer::OnAttach()
 
     // Textures loading
 
-    auto [data, texDesc] = textureLoader.Load("/Assets/Textures/albedo.png");
+    auto [data, texDesc] = textureLoader.Load("/Assets/Textures/blue_brick_albedo.jpg");
     texDesc.type = TextureType::TEXTURE_2D;
-    texDesc.format = Format::RGBA8_SRGB;
+    texDesc.format = Format::RGBA8_UINT;
+    texDesc.componentAmount = 4;
     testTexture = Device::Get()->CreateTexture(texDesc, data);
     SamplerDescriptor samplerDescriptor{};
     testTexture->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));
@@ -210,20 +211,12 @@ void SandboxLayer::OnAttach()
     rendererState->SetVertexBuffer(transformUBO, 0);
     rendererState->SetTexture(testTexture, 2);
     rendererState->OnUpdate(graphicsPipeline);
-
-//    TextureDescriptor cubeDesc;
-//    cubeDesc.type = TextureType::CUBEMAP;
-//    cubeDesc.width = 1024;
-//    cubeDesc.height = 1024;
-//    cubeDesc.format = Format::RGBA16_SFLOAT;
-//    cubeDesc.componentAmount = 3;
-//    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
     EnvironmentMapLoader loader;
-    loader.Load("/Assets/Textures/env_helipad.hdr", false);
+    loader.Load("/Assets/Textures/env_sdr.png", true);
     TransformConstant transformConstantValue;
     SceneUBO sceneUboValue;
     transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -238,12 +231,12 @@ void SandboxLayer::OnUpdate(float ts)
     memcpy(sceneUboPtr, &sceneUboValue, sizeof(SceneUBO));
     sceneUBO->UnMap();
     sceneUBO->SetNeedToSync(true);
-    renderer->SetPipeline(graphicsPipeline);
-    renderer->BeginFrame(nullptr);
-    rendererState->OnUpdate(graphicsPipeline);
-    renderer->EncodeState(rendererState);
-    renderer->Draw(vertexBuffer);
-    renderer->EndFrame();
+//    renderer->SetPipeline(graphicsPipeline);
+//    renderer->BeginFrame(nullptr);
+//    rendererState->OnUpdate(graphicsPipeline);
+//    renderer->EncodeState(rendererState);
+//    renderer->Draw(vertexBuffer);
+//    renderer->EndFrame();
 
     renderer->SetPipeline(presentPipeline);
     renderer->BeginFrame(nullptr);

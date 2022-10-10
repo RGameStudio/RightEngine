@@ -10,6 +10,8 @@ namespace RightEngine
     {
     };
 
+//TODO: Implement custom coverter for 3 channel textures
+
     class TextureLoader
     {
     public:

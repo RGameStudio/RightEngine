@@ -37,7 +37,8 @@ namespace RightEngine
         RGBA8_SRGB,
 
         //Depth buffer formats
-        D24_UNORM_S8_UINT
+        D24_UNORM_S8_UINT,
+        D32_SFLOAT_S8_UINT
     };
 
     enum class PresentMode
