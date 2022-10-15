@@ -114,7 +114,7 @@ void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
     loaderContext.flipVertically = flipVertically;
     environmentContext->name = GetTextureName(path);
     ComputeEnvironmentMap();
-//    ComputeIrradianceMap();
+    ComputeIrradianceMap();
 //    ComputeRadianceMap();
 //    ComputeLUT();
 }
@@ -124,8 +124,8 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     TextureLoader textureLoader;
     auto [data, textureSpec] = textureLoader.Load(loaderContext.path, loaderContext.flipVertically);
     textureSpec.format = Format::RGBA8_SRGB;
-    loaderContext.specification = textureSpec;
     textureSpec.type = TextureType::TEXTURE_2D;
+    loaderContext.specification = textureSpec;
     const auto equirectMap = Device::Get()->CreateTexture(textureSpec, data);
 
     ShaderProgramDescriptor shaderProgramDescriptor;
@@ -249,40 +249,115 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
 
 void EnvironmentMapLoader::ComputeIrradianceMap()
 {
-    TextureDescriptor texSpec = loaderContext.specification;
-    const auto irradianceMapShader = AssetManager::Get().LoadAsset<Shader>("/Assets/Shaders/Utils/envmap_to_irr_map",
-                                                                           "envmap_to_irr_map", LoaderOptions());
+    ShaderProgramDescriptor shaderProgramDescriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/Utils/envmap_to_irr_map.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/Utils/envmap_to_irr_map.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+    VertexBufferLayout layout;
+    layout.Push<glm::vec3>();
+    shaderProgramDescriptor.layout = layout;
+    shaderProgramDescriptor.reflection.textures = { 1 };
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
+    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
-    FramebufferSpecification fbSpec;
-    fbSpec.width = irradianceTexWidth;
-    fbSpec.height = irradianceTexHeight;
-    fbSpec.attachments = FramebufferAttachmentSpecification(
-            {
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
-            }
-    );
-    Framebuffer fb(fbSpec);
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::RGBA16_SFLOAT;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = irradianceTexWidth;
+    colorAttachmentDesc.height = irradianceTexHeight;
+    const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = irradianceTexWidth;
+    depthAttachmentDesc.height = irradianceTexHeight;
+    const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
 
-    texSpec.width = irradianceTexWidth;
-    texSpec.height = irradianceTexHeight;
-    texSpec.type = TextureType::CUBEMAP;
-    auto irradianceMap = Texture::Create(texSpec, CubemapFaces());
-    fb.Bind();
-    irradianceMapShader->Bind();
-    environmentContext->envMap->Bind();
-    const auto& va = cube->GetVertexArray();
-    va->Bind();
-    va->GetVertexBuffer()->Bind();
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = { irradianceTexWidth, irradianceTexHeight };
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+
+
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+
+    const auto pipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+
+    Renderer renderer;
+    renderer.SetPipeline(pipeline);
+
+    const auto rendererState = RendererCommand::CreateRendererState();
+    struct Camera
+    {
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+    BufferDescriptor bufferDescriptor{};
+    bufferDescriptor.type = BUFFER_TYPE_VERTEX;
+    bufferDescriptor.size = sizeof(cubeVertexData);
+    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
+
+    bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
+    bufferDescriptor.size = sizeof(Camera);
+    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
+    rendererState->SetVertexBuffer(buffer, 0);
+    rendererState->SetTexture(environmentContext->envMap, 1);
+
+    SamplerDescriptor samplerDescriptor{};
+    const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
+    TextureDescriptor irradianceCubemapDesc;
+    irradianceCubemapDesc.type = TextureType::CUBEMAP;
+    irradianceCubemapDesc.componentAmount = 4;
+    irradianceCubemapDesc.format = Format::RGBA16_SFLOAT;
+    irradianceCubemapDesc.height = irradianceTexHeight;
+    irradianceCubemapDesc.width = irradianceTexWidth;
+    const auto irradianceCubemap = Device::Get()->CreateTexture(irradianceCubemapDesc, {});
+
+    irradianceCubemap->SetSampler(sampler);
+    colorAttachment->SetSampler(sampler);
+
+    TextureCopy src;
+    src.usage = SHADER_READ_ONLY;
+    src.layerNum = 0;
+    src.mipLevel = 0;
+
     for (int i = 0; i < 6; i++)
     {
-        irradianceMapShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-        fb.BindAttachmentToCubemapFace(irradianceMap, 0, i);
-        RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        RendererCommand::Draw(va->GetVertexBuffer());
-    }
-    fb.UnBind();
+        Camera camera;
+        camera.view = captureViews[i];
+        camera.projection = projectionMatrix;
+        void* ptr = buffer->Map();
+        memcpy(ptr, &camera, sizeof(Camera));
+        buffer->UnMap();
+        rendererState->OnUpdate(pipeline);
+        renderer.BeginFrame(nullptr);
+        renderer.EncodeState(rendererState);
+        renderer.Draw(vertexBuffer);
+        renderer.EndFrame();
 
-    environmentContext->irradianceMap = irradianceMap;
+        TextureCopy dst;
+        dst.usage = SHADER_READ_ONLY;
+        dst.layerNum = i;
+        dst.mipLevel = 0;
+        irradianceCubemap->CopyFrom(colorAttachment, src, dst);
+    }
+
+
+    environmentContext->irradianceMap = irradianceCubemap;
     R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", loaderContext.path);
 }
 
