@@ -49,5 +49,6 @@ namespace RightEngine
         bool offscreen{ false };
         std::vector<AttachmentDescriptor> colorAttachments;
         AttachmentDescriptor depthStencilAttachment;
+        std::string name;
     };
 }

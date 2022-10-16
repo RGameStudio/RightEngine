@@ -13,6 +13,8 @@ namespace RightEngine
                                const RenderPassDescriptor& renderPassDescriptor);
 
         ~VulkanGraphicsPipeline();
+        
+        virtual void Resize(int x, int y) override;
 
         VkRenderPass GetRenderPass() const
         { return renderPass; }

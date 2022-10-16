@@ -65,6 +65,15 @@ namespace
             }
         }
     }
+
+    void ResizeAttachment(AttachmentDescriptor& attachment, int x, int y)
+    {
+        TextureDescriptor descriptor{};
+        descriptor = attachment.texture->GetSpecification();
+        descriptor.width = x;
+        descriptor.height = y;
+        attachment.texture = Device::Get()->CreateTexture(descriptor, {});
+    }
 }
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor,
@@ -387,6 +396,9 @@ void VulkanGraphicsPipeline::CreateFramebuffer()
 
     for (const auto& attachment : renderPassDescriptor.colorAttachments)
     {
+        TextureDescriptor texDescriptor = attachment.texture->GetSpecification();
+        R_CORE_ASSERT(texDescriptor.width == renderPassDescriptor.extent.x
+                      && texDescriptor.height == renderPassDescriptor.extent.y, "");
         const auto vkTexture = std::static_pointer_cast<VulkanTexture>(attachment.texture);
         attachments.push_back(vkTexture->GetImageView());
     }
@@ -407,4 +419,26 @@ void VulkanGraphicsPipeline::CreateFramebuffer()
         R_CORE_ASSERT(false, "failed to create framebuffer!");
     }
 
+}
+
+void VulkanGraphicsPipeline::Resize(int x, int y)
+{
+    if (x == renderPassDescriptor.extent.x && renderPassDescriptor.extent.y == y)
+    {
+        R_CORE_WARN("Trying to resize renderpass {0} to same size!", renderPassDescriptor.name);
+        return;
+    }
+    
+    renderPassDescriptor.extent.x = x;
+    renderPassDescriptor.extent.y = y;
+    
+    for (auto& attachment : renderPassDescriptor.colorAttachments)
+    {
+        ResizeAttachment(attachment, x, y);
+    }
+    ResizeAttachment(renderPassDescriptor.depthStencilAttachment, x, y);
+    
+    vkDeviceWaitIdle(VK_DEVICE()->GetDevice());
+    vkDestroyFramebuffer(VK_DEVICE()->GetDevice(), framebuffer, nullptr);
+    CreateFramebuffer();
 }

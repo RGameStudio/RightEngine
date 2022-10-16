@@ -12,6 +12,8 @@ namespace RightEngine
 
         const RenderPassDescriptor& GetRenderPassDescriptor() const
         { return renderPassDescriptor; }
+        
+        virtual void Resize(int x, int y) = 0;
 
     protected:
         GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor,
