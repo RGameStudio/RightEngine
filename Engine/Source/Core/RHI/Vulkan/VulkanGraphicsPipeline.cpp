@@ -69,10 +69,15 @@ namespace
     void ResizeAttachment(AttachmentDescriptor& attachment, int x, int y)
     {
         TextureDescriptor descriptor{};
+        const auto sampler = attachment.texture->GetSampler();
         descriptor = attachment.texture->GetSpecification();
         descriptor.width = x;
         descriptor.height = y;
         attachment.texture = Device::Get()->CreateTexture(descriptor, {});
+        if (sampler)
+        {
+            attachment.texture->SetSampler(sampler);
+        }
     }
 }
 

@@ -385,7 +385,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
     colorAttachmentDesc.type = TextureType::TEXTURE_2D;
     colorAttachmentDesc.width = prefilterTexWidth;
     colorAttachmentDesc.height = prefilterTexHeight;
-    const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
     TextureDescriptor depthAttachmentDesc{};
     depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
     depthAttachmentDesc.type = TextureType::TEXTURE_2D;
@@ -459,6 +459,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
         uint32_t mipWidth = prefilterTexWidth * std::pow(0.5, mipLevel);
         uint32_t mipHeight = prefilterTexHeight * std::pow(0.5, mipLevel);
         pipeline->Resize(mipWidth, mipHeight);
+        colorAttachment = pipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
         roughness = static_cast<float>(mipLevel) / static_cast<float>(maxMipLevels - 1);
         auto roughnessPtr = roughnessBuffer->Map();
         memcpy(roughnessPtr, &roughness, sizeof(roughness));
@@ -479,10 +480,24 @@ void EnvironmentMapLoader::ComputeRadianceMap()
             renderer.EncodeState(rendererState);
             renderer.Draw(vertexBuffer);
             renderer.EndFrame();
-            break;
+            
+            TextureCopy src;
+            src.usage = SHADER_READ_ONLY;
+            src.layerNum = 0;
+            src.mipLevel = 0;
+            
+            TextureCopy dst;
+            dst.usage = SHADER_READ_ONLY;
+            dst.layerNum = i;
+            dst.mipLevel = mipLevel;
+            
+            
+            prefilterCubemap->CopyFrom(colorAttachment, src, dst);
         }
-        break;
     }
+    
+    environmentContext->prefilterMap = prefilterCubemap;
+    R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", loaderContext.path);
 }
 
 void EnvironmentMapLoader::ComputeLUT()

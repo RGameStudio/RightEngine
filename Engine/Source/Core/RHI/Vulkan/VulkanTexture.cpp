@@ -216,8 +216,9 @@ void VulkanTexture::CopyFrom(const std::shared_ptr<Texture>& texture,
                              const TextureCopy& dstCopy)
 {
     R_CORE_ASSERT(sampler && texture && texture->GetSampler(), "");
-    R_CORE_ASSERT(specification.width == texture->GetSpecification().width
-                  && specification.height == texture->GetSpecification().height, "");
+//TODO: Add smarter check
+    R_CORE_ASSERT(specification.width / glm::exp2(dstCopy.mipLevel) == texture->GetSpecification().width / glm::exp2(srcCopy.mipLevel)
+                  && specification.height / glm::exp2(dstCopy.mipLevel)  == texture->GetSpecification().height / glm::exp2(srcCopy.mipLevel), "");
     const auto srcTexture = std::static_pointer_cast<VulkanTexture>(texture);
     const auto copyCmdBuffer = std::static_pointer_cast<VulkanCommandBuffer>(
             Device::Get()->CreateCommandBuffer({ CommandBufferType::GRAPHICS }));
@@ -257,8 +258,8 @@ void VulkanTexture::CopyFrom(const std::shared_ptr<Texture>& texture,
     copyRegion.dstSubresource.layerCount = 1;
     copyRegion.dstOffset = { 0, 0, 0 };
 
-    copyRegion.extent.width = static_cast<uint32_t>(specification.width);
-    copyRegion.extent.height = static_cast<uint32_t>(specification.height);
+    copyRegion.extent.width = static_cast<uint32_t>(texture->GetSpecification().width);
+    copyRegion.extent.height = static_cast<uint32_t>(texture->GetSpecification().height);
     copyRegion.extent.depth = 1;
 
     vkCmdCopyImage(
