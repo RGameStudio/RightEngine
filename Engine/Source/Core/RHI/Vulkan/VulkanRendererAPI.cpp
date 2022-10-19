@@ -344,6 +344,10 @@ void VulkanRendererAPI::EncodeState(const std::shared_ptr<CommandBuffer>& cmd,
 {
     R_CORE_ASSERT(state, "");
     auto vkState = std::static_pointer_cast<VulkanRendererState>(state);
+    if (!vkState->GetDescriptorSet())
+    {
+        return;
+    }
     auto vkPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
     cmd->Enqueue([=](auto buffer)
     {

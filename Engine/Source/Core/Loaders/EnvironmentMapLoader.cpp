@@ -57,49 +57,59 @@ namespace
     }
 
     const float cubeVertexData[] = {
-            // [position 3] [normal 3] [texture coodinate 2]
-            // back face
-            -1.0f, -1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-            // front face
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
-            // left face
-            -1.0f, 1.0f, 1.0f, // top-right
-            -1.0f, 1.0f, -1.0f,  // top-left
-            -1.0f, -1.0f, -1.0f, // bottom-left
-            -1.0f, -1.0f, -1.0f,   // bottom-left
-            -1.0f, -1.0f, 1.0f,   // bottom-right
-            -1.0f, 1.0f, 1.0f,  // top-right
-            // right face
-            1.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f,
-            // bottom face
-            -1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f,
-            // top face
-            -1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, 1.0f,
+        // [position 3] [normal 3] [texture coodinate 2]
+        // back face
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+        // front face
+        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        // left face
+        -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-right
+        -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-left
+        -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
+        -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
+        -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
+        -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-right
+        // right face
+        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        // bottom face
+        -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+        // top face
+        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    };
+
+    const float quadVertexData[] = {
+        // positions        // texture Coords
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
     };
 }
 
@@ -117,7 +127,7 @@ void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
     ComputeEnvironmentMap();
     ComputeIrradianceMap();
     ComputeRadianceMap();
-//    ComputeLUT();
+    ComputeLUT();
 }
 
 void EnvironmentMapLoader::ComputeEnvironmentMap()
@@ -139,6 +149,8 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
     VertexBufferLayout layout;
     layout.Push<glm::vec3>();
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec2>();
     shaderProgramDescriptor.layout = layout;
     shaderProgramDescriptor.reflection.textures = { 1 };
     shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
@@ -260,6 +272,8 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
     shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
     VertexBufferLayout layout;
     layout.Push<glm::vec3>();
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec2>();
     shaderProgramDescriptor.layout = layout;
     shaderProgramDescriptor.reflection.textures = { 1 };
     shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
@@ -374,6 +388,8 @@ void EnvironmentMapLoader::ComputeRadianceMap()
     shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
     VertexBufferLayout layout;
     layout.Push<glm::vec3>();
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec2>();
     shaderProgramDescriptor.layout = layout;
     shaderProgramDescriptor.reflection.textures = { 1 };
     shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
@@ -502,41 +518,70 @@ void EnvironmentMapLoader::ComputeRadianceMap()
 
 void EnvironmentMapLoader::ComputeLUT()
 {
-    R_CORE_ASSERT(false, "");
-    TextureDescriptor specification{};
-    auto lutTexture = Texture::Create(specification, std::vector<uint8_t>());
-//    lutTexture->SetSampler(Sampler::Create({ SamplerFilter::Linear,
-//                                             SamplerFilter::Linear,
-//                                             SamplerFilter::Linear,
-//                                             false }));
-    const auto lutShader = AssetManager::Get().LoadAsset<Shader>(
-            "/Assets/Shaders/Utils/brdf",
-            "brdf",
-            LoaderOptions());
+    ShaderProgramDescriptor shaderProgramDescriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/Utils/brdf.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/Utils/brdf.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+    VertexBufferLayout layout;
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec2>();
+    shaderProgramDescriptor.layout = layout;
+    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
+    
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::RG16_SFLOAT;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = lutTexWidth;
+    colorAttachmentDesc.height = lutTexHeight;
+    auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = lutTexWidth;
+    depthAttachmentDesc.height = lutTexHeight;
+    const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
+    
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = { lutTexWidth, lutTexHeight };
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+    
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+    
+    const auto pipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
 
-    FramebufferSpecification fbSpec;
-    fbSpec.width = lutTexWidth;
-    fbSpec.height = lutTexHeight;
-    fbSpec.attachments = FramebufferAttachmentSpecification(
-            {
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
-            }
-    );
-    Framebuffer fb(fbSpec);
-    const auto quad = MeshBuilder::QuadGeometry();
-    fb.Bind();
-    lutShader->Bind();
-//    lutTexture->GetSampler()->Bind();
-    lutTexture->Bind();
-    const auto& va = quad->GetVertexArray();
-    va->Bind();
-    va->GetVertexBuffer()->Bind();
-
-    fb.BindAttachmentToTexture(lutTexture, 0);
-    RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    RendererCommand::Draw(va->GetVertexBuffer());
-
-    fb.UnBind();
-
-    environmentContext->brdfLut = lutTexture;
+    Renderer renderer;
+    renderer.SetPipeline(pipeline);
+    const auto rendererState = RendererCommand::CreateRendererState();
+    
+    SamplerDescriptor samplerDescriptor{};
+    const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
+    colorAttachment->SetSampler(sampler);
+    
+    BufferDescriptor bufferDescriptor{};
+    bufferDescriptor.type = BUFFER_TYPE_VERTEX;
+    bufferDescriptor.size = sizeof(quadVertexData);
+    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, quadVertexData);
+    
+    rendererState->OnUpdate(pipeline);
+    renderer.BeginFrame(nullptr);
+    renderer.EncodeState(rendererState);
+    renderer.Draw(vertexBuffer);
+    renderer.EndFrame();
+    
+    environmentContext->brdfLut = colorAttachment;
+    R_CORE_TRACE("Finished computing BRDF map for texture \"{0}\"", loaderContext.path);
 }

@@ -99,6 +99,11 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
         VkDescriptorPoolSize texturePoolSize{};
         texturePoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         texturePoolSize.descriptorCount = shaderDescriptor.reflection.textures.size();
+        
+        if (bufferPoolSize.descriptorCount == 0 && texturePoolSize.descriptorCount == 0)
+        {
+            return;
+        }
 
         std::array<VkDescriptorPoolSize, 2> poolSizes = { bufferPoolSize, texturePoolSize };
 

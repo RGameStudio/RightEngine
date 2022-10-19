@@ -25,6 +25,7 @@ namespace RightEngine
         R32_SFLOAT,
         R32_UINT,
         R8_UINT,
+        RG16_SFLOAT,
         RGB8_UINT,
         RGBA8_UINT,
         RGB16_SFLOAT,

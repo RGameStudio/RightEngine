@@ -62,6 +62,8 @@ namespace RightEngine
                     return VK_FORMAT_R8G8B8_UINT;
                 case Format::D32_SFLOAT_S8_UINT:
                     return VK_FORMAT_D32_SFLOAT_S8_UINT;
+                case Format::RG16_SFLOAT:
+                    return VK_FORMAT_R16G16_SFLOAT;
                 default:
                     R_CORE_ASSERT(false, "");
             }
