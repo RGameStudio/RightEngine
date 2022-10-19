@@ -93,7 +93,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
         BufferDescriptor stagingBufferDesc;
         stagingBufferDesc.size = specification.GetTextureSize();
         stagingBufferDesc.type = BUFFER_TYPE_TRANSFER_SRC;
-        stagingBufferDesc.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+        stagingBufferDesc.memoryType = MemoryType::CPU_ONLY;
         stagingBuffer = device->CreateBuffer(stagingBufferDesc, nullptr);
         auto ptr = stagingBuffer->Map();
         memcpy(ptr, data.data(), stagingBufferDesc.size);
@@ -117,24 +117,20 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     }
     else
     {
-        imageInfo.usage =
-                VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT
+                | VK_IMAGE_USAGE_SAMPLED_BIT
+                | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+                | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     }
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.flags = specification.type == TextureType::CUBEMAP ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 
-    if (vkCreateImage(device->GetDevice(), &imageInfo, nullptr, &textureImage) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to create image!");
-    }
+    VmaAllocationCreateInfo imageAllocInfo = {};
+    imageAllocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+    imageAllocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(device->GetDevice(), textureImage, &memRequirements);
-
-    textureImageMemory = VulkanUtils::AllocateMemory(memRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    vkBindImageMemory(device->GetDevice(), textureImage, textureImageMemory, 0);
+    vmaCreateImage(VK_DEVICE()->GetAllocator(), &imageInfo, &imageAllocInfo, &textureImage, &allocation, nullptr);
 
     if (!IsDepthTexture(specification.format))
     {
@@ -203,7 +199,8 @@ VulkanTexture::~VulkanTexture()
 {
     vkDestroyImageView(VK_DEVICE()->GetDevice(), textureImageView, nullptr);
     vkDestroyImage(VK_DEVICE()->GetDevice(), textureImage, nullptr);
-    vkFreeMemory(VK_DEVICE()->GetDevice(), textureImageMemory, nullptr);
+//    vkFreeMemory(VK_DEVICE()->GetDevice(), textureImageMemory, nullptr);
+    vmaFreeMemory(VK_DEVICE()->GetAllocator(), allocation);
 }
 
 void VulkanTexture::ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layers, int mipmaps)

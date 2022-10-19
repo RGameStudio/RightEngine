@@ -27,22 +27,12 @@ VulkanBuffer::VulkanBuffer(std::shared_ptr<Device> device, const BufferDescripto
         const auto vulkanDevice = std::static_pointer_cast<VulkanDevice>(device);
 
         VmaAllocationCreateInfo vmaAllocInfo = {};
-        vmaAllocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+        vmaAllocInfo.usage = VulkanConverters::MemoryUsage(bufferDescriptor.memoryType);
 
         vmaCreateBuffer(vulkanDevice->GetAllocator(), &bufferInfo, &vmaAllocInfo,
                         &buffer,
                         &allocation,
                         nullptr);
-
-//        if (vkCreateBuffer(vulkanDevice->GetDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-//        {
-//            R_CORE_ASSERT(false, "failed to create vertex buffer!");
-//        }
-//
-//        VkMemoryRequirements memRequirements;
-//        vkGetBufferMemoryRequirements(vulkanDevice->GetDevice(), buffer, &memRequirements);
-//        memory = VulkanUtils::AllocateMemory(memRequirements, VulkanConverters::MemoryProperty(bufferDescriptor.memoryType));
-//        vkBindBufferMemory(vulkanDevice->GetDevice(), buffer, memory, 0);
     }
 
     if (data)

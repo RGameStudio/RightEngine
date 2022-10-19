@@ -51,11 +51,11 @@ namespace RightEngine
 
     #define BIT(x) 1 << x
 
-    enum MemoryType
+    enum class MemoryType
     {
-        MEMORY_TYPE_HOST_VISIBLE = BIT(0),
-        MEMORY_TYPE_HOST_COHERENT = BIT(1),
-        MEMORY_TYPE_DEVICE_LOCAL = BIT(2)
+        CPU_ONLY,
+        CPU_GPU,
+        GPU_ONLY
     };
 
     enum class TextureType

@@ -35,7 +35,7 @@ namespace RightEngine
 
         std::shared_ptr<Buffer> stagingBuffer;
         VkImage textureImage;
-        VkDeviceMemory textureImageMemory;
         VkImageView textureImageView;
+        VmaAllocation allocation;
     };
 }

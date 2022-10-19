@@ -98,25 +98,25 @@ void SandboxLayer::OnAttach()
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BUFFER_TYPE_VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = RightEngine::MemoryType::CPU_GPU;
     vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
     BufferDescriptor indexBufferDescriptor{};
     indexBufferDescriptor.type = BUFFER_TYPE_INDEX;
     indexBufferDescriptor.size = sizeof(indices);
-    indexBufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    indexBufferDescriptor.memoryType = RightEngine::MemoryType::CPU_GPU;
     indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
 
     BufferDescriptor transformConstantDesc{};
     transformConstantDesc.type = BUFFER_TYPE_UNIFORM;
     transformConstantDesc.size = sizeof(TransformConstant);
-    transformConstantDesc.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    transformConstantDesc.memoryType = RightEngine::MemoryType::CPU_GPU;
     transformUBO = Device::Get()->CreateBuffer(transformConstantDesc, nullptr);
 
     BufferDescriptor sceneUBODesc{};
     sceneUBODesc.type = BUFFER_TYPE_UNIFORM;
     sceneUBODesc.size = sizeof(SceneUBO);
-    sceneUBODesc.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    sceneUBODesc.memoryType = RightEngine::MemoryType::CPU_GPU;
     sceneUBO = Device::Get()->CreateBuffer(sceneUBODesc, nullptr);
 
     ShaderProgramDescriptor shaderProgramDescriptor;

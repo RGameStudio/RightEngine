@@ -205,12 +205,12 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BUFFER_TYPE_VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
     bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
     bufferDescriptor.size = sizeof(Camera);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
     rendererState->SetVertexBuffer(buffer, 0);
     rendererState->SetTexture(equirectMap, 1);
@@ -321,12 +321,12 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BUFFER_TYPE_VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
     bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
     bufferDescriptor.size = sizeof(Camera);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
     rendererState->SetVertexBuffer(buffer, 0);
     rendererState->SetTexture(environmentContext->envMap, 1);
@@ -439,16 +439,16 @@ void EnvironmentMapLoader::ComputeRadianceMap()
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BUFFER_TYPE_VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
     bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
     bufferDescriptor.size = sizeof(Camera);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
     bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
     bufferDescriptor.size = sizeof(roughness);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto roughnessBuffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
     
     rendererState->SetVertexBuffer(buffer, 0);
@@ -572,7 +572,7 @@ void EnvironmentMapLoader::ComputeLUT()
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BUFFER_TYPE_VERTEX;
     bufferDescriptor.size = sizeof(quadVertexData);
-    bufferDescriptor.memoryType = static_cast<MemoryType>(MEMORY_TYPE_HOST_COHERENT | MEMORY_TYPE_HOST_VISIBLE);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, quadVertexData);
     
     rendererState->OnUpdate(pipeline);

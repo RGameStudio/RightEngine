@@ -95,7 +95,7 @@ namespace RightEngine
 
             return flags;
         }
-
+/*
         inline static VkMemoryPropertyFlags MemoryProperty(MemoryType type)
         {
             VkMemoryPropertyFlags flags = 0;
@@ -114,6 +114,7 @@ namespace RightEngine
 
             return flags;
         }
+*/
 
         inline static VkShaderStageFlags ShaderStage(ShaderStage stage)
         {
@@ -184,6 +185,21 @@ namespace RightEngine
                 default:
                     R_CORE_ASSERT(false, "");
                     return VK_IMAGE_LAYOUT_UNDEFINED;
+            }
+        }
+
+        inline static VmaMemoryUsage MemoryUsage(MemoryType type)
+        {
+            switch (type)
+            {
+                case MemoryType::CPU_ONLY:
+                    return VMA_MEMORY_USAGE_CPU_ONLY;
+                case MemoryType::CPU_GPU:
+                    return VMA_MEMORY_USAGE_CPU_TO_GPU;
+                case MemoryType::GPU_ONLY:
+                    return VMA_MEMORY_USAGE_GPU_ONLY;
+                default:
+                R_CORE_ASSERT(false, "")
             }
         }
     };
