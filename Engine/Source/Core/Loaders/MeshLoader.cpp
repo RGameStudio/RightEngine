@@ -33,15 +33,16 @@ namespace
         layout.Push<float>(3);
 
         auto mesh = std::make_shared<MeshComponent>();
-        auto vertexArray = std::make_shared<VertexArray>();
-        vertexArray->AddBuffer(std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex)), layout);
-        if (!indexes.empty())
-        {
-            vertexArray->AddBuffer(std::make_shared<IndexBuffer>(indexes.data(), indexes.size()));
-        }
-
-        mesh->SetVertexArray(vertexArray);
-        mesh->SetMaterial(material);
+//        auto vertexArray = std::make_shared<VertexArray>();
+//        vertexArray->AddBuffer(std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex)), layout);
+//        if (!indexes.empty())
+//        {
+//            vertexArray->AddBuffer(std::make_shared<IndexBuffer>(indexes.data(), indexes.size()));
+//        }
+//
+//        mesh->SetVertexArray(vertexArray);
+//        const auto vertexBuffer = Device::Get()->CreateBuffer()
+//        mesh->SetMaterial(material);
 
         return mesh;
     }

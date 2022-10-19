@@ -18,16 +18,13 @@ void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
                           const MeshComponent& mesh,
                           const glm::mat4& transform)
 {
-    shader->Bind();
-    shader->SetUniformMat4f("u_ViewProjection", sceneData.viewProjectionMatrix);
-    shader->SetUniformMat4f("u_Transform", transform);
-    const auto& va = mesh.GetVertexArray();
-    const auto& ib = va->GetIndexBuffer();
-    const auto& vb = va->GetVertexBuffer();
-    va->Bind();
+//    shader->Bind();
+//    shader->SetUniformMat4f("u_ViewProjection", sceneData.viewProjectionMatrix);
+//    shader->SetUniformMat4f("u_Transform", transform);
+    const auto& ib = mesh.GetIndexBuffer();
+    const auto& vb = mesh.GetVertexBuffer();
     if (ib)
     {
-        ib->Bind();
 //        RendererCommand::DrawIndexed(ib);
     } else
     {

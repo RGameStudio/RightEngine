@@ -1,7 +1,5 @@
 #pragma once
 
-#include "IndexBuffer.hpp"
-#include "VertexBuffer.hpp"
 #include "Types.hpp"
 #include "RenderingContext.hpp"
 #include "Buffer.hpp"

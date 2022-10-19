@@ -7,14 +7,8 @@ set(ENGINE_SRC
         Source/Core/Window/Window.cpp
         Source/Core/Window/WindowsWindow.cpp
         Source/Core/Application/Application.cpp
-        Source/Core/RHI/WindowsRenderingContext.cpp
-        Source/Core/RHI/VertexBuffer.cpp
         Source/Core/RHI/VertexBufferLayout.cpp
-        Source/Core/RHI/VertexArray.cpp
-        Source/Core/RHI/IndexBuffer.cpp
         Source/Core/RHI/Renderer.cpp
-        Source/Core/RHI/DebugRHI.cpp
-        Source/Core/RHI/Shader.cpp
         Source/Core/Utils/Input.cpp
         Source/Core/Window/GLFWWindow.cpp
         Source/Core/Scene/Camera.cpp
@@ -23,9 +17,7 @@ set(ENGINE_SRC
         Source/Core/RHI/Material.cpp
         Source/Core/Utils/Path.cpp
         Source/Core/Utils/MeshBuilder.cpp
-        Source/Core/RHI/FrameBuffer.cpp
         Source/Core/Application/Layer.cpp
-        Source/Core/RHI/OpenGL/OpenGLRendererAPI.cpp
         Source/Core/RHI/RendererCommand.cpp
         Source/Core/RHI/RendererAPI.cpp
         Source/Core/UI/ImGuiLayer.cpp
@@ -33,12 +25,8 @@ set(ENGINE_SRC
         Source/Core/Scene/EditorCamera.cpp
         Source/Core/Scene/Components/Transform.cpp
         Source/Core/Scene/Components/Mesh.cpp
-        Source/Core/RHI/OpenGL/OpenGLShader.cpp
-        Source/Core/RHI/UniformBuffer.cpp
-        Source/Core/RHI/OpenGL/OpenGLUniformBuffer.cpp
         Source/Core/Loaders/TextureLoader.cpp
         Source/Core/RHI/Sampler.cpp
-        Source/Core/RHI/OpenGL/OpenGLConverters.cpp
         Source/Core/Utils/String.cpp
         Source/Core/Scene/AssetManager.cpp
         Source/Core/Loaders/EnvironmentMapLoader.cpp

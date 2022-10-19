@@ -1,7 +1,6 @@
 #include "Application.hpp"
 #include "Assert.hpp"
 #include "Logger.hpp"
-#include "DebugRHI.hpp"
 #include "RendererCommand.hpp"
 #include "Input.hpp"
 #include "Types.hpp"

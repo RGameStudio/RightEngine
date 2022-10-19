@@ -194,56 +194,6 @@ void VulkanShader::UnBind() const
 
 }
 
-void VulkanShader::SetUniform1ui(const std::string& name, uint32_t value)
-{
-
-}
-
-void VulkanShader::SetUniform1i(const std::string& name, int value)
-{
-
-}
-
-void VulkanShader::SetUniform1f(const std::string& name, float value)
-{
-
-}
-
-void VulkanShader::SetUniform2f(const std::string& name, float v0, float v1)
-{
-
-}
-
-void VulkanShader::SetUniform3f(const std::string& name, float v0, float v1, float v2)
-{
-
-}
-
-void VulkanShader::SetUniform3f(const std::string& name, const glm::vec3& vec3)
-{
-
-}
-
-void VulkanShader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
-{
-
-}
-
-void VulkanShader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
-{
-
-}
-
-void VulkanShader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
-{
-
-}
-
-void VulkanShader::SetUniform1iv(const std::string& name, const std::vector<int>& v)
-{
-
-}
-
 VkVertexInputBindingDescription VulkanShader::GetVertexFormatDescription() const
 {
     VkVertexInputBindingDescription bindingDescription{};

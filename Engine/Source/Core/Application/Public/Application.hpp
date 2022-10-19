@@ -1,8 +1,5 @@
 #pragma once
 
-#include "IndexBuffer.hpp"
-#include "VertexBuffer.hpp"
-#include "VertexArray.hpp"
 #include "Shader.hpp"
 #include "Window.hpp"
 #include "Camera.hpp"

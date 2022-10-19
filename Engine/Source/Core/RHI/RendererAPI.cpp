@@ -1,6 +1,5 @@
 #include "RendererAPI.hpp"
 #include "Assert.hpp"
-#include "OpenGL/OpenGLRendererAPI.hpp"
 #include "Vulkan/VulkanRendererAPI.hpp"
 
 using namespace RightEngine;

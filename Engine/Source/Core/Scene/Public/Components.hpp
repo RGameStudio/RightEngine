@@ -1,6 +1,5 @@
 #pragma once
 
-#include "VertexArray.hpp"
 #include "Material.hpp"
 #include "EnvironmentMapLoader.hpp"
 #include <glm/glm.hpp>
@@ -62,8 +61,15 @@ namespace RightEngine
     public:
         MeshComponent();
 
-        const std::shared_ptr<VertexArray>& GetVertexArray() const;
-        void SetVertexArray(std::shared_ptr<VertexArray>& newVertexArray);
+        const std::shared_ptr<Buffer>& GetVertexBuffer() const
+        { return vertexBuffer; }
+        void SetVertexBuffer(std::shared_ptr<Buffer>& aVertexBuffer)
+        { vertexBuffer = aVertexBuffer; }
+
+        const std::shared_ptr<Buffer>& GetIndexBuffer() const
+        { return indexBuffer; }
+        void SetIndexBuffer(std::shared_ptr<Buffer>& anIndexBuffer)
+        { indexBuffer = anIndexBuffer; }
 
         const std::shared_ptr<Material>& GetMaterial() const;
         void SetMaterial(const std::shared_ptr<Material>& newMaterial);
@@ -75,7 +81,8 @@ namespace RightEngine
         { isVisible = aIsVisible; }
 
     private:
-        std::shared_ptr<VertexArray> vertexArray;
+        std::shared_ptr<Buffer> vertexBuffer;
+        std::shared_ptr<Buffer> indexBuffer;
         std::shared_ptr<Material> material;
         bool isVisible{ true };
     };
