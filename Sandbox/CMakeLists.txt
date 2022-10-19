@@ -23,6 +23,7 @@ target_link_libraries(Sandbox
         ${Vulkan_LIBRARY}
         glslang-default-resource-limits
         vk-tools
+        VulkanMemoryAllocator
 )
 
 if (WIN32)

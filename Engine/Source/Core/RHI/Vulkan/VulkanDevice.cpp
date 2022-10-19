@@ -153,6 +153,7 @@ void VulkanDevice::Init(const std::shared_ptr<VulkanRenderingContext>& context)
     PickPhysicalDevice(context);
     CreateLogicalDevice(context);
     SetupDeviceQueues(context);
+    SetupAllocator(context);
 }
 
 void VulkanDevice::PickPhysicalDevice(const std::shared_ptr<VulkanRenderingContext>& context)
@@ -256,6 +257,7 @@ QueueFamilyIndices VulkanDevice::FindQueueFamilies() const
 
 VulkanDevice::~VulkanDevice()
 {
+    vmaDestroyAllocator(allocator);
     vkDestroyDevice(device, nullptr);
 }
 
@@ -289,4 +291,13 @@ std::shared_ptr<Texture> VulkanDevice::CreateTexture(const TextureDescriptor& de
 std::shared_ptr<Sampler> VulkanDevice::CreateSampler(const SamplerDescriptor& descriptor)
 {
     return std::make_shared<VulkanSampler>(shared_from_this(), descriptor);
+}
+
+void VulkanDevice::SetupAllocator(const std::shared_ptr<VulkanRenderingContext>& context)
+{
+    VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.physicalDevice = physicalDevice;
+    allocatorInfo.device = device;
+    allocatorInfo.instance = context->GetInstance();
+    vmaCreateAllocator(&allocatorInfo, &allocator);
 }

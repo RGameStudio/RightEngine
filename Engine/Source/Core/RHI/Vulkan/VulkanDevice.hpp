@@ -3,6 +3,7 @@
 #include "Device.hpp"
 #include "VulkanRenderingContext.hpp"
 #include "VulkanSurface.hpp"
+#include <VulkanMemoryAllocator/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 #include <optional>
 
@@ -67,18 +68,21 @@ namespace RightEngine
         }
 
         SwapchainSupportDetails GetSwapchainSupportDetails() const;
-
         QueueFamilyIndices FindQueueFamilies() const;
+        VmaAllocator GetAllocator() const
+        { return allocator; }
 
     private:
         VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
         VkDevice device{ VK_NULL_HANDLE };
         VkQueue graphicsQueue;
         VkQueue presentQueue;
+        VmaAllocator allocator;
 
         void Init(const std::shared_ptr<VulkanRenderingContext>& context);
         void PickPhysicalDevice(const std::shared_ptr<VulkanRenderingContext>& context);
         void CreateLogicalDevice(const std::shared_ptr<VulkanRenderingContext>& context);
         void SetupDeviceQueues(const std::shared_ptr<VulkanRenderingContext>& context);
+        void SetupAllocator(const std::shared_ptr<VulkanRenderingContext>& context);
     };
 }

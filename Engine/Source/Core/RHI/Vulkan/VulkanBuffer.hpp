@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Buffer.hpp"
+#include <VulkanMemoryAllocator/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
 namespace RightEngine
@@ -20,7 +21,7 @@ namespace RightEngine
 
     private:
         VkBuffer buffer{ VK_NULL_HANDLE };
-        VkDeviceMemory memory{ VK_NULL_HANDLE };
+        VmaAllocation allocation;
         // Is used only for constant buffer
         mutable uint8_t* bufferData{ nullptr };
     };

@@ -26,15 +26,23 @@ VulkanBuffer::VulkanBuffer(std::shared_ptr<Device> device, const BufferDescripto
 
         const auto vulkanDevice = std::static_pointer_cast<VulkanDevice>(device);
 
-        if (vkCreateBuffer(vulkanDevice->GetDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-        {
-            R_CORE_ASSERT(false, "failed to create vertex buffer!");
-        }
+        VmaAllocationCreateInfo vmaAllocInfo = {};
+        vmaAllocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
-        VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(vulkanDevice->GetDevice(), buffer, &memRequirements);
-        memory = VulkanUtils::AllocateMemory(memRequirements, VulkanConverters::MemoryProperty(bufferDescriptor.memoryType));
-        vkBindBufferMemory(vulkanDevice->GetDevice(), buffer, memory, 0);
+        vmaCreateBuffer(vulkanDevice->GetAllocator(), &bufferInfo, &vmaAllocInfo,
+                        &buffer,
+                        &allocation,
+                        nullptr);
+
+//        if (vkCreateBuffer(vulkanDevice->GetDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+//        {
+//            R_CORE_ASSERT(false, "failed to create vertex buffer!");
+//        }
+//
+//        VkMemoryRequirements memRequirements;
+//        vkGetBufferMemoryRequirements(vulkanDevice->GetDevice(), buffer, &memRequirements);
+//        memory = VulkanUtils::AllocateMemory(memRequirements, VulkanConverters::MemoryProperty(bufferDescriptor.memoryType));
+//        vkBindBufferMemory(vulkanDevice->GetDevice(), buffer, memory, 0);
     }
 
     if (data)
@@ -56,7 +64,8 @@ void* VulkanBuffer::Map() const
         return bufferData;
     }
     void* data;
-    vkMapMemory(VK_DEVICE()->GetDevice(), memory, 0, descriptor.size, 0, &data);
+//    vkMapMemory(VK_DEVICE()->GetDevice(), memory, 0, descriptor.size, 0, &data);
+    vmaMapMemory(VK_DEVICE()->GetAllocator(), allocation, &data);
     return data;
 }
 
@@ -66,7 +75,7 @@ void VulkanBuffer::UnMap() const
     {
         return;
     }
-    vkUnmapMemory(VK_DEVICE()->GetDevice(), memory);
+    vmaUnmapMemory(VK_DEVICE()->GetAllocator(), allocation);
 }
 
 VulkanBuffer::~VulkanBuffer()
@@ -77,5 +86,6 @@ VulkanBuffer::~VulkanBuffer()
         return;
     }
     vkDestroyBuffer(VK_DEVICE()->GetDevice(), buffer, nullptr);
-    vkFreeMemory(VK_DEVICE()->GetDevice(), memory, nullptr);
+//    vkFreeMemory(VK_DEVICE()->GetDevice(), memory, nullptr);
+    vmaFreeMemory(VK_DEVICE()->GetAllocator(), allocation);
 }
