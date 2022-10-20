@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core.hpp"
-#include "FrameBuffer.hpp"
 #include "Texture.hpp"
 
 class SandboxLayer : public RightEngine::Layer
@@ -16,7 +15,6 @@ private:
     std::shared_ptr<RightEngine::Scene> scene;
     std::shared_ptr<RightEngine::Shader> shader;
     std::shared_ptr<RightEngine::Renderer> renderer;
-    std::shared_ptr<RightEngine::Framebuffer> frameBuffer;
     std::shared_ptr<RightEngine::Texture> texture;
     uint32_t id;
 };

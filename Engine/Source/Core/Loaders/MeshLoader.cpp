@@ -33,16 +33,23 @@ namespace
         layout.Push<float>(3);
 
         auto mesh = std::make_shared<MeshComponent>();
-//        auto vertexArray = std::make_shared<VertexArray>();
-//        vertexArray->AddBuffer(std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex)), layout);
-//        if (!indexes.empty())
-//        {
-//            vertexArray->AddBuffer(std::make_shared<IndexBuffer>(indexes.data(), indexes.size()));
-//        }
-//
-//        mesh->SetVertexArray(vertexArray);
-//        const auto vertexBuffer = Device::Get()->CreateBuffer()
-//        mesh->SetMaterial(material);
+        BufferDescriptor vertexBufferDescriptor{};
+        vertexBufferDescriptor.type = BufferType::VERTEX;
+        vertexBufferDescriptor.size = vertices.size() * sizeof(Vertex);
+        vertexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
+        const auto vertexBuffer = Device::Get()->CreateBuffer(vertexBufferDescriptor, vertices.data());
+        mesh->SetVertexBuffer(vertexBuffer, std::make_shared<VertexBufferLayout>(layout));
+
+        if (!indexes.empty())
+        {
+            BufferDescriptor indexBufferDescriptor{};
+            vertexBufferDescriptor.type = BufferType::INDEX;
+            vertexBufferDescriptor.size = indexes.size();
+            vertexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
+            const auto indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indexes.data());
+            mesh->SetIndexBuffer(indexBuffer);
+        }
+        mesh->SetMaterial(material);
 
         return mesh;
     }

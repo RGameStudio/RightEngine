@@ -41,7 +41,7 @@ void RendererCommand::Draw(const std::shared_ptr<CommandBuffer>& cmd,
                            uint32_t vertexCount,
                            uint32_t instanceCount)
 {
-    R_CORE_ASSERT(buffer->GetDescriptor().type == BUFFER_TYPE_VERTEX
+    R_CORE_ASSERT(buffer->GetDescriptor().type == BufferType::VERTEX
                   && buffer->GetDescriptor().size > 0
                   && vertexCount > 0
                   && instanceCount > 0, "");
@@ -54,8 +54,8 @@ void RendererCommand::DrawIndexed(const std::shared_ptr<CommandBuffer>& cmd,
                                   uint32_t indexCount,
                                   uint32_t instanceCount)
 {
-    R_CORE_ASSERT(vertexBuffer->GetDescriptor().type == BUFFER_TYPE_VERTEX
-                  && indexBuffer->GetDescriptor().type == BUFFER_TYPE_INDEX
+    R_CORE_ASSERT(vertexBuffer->GetDescriptor().type == BufferType::VERTEX
+                  && indexBuffer->GetDescriptor().type == BufferType::INDEX
                   && vertexBuffer->GetDescriptor().size > 0
                   && indexBuffer->GetDescriptor().size > 0
                   && indexCount > 0

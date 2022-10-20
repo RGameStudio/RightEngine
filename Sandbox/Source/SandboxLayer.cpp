@@ -96,25 +96,25 @@ void SandboxLayer::OnAttach()
 {
     renderer = new Renderer();
     BufferDescriptor bufferDescriptor{};
-    bufferDescriptor.type = BUFFER_TYPE_VERTEX;
+    bufferDescriptor.type = BufferType::VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
     bufferDescriptor.memoryType = RightEngine::MemoryType::CPU_GPU;
     vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
     BufferDescriptor indexBufferDescriptor{};
-    indexBufferDescriptor.type = BUFFER_TYPE_INDEX;
+    indexBufferDescriptor.type = BufferType::INDEX;
     indexBufferDescriptor.size = sizeof(indices);
     indexBufferDescriptor.memoryType = RightEngine::MemoryType::CPU_GPU;
     indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
 
     BufferDescriptor transformConstantDesc{};
-    transformConstantDesc.type = BUFFER_TYPE_UNIFORM;
+    transformConstantDesc.type = BufferType::UNIFORM;
     transformConstantDesc.size = sizeof(TransformConstant);
     transformConstantDesc.memoryType = RightEngine::MemoryType::CPU_GPU;
     transformUBO = Device::Get()->CreateBuffer(transformConstantDesc, nullptr);
 
     BufferDescriptor sceneUBODesc{};
-    sceneUBODesc.type = BUFFER_TYPE_UNIFORM;
+    sceneUBODesc.type = BufferType::UNIFORM;
     sceneUBODesc.size = sizeof(SceneUBO);
     sceneUBODesc.memoryType = RightEngine::MemoryType::CPU_GPU;
     sceneUBO = Device::Get()->CreateBuffer(sceneUBODesc, nullptr);
@@ -133,8 +133,8 @@ void SandboxLayer::OnAttach()
     layout.Push<glm::vec2>();
     shaderProgramDescriptor.layout = layout;
     shaderProgramDescriptor.reflection.textures = { 2 };
-    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
-    shaderProgramDescriptor.reflection.buffers[{ 1, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
+    shaderProgramDescriptor.reflection.buffers[{ 1, ShaderType::VERTEX }] = BufferType::UNIFORM;
     const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
     const auto window = Application::Get().GetWindow();

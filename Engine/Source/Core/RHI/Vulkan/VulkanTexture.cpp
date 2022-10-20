@@ -92,7 +92,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     {
         BufferDescriptor stagingBufferDesc;
         stagingBufferDesc.size = specification.GetTextureSize();
-        stagingBufferDesc.type = BUFFER_TYPE_TRANSFER_SRC;
+        stagingBufferDesc.type = BufferType::TRANSFER_SRC;
         stagingBufferDesc.memoryType = MemoryType::CPU_ONLY;
         stagingBuffer = device->CreateBuffer(stagingBufferDesc, nullptr);
         auto ptr = stagingBuffer->Map();

@@ -2,7 +2,6 @@
 #include "Renderer.hpp"
 #include "EditorCamera.hpp"
 #include "RendererCommand.hpp"
-#include "UniformBuffer.hpp"
 #include "Entity.hpp"
 #include "Components.hpp"
 #include "Texture.hpp"
@@ -111,7 +110,7 @@ namespace
 
     struct LayerSceneData
     {
-        std::shared_ptr<UniformBuffer> materialUniformBuffer;
+        std::shared_ptr<Buffer> materialUniformBuffer;
         std::shared_ptr<EditorCamera> camera;
         std::shared_ptr<Entity> skyboxCube;
         std::shared_ptr<Shader> skyboxShader;
@@ -121,7 +120,7 @@ namespace
         PropertyPanel propertyPanel;
         MeshLoader meshLoader;
         std::shared_ptr<MeshNode> gun;
-        std::shared_ptr<UniformBuffer> lightUniformBuffer;
+        std::shared_ptr<Buffer> lightUniformBuffer;
         UIState uiState;
     };
 

@@ -63,16 +63,22 @@ namespace RightEngine
 
         const std::shared_ptr<Buffer>& GetVertexBuffer() const
         { return vertexBuffer; }
-        void SetVertexBuffer(std::shared_ptr<Buffer>& aVertexBuffer)
-        { vertexBuffer = aVertexBuffer; }
+        void SetVertexBuffer(const std::shared_ptr<Buffer>& aVertexBuffer, const std::shared_ptr<VertexBufferLayout>& aLayout)
+        {
+            vertexBuffer = aVertexBuffer;
+            vertexLayout = aLayout;
+        }
 
         const std::shared_ptr<Buffer>& GetIndexBuffer() const
         { return indexBuffer; }
-        void SetIndexBuffer(std::shared_ptr<Buffer>& anIndexBuffer)
+        void SetIndexBuffer(const std::shared_ptr<Buffer>& anIndexBuffer)
         { indexBuffer = anIndexBuffer; }
 
         const std::shared_ptr<Material>& GetMaterial() const;
         void SetMaterial(const std::shared_ptr<Material>& newMaterial);
+
+        const std::shared_ptr<VertexBufferLayout>& GetVertexLayout() const
+        { return vertexLayout; }
 
         inline bool IsVisible() const
         { return isVisible; }
@@ -84,6 +90,7 @@ namespace RightEngine
         std::shared_ptr<Buffer> vertexBuffer;
         std::shared_ptr<Buffer> indexBuffer;
         std::shared_ptr<Material> material;
+        std::shared_ptr<VertexBufferLayout> vertexLayout;
         bool isVisible{ true };
     };
 

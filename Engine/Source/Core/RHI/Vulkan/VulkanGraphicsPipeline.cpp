@@ -18,7 +18,7 @@ namespace
         std::vector<VkWriteDescriptorSet> writeDescriptorSet;
         for (const auto& [slot, buffer] : buffers)
         {
-            if (buffer->GetDescriptor().type == BUFFER_TYPE_CONSTANT)
+            if (buffer->GetDescriptor().type == BufferType::CONSTANT)
             {
                 continue;
             }
@@ -52,7 +52,7 @@ namespace
         uint32_t offset = 0;
         for (const auto& [slot, buffer] : buffers)
         {
-            if (buffer->GetDescriptor().type == BUFFER_TYPE_CONSTANT)
+            if (buffer->GetDescriptor().type == BufferType::CONSTANT)
             {
                 VkPushConstantRange range;
                 range.offset = offset;
@@ -343,7 +343,7 @@ void VulkanGraphicsPipeline::CreateDescriptorSets()
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     for (const auto& [bufferRef, bufferType] : pipelineDescriptor.shader->GetShaderProgramDescriptor().reflection.buffers)
     {
-        if (bufferType == BUFFER_TYPE_UNIFORM)
+        if (bufferType == BufferType::UNIFORM)
         {
             VkDescriptorSetLayoutBinding bufferLayoutBinding{};
             bufferLayoutBinding.binding = bufferRef.slot;

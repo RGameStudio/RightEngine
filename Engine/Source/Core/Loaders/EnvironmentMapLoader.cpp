@@ -152,7 +152,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     layout.Push<glm::vec2>();
     shaderProgramDescriptor.layout = layout;
     shaderProgramDescriptor.reflection.textures = { 1 };
-    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
     const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
     TextureDescriptor cubeDesc;
@@ -203,12 +203,12 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
         glm::mat4 projection;
     };
     BufferDescriptor bufferDescriptor{};
-    bufferDescriptor.type = BUFFER_TYPE_VERTEX;
+    bufferDescriptor.type = BufferType::VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
-    bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
+    bufferDescriptor.type = BufferType::VERTEX;
     bufferDescriptor.size = sizeof(Camera);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
@@ -275,7 +275,7 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
     layout.Push<glm::vec2>();
     shaderProgramDescriptor.layout = layout;
     shaderProgramDescriptor.reflection.textures = { 1 };
-    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
     const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
     TextureDescriptor colorAttachmentDesc{};
@@ -319,12 +319,12 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
         glm::mat4 projection;
     };
     BufferDescriptor bufferDescriptor{};
-    bufferDescriptor.type = BUFFER_TYPE_VERTEX;
+    bufferDescriptor.type = BufferType::VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
-    bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
+    bufferDescriptor.type = BufferType::UNIFORM;
     bufferDescriptor.size = sizeof(Camera);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
@@ -391,8 +391,8 @@ void EnvironmentMapLoader::ComputeRadianceMap()
     layout.Push<glm::vec2>();
     shaderProgramDescriptor.layout = layout;
     shaderProgramDescriptor.reflection.textures = { 1 };
-    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BUFFER_TYPE_UNIFORM;
-    shaderProgramDescriptor.reflection.buffers[{ 2, ShaderType::FRAGMENT }] = BUFFER_TYPE_UNIFORM;
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
+    shaderProgramDescriptor.reflection.buffers[{ 2, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
     const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
     
     TextureDescriptor colorAttachmentDesc{};
@@ -437,16 +437,16 @@ void EnvironmentMapLoader::ComputeRadianceMap()
     float roughness;
     
     BufferDescriptor bufferDescriptor{};
-    bufferDescriptor.type = BUFFER_TYPE_VERTEX;
+    bufferDescriptor.type = BufferType::VERTEX;
     bufferDescriptor.size = sizeof(cubeVertexData);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
-    bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
+    bufferDescriptor.type = BufferType::UNIFORM;
     bufferDescriptor.size = sizeof(Camera);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
-    bufferDescriptor.type = BUFFER_TYPE_UNIFORM;
+    bufferDescriptor.type = BufferType::UNIFORM;
     bufferDescriptor.size = sizeof(roughness);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto roughnessBuffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
@@ -570,7 +570,7 @@ void EnvironmentMapLoader::ComputeLUT()
     colorAttachment->SetSampler(sampler);
     
     BufferDescriptor bufferDescriptor{};
-    bufferDescriptor.type = BUFFER_TYPE_VERTEX;
+    bufferDescriptor.type = BufferType::VERTEX;
     bufferDescriptor.size = sizeof(quadVertexData);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, quadVertexData);

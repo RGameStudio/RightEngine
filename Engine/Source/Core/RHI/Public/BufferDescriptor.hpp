@@ -4,14 +4,14 @@
 
 namespace RightEngine
 {
-    enum BufferType
+    enum class BufferType
     {
-        BUFFER_TYPE_VERTEX = BIT(0),
-        BUFFER_TYPE_TRANSFER_SRC = BIT(1),
-        BUFFER_TYPE_TRANSFER_DST = BIT(2),
-        BUFFER_TYPE_INDEX = BIT(3),
-        BUFFER_TYPE_UNIFORM = BIT(4),
-        BUFFER_TYPE_CONSTANT = BIT(5),
+        VERTEX = BIT(0),
+        TRANSFER_SRC = BIT(1),
+        TRANSFER_DST = BIT(2),
+        INDEX = BIT(3),
+        UNIFORM = BIT(4),
+        CONSTANT = BIT(5),
     };
 
     struct BufferDescriptor

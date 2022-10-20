@@ -71,29 +71,21 @@ namespace RightEngine
 
         inline static VkBufferUsageFlags BufferUsage(BufferType type)
         {
-            VkBufferUsageFlags flags = 0;
-            if (type & BUFFER_TYPE_VERTEX)
+            switch (type)
             {
-                flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+                case BufferType::VERTEX:
+                    return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+                case BufferType::INDEX:
+                    return VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+                case BufferType::UNIFORM:
+                    return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+                case BufferType::TRANSFER_DST:
+                    return VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+                case BufferType::TRANSFER_SRC:
+                    return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+                default:
+                R_CORE_ASSERT(false, "");
             }
-            if (type & BUFFER_TYPE_TRANSFER_SRC)
-            {
-                flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-            }
-            if (type & BUFFER_TYPE_TRANSFER_DST)
-            {
-                flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-            }
-            if (type & BUFFER_TYPE_INDEX)
-            {
-                flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-            }
-            if (type & BUFFER_TYPE_UNIFORM)
-            {
-                flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-            }
-
-            return flags;
         }
 /*
         inline static VkMemoryPropertyFlags MemoryProperty(MemoryType type)

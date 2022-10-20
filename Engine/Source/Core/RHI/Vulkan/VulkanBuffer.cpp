@@ -10,7 +10,7 @@ VulkanBuffer::VulkanBuffer(std::shared_ptr<Device> device, const BufferDescripto
                                                                                                                                 bufferDescriptor,
                                                                                                                                 data)
 {
-    if (bufferDescriptor.type == BUFFER_TYPE_CONSTANT)
+    if (bufferDescriptor.type == BufferType::CONSTANT)
     {
         R_CORE_ASSERT(bufferDescriptor.size < 128, "");
         bufferData = new uint8_t[bufferDescriptor.size];
@@ -45,7 +45,7 @@ VulkanBuffer::VulkanBuffer(std::shared_ptr<Device> device, const BufferDescripto
 
 void* VulkanBuffer::Map() const
 {
-    if (descriptor.type == BUFFER_TYPE_CONSTANT)
+    if (descriptor.type == BufferType::CONSTANT)
     {
         if (!bufferData)
         {
@@ -61,7 +61,7 @@ void* VulkanBuffer::Map() const
 
 void VulkanBuffer::UnMap() const
 {
-    if (descriptor.type == BUFFER_TYPE_CONSTANT)
+    if (descriptor.type == BufferType::CONSTANT)
     {
         return;
     }
@@ -70,7 +70,7 @@ void VulkanBuffer::UnMap() const
 
 VulkanBuffer::~VulkanBuffer()
 {
-    if (descriptor.type == BUFFER_TYPE_CONSTANT)
+    if (descriptor.type == BufferType::CONSTANT)
     {
         delete[] bufferData;
         return;
