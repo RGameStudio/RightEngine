@@ -8,21 +8,19 @@ namespace RightEngine
 {
     struct TextureLoaderOptions
     {
+        Format format = Format::NONE;
+        bool chooseFormat{ true };
+        bool flipVertically{ false };
     };
-
-//TODO: Implement custom coverter for 3 channel textures
 
     class TextureLoader
     {
     public:
-        TextureLoader(const TextureLoaderOptions& options = TextureLoaderOptions());
+        std::pair<std::vector<uint8_t>, TextureDescriptor> Load(const std::string& path,
+                                  const TextureLoaderOptions& options = {}) const;
 
-        //TODO: Investigate why returning struct here leads to crash
-        std::pair<std::vector<uint8_t>, TextureDescriptor> Load(const std::string& path, bool flipVertically = false) const;
-
-        std::shared_ptr<Texture> CreateTexture(const std::string& path, bool flipVertically = false) const;
-
-    private:
-        TextureLoaderOptions options;
+        std::shared_ptr<Texture> CreateTexture(const std::string& path,
+                                               TextureType type = TextureType::TEXTURE_2D,
+                                               const TextureLoaderOptions& options = {}) const;
     };
 }

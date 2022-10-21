@@ -14,7 +14,12 @@ namespace RightEngine
     struct LoaderOptions
     {
         bool flipTextureVertically{ false };
+        bool convertTextureFormat{ false };
     };
+
+    // TODO: Implement AssetManager in a new way
+    // Use AssetHandle with UUID to refer to specific asset
+    // Use assets factories to use asset-specific loading options with ease
 
     class AssetManager
     {
@@ -64,7 +69,7 @@ namespace RightEngine
         template<class T>
         void CacheAsset(const std::shared_ptr<T>& ptr, const std::string& id, AssetType type)
         {
-            R_CORE_ASSERT(static_cast<bool>(std::is_base_of<AssetBase, T>::value), "");
+            R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
             auto basePtr = std::dynamic_pointer_cast<AssetBase>(ptr);
             R_CORE_ASSERT(basePtr != nullptr, "");
             basePtr->id = id;
@@ -83,9 +88,10 @@ namespace RightEngine
         }
 
         TextureLoader loader;
-        auto texture = loader.CreateTexture(path, options.flipTextureVertically);
-        CacheAsset(texture, id, AssetType::IMAGE);
-        return texture;
+//        TextureDescriptor
+//        auto texture = loader.CreateTexture(path, options.flipTextureVertically);
+//        CacheAsset(texture, id, AssetType::IMAGE);
+//        return texture;
     }
 
     template<>
@@ -122,6 +128,8 @@ namespace RightEngine
     template<>
     inline std::shared_ptr<Shader> AssetManager::LoadAsset(const std::string& path, const std::string& id, const LoaderOptions& options)
     {
+        // TODO: Implement shader reflection here with this - https://github.com/KhronosGroup/SPIRV-Reflect
+        R_CORE_ASSERT(false, "");
         auto asset = GetAsset<Shader>(id);
         if (asset)
         {

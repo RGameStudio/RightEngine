@@ -16,25 +16,30 @@ namespace RightEngine
          */
         inline size_t GetTextureSize() const
         {
+            const size_t size = width * height;
+            return GetPixelSize() * size;
+        }
+
+        inline size_t GetPixelSize() const
+        {
             R_CORE_ASSERT(format != Format::NONE
                           && width > 0
                           && height > 0
                           && componentAmount > 0, "");
-            size_t size = width * height * componentAmount;
             switch (format)
             {
                 case Format::R8_UINT:
                 case Format::RGB8_UINT:
                 case Format::RGBA8_UINT:
-                    return sizeof(uint8_t) * size;
+                    return sizeof(uint8_t) * componentAmount;
                 case Format::RGB16_SFLOAT:
                 case Format::RGBA16_SFLOAT:
-                    return sizeof(float) / 2 * size;
+                    return sizeof(float) / 2 * componentAmount;
                 case Format::RGB32_SFLOAT:
                 case Format::RGBA32_SFLOAT:
-                    return sizeof(float) * size;
+                    return sizeof(float) * componentAmount;
                 case Format::RGBA8_SRGB:
-                    return sizeof(uint8_t) * size;
+                    return sizeof(uint8_t) * componentAmount;
                 default:
                 R_CORE_ASSERT(false, "");
                     return 0;

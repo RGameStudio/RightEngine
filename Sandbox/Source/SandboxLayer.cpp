@@ -198,11 +198,9 @@ void SandboxLayer::OnAttach()
 
     // Textures loading
 
-    auto [data, texDesc] = textureLoader.Load("/Assets/Textures/blue_brick_albedo.jpg");
-    texDesc.type = TextureType::TEXTURE_2D;
-    texDesc.format = Format::RGBA8_UINT;
-    texDesc.componentAmount = 4;
-    testTexture = Device::Get()->CreateTexture(texDesc, data);
+    auto [data, descriptor] = textureLoader.Load("/Assets/Textures/blue_brick_albedo.jpg");
+    descriptor.type = TextureType::TEXTURE_2D;
+    testTexture = Device::Get()->CreateTexture(descriptor, data);
     SamplerDescriptor samplerDescriptor{};
     testTexture->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));
 
@@ -216,7 +214,7 @@ void SandboxLayer::OnAttach()
 void SandboxLayer::OnUpdate(float ts)
 {
     EnvironmentMapLoader loader;
-    loader.Load("/Assets/Textures/env_sdr.png", true);
+    loader.Load("/Assets/Textures/env_helipad.hdr", true);
     TransformConstant transformConstantValue;
     SceneUBO sceneUboValue;
     transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));

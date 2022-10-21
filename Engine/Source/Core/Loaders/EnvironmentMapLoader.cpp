@@ -132,11 +132,7 @@ void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
 void EnvironmentMapLoader::ComputeEnvironmentMap()
 {
     TextureLoader textureLoader;
-    auto [data, textureSpec] = textureLoader.Load(loaderContext.path, loaderContext.flipVertically);
-    textureSpec.format = Format::RGBA8_SRGB;
-    textureSpec.type = TextureType::TEXTURE_2D;
-    loaderContext.specification = textureSpec;
-    const auto equirectMap = Device::Get()->CreateTexture(textureSpec, data);
+    const auto equirectMap = textureLoader.CreateTexture(loaderContext.path);
 
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;

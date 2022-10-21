@@ -43,20 +43,6 @@ namespace RightEngine
         virtual void Bind(uint32_t slot = 0) const = 0;
         virtual void UnBind() const = 0;
 
-        static std::shared_ptr<Texture> Create(const TextureDescriptor& aSpecification,
-                                               const std::vector<uint8_t>& data)
-        {
-            R_CORE_ASSERT(false, "");
-            return nullptr;
-        }
-
-        static std::shared_ptr<Texture> Create(const TextureDescriptor& aSpecification,
-                                               const CubemapFaces& faces)
-        {
-            R_CORE_ASSERT(false, "");
-            return nullptr;
-        }
-
     protected:
         Texture(const std::shared_ptr<Device>& device,
                 const TextureDescriptor& aSpecification,
