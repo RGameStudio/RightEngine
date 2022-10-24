@@ -13,9 +13,10 @@ namespace RightEngine
         Camera(const glm::vec3& position, const glm::vec3& worldUp);
         ~Camera();
 
-        virtual void OnUpdate();
+        void OnUpdate(float deltaTime);
 
         glm::mat4 GetViewMatrix() const;
+        glm::mat4 GetProjectionMatrix() const;
 
         const glm::vec3& GetPosition() const;
         const glm::vec3& GetRotation() const;
@@ -48,6 +49,11 @@ namespace RightEngine
         { zNear = aNear; }
         void SetFar(float aFar)
         { zFar = aFar; }
+        void SetActive(bool isActive)
+        { active = isActive; }
+
+        void Move(int keycode);
+        void Rotate(float x, float y);
 
     protected:
         glm::vec3 position;
@@ -66,14 +72,12 @@ namespace RightEngine
         float actualSpeed{ 1.0f };
         float prevXMousePos{ -1 };
         float prevYMousePos{ -1 };
+        float positionDelta = 0.0f;
 
-        bool active{ true };
+        bool active{true };
         bool invertY{ false };
 
     private:
         void UpdateVectors();
-        bool OnEvent(const Event& event);
-        bool OnMouseMove(const MouseMovedEvent& e);
-        void Move();
     };
 }

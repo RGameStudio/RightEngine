@@ -3,6 +3,7 @@
 #include "TextureLoader.hpp"
 #include "RendererState.hpp"
 #include "RendererCommand.hpp"
+#include "KeyCodes.hpp"
 #include <glm/gtx/transform.hpp>
 
 using namespace RightEngine;
@@ -90,6 +91,8 @@ namespace
     TextureLoader textureLoader;
     std::shared_ptr<Texture> testTexture;
     std::shared_ptr<RendererState> rendererState;
+
+    Camera camera(glm::vec3(2), glm::vec3(0, 1, 0));
 }
 
 void SandboxLayer::OnAttach()
@@ -136,6 +139,8 @@ void SandboxLayer::OnAttach()
     glfwGetFramebufferSize(static_cast<GLFWwindow*>(window->GetNativeHandle()), &extent.x, &extent.y);
     GraphicsPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.shader = shader;
+
+    camera.SetAspectRatio(window->GetWidth() / window->GetHeight());
 
     // Default offscreen rendering pipeline
 
@@ -195,15 +200,37 @@ void SandboxLayer::OnAttach()
     rendererState->SetVertexBuffer(transformUBO, 0);
     rendererState->SetTexture(testTexture, 2);
     rendererState->OnUpdate(graphicsPipeline);
+
+    EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(SandboxLayer::OnEvent));
+    camera.SetMovementSpeed(20.0f);
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
+    if (Input::IsKeyDown(R_KEY_W))
+    {
+        camera.Move(R_KEY_W);
+    }
+    if (Input::IsKeyDown(R_KEY_S))
+    {
+        camera.Move(R_KEY_S);
+    }
+    if (Input::IsKeyDown(R_KEY_A))
+    {
+        camera.Move(R_KEY_A);
+    }
+    if (Input::IsKeyDown(R_KEY_D))
+    {
+        camera.Move(R_KEY_D);
+    }
+
+    camera.OnUpdate(ts);
+
     TransformConstant transformConstantValue;
     SceneUBO sceneUboValue;
     transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
-    sceneUboValue.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    sceneUboValue.projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080, 0.1f, 10.0f);
+    sceneUboValue.view = camera.GetViewMatrix();
+    sceneUboValue.projection = camera.GetProjectionMatrix();
     sceneUboValue.projection[1][1] *= -1;
     auto transformConstantValuePtr = transformUBO->Map();
     memcpy(transformConstantValuePtr, &transformConstantValue, sizeof(TransformConstant));
@@ -213,6 +240,7 @@ void SandboxLayer::OnUpdate(float ts)
     memcpy(sceneUboPtr, &sceneUboValue, sizeof(SceneUBO));
     sceneUBO->UnMap();
     sceneUBO->SetNeedToSync(true);
+
     renderer->SetPipeline(graphicsPipeline);
     renderer->BeginFrame(nullptr);
     rendererState->OnUpdate(graphicsPipeline);
@@ -228,4 +256,16 @@ void SandboxLayer::OnUpdate(float ts)
 void SandboxLayer::OnImGuiRender()
 {
 
+}
+
+bool SandboxLayer::OnEvent(const Event& event)
+{
+    if (event.GetType() == MouseMovedEvent::descriptor)
+    {
+        MouseMovedEvent mouseMovedEvent = static_cast<const MouseMovedEvent&>(event);
+        camera.Rotate(mouseMovedEvent.GetX(), mouseMovedEvent.GetY());
+        return true;
+    }
+
+    return false;
 }

@@ -22,7 +22,6 @@ set(ENGINE_SRC
         Source/Core/RHI/RendererAPI.cpp
         Source/Core/UI/ImGuiLayer.cpp
         Source/Core/UI/ImGuiBuild.cpp
-        Source/Core/Scene/EditorCamera.cpp
         Source/Core/Scene/Components/Transform.cpp
         Source/Core/Scene/Components/Mesh.cpp
         Source/Core/Loaders/TextureLoader.cpp

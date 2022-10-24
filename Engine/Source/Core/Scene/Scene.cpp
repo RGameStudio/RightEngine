@@ -15,9 +15,9 @@ std::shared_ptr<Scene> Scene::Create()
     return scene;
 }
 
-void RightEngine::Scene::OnUpdate()
+void RightEngine::Scene::OnUpdate(float deltaTime)
 {
-    camera->OnUpdate();
+    camera->OnUpdate(deltaTime);
     UpdateNodeTransformRecursively(rootNode);
 }
 

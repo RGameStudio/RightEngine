@@ -2,53 +2,53 @@
 #include "Input.hpp"
 #include "EventDispatcher.hpp"
 #include "KeyCodes.hpp"
+#include "Logger.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
-RightEngine::Camera::Camera(const glm::vec3& position, const glm::vec3& worldUp) : position(position),
-                                                                                   worldUp(worldUp),
-                                                                                   rotation(90.0f, 0.0f, 0.0f)
+using namespace RightEngine;
+
+Camera::Camera(const glm::vec3& position, const glm::vec3& worldUp) : position(position),
+                                                                      worldUp(worldUp),
+                                                                      rotation(90.0f, 0.0f, 0.0f)
 {
     UpdateVectors();
-    EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(Camera::OnEvent));
 }
 
-RightEngine::Camera::~Camera()
+Camera::~Camera()
 {
-    EventDispatcher::Get().UnSubscribe(MouseMovedEvent::descriptor, CallbackContext(nullptr, this));
 }
 
-void RightEngine::Camera::OnUpdate()
+void Camera::OnUpdate(float deltaTime)
 {
-    actualSpeed = movementSpeed * Input::deltaTime;
-    Move();
+    actualSpeed = movementSpeed * deltaTime;
 }
 
-glm::mat4 RightEngine::Camera::GetViewMatrix() const
+glm::mat4 Camera::GetViewMatrix() const
 {
     return glm::lookAt(position, position + front, up);
 }
 
-const glm::vec3& RightEngine::Camera::GetPosition() const
+const glm::vec3& Camera::GetPosition() const
 {
     return position;
 }
 
-const glm::vec3& RightEngine::Camera::GetRotation() const
+const glm::vec3& Camera::GetRotation() const
 {
     return rotation;
 }
 
-const glm::vec3& RightEngine::Camera::GetFront() const
+const glm::vec3& Camera::GetFront() const
 {
     return front;
 }
 
-float RightEngine::Camera::GetMovementSpeed() const
+float Camera::GetMovementSpeed() const
 {
     return movementSpeed;
 }
 
-void RightEngine::Camera::UpdateVectors()
+void Camera::UpdateVectors()
 {
     float yaw = rotation[0];
     float pitch = rotation[1];
@@ -62,31 +62,41 @@ void RightEngine::Camera::UpdateVectors()
     up = glm::normalize(glm::cross(right, front));
 }
 
-bool RightEngine::Camera::OnEvent(const Event& event)
+void Camera::Move(int keycode)
 {
-    if (event.GetType() == MouseMovedEvent::descriptor)
+    if (keycode == R_KEY_W)
     {
-        return OnMouseMove(static_cast<const MouseMovedEvent&>(event));
+        position += actualSpeed * front;
     }
-
-    return true;
+    if (keycode == R_KEY_S)
+    {
+        position -= actualSpeed * front;
+    }
+    if (keycode == R_KEY_A)
+    {
+        position -= glm::normalize(glm::cross(front, up)) * actualSpeed;
+    }
+    if (keycode == R_KEY_D)
+    {
+        position += glm::normalize(glm::cross(front, up)) * actualSpeed;
+    }
 }
 
-bool RightEngine::Camera::OnMouseMove(const MouseMovedEvent& e)
+void Camera::Rotate(float x, float y)
 {
     if (!active)
     {
-        prevXMousePos = e.GetX();
-        prevYMousePos = e.GetY();
-        return true;
+        prevXMousePos = x;
+        prevYMousePos = y;
+        return;
     }
     if (prevXMousePos == -1)
     {
-        prevXMousePos = e.GetX();
-        prevYMousePos = e.GetY();
+        prevXMousePos = x;
+        prevYMousePos = y;
     }
-    float xOffset = e.GetX() - prevXMousePos;
-    float yOffset = prevYMousePos - e.GetY();
+    float xOffset = x - prevXMousePos;
+    float yOffset = prevYMousePos - y;
     xOffset *= sensitivity;
     yOffset *= sensitivity;
 
@@ -100,7 +110,6 @@ bool RightEngine::Camera::OnMouseMove(const MouseMovedEvent& e)
         rotation[1] += yOffset;
     }
 
-
     if (rotation[1] > 89.0f)
     {
         rotation[1] = 89.0f;
@@ -110,28 +119,11 @@ bool RightEngine::Camera::OnMouseMove(const MouseMovedEvent& e)
         rotation[1] = -89.0f;
     }
     UpdateVectors();
-    prevXMousePos = e.GetX();
-    prevYMousePos = e.GetY();
-    return true;
+    prevXMousePos = x;
+    prevYMousePos = y;
 }
 
-void RightEngine::Camera::Move()
+glm::mat4 Camera::GetProjectionMatrix() const
 {
-    if(Input::IsKeyDown(R_KEY_W))
-    {
-        position += actualSpeed * front;
-    }
-    if(Input::IsKeyDown(R_KEY_S))
-    {
-        position -= actualSpeed * front;
-    }
-    if(Input::IsKeyDown(R_KEY_A))
-    {
-        position -= glm::normalize(glm::cross(front, up)) * actualSpeed;
-    }
-    if(Input::IsKeyDown(R_KEY_D))
-    {
-        position += glm::normalize(glm::cross(front, up)) * actualSpeed;
-    }
-
+    return glm::perspective(glm::radians(fov), aspectRatio, zNear, zFar);
 }

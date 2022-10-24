@@ -10,4 +10,6 @@ public:
     virtual void OnAttach() override;
     virtual void OnUpdate(float ts) override;
     virtual void OnImGuiRender() override;
+
+    bool OnEvent(const Event& event);
 };
