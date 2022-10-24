@@ -81,16 +81,6 @@ namespace
             -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     };
 
-    const float planeVertexData[] = {
-            // [position 3] [normal 3] [texture coodinate 2]
-            -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-            -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-    };
-
     std::shared_ptr<Buffer> vertexBuffer;
     std::shared_ptr<Buffer> indexBuffer;
     std::shared_ptr<Buffer> transformUBO;
@@ -107,15 +97,9 @@ void SandboxLayer::OnAttach()
     renderer = new Renderer();
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BufferType::VERTEX;
-    bufferDescriptor.size = sizeof(planeVertexData);
+    bufferDescriptor.size = sizeof(cubeVertexData);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
-    vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, planeVertexData);
-
-    BufferDescriptor indexBufferDescriptor{};
-    indexBufferDescriptor.type = BufferType::INDEX;
-    indexBufferDescriptor.size = sizeof(indices);
-    indexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
-    indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
+    vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
     BufferDescriptor transformConstantDesc{};
     transformConstantDesc.type = BufferType::UNIFORM;
@@ -169,14 +153,6 @@ void SandboxLayer::OnAttach()
     depthAttachmentDesc.height = extent.y;
     const auto depthAttachment =  Device::Get()->CreateTexture(depthAttachmentDesc, {});
 
-//    TextureDescriptor cubeDesc;
-//    cubeDesc.type = TextureType::TEXTURE_2D;
-//    cubeDesc.width = extent.x;
-//    cubeDesc.height = extent.y;
-//    cubeDesc.format = Format::BGRA8_SRGB;
-//    cubeDesc.componentAmount = 3;
-//    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
-
     RenderPassDescriptor renderPassDescriptor{};
     renderPassDescriptor.extent = extent;
     renderPassDescriptor.offscreen = true;
@@ -208,7 +184,6 @@ void SandboxLayer::OnAttach()
                                                             presentRenderPassDescriptor);
 
     // Textures loading
-
     auto [data, descriptor] = textureLoader.Load("/Assets/Textures/yellow_brick_albedo.png");
     descriptor.type = TextureType::TEXTURE_2D;
     testTexture = Device::Get()->CreateTexture(descriptor, data);
@@ -224,8 +199,6 @@ void SandboxLayer::OnAttach()
 
 void SandboxLayer::OnUpdate(float ts)
 {
-//    EnvironmentMapLoader loader;
-//    loader.Load("/Assets/Textures/env_helipad.hdr", true);
     TransformConstant transformConstantValue;
     SceneUBO sceneUboValue;
     transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));

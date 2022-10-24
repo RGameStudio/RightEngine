@@ -8,8 +8,6 @@ layout(location = 1) in vec2 fragTexCoord;
 layout(binding = 2) uniform usampler2D texSampler;
 
 void main() {
-    vec4 color = texture(texSampler, fragTexCoord);
-//    const float gamma = 2.2;
-//    color.rgb = pow(color.rgb, vec3(1.0/gamma));
+    vec4 color = texture(texSampler, fragTexCoord) / 255.0;
     outColor = color;
 }
