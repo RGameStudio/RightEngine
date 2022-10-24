@@ -31,7 +31,10 @@ namespace RightEngine
         { return sampler; }
 
         void SetSampler(const std::shared_ptr<Sampler>& aSampler)
-        { sampler = aSampler; }
+        {
+//            R_CORE_ASSERT(ValidateSampler(aSampler), "");
+            sampler = aSampler;
+        }
 
         inline const TextureDescriptor& GetSpecification() const
         { return specification; }
@@ -48,6 +51,8 @@ namespace RightEngine
                 const TextureDescriptor& aSpecification,
                 const std::vector<uint8_t>& data) : specification(aSpecification)
         {}
+
+        virtual bool ValidateSampler(const std::shared_ptr<Sampler>& sampler) const = 0;
 
         uint32_t id;
         TextureDescriptor specification;

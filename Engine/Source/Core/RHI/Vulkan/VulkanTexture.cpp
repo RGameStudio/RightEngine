@@ -282,3 +282,11 @@ void VulkanTexture::CopyFrom(const std::shared_ptr<Texture>& texture,
 
     VulkanUtils::EndCommandBuffer(VK_DEVICE(), copyCmdBuffer);
 }
+
+bool VulkanTexture::ValidateSampler(const std::shared_ptr<Sampler>& sampler) const
+{
+    bool result = false;
+    result |= vks::tools::formatIsFilterable(VK_DEVICE()->GetPhysicalDevice(), VulkanConverters::Format(specification.format), VK_IMAGE_TILING_LINEAR);
+
+    return result;
+}

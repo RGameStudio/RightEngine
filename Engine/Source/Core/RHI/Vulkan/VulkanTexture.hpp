@@ -30,8 +30,9 @@ namespace RightEngine
         static void ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layers, int mipmaps);
 
     protected:
-        void Init(const std::shared_ptr<VulkanDevice>& device,
-             const std::vector<uint8_t>& data);
+        void Init(const std::shared_ptr<VulkanDevice>& device, const std::vector<uint8_t>& data);
+
+        virtual bool ValidateSampler(const std::shared_ptr<Sampler>& sampler) const override;
 
         std::shared_ptr<Buffer> stagingBuffer;
         VkImage textureImage;

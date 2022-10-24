@@ -46,6 +46,13 @@ namespace RightEngine
 
         virtual ~VulkanRendererAPI() override;
 
+        void SetImageLayout(const VulkanCommandBuffer* cmd,
+                            VkImage image,
+                            VkImageLayout oldLayout,
+                            VkImageLayout newLayout,
+                            int layerCount,
+                            int mipmaps) const;
+
     private:
         std::shared_ptr<VulkanRenderingContext> context;
         std::shared_ptr<VulkanSurface> surface;
@@ -56,6 +63,7 @@ namespace RightEngine
         std::vector<VkFence> inFlightFences;
         VkRenderPassBeginInfo renderPassInfo{};
         VkImageCopy imageCopy;
+        mutable std::unordered_map<VkImage, VkImageLayout> imageLayouts;
 
         void CreateSyncObjects();
         void CreateSwapchain();

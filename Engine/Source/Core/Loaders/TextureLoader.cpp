@@ -44,6 +44,10 @@ std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::Load(const std:
                                                                       const TextureLoaderOptions& options) const
 {
     std::ifstream file(Path::ConvertEnginePathToOSPath(path).c_str(), std::ios::binary | std::ios::ate);
+    if (!file.is_open())
+    {
+        R_CORE_ASSERT(false, "");
+    }
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
     std::vector<char> fileBuffer(size);

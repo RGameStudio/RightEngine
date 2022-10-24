@@ -81,6 +81,16 @@ namespace
             -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     };
 
+    const float planeVertexData[] = {
+            // [position 3] [normal 3] [texture coodinate 2]
+            -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    };
+
     std::shared_ptr<Buffer> vertexBuffer;
     std::shared_ptr<Buffer> indexBuffer;
     std::shared_ptr<Buffer> transformUBO;
@@ -97,26 +107,26 @@ void SandboxLayer::OnAttach()
     renderer = new Renderer();
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BufferType::VERTEX;
-    bufferDescriptor.size = sizeof(cubeVertexData);
-    bufferDescriptor.memoryType = RightEngine::MemoryType::CPU_GPU;
-    vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
+    bufferDescriptor.size = sizeof(planeVertexData);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, planeVertexData);
 
     BufferDescriptor indexBufferDescriptor{};
     indexBufferDescriptor.type = BufferType::INDEX;
     indexBufferDescriptor.size = sizeof(indices);
-    indexBufferDescriptor.memoryType = RightEngine::MemoryType::CPU_GPU;
+    indexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
     indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
 
     BufferDescriptor transformConstantDesc{};
     transformConstantDesc.type = BufferType::UNIFORM;
     transformConstantDesc.size = sizeof(TransformConstant);
-    transformConstantDesc.memoryType = RightEngine::MemoryType::CPU_GPU;
+    transformConstantDesc.memoryType = MemoryType::CPU_GPU;
     transformUBO = Device::Get()->CreateBuffer(transformConstantDesc, nullptr);
 
     BufferDescriptor sceneUBODesc{};
     sceneUBODesc.type = BufferType::UNIFORM;
     sceneUBODesc.size = sizeof(SceneUBO);
-    sceneUBODesc.memoryType = RightEngine::MemoryType::CPU_GPU;
+    sceneUBODesc.memoryType = MemoryType::CPU_GPU;
     sceneUBO = Device::Get()->CreateBuffer(sceneUBODesc, nullptr);
 
     ShaderProgramDescriptor shaderProgramDescriptor;
@@ -150,6 +160,7 @@ void SandboxLayer::OnAttach()
     colorAttachmentDesc.type = TextureType::TEXTURE_2D;
     colorAttachmentDesc.width = extent.x;
     colorAttachmentDesc.height = extent.y;
+    colorAttachmentDesc.componentAmount = 4;
     const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
     TextureDescriptor depthAttachmentDesc{};
     depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
@@ -158,13 +169,13 @@ void SandboxLayer::OnAttach()
     depthAttachmentDesc.height = extent.y;
     const auto depthAttachment =  Device::Get()->CreateTexture(depthAttachmentDesc, {});
 
-    TextureDescriptor cubeDesc;
-    cubeDesc.type = TextureType::TEXTURE_2D;
-    cubeDesc.width = extent.x;
-    cubeDesc.height = extent.y;
-    cubeDesc.format = Format::RGBA16_SFLOAT;
-    cubeDesc.componentAmount = 3;
-    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
+//    TextureDescriptor cubeDesc;
+//    cubeDesc.type = TextureType::TEXTURE_2D;
+//    cubeDesc.width = extent.x;
+//    cubeDesc.height = extent.y;
+//    cubeDesc.format = Format::BGRA8_SRGB;
+//    cubeDesc.componentAmount = 3;
+//    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
 
     RenderPassDescriptor renderPassDescriptor{};
     renderPassDescriptor.extent = extent;
@@ -173,7 +184,7 @@ void SandboxLayer::OnAttach()
     depth.loadOperation = AttachmentLoadOperation::CLEAR;
     depth.texture = depthAttachment;
     AttachmentDescriptor color{};
-    color.texture = cubemap;
+    color.texture = colorAttachment;
     color.loadOperation = AttachmentLoadOperation::CLEAR;
     renderPassDescriptor.colorAttachments = { color };
     renderPassDescriptor.depthStencilAttachment = { depth };
@@ -198,7 +209,7 @@ void SandboxLayer::OnAttach()
 
     // Textures loading
 
-    auto [data, descriptor] = textureLoader.Load("/Assets/Textures/blue_brick_albedo.jpg");
+    auto [data, descriptor] = textureLoader.Load("/Assets/Textures/yellow_brick_albedo.png");
     descriptor.type = TextureType::TEXTURE_2D;
     testTexture = Device::Get()->CreateTexture(descriptor, data);
     SamplerDescriptor samplerDescriptor{};
@@ -213,8 +224,8 @@ void SandboxLayer::OnAttach()
 
 void SandboxLayer::OnUpdate(float ts)
 {
-    EnvironmentMapLoader loader;
-    loader.Load("/Assets/Textures/env_helipad.hdr", true);
+//    EnvironmentMapLoader loader;
+//    loader.Load("/Assets/Textures/env_helipad.hdr", true);
     TransformConstant transformConstantValue;
     SceneUBO sceneUboValue;
     transformConstantValue.transform = glm::rotate(glm::mat4(1.0f), static_cast<float>(glfwGetTime() * glm::radians(90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -229,12 +240,12 @@ void SandboxLayer::OnUpdate(float ts)
     memcpy(sceneUboPtr, &sceneUboValue, sizeof(SceneUBO));
     sceneUBO->UnMap();
     sceneUBO->SetNeedToSync(true);
-//    renderer->SetPipeline(graphicsPipeline);
-//    renderer->BeginFrame(nullptr);
-//    rendererState->OnUpdate(graphicsPipeline);
-//    renderer->EncodeState(rendererState);
-//    renderer->Draw(vertexBuffer);
-//    renderer->EndFrame();
+    renderer->SetPipeline(graphicsPipeline);
+    renderer->BeginFrame(nullptr);
+    rendererState->OnUpdate(graphicsPipeline);
+    renderer->EncodeState(rendererState);
+    renderer->Draw(vertexBuffer);
+    renderer->EndFrame();
 
     renderer->SetPipeline(presentPipeline);
     renderer->BeginFrame(nullptr);

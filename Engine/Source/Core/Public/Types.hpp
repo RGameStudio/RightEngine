@@ -37,6 +37,7 @@ namespace RightEngine
         RGB16_UNORM,
         BGRA8_SRGB,
         RGBA8_SRGB,
+        BGRA8_UNORM,
 
         //Depth buffer formats
         D24_UNORM_S8_UINT,
