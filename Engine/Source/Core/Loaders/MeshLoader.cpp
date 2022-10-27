@@ -43,9 +43,9 @@ namespace
         if (!indexes.empty())
         {
             BufferDescriptor indexBufferDescriptor{};
-            vertexBufferDescriptor.type = BufferType::INDEX;
-            vertexBufferDescriptor.size = indexes.size();
-            vertexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
+            indexBufferDescriptor.type = BufferType::INDEX;
+            indexBufferDescriptor.size = indexes.size() * sizeof(uint32_t);
+            indexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
             const auto indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indexes.data());
             mesh->SetIndexBuffer(indexBuffer);
         }
@@ -61,14 +61,19 @@ std::shared_ptr<MeshNode> MeshLoader::Load(const std::string& aPath)
     std::string meshName = aPath.substr(lastDelimIndex, aPath.size() - 1 - lastDelimIndex);
     meshDir = aPath.substr(0, lastDelimIndex);
     Assimp::Importer importer;
-    const auto scene = importer.ReadFile(Path::ConvertEnginePathToOSPath(aPath),
+    auto scene = importer.ReadFile(Path::ConvertEnginePathToOSPath(aPath),
                                          aiProcess_Triangulate
                                          | aiProcess_GenSmoothNormals
                                          | aiProcess_FlipUVs
-                                         | aiProcess_CalcTangentSpace);
+                                         | aiProcess_CalcTangentSpace
+                                         | aiProcess_GenUVCoords
+                                         | aiProcess_OptimizeGraph
+                                         | aiProcess_OptimizeMeshes
+                                         | aiProcess_JoinIdenticalVertices);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
+        const auto errorStr = importer.GetErrorString();
         R_CORE_ERROR("ASSIMP ERROR: {0}", importer.GetErrorString());
         return nullptr;
     }

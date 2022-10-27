@@ -4,6 +4,7 @@
 #include "RendererState.hpp"
 #include "RendererCommand.hpp"
 #include "KeyCodes.hpp"
+#include "MeshLoader.hpp"
 #include <glm/gtx/transform.hpp>
 
 using namespace RightEngine;
@@ -92,7 +93,25 @@ namespace
     std::shared_ptr<Texture> testTexture;
     std::shared_ptr<RendererState> rendererState;
 
-    Camera camera(glm::vec3(2), glm::vec3(0, 1, 0));
+    Camera camera(glm::vec3(0, 0, -10), glm::vec3(0, 1, 0));
+    MeshLoader meshLoader;
+    std::shared_ptr<MeshNode> mesh;
+
+    void DrawMeshNode(Renderer* renderer, const std::shared_ptr<MeshNode>& node, bool recursive)
+    {
+        for (const auto& meshNode : mesh->meshes)
+        {
+            renderer->Draw(meshNode->GetVertexBuffer(), meshNode->GetIndexBuffer());
+        }
+
+        if (recursive)
+        {
+            for (const auto& child : node->children)
+            {
+                DrawMeshNode(renderer, child, true);
+            }
+        }
+    }
 }
 
 void SandboxLayer::OnAttach()
@@ -100,9 +119,15 @@ void SandboxLayer::OnAttach()
     renderer = new Renderer();
     BufferDescriptor bufferDescriptor{};
     bufferDescriptor.type = BufferType::VERTEX;
-    bufferDescriptor.size = sizeof(cubeVertexData);
+    bufferDescriptor.size = sizeof(vertices);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
-    vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
+    vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, vertices);
+
+    BufferDescriptor indexBufferDescriptor{};
+    indexBufferDescriptor.type = BufferType::INDEX;
+    indexBufferDescriptor.size = sizeof(indices);
+    indexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
 
     BufferDescriptor transformConstantDesc{};
     transformConstantDesc.type = BufferType::UNIFORM;
@@ -128,6 +153,8 @@ void SandboxLayer::OnAttach()
     layout.Push<glm::vec3>();
     layout.Push<glm::vec3>();
     layout.Push<glm::vec2>();
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec3>();
     shaderProgramDescriptor.layout = layout;
     shaderProgramDescriptor.reflection.textures = { 2 };
     shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
@@ -189,7 +216,7 @@ void SandboxLayer::OnAttach()
                                                             presentRenderPassDescriptor);
 
     // Textures loading
-    auto [data, descriptor] = textureLoader.Load("/Assets/Textures/yellow_brick_albedo.png");
+    auto [data, descriptor] = textureLoader.Load("/Assets/Textures/diffuse.jpg", {Format::NONE, true, true});
     descriptor.type = TextureType::TEXTURE_2D;
     testTexture = Device::Get()->CreateTexture(descriptor, data);
     SamplerDescriptor samplerDescriptor{};
@@ -203,6 +230,8 @@ void SandboxLayer::OnAttach()
 
     EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(SandboxLayer::OnEvent));
     camera.SetMovementSpeed(20.0f);
+
+    mesh = meshLoader.Load("/Assets/Models/backpack.obj");
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -245,7 +274,7 @@ void SandboxLayer::OnUpdate(float ts)
     renderer->BeginFrame(nullptr);
     rendererState->OnUpdate(graphicsPipeline);
     renderer->EncodeState(rendererState);
-    renderer->Draw(vertexBuffer);
+    DrawMeshNode(renderer, mesh, true);
     renderer->EndFrame();
 
     renderer->SetPipeline(presentPipeline);
