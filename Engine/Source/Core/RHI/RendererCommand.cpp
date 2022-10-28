@@ -86,3 +86,8 @@ std::shared_ptr<RendererState> RendererCommand::CreateRendererState()
 {
     return rendererAPI->CreateRendererState();
 }
+
+const std::shared_ptr<RenderingContext>& RendererCommand::GetContext()
+{
+    return rendererAPI->GetContext();
+}

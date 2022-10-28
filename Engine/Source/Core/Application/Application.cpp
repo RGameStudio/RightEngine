@@ -36,16 +36,14 @@ namespace RightEngine
     void Application::Init()
     {
         window.reset(Window::Create("Right Editor", 1920, 1080));
-        // TODO: Move renderer initialization to Renderer class
         RendererCommand::Init(GGPU_API);
-        // TODO: Initialize imgui for Vulkan
-//        imGuiLayer = std::make_shared<ImGuiLayer>();
+        imGuiLayer = std::make_shared<ImGuiLayer>();
 
         static bool wasCalled = false;
         R_CORE_ASSERT(!wasCalled, "PostInit was called twice!");
         wasCalled = true;
 
-//        PushOverlay(imGuiLayer);
+        PushOverlay(imGuiLayer);
 
         R_CORE_INFO("Successfully initialized application!");
     }
@@ -53,8 +51,6 @@ namespace RightEngine
     void Application::OnUpdate()
     {
         Input::OnUpdate();
-//        RendererCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-//        RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         window->OnUpdate();
 
         for (const auto& layer: layers)
@@ -62,14 +58,14 @@ namespace RightEngine
             layer->OnUpdate(Input::deltaTime);
         }
 
-//        imGuiLayer->Begin();
-//        {
-//            for (const auto& layer : layers)
-//            {
-//                layer->OnImGuiRender();
-//            }
-//        }
-//        imGuiLayer->End();
+        imGuiLayer->Begin();
+        {
+            for (const auto& layer : layers)
+            {
+                layer->OnImGuiRender();
+            }
+        }
+        imGuiLayer->End();
     }
 
     void Application::OnUpdateEnd()

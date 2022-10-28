@@ -50,6 +50,8 @@ namespace RightEngine
 
         virtual std::shared_ptr<RendererState> CreateRendererState() = 0;
 
+        virtual const std::shared_ptr<RenderingContext>& GetContext() const = 0;
+
         static std::shared_ptr<RendererAPI> Create(GPU_API GpuApi);
         static GPU_API GetAPI();
 

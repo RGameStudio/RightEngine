@@ -44,6 +44,8 @@ namespace RightEngine
 
         virtual std::shared_ptr<RendererState> CreateRendererState() override;
 
+        virtual const std::shared_ptr<RenderingContext>& GetContext() const override;
+
         virtual ~VulkanRendererAPI() override;
 
         void SetImageLayout(const VulkanCommandBuffer* cmd,

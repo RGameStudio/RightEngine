@@ -413,3 +413,8 @@ void VulkanRendererAPI::SetImageLayout(const VulkanCommandBuffer* cmd,
                                imgSubRange);
     imageLayouts[image] = newLayout;
 }
+
+const std::shared_ptr<RenderingContext>& VulkanRendererAPI::GetContext() const
+{
+    return context;
+}

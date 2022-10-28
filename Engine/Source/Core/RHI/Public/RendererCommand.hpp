@@ -40,6 +40,8 @@ namespace RightEngine
 
         static void Configure(const RendererSettings& settings);
 
+        static const std::shared_ptr<RenderingContext>& GetContext();
+
     private:
         static std::shared_ptr<RendererAPI> rendererAPI;
     };

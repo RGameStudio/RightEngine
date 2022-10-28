@@ -26,8 +26,6 @@ namespace RightEngine
         void PushLayer(const std::shared_ptr<Layer>& layer);
         void PushOverlay(const std::shared_ptr<Layer>& layer);
 
-        const std::shared_ptr<RenderingContext>& GetRenderingContext() const
-        { return renderingContext; }
         const std::shared_ptr<Window>& GetWindow() const;
 
         void Init();
@@ -39,8 +37,6 @@ namespace RightEngine
 
     private:
         std::shared_ptr<Window> window;
-        std::shared_ptr<RenderingContext> renderingContext;
-        std::shared_ptr<Surface> surface;
         std::vector<std::shared_ptr<Layer>> layers;
         std::shared_ptr<ImGuiLayer> imGuiLayer;
 

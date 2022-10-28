@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Layer.hpp"
+#include "ImguiLayerImpl.hpp"
 
 namespace RightEngine
 {
@@ -20,5 +21,10 @@ namespace RightEngine
 
         void Begin();
         void End();
+
+    private:
+        void CreateImpl();
+
+        std::shared_ptr<ImguiLayerImpl> impl;
     };
 }

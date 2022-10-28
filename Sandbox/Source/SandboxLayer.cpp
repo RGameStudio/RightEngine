@@ -230,6 +230,7 @@ void SandboxLayer::OnAttach()
 
     EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(SandboxLayer::OnEvent));
     camera.SetMovementSpeed(20.0f);
+    camera.SetActive(false);
 
     mesh = meshLoader.Load("/Assets/Models/backpack.obj");
 }
