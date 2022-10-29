@@ -33,3 +33,6 @@ Just a bunch of screenshots, that show progress of engine development
 ## 19-07-2022 (Proper IBL reflections and camera options)
 
 ![19-07-2022.png](https://i.imgur.com/sKRGyWH.png)
+
+## 30-10-2022 (Implemented 3d model rendering and ImGui with new vulkan renderer backend!)
+![30-10-2022.png](https://i.imgur.com/rD8WWYj.png)

@@ -38,7 +38,6 @@ namespace RightEngine
     private:
         std::shared_ptr<Window> window;
         std::vector<std::shared_ptr<Layer>> layers;
-        std::shared_ptr<ImGuiLayer> imGuiLayer;
 
     private:
         Application();

@@ -3,11 +3,8 @@
 #include "Logger.hpp"
 #include "RendererCommand.hpp"
 #include "Input.hpp"
-#include "Types.hpp"
 #include "ImGuiLayer.hpp"
-#include "Renderer.hpp"
 #include "Core.hpp"
-#include "Device.hpp"
 #include "Surface.hpp"
 #include <memory>
 
@@ -37,14 +34,10 @@ namespace RightEngine
     {
         window.reset(Window::Create("Right Editor", 1920, 1080));
         RendererCommand::Init(GGPU_API);
-//        imGuiLayer = std::make_shared<ImGuiLayer>();
 
         static bool wasCalled = false;
         R_CORE_ASSERT(!wasCalled, "PostInit was called twice!");
         wasCalled = true;
-
-//        PushOverlay(imGuiLayer);
-
         R_CORE_INFO("Successfully initialized application!");
     }
 
@@ -57,15 +50,6 @@ namespace RightEngine
         {
             layer->OnUpdate(Input::deltaTime);
         }
-
-//        imGuiLayer->Begin();
-//        {
-//            for (const auto& layer : layers)
-//            {
-//                layer->OnImGuiRender();
-//            }
-//        }
-//        imGuiLayer->End();
     }
 
     void Application::OnUpdateEnd()

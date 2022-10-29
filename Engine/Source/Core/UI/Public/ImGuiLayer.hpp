@@ -15,7 +15,6 @@ namespace RightEngine
         virtual void OnDetach() override;
 
         virtual void OnUpdate(float ts) override;
-        virtual void OnImGuiRender() override;
 
         virtual void OnEvent(Event& event) override;
 

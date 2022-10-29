@@ -91,11 +91,6 @@ void VulkanImguiLayerImpl::OnUpdate(float deltaTime)
 
 }
 
-void VulkanImguiLayerImpl::OnImGuiRender()
-{
-
-}
-
 void VulkanImguiLayerImpl::OnEvent(Event& event)
 {
 

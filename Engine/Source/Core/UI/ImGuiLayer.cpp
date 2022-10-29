@@ -22,11 +22,6 @@ void ImGuiLayer::OnUpdate(float ts)
     impl->OnUpdate(ts);
 }
 
-void ImGuiLayer::OnImGuiRender()
-{
-    impl->OnImGuiRender();
-}
-
 void ImGuiLayer::OnEvent(Event& event)
 {
     impl->OnEvent(event);

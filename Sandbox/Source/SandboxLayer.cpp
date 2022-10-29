@@ -253,7 +253,7 @@ void SandboxLayer::OnAttach()
     uiPipeline = Device::Get()->CreateGraphicsPipeline(uiPipelineDesc, uiRenderpass);
 
     imGuiLayer = std::make_shared<ImGuiLayer>(uiPipeline);
-    imGuiLayer->OnAttach();
+    Application::Get().PushOverlay(imGuiLayer);
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -311,11 +311,6 @@ void SandboxLayer::OnUpdate(float ts)
     renderer->SetPipeline(presentPipeline);
     renderer->BeginFrame(nullptr);
     renderer->EndFrame();
-}
-
-void SandboxLayer::OnImGuiRender()
-{
-
 }
 
 bool SandboxLayer::OnEvent(const Event& event)
