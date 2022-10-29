@@ -54,6 +54,10 @@ namespace RightEngine
 
         void Configure();
 
+        // TODO: Must be removed
+        const std::shared_ptr<CommandBuffer>& GetCmd() const
+        { return commandBuffer; }
+
         RendererSettings& GetSettings();
 
         static GPU_API GetAPI();

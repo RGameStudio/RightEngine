@@ -10,7 +10,7 @@ namespace RightEngine
     public:
         virtual ~VulkanImguiLayerImpl() override = default;
 
-        virtual void OnAttach() override;
+        virtual void OnAttach(const std::shared_ptr<GraphicsPipeline>& pipeline) override;
         virtual void OnDetach() override;
 
         virtual void OnUpdate(float deltaTime) override;
@@ -19,7 +19,7 @@ namespace RightEngine
         virtual void OnEvent(Event& event) override;
 
         virtual void Begin() override;
-        virtual void End() override;
+        virtual void End(const std::shared_ptr<CommandBuffer>& cmd) override;
 
     private:
         VkRenderPass renderPass;

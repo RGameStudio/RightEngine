@@ -2,14 +2,14 @@
 
 using namespace RightEngine;
 
-ImGuiLayer::ImGuiLayer(): Layer("ImGuiLayer")
+ImGuiLayer::ImGuiLayer(const std::shared_ptr<GraphicsPipeline>& aPipeline): pipeline(aPipeline), Layer("ImGuiLayer")
 {
     CreateImpl();
 }
 
 void ImGuiLayer::OnAttach()
 {
-    impl->OnAttach();
+    impl->OnAttach(pipeline);
 }
 
 void ImGuiLayer::OnDetach()
@@ -37,7 +37,7 @@ void ImGuiLayer::Begin()
     impl->Begin();
 }
 
-void ImGuiLayer::End()
+void ImGuiLayer::End(const std::shared_ptr<CommandBuffer>& cmd)
 {
-    impl->End();
+    impl->End(cmd);
 }

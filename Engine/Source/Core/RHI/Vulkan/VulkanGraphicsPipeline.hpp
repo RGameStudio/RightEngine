@@ -32,13 +32,13 @@ namespace RightEngine
         { return framebuffer; }
 
     private:
-        VkPipeline graphicsPipeline;
-        VkPipelineLayout pipelineLayout;
-        VkRenderPass renderPass;
+        VkPipeline graphicsPipeline{ VK_NULL_HANDLE };
+        VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
+        VkRenderPass renderPass{ VK_NULL_HANDLE };
         VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
         std::vector<VkDescriptorSet> descriptorSets;
         std::vector<VkPushConstantRange> pushConstants;
-        VkFramebuffer framebuffer;
+        VkFramebuffer framebuffer{ VK_NULL_HANDLE };
 
         void Init(const GraphicsPipelineDescriptor& descriptorconst,
                   const RenderPassDescriptor& renderPassDescriptor);

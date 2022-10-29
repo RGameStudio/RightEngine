@@ -142,7 +142,10 @@ void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
     cmd->Enqueue([this, nativePipeline](auto buffer)
                  {
                      vkCmdBeginRenderPass(VK_CMD(buffer)->GetBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-                     vkCmdBindPipeline(VK_CMD(buffer)->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, nativePipeline);
+                     if (nativePipeline)
+                     {
+                         vkCmdBindPipeline(VK_CMD(buffer)->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, nativePipeline);
+                     }
                  });
 
     VkViewport viewport{};

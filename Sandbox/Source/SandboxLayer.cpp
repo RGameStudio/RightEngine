@@ -5,6 +5,7 @@
 #include "RendererCommand.hpp"
 #include "KeyCodes.hpp"
 #include "MeshLoader.hpp"
+#include <imgui.h>
 #include <glm/gtx/transform.hpp>
 
 using namespace RightEngine;
@@ -89,9 +90,11 @@ namespace
     std::shared_ptr<Buffer> sceneUBO;
     std::shared_ptr<GraphicsPipeline> graphicsPipeline;
     std::shared_ptr<GraphicsPipeline> presentPipeline;
+    std::shared_ptr<GraphicsPipeline> uiPipeline;
     TextureLoader textureLoader;
     std::shared_ptr<Texture> testTexture;
     std::shared_ptr<RendererState> rendererState;
+    std::shared_ptr<ImGuiLayer> imGuiLayer;
 
     Camera camera(glm::vec3(0, 0, -10), glm::vec3(0, 1, 0));
     MeshLoader meshLoader;
@@ -233,6 +236,24 @@ void SandboxLayer::OnAttach()
     camera.SetActive(false);
 
     mesh = meshLoader.Load("/Assets/Models/backpack.obj");
+
+    GraphicsPipelineDescriptor uiPipelineDesc{};
+    uiPipelineDesc.shader = nullptr;
+
+    AttachmentDescriptor uiAttachment{};
+    uiAttachment.texture = colorAttachment;
+    uiAttachment.loadOperation = AttachmentLoadOperation::LOAD;
+    uiAttachment.storeOperation = AttachmentStoreOperation::STORE;
+
+    RenderPassDescriptor uiRenderpass{};
+    uiRenderpass.extent = extent;
+    uiRenderpass.offscreen = true;
+    uiRenderpass.colorAttachments.emplace_back(uiAttachment);
+
+    uiPipeline = Device::Get()->CreateGraphicsPipeline(uiPipelineDesc, uiRenderpass);
+
+    imGuiLayer = std::make_shared<ImGuiLayer>(uiPipeline);
+    imGuiLayer->OnAttach();
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -276,6 +297,15 @@ void SandboxLayer::OnUpdate(float ts)
     rendererState->OnUpdate(graphicsPipeline);
     renderer->EncodeState(rendererState);
     DrawMeshNode(renderer, mesh, true);
+    renderer->EndFrame();
+
+    renderer->SetPipeline(uiPipeline);
+    renderer->BeginFrame(nullptr);
+    imGuiLayer->Begin();
+    ImGui::Begin("FPS");
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::End();
+    imGuiLayer->End(renderer->GetCmd());
     renderer->EndFrame();
 
     renderer->SetPipeline(presentPipeline);

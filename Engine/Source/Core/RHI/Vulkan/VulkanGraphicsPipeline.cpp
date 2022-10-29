@@ -90,6 +90,12 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const GraphicsPipelineDescriptor&
 void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
                                   const RenderPassDescriptor& renderPassDescriptor)
 {
+    if (!descriptor.shader)
+    {
+        CreateRenderPass(renderPassDescriptor);
+        CreateFramebuffer();
+        return;
+    }
     std::vector<VkDynamicState> dynamicStates =
             {
                     VK_DYNAMIC_STATE_VIEWPORT,
@@ -312,7 +318,11 @@ void VulkanGraphicsPipeline::CreateRenderPass(const RenderPassDescriptor& render
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = colorAttachmentRefs.size();
     subpass.pColorAttachments = colorAttachmentRefs.data();
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+    const bool hasDepthAttachment = renderPassDescriptor.depthStencilAttachment.texture != nullptr;
+    if (hasDepthAttachment)
+    {
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+    }
 
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -322,7 +332,10 @@ void VulkanGraphicsPipeline::CreateRenderPass(const RenderPassDescriptor& render
     dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-    colorAttachments.push_back(depthAttachment);
+    if (hasDepthAttachment)
+    {
+        colorAttachments.push_back(depthAttachment);
+    }
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = colorAttachments.size();
@@ -408,7 +421,10 @@ void VulkanGraphicsPipeline::CreateFramebuffer()
         attachments.push_back(vkTexture->GetImageView());
     }
 
-    attachments.push_back(std::static_pointer_cast<VulkanTexture>(renderPassDescriptor.depthStencilAttachment.texture)->GetImageView());
+    if (renderPassDescriptor.depthStencilAttachment.texture)
+    {
+        attachments.push_back(std::static_pointer_cast<VulkanTexture>(renderPassDescriptor.depthStencilAttachment.texture)->GetImageView());
+    }
 
     VkFramebufferCreateInfo framebufferInfo{};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;

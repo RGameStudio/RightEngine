@@ -8,7 +8,7 @@ namespace RightEngine
     class ImGuiLayer : public Layer
     {
     public:
-        ImGuiLayer();
+        ImGuiLayer(const std::shared_ptr<GraphicsPipeline>& aPipeline);
         ~ImGuiLayer() override = default;
 
         virtual void OnAttach() override;
@@ -20,11 +20,12 @@ namespace RightEngine
         virtual void OnEvent(Event& event) override;
 
         void Begin();
-        void End();
+        void End(const std::shared_ptr<CommandBuffer>& cmd);
 
     private:
         void CreateImpl();
 
         std::shared_ptr<ImguiLayerImpl> impl;
+        std::shared_ptr<GraphicsPipeline> pipeline;
     };
 }
