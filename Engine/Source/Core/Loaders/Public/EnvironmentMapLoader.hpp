@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Texture.hpp"
+#include "AssetLoader.hpp"
 #include <string>
 
 namespace RightEngine
@@ -22,28 +23,24 @@ namespace RightEngine
     struct EnvironmentMapLoaderContext
     {
         std::string path;
-        bool flipVertically{ false };
         TextureDescriptor specification;
     };
 
-    class EnvironmentMapLoader
+    class EnvironmentMapLoader : public AssetLoader
     {
     public:
         EnvironmentMapLoader();
         ~EnvironmentMapLoader() = default;
 
-        void Load(const std::string& path, bool flipVertically = false);
-
-        inline const std::shared_ptr<EnvironmentContext>& GetEnvironmentContext() const
-        { return environmentContext; }
+        AssetHandle Load(const std::string& path, bool flipVertically = false);
 
     private:
         void ComputeEnvironmentMap();
         void ComputeIrradianceMap();
         void ComputeRadianceMap();
         void ComputeLUT();
+        AssetHandle FinishLoading();
 
-    private:
         std::shared_ptr<EnvironmentContext> environmentContext;
         EnvironmentMapLoaderContext loaderContext;
     };

@@ -117,16 +117,16 @@ EnvironmentMapLoader::EnvironmentMapLoader()
 //    cube = MeshBuilder::CubeGeometry();
 }
 
-void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
+AssetHandle EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
 {
     environmentContext = std::make_shared<EnvironmentContext>();
     loaderContext.path = path;
-    loaderContext.flipVertically = flipVertically;
     environmentContext->name = GetTextureName(path);
     ComputeEnvironmentMap();
     ComputeIrradianceMap();
     ComputeRadianceMap();
     ComputeLUT();
+    return FinishLoading();
 }
 
 void EnvironmentMapLoader::ComputeEnvironmentMap()
@@ -581,4 +581,9 @@ void EnvironmentMapLoader::ComputeLUT()
     
     environmentContext->brdfLut = colorAttachment;
     R_CORE_TRACE("Finished computing BRDF map for texture \"{0}\"", loaderContext.path);
+}
+
+AssetHandle EnvironmentMapLoader::FinishLoading()
+{
+    return manager->CacheAsset(environmentContext, AssetType::ENVIRONMENT_MAP);
 }
