@@ -8,7 +8,7 @@ void AssetLoader::OnRegister(AssetManager* aManager)
     manager = aManager;
 }
 
-void AssetLoader::RemoveAsset(const xg::Guid& guid)
+void AssetLoader::RemoveAsset(const AssetHandle& handle)
 {
-    manager->RemoveAsset(guid);
+    manager->RemoveAsset(handle);
 }

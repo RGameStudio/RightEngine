@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Texture.hpp"
+#include "AssetLoader.hpp"
 #include <string>
 #include <vector>
 
@@ -8,19 +9,20 @@ namespace RightEngine
 {
     struct TextureLoaderOptions
     {
+        TextureType type = TextureType::TEXTURE_2D;
         Format format = Format::NONE;
         bool chooseFormat{ true };
-        bool flipVertically{ false };
+        bool flipVertically{ true };
     };
 
-    class TextureLoader
+    class TextureLoader : public AssetLoader
     {
     public:
-        std::pair<std::vector<uint8_t>, TextureDescriptor> Load(const std::string& path,
-                                  const TextureLoaderOptions& options = {}) const;
+        AssetHandle Load(const std::string& path,
+                         const TextureLoaderOptions& options = {}) const;
 
-        std::shared_ptr<Texture> CreateTexture(const std::string& path,
-                                               TextureType type = TextureType::TEXTURE_2D,
-                                               const TextureLoaderOptions& options = {}) const;
+    private:
+        std::pair<std::vector<uint8_t>, TextureDescriptor> LoadTextureData(const std::string& path,
+                                                                const TextureLoaderOptions& options = {}) const;
     };
 }

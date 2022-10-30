@@ -131,8 +131,10 @@ void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
 
 void EnvironmentMapLoader::ComputeEnvironmentMap()
 {
-    TextureLoader textureLoader;
-    const auto equirectMap = textureLoader.CreateTexture(loaderContext.path);
+    auto& assetManager = AssetManager::Get();
+    auto loader = assetManager.GetLoader<TextureLoader>();
+    auto textureHandle = loader->Load(loaderContext.path, {});
+    const auto equirectMap = assetManager.GetAsset<Texture>(textureHandle);
 
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;

@@ -27,7 +27,7 @@ set(ENGINE_SRC
         Source/Core/Loaders/TextureLoader.cpp
         Source/Core/RHI/Sampler.cpp
         Source/Core/Utils/String.cpp
-        Source/Core/Scene/AssetManager.cpp
+        Source/Core/Loaders/AssetManager.cpp
         Source/Core/Loaders/EnvironmentMapLoader.cpp
         Source/Core/Loaders/MeshLoader.cpp
         Source/Core/RHI/Vulkan/VulkanRenderingContext.cpp
@@ -44,7 +44,9 @@ set(ENGINE_SRC
         Source/Core/RHI/Vulkan/VulkanTexture.cpp
         Source/Core/RHI/Vulkan/VulkanSampler.cpp
         Source/Core/RHI/RendererState.cpp
-        Source/Core/RHI/Vulkan/VulkanRendererState.cpp Source/Core/UI/Public/ImguiLayerImpl.hpp Source/Core/RHI/Vulkan/VulkanImguiLayerImpl.cpp Source/Core/RHI/Vulkan/VulkanImguiLayerImpl.hpp Source/Core/Loaders/AssetLoader.cpp)
+        Source/Core/RHI/Vulkan/VulkanRendererState.cpp
+        Source/Core/RHI/Vulkan/VulkanImguiLayerImpl.cpp
+        Source/Core/Loaders/AssetLoader.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

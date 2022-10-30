@@ -2,6 +2,7 @@
 #include "Logger.hpp"
 #include "Path.hpp"
 #include "Assert.hpp"
+#include "AssetManager.hpp"
 #include <stb_image.h>
 #include <stb_image_write.h>
 #include <fstream>
@@ -40,8 +41,8 @@ namespace
     }
 }
 
-std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::Load(const std::string& path,
-                                                                      const TextureLoaderOptions& options) const
+std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::LoadTextureData(const std::string& path,
+                                                                                 const TextureLoaderOptions& options) const
 {
     std::ifstream file(Path::ConvertEnginePathToOSPath(path).c_str(), std::ios::binary | std::ios::ate);
     if (!file.is_open())
@@ -130,12 +131,11 @@ std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::Load(const std:
     return { data, descriptor };
 }
 
-std::shared_ptr<Texture> TextureLoader::CreateTexture(const std::string& path,
-                                                      TextureType type,
-                                                      const TextureLoaderOptions& options) const
+AssetHandle TextureLoader::Load(const std::string& path,
+                                const TextureLoaderOptions& options) const
 {
-    auto [data, descriptor] = Load(path, options);
-    descriptor.type = type;
+    auto [data, descriptor] = LoadTextureData(path, options);
+    descriptor.type = options.type;
     auto texture = Device::Get()->CreateTexture(descriptor, data);
-    return texture;
+    return manager->CacheAsset(texture, AssetType::IMAGE);
 }

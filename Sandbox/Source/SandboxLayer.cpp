@@ -5,6 +5,7 @@
 #include "RendererCommand.hpp"
 #include "KeyCodes.hpp"
 #include "MeshLoader.hpp"
+#include "AssetManager.hpp"
 #include <imgui.h>
 #include <glm/gtx/transform.hpp>
 
@@ -207,9 +208,10 @@ void SandboxLayer::OnAttach()
                                                             presentRenderPassDescriptor);
 
     // Textures loading
-    auto [data, descriptor] = textureLoader.Load("/Assets/Textures/diffuse.jpg", {Format::NONE, true, true});
-    descriptor.type = TextureType::TEXTURE_2D;
-    testTexture = Device::Get()->CreateTexture(descriptor, data);
+    auto& assetManager = AssetManager::Get();
+    auto loader = assetManager.GetLoader<TextureLoader>();
+    auto textureHandle = loader->Load("/Assets/Textures/diffuse.jpg");
+    const auto testTexture = assetManager.GetAsset<Texture>(textureHandle);
     SamplerDescriptor samplerDescriptor{};
     testTexture->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));
 

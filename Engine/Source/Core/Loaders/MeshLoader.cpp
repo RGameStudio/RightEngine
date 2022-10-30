@@ -3,9 +3,11 @@
 #include "Path.hpp"
 #include "String.hpp"
 #include "TextureLoader.hpp"
-#include "assimp/scene.h"
-#include "assimp/Importer.hpp"
-#include "assimp/postprocess.h"
+#include "AssetManager.hpp"
+#include "AssetLoader.hpp"
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 using namespace RightEngine;
 
@@ -231,7 +233,10 @@ std::vector<std::shared_ptr<Texture>> MeshLoader::LoadTextures(const aiMaterial*
         std::string texName = meshDir + '/' + *(splittedPath.end() - 2) + '/' + *(splittedPath.end() - 1);
         if (loadedTextures.find(texName) == loadedTextures.end())
         {
-            auto texture = textureLoader.CreateTexture(texName);
+            auto& assetManager = AssetManager::Get();
+            auto loader = assetManager.GetLoader<TextureLoader>();
+            auto textureHandle = loader->Load(texName, {});
+            const auto texture = assetManager.GetAsset<Texture>(textureHandle);
             textures.push_back(texture);
             loadedTextures[texName] = texture;
         }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssetBase.hpp"
 #include <crossguid/guid.hpp>
 #include <functional>
 
@@ -11,9 +12,9 @@ namespace RightEngine
     {
     public:
         virtual void OnRegister(AssetManager* aManager);
-        virtual void RemoveAsset(const xg::Guid& guid);
+        virtual void RemoveAsset(const AssetHandle& handle);
 
     protected:
-        AssetManager* manager;
+        AssetManager* manager{ nullptr };
     };
 }

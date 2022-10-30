@@ -6,6 +6,7 @@
 #include "ImGuiLayer.hpp"
 #include "Core.hpp"
 #include "Surface.hpp"
+#include "AssetManager.hpp"
 #include <memory>
 
 namespace RightEngine
@@ -34,6 +35,9 @@ namespace RightEngine
     {
         window.reset(Window::Create("Right Editor", 1920, 1080));
         RendererCommand::Init(GGPU_API);
+
+        auto& manager = AssetManager::Get();
+        manager.RegisterLoader<TextureLoader>(std::make_shared<TextureLoader>());
 
         static bool wasCalled = false;
         R_CORE_ASSERT(!wasCalled, "PostInit was called twice!");
