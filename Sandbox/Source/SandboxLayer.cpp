@@ -120,18 +120,6 @@ namespace
 void SandboxLayer::OnAttach()
 {
     renderer = new Renderer();
-    BufferDescriptor bufferDescriptor{};
-    bufferDescriptor.type = BufferType::VERTEX;
-    bufferDescriptor.size = sizeof(vertices);
-    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
-    vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, vertices);
-
-    BufferDescriptor indexBufferDescriptor{};
-    indexBufferDescriptor.type = BufferType::INDEX;
-    indexBufferDescriptor.size = sizeof(indices);
-    indexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
-    indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indices);
-
     BufferDescriptor transformConstantDesc{};
     transformConstantDesc.type = BufferType::UNIFORM;
     transformConstantDesc.size = sizeof(TransformConstant);

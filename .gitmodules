@@ -25,3 +25,6 @@
 [submodule "Lib/glslang"]
 	path = Lib/glslang
 	url = git@github.com:KhronosGroup/glslang.git
+[submodule "Lib/crossguid"]
+	path = Lib/crossguid
+	url = git@github.com:rbetik12/crossguid.git

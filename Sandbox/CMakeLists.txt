@@ -24,6 +24,7 @@ target_link_libraries(Sandbox
         glslang-default-resource-limits
         vk-tools
         VulkanMemoryAllocator
+        crossguid
 )
 
 if (WIN32)

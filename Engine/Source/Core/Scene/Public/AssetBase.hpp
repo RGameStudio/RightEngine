@@ -1,5 +1,6 @@
 #pragma once
 
+#include <crossguid/guid.hpp>
 #include <string>
 
 namespace RightEngine
@@ -19,8 +20,14 @@ namespace RightEngine
         virtual std::string GetClass() const = 0;
 
     public:
-        std::string id;
+        xg::Guid guid;
+        std::string path;
         AssetType type;
+    };
+
+    struct AssetHandle
+    {
+        xg::Guid guid;
     };
 }
 

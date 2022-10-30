@@ -5,33 +5,62 @@
 #include "MeshLoader.hpp"
 #include "EnvironmentMapLoader.hpp"
 #include "Shader.hpp"
+#include "AssetLoader.hpp"
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <typeindex>
 
 namespace RightEngine
 {
-    struct LoaderOptions
-    {
-        bool flipTextureVertically{ false };
-        bool convertTextureFormat{ false };
-    };
-
-    // TODO: Implement AssetManager in a new way
-    // Use AssetHandle with UUID to refer to specific asset
-    // Use assets factories to use asset-specific loading options with ease
-
     class AssetManager
     {
     public:
         static AssetManager& Get();
 
         template<class T>
-        std::shared_ptr<T> GetAsset(const std::string& id)
+        void RegisterLoader(const std::shared_ptr<AssetLoader>& loader)
         {
-            R_CORE_ASSERT(!id.empty(), "");
-            R_CORE_ASSERT(static_cast<bool>(std::is_base_of<AssetBase, T>::value), "");
-            auto assetIt = assetCache.find(id);
+            auto typeIndex = std::type_index(typeid(T));
+            auto loaderIt = loaders.find(typeIndex);
+            if (loaderIt == loaders.end())
+            {
+                loaders[typeIndex] = loader;
+                loader->OnRegister(this);
+            }
+            R_CORE_ASSERT(false, "")
+        }
+
+        AssetManager(const AssetManager& other) = delete;
+        AssetManager& operator=(const AssetManager& other) = delete;
+        AssetManager(AssetManager&& other) = delete;
+        AssetManager& operator=(AssetManager&& other) = delete;
+
+    private:
+        std::unordered_map<xg::Guid, std::shared_ptr<AssetBase>> assetCache;
+        std::unordered_map<std::type_index, std::shared_ptr<AssetLoader>> loaders;
+
+        AssetManager() = default;
+        ~AssetManager() = default;
+
+        template<class T>
+        AssetHandle CacheAsset(const std::shared_ptr<T>& ptr, AssetType type)
+        {
+            R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
+            auto basePtr = std::dynamic_pointer_cast<AssetBase>(ptr);
+            R_CORE_ASSERT(basePtr != nullptr, "");
+            basePtr->guid = xg::newGuid();
+            basePtr->type = type;
+            assetCache[basePtr->guid] = basePtr;
+            return { basePtr->guid };
+        }
+
+        template<class T>
+        std::shared_ptr<T> GetAsset(const AssetHandle& assetHandle)
+        {
+            R_CORE_ASSERT(assetHandle.guid.isValid(), "");
+            R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
+            auto assetIt = assetCache.find(assetHandle.guid);
             if (assetIt == assetCache.end())
             {
                 return nullptr;
@@ -41,103 +70,11 @@ namespace RightEngine
             return ptr;
         }
 
-        template<class T>
-        std::shared_ptr<T> LoadAsset(const std::string& path, const std::string& id, const LoaderOptions& options)
-        {
-            R_CORE_ASSERT(!id.empty(), "");
-            R_CORE_ASSERT(false, "");
-            return nullptr;
-        }
-
-        void RemoveAsset(const std::string& id)
+        void RemoveAsset(const xg::Guid& id)
         {
             assetCache.erase(id);
         }
 
-        AssetManager(const AssetManager& other) = delete;
-        AssetManager& operator=(const AssetManager& other) = delete;
-        AssetManager(AssetManager&& other) = delete;
-        AssetManager& operator=(AssetManager&& other) = delete;
-
-    private:
-        std::unordered_map<std::string, std::shared_ptr<AssetBase>> assetCache;
-
-    private:
-        AssetManager() = default;
-        ~AssetManager() = default;
-
-        template<class T>
-        void CacheAsset(const std::shared_ptr<T>& ptr, const std::string& id, AssetType type)
-        {
-            R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
-            auto basePtr = std::dynamic_pointer_cast<AssetBase>(ptr);
-            R_CORE_ASSERT(basePtr != nullptr, "");
-            basePtr->id = id;
-            basePtr->type = type;
-            assetCache[id] = basePtr;
-        }
+        friend class AssetLoader;
     };
-
-    template<>
-    inline std::shared_ptr<Texture> AssetManager::LoadAsset(const std::string& path, const std::string& id, const LoaderOptions& options)
-    {
-        auto asset = GetAsset<Texture>(id);
-        if (asset)
-        {
-            return asset;
-        }
-
-        TextureLoader loader;
-//        TextureDescriptor
-//        auto texture = loader.CreateTexture(path, options.flipTextureVertically);
-//        CacheAsset(texture, id, AssetType::IMAGE);
-//        return texture;
-    }
-
-    template<>
-    inline std::shared_ptr<MeshNode> AssetManager::LoadAsset(const std::string& path, const std::string& id, const LoaderOptions& options)
-    {
-        auto asset = GetAsset<MeshNode>(id);
-        if (asset)
-        {
-            return asset;
-        }
-
-        MeshLoader loader;
-        auto mesh = loader.Load(path);
-        CacheAsset(mesh, id, AssetType::MESH);
-        return mesh;
-    }
-
-    template<>
-    inline std::shared_ptr<EnvironmentContext> AssetManager::LoadAsset(const std::string& path, const std::string& id, const LoaderOptions& options)
-    {
-        auto asset = GetAsset<EnvironmentContext>(id);
-        if (asset)
-        {
-            return asset;
-        }
-
-        EnvironmentMapLoader loader;
-        loader.Load(path, options.flipTextureVertically);
-        auto env = loader.GetEnvironmentContext();
-        CacheAsset(env, id, AssetType::ENVIRONMENT_MAP);
-        return env;
-    }
-
-    template<>
-    inline std::shared_ptr<Shader> AssetManager::LoadAsset(const std::string& path, const std::string& id, const LoaderOptions& options)
-    {
-        // TODO: Implement shader reflection here with this - https://github.com/KhronosGroup/SPIRV-Reflect
-        R_CORE_ASSERT(false, "");
-        auto asset = GetAsset<Shader>(id);
-        if (asset)
-        {
-            return asset;
-        }
-
-//        auto shader = Shader::Create(path + ".vert", path + ".frag");
-//        CacheAsset(shader, id, AssetType::SHADER);
-        return nullptr;
-    }
 }
