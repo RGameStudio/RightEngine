@@ -177,9 +177,10 @@ void PropertyPanel::OnImGuiRender()
                 }
                 fileDialog.ClearSelected();
 
-                LoaderOptions options{ true };
-                const auto id = String::Split(filename, ".").front();
-                component.environment = AssetManager::Get().LoadAsset<EnvironmentContext>("/Assets/Textures/" + filename, id, options);
+                R_CORE_ASSERT(false, "");
+//                LoaderOptions options{ true };
+//                const auto id = String::Split(filename, ".").front();
+//                component.environment = AssetManager::Get().LoadAsset<EnvironmentContext>("/Assets/Textures/" + filename, id, options);
             }
         });
 

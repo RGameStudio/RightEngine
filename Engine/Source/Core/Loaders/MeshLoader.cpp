@@ -57,7 +57,7 @@ namespace
     }
 }
 
-std::shared_ptr<MeshNode> MeshLoader::Load(const std::string& aPath)
+AssetHandle MeshLoader::Load(const std::string& aPath)
 {
     const size_t lastDelimIndex = aPath.find_last_of('/');
     std::string meshName = aPath.substr(lastDelimIndex, aPath.size() - 1 - lastDelimIndex);
@@ -75,15 +75,14 @@ std::shared_ptr<MeshNode> MeshLoader::Load(const std::string& aPath)
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        const auto errorStr = importer.GetErrorString();
         R_CORE_ERROR("ASSIMP ERROR: {0}", importer.GetErrorString());
-        return nullptr;
+        return {};
     }
 
     auto meshTree = std::make_shared<MeshNode>();
     ProcessNode(scene->mRootNode, scene, meshTree);
 
-    return meshTree;
+    return manager->CacheAsset(meshTree, AssetType::MESH);
 }
 
 void MeshLoader::ProcessNode(const aiNode* node, const aiScene* scene, std::shared_ptr<MeshNode>& meshNode)
@@ -194,6 +193,7 @@ std::shared_ptr<MeshComponent> MeshLoader::ProcessMesh(const aiMesh* mesh, const
 #endif
 
     auto material = std::make_shared<Material>();
+#if 0
     if (!albedo.empty())
     {
         material->textureData.albedo = albedo.front();
@@ -210,6 +210,7 @@ std::shared_ptr<MeshComponent> MeshLoader::ProcessMesh(const aiMesh* mesh, const
     {
         material->textureData.roughness = roughness.front();
     }
+#endif
     auto builtMesh = BuildMesh(vertices, indexes, material);
 
     return builtMesh;

@@ -2,16 +2,16 @@
 layout (location = 0) out vec4 aAlbedo;
 layout (location = 1) out vec4 aNormal;
 
-in vec2 f_UV;
-in vec3 f_Normal;
-in vec3 f_WorldPos;
-in mat3 f_TBN;
+layout(location = 0) in vec2 f_UV;
+layout(location = 1) in vec3 f_Normal;
+layout(location = 2) in vec3 f_WorldPos;
+layout(location = 3) in mat3 f_TBN;
 
-layout(std140, binding = 0) uniform MaterialData
+layout(binding = 2) uniform MaterialData
 {
-    vec4 u_Albedo;
-    float u_Metallic;
-    float u_Roughness;
+    vec4 u_AlbedoV;
+    float u_MetallicV;
+    float u_RoughnessV;
     bool u_HasAlbedo;
     bool u_HasNormal;
     bool u_HasMetallic;
@@ -19,10 +19,14 @@ layout(std140, binding = 0) uniform MaterialData
     bool u_HasAO;
 };
 
-uniform sampler2D u_Textures[5];
-uniform samplerCube u_IrradianceMap;
-uniform samplerCube u_PrefilterMap;
-uniform sampler2D u_BRDFLUT;
+layout(binding = 3) uniform sampler2D u_Albedo;
+layout(binding = 4) uniform sampler2D u_Normal;
+layout(binding = 5) uniform sampler2D u_Metallic;
+layout(binding = 6) uniform sampler2D u_Rougness;
+layout(binding = 7) uniform sampler2D u_AO;
+layout(binding = 8) uniform samplerCube u_IrradianceMap;
+layout(binding = 9) uniform samplerCube u_PrefilterMap;
+layout(binding = 10) uniform sampler2D u_BRDFLUT;
 
 struct Light
 {
@@ -34,7 +38,7 @@ struct Light
     vec2 _padding_;
 };
 
-layout(std140, binding = 1) uniform LightBuffer
+layout(binding = 11) uniform LightBuffer
 {
 // X - Overall lights amount
 // Y - Directional lights amount
@@ -44,13 +48,16 @@ layout(std140, binding = 1) uniform LightBuffer
     Light u_Light[30];
 };
 
-uniform vec3 u_CameraPosition;
+layout(binding = 12) uniform CameraPos
+{
+    vec3 u_CameraPosition;
+};
 
 const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
 {
-    vec3 tangentNormal = texture(u_Textures[1], f_UV).xyz;
+    vec3 tangentNormal = texture(u_Normal, f_UV).xyz;
     tangentNormal = tangentNormal * 2.0 - 1.0;
     return normalize(f_TBN * tangentNormal);
 }
@@ -111,11 +118,11 @@ void main()
 
     if (u_HasAlbedo)
     {
-        albedo = pow(texture(u_Textures[0], f_UV).rgb, vec3(2.2));
+        albedo = pow(texture(u_Albedo, f_UV).rgb, vec3(2.2));
     }
     else
     {
-        albedo = u_Albedo.rgb;
+        albedo = u_AlbedoV.rgb;
     }
 
     if (u_HasNormal)
@@ -129,25 +136,25 @@ void main()
 
     if (u_HasMetallic)
     {
-        metallic = texture(u_Textures[2], f_UV).r;
+        metallic = texture(u_Metallic, f_UV).r;
     }
     else
     {
-        metallic = u_Metallic;
+        metallic = u_MetallicV;
     }
 
     if (u_HasRoughness)
     {
-        roughness = texture(u_Textures[3], f_UV).r;
+        roughness = texture(u_Rougness, f_UV).r;
     }
     else
     {
-        roughness = u_Roughness;
+        roughness = u_RoughnessV;
     }
 
     if (u_HasAO)
     {
-        ao = texture(u_Textures[4], f_UV).r;
+        ao = texture(u_AO, f_UV).r;
     }
     else
     {

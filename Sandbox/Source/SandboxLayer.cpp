@@ -210,7 +210,7 @@ void SandboxLayer::OnAttach()
     // Textures loading
     auto& assetManager = AssetManager::Get();
     auto loader = assetManager.GetLoader<TextureLoader>();
-    auto textureHandle = loader->Load("/Assets/Textures/diffuse.jpg");
+    auto textureHandle = loader->Load("/Assets/Textures/backpack_diffuse.jpg");
     const auto testTexture = assetManager.GetAsset<Texture>(textureHandle);
     SamplerDescriptor samplerDescriptor{};
     testTexture->SetSampler(Device::Get()->CreateSampler(samplerDescriptor));

@@ -21,11 +21,11 @@ namespace RightEngine
 
     struct TextureData
     {
-        std::shared_ptr<Texture> albedo;
-        std::shared_ptr<Texture> normal;
-        std::shared_ptr<Texture> metallic;
-        std::shared_ptr<Texture> roughness;
-        std::shared_ptr<Texture> ao;
+        AssetHandle albedo;
+        AssetHandle normal;
+        AssetHandle metallic;
+        AssetHandle roughness;
+        AssetHandle ao;
     };
 
     struct Material

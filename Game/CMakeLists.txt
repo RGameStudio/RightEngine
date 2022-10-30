@@ -8,11 +8,24 @@ set_target_properties(Game
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR})
 
-if (WIN32)
-    target_link_libraries(Game Engine glad opengl32 easyargs glfw stb_image imgui assimp)
-else()
-    target_link_libraries(Game Engine glad easyargs glfw stb_image imgui assimp)
-endif()
+target_link_libraries(Game
+        Engine
+        easyargs
+        glfw
+        stb_image
+        imgui
+        assimp
+        glslang
+        MachineIndependent
+        GenericCodeGen
+        OGLCompiler
+        OSDependent
+        SPIRV
+        ${Vulkan_LIBRARY}
+        glslang-default-resource-limits
+        vk-tools
+        VulkanMemoryAllocator
+        crossguid)
 
 add_custom_target(CopyShaderFilesToGame ALL DEPENDS ${GLSL_ROOT_DIR})
 
