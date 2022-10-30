@@ -44,6 +44,7 @@ namespace
 std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::LoadTextureData(const std::string& path,
                                                                                  const TextureLoaderOptions& options) const
 {
+
     std::ifstream file(Path::ConvertEnginePathToOSPath(path).c_str(), std::ios::binary | std::ios::ate);
     if (!file.is_open())
     {
@@ -138,4 +139,17 @@ AssetHandle TextureLoader::Load(const std::string& path,
     descriptor.type = options.type;
     auto texture = Device::Get()->CreateTexture(descriptor, data);
     return manager->CacheAsset(texture, AssetType::IMAGE);
+}
+
+void TextureLoader::LoadAsync(AssetHandle& handle,
+                              const std::string& path,
+                              const TextureLoaderOptions& options) const
+{
+    taskGroup.run([&, path = std::move(path)]()
+    {
+        auto [data, descriptor] = LoadTextureData(path, options);
+        descriptor.type = options.type;
+        auto texture = Device::Get()->CreateTexture(descriptor, data);
+        handle = manager->CacheAsset(texture, AssetType::IMAGE);
+    });
 }

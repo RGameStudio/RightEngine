@@ -12,3 +12,8 @@ void AssetLoader::RemoveAsset(const AssetHandle& handle)
 {
     manager->RemoveAsset(handle);
 }
+
+void AssetLoader::WaitAllLoaders()
+{
+    taskGroup.wait();
+}

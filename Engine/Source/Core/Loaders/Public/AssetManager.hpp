@@ -65,6 +65,7 @@ namespace RightEngine
         template<class T>
         AssetHandle CacheAsset(const std::shared_ptr<T>& ptr, AssetType type)
         {
+            std::lock_guard<std::mutex> lock(assetCacheMutex);
             R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
             auto basePtr = std::dynamic_pointer_cast<AssetBase>(ptr);
             R_CORE_ASSERT(basePtr != nullptr, "");
@@ -82,6 +83,7 @@ namespace RightEngine
     private:
         std::unordered_map<xg::Guid, std::shared_ptr<AssetBase>> assetCache;
         std::unordered_map<std::type_index, std::shared_ptr<AssetLoader>> loaders;
+        std::mutex assetCacheMutex;
 
         AssetManager() = default;
         ~AssetManager() = default;

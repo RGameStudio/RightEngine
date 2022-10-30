@@ -3,6 +3,11 @@
 
 using namespace RightEngine;
 
+namespace
+{
+    std::mutex submitMutex;
+}
+
 uint32_t VulkanUtils::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memProperties;
@@ -63,6 +68,7 @@ void VulkanUtils::EndCommandBuffer(const std::shared_ptr<VulkanDevice>& device,
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
+    std::lock_guard<std::mutex> lock(submitMutex);
     vkQueueSubmit(device->GetQueue(QueueType::GRAPHICS), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(device->GetQueue(QueueType::GRAPHICS));
 }

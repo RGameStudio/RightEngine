@@ -21,6 +21,10 @@ namespace RightEngine
         AssetHandle Load(const std::string& path,
                          const TextureLoaderOptions& options = {}) const;
 
+        void LoadAsync(AssetHandle& handle,
+                       const std::string& path,
+                       const TextureLoaderOptions& options = {}) const;
+
     private:
         std::pair<std::vector<uint8_t>, TextureDescriptor> LoadTextureData(const std::string& path,
                                                                 const TextureLoaderOptions& options = {}) const;

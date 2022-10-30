@@ -28,3 +28,6 @@
 [submodule "Lib/crossguid"]
 	path = Lib/crossguid
 	url = git@github.com:rbetik12/crossguid.git
+[submodule "Lib/oneTBB"]
+	path = Lib/oneTBB
+	url = git@github.com:oneapi-src/oneTBB.git

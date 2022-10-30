@@ -25,7 +25,8 @@ target_link_libraries(Game
         glslang-default-resource-limits
         vk-tools
         VulkanMemoryAllocator
-        crossguid)
+        crossguid
+        TBB::tbb)
 
 add_custom_target(CopyShaderFilesToGame ALL DEPENDS ${GLSL_ROOT_DIR})
 

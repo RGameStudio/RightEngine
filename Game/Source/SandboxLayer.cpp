@@ -280,10 +280,11 @@ void SandboxLayer::OnAttach()
     auto& textureData = gunMesh->GetComponent<MeshComponent>().GetMaterial()->textureData;
 
     const auto& textureLoader = assetManager.GetLoader<TextureLoader>();
-    textureData.albedo = textureLoader->Load("/Assets/Textures/backpack_albedo.jpg");
-    textureData.normal = textureLoader->Load("/Assets/Textures/backpack_normal.png");
-    textureData.roughness = textureLoader->Load("/Assets/Textures/backpack_roughness.jpg");
-    textureData.metallic = textureLoader->Load("/Assets/Textures/backpack_metallic.jpg");
+    textureLoader->LoadAsync(textureData.albedo, "/Assets/Textures/backpack_albedo.jpg");
+    textureLoader->LoadAsync(textureData.normal,"/Assets/Textures/backpack_normal.png");
+    textureLoader->LoadAsync(textureData.roughness,"/Assets/Textures/backpack_roughness.jpg");
+    textureLoader->LoadAsync(textureData.metallic,"/Assets/Textures/backpack_metallic.jpg");
+    textureLoader->WaitAllLoaders();
 
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(gun);
@@ -313,6 +314,7 @@ void SandboxLayer::OnAttach()
 
 
     renderer = std::make_shared<Renderer>();
+    R_CORE_ASSERT(false, "");
 
 //    FramebufferSpecification fbSpec;
 //    fbSpec.width = sceneData.viewportSize.x;
@@ -373,8 +375,6 @@ void SandboxLayer::OnAttach()
 
     scene->GetRootNode()->AddChild(light);
     scene->GetRootNode()->AddChild(light1);
-
-    R_CORE_ASSERT(false, "");
 }
 
 void SandboxLayer::OnUpdate(float ts)
