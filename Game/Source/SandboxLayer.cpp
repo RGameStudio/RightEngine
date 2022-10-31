@@ -9,7 +9,6 @@
 #include "EnvironmentMapLoader.hpp"
 #include "MeshLoader.hpp"
 #include "AssetManager.hpp"
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <imgui.h>
@@ -109,10 +108,11 @@ namespace
 
     struct LayerSceneData
     {
+        std::shared_ptr<GraphicsPipeline> pbrPipeline;
+        std::shared_ptr<GraphicsPipeline> skyboxPipeline;
         std::shared_ptr<Buffer> materialUniformBuffer;
         std::shared_ptr<Camera> camera;
         std::shared_ptr<Entity> skyboxCube;
-        std::shared_ptr<Shader> skyboxShader;
         ImVec2 viewportSize{ width, height };
         uint32_t newEntityId{ 1 };
         PropertyPanel propertyPanel;
@@ -310,34 +310,88 @@ void SandboxLayer::OnAttach()
     shaderProgramDescriptor.reflection.buffers[{ 2, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
     shaderProgramDescriptor.reflection.buffers[{ 11, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
     shaderProgramDescriptor.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
-    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
+    auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
 
     renderer = std::make_shared<Renderer>();
+
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::BGRA8_SRGB;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = sceneData.viewportSize.x;
+    colorAttachmentDesc.height = sceneData.viewportSize.y;
+    const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor normalAttachmentDesc{};
+    normalAttachmentDesc.format = Format::RGBA16_SFLOAT;
+    normalAttachmentDesc.type = TextureType::TEXTURE_2D;
+    normalAttachmentDesc.width = sceneData.viewportSize.x;
+    normalAttachmentDesc.height = sceneData.viewportSize.y;
+    const auto normalAttachemnt = Device::Get()->CreateTexture(normalAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = sceneData.viewportSize.x;
+    depthAttachmentDesc.height = sceneData.viewportSize.y;
+    const auto depthAttachment =  Device::Get()->CreateTexture(depthAttachmentDesc, {});
+
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = { sceneData.viewportSize.x, sceneData.viewportSize.y };
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.storeOperation = AttachmentStoreOperation::STORE;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    color.storeOperation = AttachmentStoreOperation::STORE;
+    AttachmentDescriptor normal{};
+    normal.loadOperation = AttachmentLoadOperation::CLEAR;
+    normal.texture = normalAttachemnt;
+    renderPassDescriptor.colorAttachments = { color, normal };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+    sceneData.pbrPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+
+    BufferDescriptor bufferDesc{};
+    bufferDesc.type = BufferType::UNIFORM;
+    bufferDesc.size = sizeof(MaterialData);
+    bufferDesc.memoryType = MemoryType::CPU_GPU;
+    sceneData.materialUniformBuffer = Device::Get()->CreateBuffer(bufferDesc, nullptr);
+
+    bufferDesc.size = sizeof(LightBuffer);
+    sceneData.lightUniformBuffer = Device::Get()->CreateBuffer(bufferDesc, nullptr);
+
+    ShaderProgramDescriptor skyboxShaderDesc{};
+    vertexShader.path = "/Assets/Shaders/skybox.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    fragmentShader.path = "/Assets/Shaders/skybox.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    skyboxShaderDesc.shaders = {vertexShader, fragmentShader};
+    VertexBufferLayout skyboxLayout;
+    skyboxLayout.Push<glm::vec3>();
+    skyboxShaderDesc.layout = skyboxLayout;
+    skyboxShaderDesc.reflection.textures = { 1 };
+    skyboxShaderDesc.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
+    shader = Device::Get()->CreateShader(shaderProgramDescriptor);
+
+    pipelineDescriptor.shader = shader;
+    renderPassDescriptor.extent = { sceneData.viewportSize.x, sceneData.viewportSize.y };
+    renderPassDescriptor.offscreen = true;
+    depth.loadOperation = AttachmentLoadOperation::LOAD;
+    depth.storeOperation = AttachmentStoreOperation::STORE;
+    depth.texture = depthAttachment;
+    color.loadOperation = AttachmentLoadOperation::LOAD;
+    color.storeOperation = AttachmentStoreOperation::STORE;
+    color.texture = colorAttachment;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+    sceneData.skyboxPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+
     R_CORE_ASSERT(false, "");
 
-//    FramebufferSpecification fbSpec;
-//    fbSpec.width = sceneData.viewportSize.x;
-//    fbSpec.height = sceneData.viewportSize.y;
-//    fbSpec.attachments = FramebufferAttachmentSpecification(
-//            {
-//                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
-//                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8),
-//                    FramebufferTextureSpecification(FramebufferTextureFormat::Depth),
-//            }
-//    );
-//
-//    frameBuffer = std::make_shared<Framebuffer>(fbSpec);
-//
-//    sceneData.materialUniformBuffer = UniformBuffer::Create(sizeof(MaterialData), 0);
-//    sceneData.lightUniformBuffer = UniformBuffer::Create(sizeof(LightBuffer), 1);
-//
-//    sceneData.skyboxShader = assetManager.LoadAsset<Shader>(
-//            "/Assets/Shaders/Basic/skybox",
-//            "skybox",
-//            options);
-//
-//    options.flipTextureVertically = true;
 //    const auto envContext = assetManager.LoadAsset<EnvironmentContext>("/Assets/Textures/env_malibu.hdr", "env_malibu",
 //                                                                       options);
 

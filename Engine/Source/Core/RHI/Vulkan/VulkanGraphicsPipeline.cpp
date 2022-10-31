@@ -163,6 +163,7 @@ void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
     multisampling.alphaToOneEnable = VK_FALSE; // Optional
 
+    std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
     colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     colorBlendAttachment.blendEnable = VK_FALSE;
@@ -173,12 +174,17 @@ void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
+    for (int i = 0; i < renderPassDescriptor.colorAttachments.size(); i++)
+    {
+        colorBlendAttachments.push_back(colorBlendAttachment);
+    }
+
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
+    colorBlending.attachmentCount = colorBlendAttachments.size();
+    colorBlending.pAttachments = colorBlendAttachments.data();
     colorBlending.blendConstants[0] = 0.0f; // Optional
     colorBlending.blendConstants[1] = 0.0f; // Optional
     colorBlending.blendConstants[2] = 0.0f; // Optional
@@ -296,7 +302,14 @@ void VulkanGraphicsPipeline::CreateRenderPass(const RenderPassDescriptor& render
     depthAttachment.storeOp = VulkanConverters::StoreOperation(renderPassDescriptor.depthStencilAttachment.storeOperation);
     depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    if (depthAttachment.loadOp == VK_ATTACHMENT_LOAD_OP_LOAD)
+    {
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    }
+    else
+    {
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    }
     depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     std::vector<VkAttachmentReference> colorAttachmentRefs;
