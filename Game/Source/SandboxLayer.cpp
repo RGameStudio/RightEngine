@@ -120,6 +120,9 @@ namespace
         AssetHandle backpackHandle;
         std::shared_ptr<Buffer> lightUniformBuffer;
         UIState uiState;
+        AssetHandle environmentHandle;
+        std::shared_ptr<RendererState> pbrRendererState;
+        std::shared_ptr<RendererState> skyboxRendererState;
     };
 
     static LayerSceneData sceneData;
@@ -312,7 +315,6 @@ void SandboxLayer::OnAttach()
     shaderProgramDescriptor.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
     auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
-
     renderer = std::make_shared<Renderer>();
 
     TextureDescriptor colorAttachmentDesc{};
@@ -390,24 +392,20 @@ void SandboxLayer::OnAttach()
     renderPassDescriptor.depthStencilAttachment = { depth };
     sceneData.skyboxPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
 
-    R_CORE_ASSERT(false, "");
+    sceneData.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_helipad.hdr");
 
-//    const auto envContext = assetManager.LoadAsset<EnvironmentContext>("/Assets/Textures/env_malibu.hdr", "env_malibu",
-//                                                                       options);
-
-//    sceneData.skyboxCube = scene->CreateEntity();
-//    VertexBufferLayout layout;
-//    layout.Push<float>(3);
-//    MeshComponent mesh;
-//    auto vertexArray = std::make_shared<VertexArray>();
-//    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(skyboxVertices, sizeof(skyboxVertices)), layout);
-//    mesh.SetVertexArray(vertexArray);
-//    mesh.SetVisibility(false);
-//    sceneData.skyboxCube->AddComponent<MeshComponent>(mesh);
-//    sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("Skybox", sceneData.newEntityId++));
-//    auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
-//    skyboxComponent.environment = envContext;
-//    scene->GetRootNode()->AddChild(sceneData.skyboxCube);
+    sceneData.skyboxCube = scene->CreateEntity();
+    MeshComponent skyboxMesh;
+    bufferDesc.size = sizeof(skyboxVertices);
+    bufferDesc.memoryType = MemoryType::CPU_GPU;
+    bufferDesc.type = BufferType::VERTEX;
+    skyboxMesh.SetVisibility(false);
+    skyboxMesh.SetVertexBuffer(Device::Get()->CreateBuffer(bufferDesc, nullptr), std::make_shared<VertexBufferLayout>(skyboxLayout));
+    sceneData.skyboxCube->AddComponent<MeshComponent>(skyboxMesh);
+    sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("Skybox", sceneData.newEntityId++));
+    auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
+    skyboxComponent.environment = assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle);
+    scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
     sceneData.propertyPanel.SetScene(scene);
 

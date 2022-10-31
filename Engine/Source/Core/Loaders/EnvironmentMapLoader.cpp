@@ -206,7 +206,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
 
-    bufferDescriptor.type = BufferType::VERTEX;
+    bufferDescriptor.type = BufferType::UNIFORM;
     bufferDescriptor.size = sizeof(Camera);
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
