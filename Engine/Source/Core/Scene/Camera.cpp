@@ -127,3 +127,8 @@ glm::mat4 Camera::GetProjectionMatrix() const
 {
     return glm::perspective(glm::radians(fov), aspectRatio, zNear, zFar);
 }
+
+void Camera::SetPosition(const glm::vec3& aPosition)
+{
+    position = aPosition;
+}

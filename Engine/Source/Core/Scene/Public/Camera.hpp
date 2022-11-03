@@ -53,6 +53,7 @@ namespace RightEngine
         { active = isActive; }
 
         void Move(int keycode);
+        void SetPosition(const glm::vec3& aPosition);
         void Rotate(float x, float y);
 
     protected:

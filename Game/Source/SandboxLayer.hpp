@@ -11,6 +11,8 @@ public:
     virtual void OnAttach() override;
     virtual void OnUpdate(float ts) override;
     virtual void OnImGuiRender();
+    bool OnEvent(const Event& event);
+    
 private:
     std::shared_ptr<RightEngine::Scene> scene;
     std::shared_ptr<RightEngine::Shader> shader;

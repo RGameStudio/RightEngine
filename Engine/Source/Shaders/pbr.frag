@@ -1,6 +1,6 @@
 #version 450 core
 layout (location = 0) out vec4 aAlbedo;
-layout (location = 1) out vec4 aNormal;
+//layout (location = 1) out vec4 aNormal;
 
 layout(location = 0) in vec2 f_UV;
 layout(location = 1) in vec3 f_Normal;
@@ -19,11 +19,11 @@ layout(binding = 2) uniform MaterialData
     bool u_HasAO;
 };
 
-layout(binding = 3) uniform sampler2D u_Albedo;
-layout(binding = 4) uniform sampler2D u_Normal;
-layout(binding = 5) uniform sampler2D u_Metallic;
-layout(binding = 6) uniform sampler2D u_Rougness;
-layout(binding = 7) uniform sampler2D u_AO;
+layout(binding = 3) uniform usampler2D u_Albedo;
+layout(binding = 4) uniform usampler2D u_Normal;
+layout(binding = 5) uniform usampler2D u_Metallic;
+layout(binding = 6) uniform usampler2D u_Rougness;
+layout(binding = 7) uniform usampler2D u_AO;
 layout(binding = 8) uniform samplerCube u_IrradianceMap;
 layout(binding = 9) uniform samplerCube u_PrefilterMap;
 layout(binding = 10) uniform sampler2D u_BRDFLUT;
@@ -50,7 +50,7 @@ layout(binding = 11) uniform LightBuffer
 
 layout(binding = 12) uniform CameraPos
 {
-    vec3 u_CameraPosition;
+    vec4 u_CameraPosition;
 };
 
 const float PI = 3.14159265359;
@@ -110,6 +110,9 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 
 void main()
 {
+//    aAlbedo = vec4(1.0f);
+//    aNormal = vec4(1.0f);
+//    return;
     vec3 albedo;
     vec3 N;
     float metallic;
@@ -118,7 +121,13 @@ void main()
 
     if (u_HasAlbedo)
     {
-        albedo = pow(texture(u_Albedo, f_UV).rgb, vec3(2.2));
+//        albedo = pow(texture(u_Albedo, f_UV).rgb, vec3(2.2));
+        albedo = texture(u_Albedo, f_UV).rgb;
+        if (albedo.x > 1.0f)
+        {
+            albedo /= vec3(255);
+        }
+        albedo = pow(albedo, vec3(2.2));
     }
     else
     {
@@ -161,7 +170,20 @@ void main()
         ao = 1.0f;
     }
 
-    vec3 V = normalize(u_CameraPosition - f_WorldPos);
+    if (ao > 1.0f)
+    {
+        ao /= 255;
+    }
+    if (metallic > 1.0f)
+    {
+        metallic /= 255;
+    }
+    if (roughness > 1.0f)
+    {
+        roughness /= 255;
+    }
+
+    vec3 V = normalize(u_CameraPosition.xyz - f_WorldPos);
     vec3 R = reflect(-V, N);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
@@ -240,5 +262,5 @@ void main()
     color = pow(color, vec3(1.0/2.2));
 
     aAlbedo = vec4(color, 1.0);
-    aNormal = vec4(N, 1.0);
+//    aNormal = vec4(N, 1.0);
 }

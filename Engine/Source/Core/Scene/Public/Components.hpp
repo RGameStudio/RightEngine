@@ -22,7 +22,7 @@ namespace RightEngine
     class TransformComponent
     {
     public:
-        inline const glm::vec3& GetWorldPosition() const
+        inline const glm::vec3 GetWorldPosition() const
         { return transformMatrix[3]; }
 
         inline glm::vec3& GetLocalPosition()
