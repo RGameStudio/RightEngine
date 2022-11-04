@@ -6,6 +6,8 @@
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanUtils.hpp"
 #include "VulkanGraphicsPipeline.hpp"
+#include "VulkanTexture.hpp"
+#include "VulkanSampler.hpp"
 #include <imgui.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <backends/imgui_impl_glfw.h>
@@ -18,17 +20,17 @@ void VulkanImguiLayerImpl::OnAttach(const std::shared_ptr<GraphicsPipeline>& pip
 {
     VkDescriptorPoolSize pool_sizes[] =
             {
-                    { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-                    { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-                    { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-                    { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-                    { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-                    { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-                    { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-                    { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-                    { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-                    { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-                    { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+                    { VK_DESCRIPTOR_TYPE_SAMPLER, 100 },
+                    { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1024 },
+                    { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 100 },
+                    { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100 },
+                    { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 100 },
+                    { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 100 },
+                    { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100 },
+                    { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 100 },
+                    { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 100 },
+                    { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 100 },
+                    { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 100 }
             };
 
     VkDescriptorPoolCreateInfo pool_info = {};
@@ -113,6 +115,21 @@ void VulkanImguiLayerImpl::End(const std::shared_ptr<CommandBuffer>& cmd)
     });
 }
 
+void VulkanImguiLayerImpl::Image(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1)
+{
+    R_CORE_ASSERT(texture->GetSampler() && texture->GetWidth() > 0 && texture->GetHeight() > 0, "")
+    const auto vkTexture = std::static_pointer_cast<VulkanTexture>(texture);
+    const auto vkSampler = std::static_pointer_cast<VulkanSampler>(vkTexture->GetSampler());
+    if (imageViewToDescriptorSet.find(vkTexture->GetImageView()) == imageViewToDescriptorSet.end())
+    {
+        imageViewToDescriptorSet[vkTexture->GetImageView()] = ImGui_ImplVulkan_AddTexture(vkSampler->GetSampler(),
+                                                                                          vkTexture->GetImageView(),
+                                                                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
+    const auto descSet = imageViewToDescriptorSet[vkTexture->GetImageView()];
+    ImGui::Image(descSet, size, uv0, uv1);
+}
+
 void ImGuiLayer::CreateImpl()
 {
     if (!impl)
@@ -120,3 +137,5 @@ void ImGuiLayer::CreateImpl()
         impl = std::make_shared<VulkanImguiLayerImpl>();
     }
 }
+
+

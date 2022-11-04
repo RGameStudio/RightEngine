@@ -179,27 +179,10 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     }
 }
 
-
-void VulkanTexture::GenerateMipmaps() const
-{
-
-}
-
-void VulkanTexture::Bind(uint32_t slot) const
-{
-
-}
-
-void VulkanTexture::UnBind() const
-{
-
-}
-
 VulkanTexture::~VulkanTexture()
 {
     vkDestroyImageView(VK_DEVICE()->GetDevice(), textureImageView, nullptr);
     vkDestroyImage(VK_DEVICE()->GetDevice(), textureImage, nullptr);
-//    vkFreeMemory(VK_DEVICE()->GetDevice(), textureImageMemory, nullptr);
     vmaFreeMemory(VK_DEVICE()->GetAllocator(), allocation);
 }
 
@@ -289,4 +272,9 @@ bool VulkanTexture::ValidateSampler(const std::shared_ptr<Sampler>& sampler) con
     result |= vks::tools::formatIsFilterable(VK_DEVICE()->GetPhysicalDevice(), VulkanConverters::Format(specification.format), VK_IMAGE_TILING_LINEAR);
 
     return result;
+}
+
+void* VulkanTexture::GetNativeHandle() const
+{
+    return textureImage;
 }

@@ -18,5 +18,4 @@ private:
     std::shared_ptr<RightEngine::Shader> shader;
     std::shared_ptr<RightEngine::Renderer> renderer;
     std::shared_ptr<RightEngine::Texture> texture;
-    uint32_t id;
 };

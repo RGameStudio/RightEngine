@@ -128,11 +128,13 @@ namespace
         std::shared_ptr<RendererState> pbrPipelineState;
         std::shared_ptr<GraphicsPipeline> skyboxPipeline;
         std::shared_ptr<GraphicsPipeline> presentPipeline;
+        std::shared_ptr<GraphicsPipeline> uiPipeline;
         std::shared_ptr<RendererState> skyboxPipelineState;
         std::shared_ptr<Buffer> materialUniformBuffer;
         std::shared_ptr<Camera> camera;
         std::shared_ptr<Entity> skyboxCube;
         ImVec2 viewportSize{width, height};
+        ImVec2 newViewportSize{0, 0};
         uint32_t newEntityId{1};
         PropertyPanel propertyPanel;
         MeshLoader meshLoader;
@@ -143,6 +145,7 @@ namespace
         std::shared_ptr<Buffer> vpBuffer;
         std::shared_ptr<Buffer> transBuffer;
         std::shared_ptr<Buffer> cameraPosBuffer;
+        std::shared_ptr<ImGuiLayer> imGuiLayer;
     };
 
     static LayerSceneData sceneData;
@@ -308,6 +311,9 @@ void SandboxLayer::OnAttach()
     scene->SetCamera(sceneData.camera);
     scene->GetRootNode()->AddChild(gun);
 
+    SamplerDescriptor samplerDesc{};
+    const auto sampler = Device::Get()->CreateSampler(samplerDesc);
+
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;
     vertexShader.path = "/Assets/Shaders/pbr.vert";
@@ -339,6 +345,7 @@ void SandboxLayer::OnAttach()
     colorAttachmentDesc.width = sceneData.viewportSize.x;
     colorAttachmentDesc.height = sceneData.viewportSize.y;
     const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    colorAttachment->SetSampler(sampler);
     TextureDescriptor normalAttachmentDesc{};
     normalAttachmentDesc.format = Format::RGBA16_SFLOAT;
     normalAttachmentDesc.type = TextureType::TEXTURE_2D;
@@ -394,9 +401,6 @@ void SandboxLayer::OnAttach()
 
     sceneData.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_helipad.hdr");
 
-    SamplerDescriptor samplerDesc{};
-    const auto sampler = Device::Get()->CreateSampler(samplerDesc);
-
     sceneData.pbrPipelineState->SetVertexBuffer(sceneData.vpBuffer, 0);
     sceneData.pbrPipelineState->SetVertexBuffer(sceneData.transBuffer, 1);
     sceneData.pbrPipelineState->SetFragmentBuffer(sceneData.materialUniformBuffer, 2);
@@ -416,7 +420,6 @@ void SandboxLayer::OnAttach()
     sceneData.pbrPipelineState->GetTexture(5)->SetSampler(sampler);
     sceneData.pbrPipelineState->GetTexture(6)->SetSampler(sampler);
     sceneData.pbrPipelineState->GetTexture(7)->SetSampler(sampler);
-
 
     ShaderProgramDescriptor skyboxShaderDesc{};
     vertexShader.path = "/Assets/Shaders/skybox.vert";
@@ -478,26 +481,62 @@ void SandboxLayer::OnAttach()
     scene->GetRootNode()->AddChild(light);
     scene->GetRootNode()->AddChild(light1);
 
-//    sceneData.camera->SetActive(false);
+    const auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetNativeHandle());
+    int windowW, windowH;
+    glfwGetFramebufferSize(window, &windowW, &windowH);
+
+    TextureDescriptor presentAttachmentDesc{};
+    presentAttachmentDesc.format = Format::BGRA8_SRGB;
+    presentAttachmentDesc.type = TextureType::TEXTURE_2D;
+    presentAttachmentDesc.width = windowW;
+    presentAttachmentDesc.height = windowH;
+    const auto presentAttachment = Device::Get()->CreateTexture(presentAttachmentDesc, {});
+    presentAttachment->SetSampler(sampler);
 
     GraphicsPipelineDescriptor presentPipelineDesc{};
-    presentPipelineDesc.shader = shader;
+    presentPipelineDesc.shader = nullptr;
     RenderPassDescriptor presentRenderPassDescriptor{};
-    presentRenderPassDescriptor.extent = { sceneData.viewportSize.x, sceneData.viewportSize.y };
+    presentRenderPassDescriptor.extent = { windowW, windowH };
     presentRenderPassDescriptor.offscreen = false;
     AttachmentDescriptor presentColor{};
-    presentColor.texture = colorAttachment;
+    presentColor.texture = presentAttachment;
     presentColor.loadOperation = AttachmentLoadOperation::LOAD;
     presentRenderPassDescriptor.colorAttachments = { presentColor };
-    presentRenderPassDescriptor.depthStencilAttachment = { depth };
 
     sceneData.presentPipeline = Device::Get()->CreateGraphicsPipeline(presentPipelineDesc, presentRenderPassDescriptor);
     EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(SandboxLayer::OnEvent));
-//    sceneData.camera->SetPosition({0.0f, 0.0f, -7.0f});
+    GraphicsPipelineDescriptor uiPipelineDesc{};
+    uiPipelineDesc.shader = nullptr;
+
+    AttachmentDescriptor uiAttachment{};
+    uiAttachment.texture = presentAttachment;
+    uiAttachment.loadOperation = AttachmentLoadOperation::CLEAR;
+    uiAttachment.storeOperation = AttachmentStoreOperation::STORE;
+
+    RenderPassDescriptor uiRenderpass{};
+    uiRenderpass.extent = { windowW, windowH };
+    uiRenderpass.offscreen = true;
+    uiRenderpass.colorAttachments.emplace_back(uiAttachment);
+
+    sceneData.uiPipeline = Device::Get()->CreateGraphicsPipeline(uiPipelineDesc, uiRenderpass);
+
+    sceneData.imGuiLayer = std::make_shared<ImGuiLayer>(sceneData.uiPipeline);
+    Application::Get().PushOverlay(sceneData.imGuiLayer);
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
+    if (sceneData.newViewportSize.x != 0 && sceneData.newViewportSize.y != 0)
+    {
+        sceneData.pbrPipeline->Resize(static_cast<uint32_t>(sceneData.newViewportSize.x), static_cast<uint32_t>(sceneData.newViewportSize.y));
+        sceneData.newViewportSize = {0, 0};
+    }
+
+    if (Input::IsKeyDown(R_KEY_C))
+    {
+        sceneData.camera->SetActive(!sceneData.camera->IsActive());
+    }
+
     if (Input::IsKeyDown(R_KEY_W))
     {
         sceneData.camera->Move(R_KEY_W);
@@ -591,11 +630,18 @@ void SandboxLayer::OnUpdate(float ts)
 
     renderer->EndFrame();
 
+    renderer->SetPipeline(sceneData.uiPipeline);
+    renderer->BeginFrame(nullptr);
+    sceneData.imGuiLayer->Begin();
+    OnImGuiRender();
+    sceneData.imGuiLayer->End(renderer->GetCmd());
+    renderer->EndFrame();
+
     renderer->SetPipeline(sceneData.presentPipeline);
     renderer->BeginFrame(nullptr);
     renderer->EndFrame();
-//    sceneData.lightUniformBuffer->SetData(&lightBuffer, sizeof(LightBuffer));
-//
+
+    // TODO: Implement skybox rendering
 //    const auto skyboxView = scene->GetRegistry().view<SkyboxComponent>();
 //    // TODO: Add black skybox for fallback
 //    R_ASSERT(!skyboxView.empty(), "No skybox was set!");
@@ -768,7 +814,7 @@ void SandboxLayer::OnImGuiRender()
     ImGui::End();
 
     ImGui::Begin("Viewport");
-//    id = frameBuffer->GetColorAttachment();
+    const auto attachment = sceneData.pbrPipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
     if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y)
     {
@@ -777,10 +823,11 @@ void SandboxLayer::OnImGuiRender()
             viewportSize.y = 1;
         }
         // TODO: Fix image flickering while resizing window
-//        frameBuffer->Resize(static_cast<uint32_t>(viewportSize.x), static_cast<uint32_t>(viewportSize.y));
+        sceneData.newViewportSize = viewportSize;
         sceneData.viewportSize = viewportSize;
     }
-    ImGui::Image((void*) id, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+    sceneData.imGuiLayer->Image(attachment, sceneData.viewportSize);
+//    ImGui::Image(attachmentHandle, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
     sceneData.camera->SetAspectRatio(viewportSize.x / viewportSize.y);
     ImGui::End();
 

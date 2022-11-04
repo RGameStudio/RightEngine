@@ -470,7 +470,11 @@ void VulkanGraphicsPipeline::Resize(int x, int y)
     {
         ResizeAttachment(attachment, x, y);
     }
-    ResizeAttachment(renderPassDescriptor.depthStencilAttachment, x, y);
+
+    if (renderPassDescriptor.depthStencilAttachment.texture)
+    {
+        ResizeAttachment(renderPassDescriptor.depthStencilAttachment, x, y);
+    }
     
     vkDeviceWaitIdle(VK_DEVICE()->GetDevice());
     vkDestroyFramebuffer(VK_DEVICE()->GetDevice(), framebuffer, nullptr);

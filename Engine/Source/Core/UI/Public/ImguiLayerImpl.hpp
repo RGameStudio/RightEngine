@@ -3,6 +3,7 @@
 #include "Event.hpp"
 #include "CommandBuffer.hpp"
 #include "GraphicsPipeline.hpp"
+#include <imgui.h>
 
 namespace RightEngine
 {
@@ -21,5 +22,7 @@ namespace RightEngine
 
         virtual void Begin() = 0;
         virtual void End(const std::shared_ptr<CommandBuffer>& cmd) = 0;
+
+        virtual void Image(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1) = 0;
     };
 }

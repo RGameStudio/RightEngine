@@ -52,6 +52,9 @@ namespace RightEngine
         void SetActive(bool isActive)
         { active = isActive; }
 
+        bool IsActive() const
+        { return active; }
+
         void Move(int keycode);
         void SetPosition(const glm::vec3& aPosition);
         void Rotate(float x, float y);

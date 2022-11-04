@@ -2,6 +2,7 @@
 
 #include "Layer.hpp"
 #include "ImguiLayerImpl.hpp"
+#include <imgui.h>
 
 namespace RightEngine
 {
@@ -20,6 +21,8 @@ namespace RightEngine
 
         void Begin();
         void End(const std::shared_ptr<CommandBuffer>& cmd);
+
+        void Image(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1,1));
 
     private:
         void CreateImpl();

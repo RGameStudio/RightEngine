@@ -41,10 +41,7 @@ namespace RightEngine
 
         virtual void CopyFrom(const std::shared_ptr<Texture>& texture, const TextureCopy& srcCopy, const TextureCopy& dstCopy) = 0;
 
-        virtual void GenerateMipmaps() const = 0;
-
-        virtual void Bind(uint32_t slot = 0) const = 0;
-        virtual void UnBind() const = 0;
+        virtual void* GetNativeHandle() const = 0;
 
     protected:
         Texture(const std::shared_ptr<Device>& device,

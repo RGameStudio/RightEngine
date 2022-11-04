@@ -1,6 +1,7 @@
 #pragma once
 
 #define GLFW_INCLUDE_NONE
+
 #include <GLFW/glfw3.h>
 
 namespace RightEngine
@@ -51,7 +52,7 @@ namespace RightEngine
         MAILBOX
     };
 
-    #define BIT(x) 1 << x
+#define BIT(x) 1 << x
 
     enum class MemoryType
     {
@@ -65,5 +66,11 @@ namespace RightEngine
         NONE,
         TEXTURE_2D,
         CUBEMAP
+    };
+
+    enum class RendererStatus
+    {
+        OK = 0,
+        FRAMEBUFFER_OUT_OF_DATE,
     };
 }

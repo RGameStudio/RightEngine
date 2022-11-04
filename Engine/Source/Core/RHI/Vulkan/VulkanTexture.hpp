@@ -15,9 +15,7 @@ namespace RightEngine
 
         virtual ~VulkanTexture() override;
 
-        virtual void GenerateMipmaps() const override;
-        virtual void Bind(uint32_t slot) const override;
-        virtual void UnBind() const override;
+        virtual void* GetNativeHandle() const override;
 
         virtual void CopyFrom(const std::shared_ptr<Texture>& texture, const TextureCopy& srcCopy, const TextureCopy& dstCopy) override;
 

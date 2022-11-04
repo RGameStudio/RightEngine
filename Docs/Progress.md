@@ -39,3 +39,6 @@ Just a bunch of screenshots, that show progress of engine development
 
 ## 03-11-2022 (Implemented PBR and IBL with new vulkan renderer)
 ![03-11-2022.png](https://i.imgur.com/f4WO0VE.png)
+
+## 04-11-2022 (Implemented old ImGui editor with vulkan renderer)
+![04-11-2022](https://i.imgur.com/KhVmaAF.png)

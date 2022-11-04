@@ -64,6 +64,11 @@ void Camera::UpdateVectors()
 
 void Camera::Move(int keycode)
 {
+    if (!active)
+    {
+        return;
+    }
+
     if (keycode == R_KEY_W)
     {
         position += actualSpeed * front;
