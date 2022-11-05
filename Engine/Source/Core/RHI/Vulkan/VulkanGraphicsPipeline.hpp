@@ -36,7 +36,6 @@ namespace RightEngine
         VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
         VkRenderPass renderPass{ VK_NULL_HANDLE };
         VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
-        std::vector<VkDescriptorSet> descriptorSets;
         std::vector<VkPushConstantRange> pushConstants;
         VkFramebuffer framebuffer{ VK_NULL_HANDLE };
 

@@ -10,9 +10,24 @@ namespace RightEngine
     class Buffer;
     class Texture;
 
+    enum class CompareOp
+    {
+        LESS = 0,
+        LESS_OR_EQUAL,
+        GREATER
+    };
+
+    enum class CullMode
+    {
+        BACK = 0,
+        FRONT
+    };
+
     struct GraphicsPipelineDescriptor
     {
         std::shared_ptr<Shader> shader;
+        CompareOp depthCompareOp{ CompareOp::LESS };
+        CullMode cullMode{ CullMode::BACK };
     };
 
     enum class AttachmentLoadOperation
@@ -45,8 +60,8 @@ namespace RightEngine
 
     struct RenderPassDescriptor
     {
-        glm::ivec2 extent{ 0, 0 };
-        bool offscreen{ false };
+        glm::ivec2 extent{0, 0};
+        bool offscreen{false};
         std::vector<AttachmentDescriptor> colorAttachments;
         AttachmentDescriptor depthStencilAttachment;
         std::string name;

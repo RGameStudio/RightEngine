@@ -198,5 +198,33 @@ namespace RightEngine
                 R_CORE_ASSERT(false, "")
             }
         }
+
+        inline static VkCompareOp CompareOp(CompareOp op)
+        {
+            switch (op)
+            {
+                case CompareOp::LESS:
+                    return VK_COMPARE_OP_LESS;
+                case CompareOp::LESS_OR_EQUAL:
+                    return VK_COMPARE_OP_LESS_OR_EQUAL;
+                case CompareOp::GREATER:
+                    return VK_COMPARE_OP_GREATER;
+                default:
+                    R_CORE_ASSERT(false, "");
+            }
+        }
+
+        inline static VkCullModeFlags CullMode(CullMode mode)
+        {
+            switch (mode)
+            {
+                case CullMode::FRONT:
+                    return VK_CULL_MODE_FRONT_BIT;
+                case CullMode::BACK:
+                    return VK_CULL_MODE_BACK_BIT;
+                default:
+                    R_CORE_ASSERT(false, "");
+            }
+        }
     };
 }

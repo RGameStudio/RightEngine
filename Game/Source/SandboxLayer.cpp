@@ -118,9 +118,9 @@ namespace
     };
 
     struct CameraPosBuffer
-            {
+    {
         glm::vec4 pos;
-            };
+    };
 
     struct LayerSceneData
     {
@@ -146,6 +146,7 @@ namespace
         std::shared_ptr<Buffer> transBuffer;
         std::shared_ptr<Buffer> cameraPosBuffer;
         std::shared_ptr<ImGuiLayer> imGuiLayer;
+        std::shared_ptr<Buffer> skyboxVertexBuffer;
     };
 
     static LayerSceneData sceneData;
@@ -377,6 +378,11 @@ void SandboxLayer::OnAttach()
     bufferDesc.size = sizeof(CameraPosBuffer);
     sceneData.cameraPosBuffer = Device::Get()->CreateBuffer(bufferDesc, nullptr);
 
+    bufferDesc.size = sizeof(skyboxVertices);
+    bufferDesc.type = BufferType::VERTEX;
+    bufferDesc.memoryType = MemoryType::CPU_GPU;
+    sceneData.skyboxVertexBuffer = Device::Get()->CreateBuffer(bufferDesc, &skyboxVertices);
+
     GraphicsPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.shader = shader;
 
@@ -385,7 +391,6 @@ void SandboxLayer::OnAttach()
     renderPassDescriptor.offscreen = true;
     AttachmentDescriptor depth{};
     depth.loadOperation = AttachmentLoadOperation::CLEAR;
-    depth.storeOperation = AttachmentStoreOperation::STORE;
     depth.texture = depthAttachment;
     AttachmentDescriptor color{};
     color.texture = colorAttachment;
@@ -432,13 +437,14 @@ void SandboxLayer::OnAttach()
     skyboxShaderDesc.layout = skyboxLayout;
     skyboxShaderDesc.reflection.textures = {1};
     skyboxShaderDesc.reflection.buffers[{0, ShaderType::VERTEX}] = BufferType::UNIFORM;
-    shader = Device::Get()->CreateShader(shaderProgramDescriptor);
+    shader = Device::Get()->CreateShader(skyboxShaderDesc);
 
     pipelineDescriptor.shader = shader;
+    pipelineDescriptor.depthCompareOp = CompareOp::LESS_OR_EQUAL;
+    pipelineDescriptor.cullMode = CullMode::FRONT;
     renderPassDescriptor.extent = {sceneData.viewportSize.x, sceneData.viewportSize.y};
     renderPassDescriptor.offscreen = true;
     depth.loadOperation = AttachmentLoadOperation::LOAD;
-    depth.storeOperation = AttachmentStoreOperation::STORE;
     depth.texture = depthAttachment;
     color.loadOperation = AttachmentLoadOperation::LOAD;
     color.storeOperation = AttachmentStoreOperation::STORE;
@@ -458,7 +464,10 @@ void SandboxLayer::OnAttach()
     sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("Skybox", sceneData.newEntityId++));
     auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
     skyboxComponent.environment = assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle);
-//    scene->GetRootNode()->AddChild(sceneData.skyboxCube);
+    sceneData.skyboxPipelineState = RendererCommand::CreateRendererState();
+    sceneData.skyboxPipelineState->SetVertexBuffer(sceneData.vpBuffer, 0);
+    sceneData.skyboxPipelineState->SetTexture(skyboxComponent.environment->envMap, 1);
+    scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
     sceneData.propertyPanel.SetScene(scene);
 
@@ -529,6 +538,29 @@ void SandboxLayer::OnUpdate(float ts)
     if (sceneData.newViewportSize.x != 0 && sceneData.newViewportSize.y != 0)
     {
         sceneData.pbrPipeline->Resize(static_cast<uint32_t>(sceneData.newViewportSize.x), static_cast<uint32_t>(sceneData.newViewportSize.y));
+        GraphicsPipelineDescriptor pipelineDescriptor;
+        pipelineDescriptor.shader = sceneData.skyboxPipeline->GetPipelineDescriptor().shader;
+        pipelineDescriptor.depthCompareOp = CompareOp::LESS_OR_EQUAL;
+        pipelineDescriptor.cullMode = CullMode::FRONT;
+
+        RenderPassDescriptor renderPassDescriptor;
+        renderPassDescriptor.extent = {sceneData.viewportSize.x, sceneData.viewportSize.y};
+        renderPassDescriptor.offscreen = true;
+        AttachmentDescriptor depth;
+        depth.loadOperation = AttachmentLoadOperation::LOAD;
+        depth.texture = sceneData.pbrPipeline->GetRenderPassDescriptor().depthStencilAttachment.texture;
+        AttachmentDescriptor color;
+        color.loadOperation = AttachmentLoadOperation::LOAD;
+        color.storeOperation = AttachmentStoreOperation::STORE;
+        color.texture = sceneData.pbrPipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
+        renderPassDescriptor.colorAttachments = {color};
+        renderPassDescriptor.depthStencilAttachment = {depth};
+
+        sceneData.skyboxPipelineState = RendererCommand::CreateRendererState();
+        sceneData.skyboxPipelineState->SetVertexBuffer(sceneData.vpBuffer, 0);
+        sceneData.skyboxPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(sceneData.environmentHandle)->envMap, 1);
+
+        sceneData.skyboxPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
         sceneData.newViewportSize = {0, 0};
     }
 
@@ -630,6 +662,23 @@ void SandboxLayer::OnUpdate(float ts)
 
     renderer->EndFrame();
 
+    projection = sceneData.camera->GetProjectionMatrix();
+    projection[1][1] *= -1;
+    auto cameraTransform = TransformComponent();
+    cameraTransform.SetPosition(sceneData.camera->GetPosition());
+    cameraTransform.RecalculateTransform();
+    buffer.viewProjection = projection * glm::mat4(glm::mat3(scene->GetCamera()->GetViewMatrix()));
+    ptr = sceneData.vpBuffer->Map();
+    memcpy(ptr, &buffer, sizeof(VPBuffer));
+    sceneData.vpBuffer->UnMap();
+
+    renderer->SetPipeline(sceneData.skyboxPipeline);
+    renderer->BeginFrame(nullptr);
+    sceneData.skyboxPipelineState->OnUpdate(sceneData.skyboxPipeline);
+    renderer->EncodeState(sceneData.skyboxPipelineState);
+    renderer->Draw(sceneData.skyboxVertexBuffer);
+    renderer->EndFrame();
+
     renderer->SetPipeline(sceneData.uiPipeline);
     renderer->BeginFrame(nullptr);
     sceneData.imGuiLayer->Begin();
@@ -641,39 +690,12 @@ void SandboxLayer::OnUpdate(float ts)
     renderer->BeginFrame(nullptr);
     renderer->EndFrame();
 
-    // TODO: Implement skybox rendering
-//    const auto skyboxView = scene->GetRegistry().view<SkyboxComponent>();
-//    // TODO: Add black skybox for fallback
-//    R_ASSERT(!skyboxView.empty(), "No skybox was set!");
-//    R_ASSERT(skyboxView.size() == 1, "There must only 1 skybox in scene!");
-//    const auto& skyboxEntityID = skyboxView.front();
-//    const auto& skybox = scene->GetRegistry().get<SkyboxComponent>(skyboxEntityID);
-//
-
-//    shader->UnBind();
-//    frameBuffer->UnBind();
-//
-//    frameBuffer->Bind();
-//    sceneData.skyboxShader->Bind();
-//    skybox.environment->envMap->Bind(static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
-//    sceneData.skyboxShader->SetUniform1i("u_Skybox", static_cast<uint32_t>(TextureSlot::SKYBOX_TEXTURE_SLOT));
-//    const auto projectionMatrix = glm::perspective(sceneData.camera->GetFOV(true),
-//                                                   sceneData.camera->GetAspectRatio(),
-//                                                   sceneData.camera->GetNear(),
-//                                                   sceneData.camera->GetFar());
-//    const auto viewMatrix = glm::mat4(glm::mat3(scene->GetCamera()->GetViewMatrix()));
-//    sceneData.skyboxShader->SetUniformMat4f("u_Projection", projectionMatrix);
-//    sceneData.skyboxShader->SetUniformMat4f("u_View", viewMatrix);
-//    auto& rendererSettings = renderer->GetSettings();
-//    rendererSettings.depthTestMode = RightEngine::DepthTestMode::LEQUAL;
-//    renderer->Configure();
-//    renderer->SubmitMesh(sceneData.skyboxShader,
-//                         sceneData.skyboxCube->GetComponent<MeshComponent>(),
-//                         sceneData.skyboxCube->GetComponent<TransformComponent>().GetWorldTransformMatrix());
-//    rendererSettings.depthTestMode = RightEngine::DepthTestMode::LESS;
-//    renderer->Configure();
-//    frameBuffer->UnBind();
-//    renderer->EndScene();
+    const auto skyboxView = scene->GetRegistry().view<SkyboxComponent>();
+    // TODO: Add black skybox for fallback
+    R_ASSERT(!skyboxView.empty(), "No skybox was set!");
+    R_ASSERT(skyboxView.size() == 1, "There must only 1 skybox in scene!");
+    const auto& skyboxEntityID = skyboxView.front();
+    const auto& skybox = scene->GetRegistry().get<SkyboxComponent>(skyboxEntityID);
 }
 
 void SandboxLayer::OnImGuiRender()
@@ -827,12 +849,9 @@ void SandboxLayer::OnImGuiRender()
         sceneData.viewportSize = viewportSize;
     }
     sceneData.imGuiLayer->Image(attachment, sceneData.viewportSize);
-//    ImGui::Image(attachmentHandle, sceneData.viewportSize, ImVec2(0, 1), ImVec2(1, 0));
     sceneData.camera->SetAspectRatio(viewportSize.x / viewportSize.y);
     ImGui::End();
-
     sceneData.propertyPanel.OnImGuiRender();
-
     ImGui::End();
 }
 

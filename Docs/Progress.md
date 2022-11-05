@@ -42,3 +42,6 @@ Just a bunch of screenshots, that show progress of engine development
 
 ## 04-11-2022 (Implemented old ImGui editor with vulkan renderer)
 ![04-11-2022](https://i.imgur.com/KhVmaAF.png)
+
+## 05-11-2022 (Implemented skybox)
+![05-11-2022](https://i.imgur.com/PQNFRD2.png)
