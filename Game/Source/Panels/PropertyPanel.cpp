@@ -3,6 +3,7 @@
 #include "String.hpp"
 #include "Path.hpp"
 #include "AssetManager.hpp"
+#include "ImGuiLayer.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imfilebrowser.h>
@@ -144,14 +145,11 @@ void PropertyPanel::OnImGuiRender()
             DrawVec3Control("Scale", scale);
         });
 
-        DrawComponent<SkyboxComponent>("Skybox", selectedEntity, [](auto& component)
+        DrawComponent<SkyboxComponent>("Skybox", selectedEntity, [this](auto& component)
         {
             ImGui::LabelText("Image name", "%s", component.environment->name.c_str());
             ImGui::Separator();
-            ImGui::Image((void*) component.environment->equirectangularTexture->GetId(),
-                         ImVec2(512, 256),
-                         ImVec2(0, 1),
-                         ImVec2(1, 0));
+            ImGuiLayer::Image(component.environment->equirectangularTexture, ImVec2(512, 256), ImVec2(0, 1), ImVec2(1, 0));
 
             fileDialog.SetTitle("Open new environment map");
             fileDialog.SetTypeFilters({ ".hdr" });
@@ -164,9 +162,10 @@ void PropertyPanel::OnImGuiRender()
             {
                 const auto filePath = fileDialog.GetSelected().string();
                 // TODO: Add delimiters for other OSs
-                const auto filename = String::Split(filePath, "\\").back();
+                const auto filename = String::Split(filePath, "/").back();
                 const std::filesystem::path from = filePath;
                 const std::filesystem::path to = Path::ConvertEnginePathToOSPath("/Assets/Textures/") + filename;
+                R_CORE_TRACE("{0}", filename);
                 try
                 {
                     std::filesystem::copy(from, to, std::filesystem::copy_options::update_existing);
@@ -177,10 +176,15 @@ void PropertyPanel::OnImGuiRender()
                 }
                 fileDialog.ClearSelected();
 
-                R_CORE_ASSERT(false, "");
-//                LoaderOptions options{ true };
-//                const auto id = String::Split(filename, ".").front();
-//                component.environment = AssetManager::Get().LoadAsset<EnvironmentContext>("/Assets/Textures/" + filename, id, options);
+                const auto id = String::Split(filename, ".").front();
+
+                if (environmentMaps.find(id) == environmentMaps.end())
+                {
+                    const auto environmentHandle = AssetManager::Get().GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/" + filename, true);
+                    environmentMaps[id] = environmentHandle;
+                }
+
+                component.environment = AssetManager::Get().GetAsset<EnvironmentContext>(environmentMaps[id]);
             }
         });
 

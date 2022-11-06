@@ -138,4 +138,6 @@ void ImGuiLayer::CreateImpl()
     }
 }
 
+std::shared_ptr<ImguiLayerImpl> ImGuiLayer::impl;
+
 

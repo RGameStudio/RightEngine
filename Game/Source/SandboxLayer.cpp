@@ -848,7 +848,7 @@ void SandboxLayer::OnImGuiRender()
         sceneData.newViewportSize = viewportSize;
         sceneData.viewportSize = viewportSize;
     }
-    sceneData.imGuiLayer->Image(attachment, sceneData.viewportSize);
+    ImGuiLayer::Image(attachment, sceneData.viewportSize);
     sceneData.camera->SetAspectRatio(viewportSize.x / viewportSize.y);
     ImGui::End();
     sceneData.propertyPanel.OnImGuiRender();
