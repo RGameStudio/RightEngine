@@ -121,13 +121,7 @@ void main()
 
     if (u_HasAlbedo)
     {
-//        albedo = pow(texture(u_Albedo, f_UV).rgb, vec3(2.2));
-        albedo = texture(u_Albedo, f_UV).rgb;
-        if (albedo.x > 1.0f)
-        {
-            albedo /= vec3(255);
-        }
-        albedo = pow(albedo, vec3(2.2));
+        albedo = pow(texture(u_Albedo, f_UV).rgb / vec3(255), vec3(2.2));
     }
     else
     {

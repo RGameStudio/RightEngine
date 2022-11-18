@@ -135,7 +135,14 @@ namespace
         VkPhysicalDeviceFeatures supportedFeatures;
         vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-        return indices.IsComplete() && extensionsSupported && swapchainAdequate && supportedFeatures.samplerAnisotropy;
+        VkPhysicalDeviceProperties deviceProps;
+        vkGetPhysicalDeviceProperties(device, &deviceProps);
+
+        return indices.IsComplete()
+        && extensionsSupported
+        && swapchainAdequate
+        && supportedFeatures.samplerAnisotropy
+        && deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
     }
 }
 

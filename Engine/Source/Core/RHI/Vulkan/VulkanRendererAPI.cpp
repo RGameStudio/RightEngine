@@ -205,6 +205,7 @@ void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
     }
 
     vkWaitForFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkResetFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame]);
 
     if (!pipeline->GetRenderPassDescriptor().offscreen)
     {
@@ -212,9 +213,11 @@ void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
         VkResult result = vkAcquireNextImageKHR(VK_DEVICE()->GetDevice(),
                                                 swapchain->GetSwapchain(),
                                                 UINT64_MAX,
-                                                imageAvailableSemaphores[currentFrame],
-                                                VK_NULL_HANDLE,
+                                                nullptr,
+                                                inFlightFences[currentFrame],
                                                 &currentImageIndex);
+
+        vkWaitForFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         VkImage swapchainImage = swapchain->GetImages()[currentImageIndex];
         const auto texture = std::static_pointer_cast<VulkanTexture>(pipeline->GetRenderPassDescriptor().colorAttachments[0].texture);

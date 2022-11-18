@@ -404,7 +404,7 @@ void SandboxLayer::OnAttach()
     sceneData.pbrPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
     sceneData.pbrPipelineState = RendererCommand::CreateRendererState();
 
-    sceneData.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_helipad.hdr");
+    sceneData.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_circus.hdr");
 
     sceneData.pbrPipelineState->SetVertexBuffer(sceneData.vpBuffer, 0);
     sceneData.pbrPipelineState->SetVertexBuffer(sceneData.transBuffer, 1);
