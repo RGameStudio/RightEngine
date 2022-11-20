@@ -115,7 +115,7 @@ std::vector<uint32_t> VulkanShader::CompileShader(glslang_stage_t stage, const c
     input.target_language_version = GLSLANG_TARGET_SPV_1_3;
 #endif
     input.code = shaderSource;
-    input.default_version = 100;
+    input.default_version = 450;
     input.default_profile = GLSLANG_NO_PROFILE;
     input.force_default_version_and_profile = false;
     input.forward_compatible = false;

@@ -157,10 +157,18 @@ void VulkanRenderingContext::Init()
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Right Engine Editor";
+#ifdef R_WIN32
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 3, 0);
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 3, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_3;
+#endif
+#ifdef R_APPLE
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "Right Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
+#endif
+    appInfo.pEngineName = "Right Engine";
+
 
     VkValidationFeatureEnableEXT enables[] = {VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT};
     VkValidationFeaturesEXT features = {};
