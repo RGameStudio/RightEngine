@@ -3,6 +3,7 @@
 #include "Material.hpp"
 #include "EnvironmentMapLoader.hpp"
 #include <glm/glm.hpp>
+#include <crossguid/guid.hpp>
 
 namespace RightEngine
 {
@@ -16,6 +17,7 @@ namespace RightEngine
 
         std::string name{ "Entity" };
         uint32_t id;
+        xg::Guid guid{ xg::newGuid() };
     };
 
     // TODO: Add dirty flag, so we can recalculate transform only when needed

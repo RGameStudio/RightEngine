@@ -133,6 +133,8 @@ void PropertyPanel::OnImGuiRender()
             component.name = std::string(buf);
             ImGui::Separator();
             ImGui::LabelText("Entity ID", "%d", component.id);
+            ImGui::Separator();
+            ImGui::LabelText("GUID", "%s", component.guid.str().c_str());
         });
 
         DrawComponent<TransformComponent>("Transform", selectedEntity, [](auto& component)
