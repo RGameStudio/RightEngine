@@ -15,9 +15,9 @@ std::shared_ptr<Scene> Scene::Create()
     return scene;
 }
 
-void RightEngine::Scene::OnUpdate()
+void RightEngine::Scene::OnUpdate(float deltaTime)
 {
-    camera->OnUpdate();
+    camera->OnUpdate(deltaTime);
     UpdateNodeTransformRecursively(rootNode);
 }
 
@@ -68,7 +68,7 @@ void Scene::UpdateNodeTransformRecursively(const std::shared_ptr<Entity>& node)
     }
 }
 
-const entt::registry& Scene::GetRegistry() const
+entt::registry& Scene::GetRegistry()
 {
     return registry;
 }

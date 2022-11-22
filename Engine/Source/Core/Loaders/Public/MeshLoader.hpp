@@ -16,13 +16,13 @@ namespace RightEngine
         std::vector<std::shared_ptr<MeshNode>> children;
     };
 
-    class MeshLoader
+    class MeshLoader : public AssetLoader
     {
     public:
         MeshLoader() = default;
         ~MeshLoader() = default;
 
-        std::shared_ptr<MeshNode> Load(const std::string& path);
+        AssetHandle Load(const std::string& path);
 
     private:
         void ProcessNode(const aiNode* node, const aiScene* scene, std::shared_ptr<MeshNode>& meshNode);

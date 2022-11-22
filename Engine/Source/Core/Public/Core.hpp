@@ -11,3 +11,7 @@
 #include "MeshBuilder.hpp"
 #include "Layer.hpp"
 #include "Application.hpp"
+#include "Types.hpp"
+
+extern RightEngine::GPU_API GGPU_API;
+

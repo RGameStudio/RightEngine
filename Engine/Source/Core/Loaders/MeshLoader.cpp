@@ -3,9 +3,11 @@
 #include "Path.hpp"
 #include "String.hpp"
 #include "TextureLoader.hpp"
-#include "assimp/scene.h"
-#include "assimp/Importer.hpp"
-#include "assimp/postprocess.h"
+#include "AssetManager.hpp"
+#include "AssetLoader.hpp"
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 using namespace RightEngine;
 
@@ -33,42 +35,54 @@ namespace
         layout.Push<float>(3);
 
         auto mesh = std::make_shared<MeshComponent>();
-        auto vertexArray = std::make_shared<VertexArray>();
-        vertexArray->AddBuffer(std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex)), layout);
+        BufferDescriptor vertexBufferDescriptor{};
+        vertexBufferDescriptor.type = BufferType::VERTEX;
+        vertexBufferDescriptor.size = vertices.size() * sizeof(Vertex);
+        vertexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
+        const auto vertexBuffer = Device::Get()->CreateBuffer(vertexBufferDescriptor, vertices.data());
+        mesh->SetVertexBuffer(vertexBuffer, std::make_shared<VertexBufferLayout>(layout));
+
         if (!indexes.empty())
         {
-            vertexArray->AddBuffer(std::make_shared<IndexBuffer>(indexes.data(), indexes.size()));
+            BufferDescriptor indexBufferDescriptor{};
+            indexBufferDescriptor.type = BufferType::INDEX;
+            indexBufferDescriptor.size = indexes.size() * sizeof(uint32_t);
+            indexBufferDescriptor.memoryType = MemoryType::CPU_GPU;
+            const auto indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indexes.data());
+            mesh->SetIndexBuffer(indexBuffer);
         }
-
-        mesh->SetVertexArray(vertexArray);
         mesh->SetMaterial(material);
 
         return mesh;
     }
 }
 
-std::shared_ptr<MeshNode> MeshLoader::Load(const std::string& aPath)
+AssetHandle MeshLoader::Load(const std::string& aPath)
 {
     const size_t lastDelimIndex = aPath.find_last_of('/');
     std::string meshName = aPath.substr(lastDelimIndex, aPath.size() - 1 - lastDelimIndex);
     meshDir = aPath.substr(0, lastDelimIndex);
     Assimp::Importer importer;
-    const auto scene = importer.ReadFile(Path::ConvertEnginePathToOSPath(aPath),
+    auto scene = importer.ReadFile(Path::ConvertEnginePathToOSPath(aPath),
                                          aiProcess_Triangulate
                                          | aiProcess_GenSmoothNormals
                                          | aiProcess_FlipUVs
-                                         | aiProcess_CalcTangentSpace);
+                                         | aiProcess_CalcTangentSpace
+                                         | aiProcess_GenUVCoords
+                                         | aiProcess_OptimizeGraph
+                                         | aiProcess_OptimizeMeshes
+                                         | aiProcess_JoinIdenticalVertices);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
         R_CORE_ERROR("ASSIMP ERROR: {0}", importer.GetErrorString());
-        return nullptr;
+        return {};
     }
 
     auto meshTree = std::make_shared<MeshNode>();
     ProcessNode(scene->mRootNode, scene, meshTree);
 
-    return meshTree;
+    return manager->CacheAsset(meshTree, AssetType::MESH);
 }
 
 void MeshLoader::ProcessNode(const aiNode* node, const aiScene* scene, std::shared_ptr<MeshNode>& meshNode)
@@ -179,6 +193,7 @@ std::shared_ptr<MeshComponent> MeshLoader::ProcessMesh(const aiMesh* mesh, const
 #endif
 
     auto material = std::make_shared<Material>();
+#if 0
     if (!albedo.empty())
     {
         material->textureData.albedo = albedo.front();
@@ -195,6 +210,7 @@ std::shared_ptr<MeshComponent> MeshLoader::ProcessMesh(const aiMesh* mesh, const
     {
         material->textureData.roughness = roughness.front();
     }
+#endif
     auto builtMesh = BuildMesh(vertices, indexes, material);
 
     return builtMesh;
@@ -218,7 +234,10 @@ std::vector<std::shared_ptr<Texture>> MeshLoader::LoadTextures(const aiMaterial*
         std::string texName = meshDir + '/' + *(splittedPath.end() - 2) + '/' + *(splittedPath.end() - 1);
         if (loadedTextures.find(texName) == loadedTextures.end())
         {
-            auto texture = textureLoader.CreateTexture(texName);
+            auto& assetManager = AssetManager::Get();
+            auto loader = assetManager.GetLoader<TextureLoader>();
+            auto textureHandle = loader->Load(texName, {});
+            const auto texture = assetManager.GetAsset<Texture>(textureHandle);
             textures.push_back(texture);
             loadedTextures[texName] = texture;
         }

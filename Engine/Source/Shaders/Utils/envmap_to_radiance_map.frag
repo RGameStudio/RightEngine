@@ -1,10 +1,14 @@
 #version 420 core
-layout (location = 0) out vec4 aAlbedo;
+layout(location = 0) out vec4 aAlbedo;
 
-in vec3 f_LocalPos;
+layout(location = 0) in vec3 f_LocalPos;
 
-layout(binding = 0) uniform samplerCube u_EnvironmentCubemap;
-uniform float u_Roughness;
+layout(binding = 1) uniform samplerCube u_EnvironmentCubemap;
+
+layout(binding = 2) uniform Buffer
+{
+    float u_Roughness;
+};
 
 const float kPI = 3.14159265359;
 

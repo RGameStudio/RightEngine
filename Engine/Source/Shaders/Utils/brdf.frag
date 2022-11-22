@@ -1,6 +1,6 @@
-#version 330 core
+#version 450 core
 layout (location = 0) out vec4 aAlbedo;
-in vec2 f_TexCoords;
+layout (location = 0) in vec2 f_TexCoords;
 
 const float kPI = 3.14159265359;
 // ----------------------------------------------------------------------------

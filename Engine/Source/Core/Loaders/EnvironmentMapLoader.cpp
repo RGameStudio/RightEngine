@@ -2,12 +2,12 @@
 #include "TextureLoader.hpp"
 #include "MeshBuilder.hpp"
 #include "Shader.hpp"
-#include "FrameBuffer.hpp"
 #include "Camera.hpp"
 #include "Renderer.hpp"
 #include "RendererCommand.hpp"
 #include "String.hpp"
 #include "AssetManager.hpp"
+#include "GraphicsPipeline.hpp"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
@@ -54,208 +54,536 @@ namespace
         const auto splittedPath = String::Split(path, "/");
         return splittedPath.back();
     }
+
+    const float cubeVertexData[] = {
+        // [position 3] [normal 3] [texture coodinate 2]
+        // back face
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+        // front face
+        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        // left face
+        -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-right
+        -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-left
+        -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
+        -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom-left
+        -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
+        -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // top-right
+        // right face
+        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        // bottom face
+        -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+        // top face
+        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    };
+
+    const float quadVertexData[] = {
+        // positions        // texture Coords
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
 }
 
 EnvironmentMapLoader::EnvironmentMapLoader()
 {
-    cube = MeshBuilder::CubeGeometry();
+//    cube = MeshBuilder::CubeGeometry();
 }
 
-void EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
+AssetHandle EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
 {
     environmentContext = std::make_shared<EnvironmentContext>();
     loaderContext.path = path;
-    loaderContext.flipVertically = flipVertically;
     environmentContext->name = GetTextureName(path);
     ComputeEnvironmentMap();
     ComputeIrradianceMap();
     ComputeRadianceMap();
     ComputeLUT();
+    return FinishLoading();
 }
 
 void EnvironmentMapLoader::ComputeEnvironmentMap()
 {
-    TextureLoader textureLoader;
-    auto [data, textureSpec] = textureLoader.Load(loaderContext.path, loaderContext.flipVertically);
-    loaderContext.specification = textureSpec;
-    textureSpec.type = TextureType::TEXTURE_2D;
-    const auto equirectMap = Texture::Create(textureSpec, data);
+    auto& assetManager = AssetManager::Get();
+    auto loader = assetManager.GetLoader<TextureLoader>();
+    auto textureHandle = loader->Load(loaderContext.path, {});
+    const auto equirectMap = assetManager.GetAsset<Texture>(textureHandle);
 
-    const auto envmapConverterShader = AssetManager::Get().LoadAsset<Shader>(
-            "/Assets/Shaders/Utils/envmap_to_cubemap",
-            "envmap_to_cubemap",
-            LoaderOptions());
+    ShaderProgramDescriptor shaderProgramDescriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/Utils/envmap_to_cubemap.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/Utils/envmap_to_cubemap.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+    VertexBufferLayout layout;
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec2>();
+    shaderProgramDescriptor.layout = layout;
+    shaderProgramDescriptor.reflection.textures = { 1 };
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
+    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
-    FramebufferSpecification fbSpec;
-    fbSpec.width = envTexWidth;
-    fbSpec.height = envTexHeight;
-    fbSpec.attachments = FramebufferAttachmentSpecification(
-            {
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
-            }
-    );
-    Framebuffer fb(fbSpec);
+    TextureDescriptor cubeDesc;
+    cubeDesc.type = TextureType::CUBEMAP;
+    cubeDesc.width = envTexWidth;
+    cubeDesc.height = envTexHeight;
+    cubeDesc.format = Format::RGBA16_SFLOAT;
+    cubeDesc.componentAmount = 3;
+    const auto cubemap = Device::Get()->CreateTexture(cubeDesc, {});
 
-    textureSpec.width = envTexWidth;
-    textureSpec.height = envTexHeight;
-    textureSpec.type = TextureType::CUBEMAP;
-    auto cubemap = Texture::Create(textureSpec, CubemapFaces());
-    fb.Bind();
-    envmapConverterShader->Bind();
-    equirectMap->Bind();
-    const auto& va = cube->GetVertexArray();
-    va->Bind();
-    va->GetVertexBuffer()->Bind();
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::RGBA16_SFLOAT;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = envTexWidth;
+    colorAttachmentDesc.height = envTexHeight;
+    const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = envTexWidth;
+    depthAttachmentDesc.height = envTexHeight;
+    const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
+
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = { envTexWidth, envTexHeight };
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+
+    const auto pipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+
+    Renderer renderer;
+    renderer.SetPipeline(pipeline);
+
+    const auto rendererState = RendererCommand::CreateRendererState();
+    struct Camera
+    {
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+    BufferDescriptor bufferDescriptor{};
+    bufferDescriptor.type = BufferType::VERTEX;
+    bufferDescriptor.size = sizeof(cubeVertexData);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
+
+    bufferDescriptor.type = BufferType::UNIFORM;
+    bufferDescriptor.size = sizeof(Camera);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
+    rendererState->SetVertexBuffer(buffer, 0);
+    rendererState->SetTexture(equirectMap, 1);
+
+    SamplerDescriptor samplerDescriptor{};
+    const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
+    TextureDescriptor environmentCubemapDesc;
+    environmentCubemapDesc.type = TextureType::CUBEMAP;
+    environmentCubemapDesc.componentAmount = 4;
+    environmentCubemapDesc.format = Format::RGBA16_SFLOAT;
+    environmentCubemapDesc.height = envTexHeight;
+    environmentCubemapDesc.width = envTexWidth;
+    const auto environmentCubemap = Device::Get()->CreateTexture(environmentCubemapDesc, {});
+    
+    environmentCubemap->SetSampler(sampler);
+    colorAttachment->SetSampler(sampler);
+    equirectMap->SetSampler(sampler);
+    
+    TextureCopy src;
+    src.usage = SHADER_READ_ONLY;
+    src.layerNum = 0;
+    src.mipLevel = 0;
+
     for (int i = 0; i < 6; i++)
     {
-        envmapConverterShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-        fb.BindAttachmentToCubemapFace(cubemap, 0, i);
-        RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        RendererCommand::Draw(va->GetVertexBuffer());
+        Camera camera;
+        camera.view = captureViews[i];
+        camera.projection = projectionMatrix;
+        void* ptr = buffer->Map();
+        memcpy(ptr, &camera, sizeof(Camera));
+        buffer->UnMap();
+        rendererState->OnUpdate(pipeline);
+        renderer.BeginFrame(nullptr);
+        renderer.EncodeState(rendererState);
+        renderer.Draw(vertexBuffer);
+        renderer.EndFrame();
+        
+        TextureCopy dst;
+        dst.usage = SHADER_READ_ONLY;
+        dst.layerNum = i;
+        dst.mipLevel = 0;
+        environmentCubemap->CopyFrom(colorAttachment, src, dst);
     }
-    fb.UnBind();
-
-    environmentContext->envMap = cubemap;
+    
+    environmentContext->envMap = environmentCubemap;
     environmentContext->equirectangularTexture = equirectMap;
-    R_CORE_TRACE("Finished computing environment map for texture \"{0}\"", loaderContext.path);
 }
 
 void EnvironmentMapLoader::ComputeIrradianceMap()
 {
-    TextureSpecification texSpec = loaderContext.specification;
-    const auto irradianceMapShader = AssetManager::Get().LoadAsset<Shader>("/Assets/Shaders/Utils/envmap_to_irr_map",
-                                                                           "envmap_to_irr_map", LoaderOptions());
+    ShaderProgramDescriptor shaderProgramDescriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/Utils/envmap_to_irr_map.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/Utils/envmap_to_irr_map.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+    VertexBufferLayout layout;
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec2>();
+    shaderProgramDescriptor.layout = layout;
+    shaderProgramDescriptor.reflection.textures = { 1 };
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
+    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
 
-    FramebufferSpecification fbSpec;
-    fbSpec.width = irradianceTexWidth;
-    fbSpec.height = irradianceTexHeight;
-    fbSpec.attachments = FramebufferAttachmentSpecification(
-            {
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
-            }
-    );
-    Framebuffer fb(fbSpec);
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::RGBA16_SFLOAT;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = irradianceTexWidth;
+    colorAttachmentDesc.height = irradianceTexHeight;
+    const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = irradianceTexWidth;
+    depthAttachmentDesc.height = irradianceTexHeight;
+    const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
 
-    texSpec.width = irradianceTexWidth;
-    texSpec.height = irradianceTexHeight;
-    texSpec.type = TextureType::CUBEMAP;
-    auto irradianceMap = Texture::Create(texSpec, CubemapFaces());
-    fb.Bind();
-    irradianceMapShader->Bind();
-    environmentContext->envMap->Bind();
-    const auto& va = cube->GetVertexArray();
-    va->Bind();
-    va->GetVertexBuffer()->Bind();
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = { irradianceTexWidth, irradianceTexHeight };
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+
+
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+
+    const auto pipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+
+    Renderer renderer;
+    renderer.SetPipeline(pipeline);
+
+    const auto rendererState = RendererCommand::CreateRendererState();
+    struct Camera
+    {
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+    BufferDescriptor bufferDescriptor{};
+    bufferDescriptor.type = BufferType::VERTEX;
+    bufferDescriptor.size = sizeof(cubeVertexData);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
+
+    bufferDescriptor.type = BufferType::UNIFORM;
+    bufferDescriptor.size = sizeof(Camera);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
+    rendererState->SetVertexBuffer(buffer, 0);
+    rendererState->SetTexture(environmentContext->envMap, 1);
+
+    SamplerDescriptor samplerDescriptor{};
+    const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
+    TextureDescriptor irradianceCubemapDesc;
+    irradianceCubemapDesc.type = TextureType::CUBEMAP;
+    irradianceCubemapDesc.componentAmount = 4;
+    irradianceCubemapDesc.format = Format::RGBA16_SFLOAT;
+    irradianceCubemapDesc.height = irradianceTexHeight;
+    irradianceCubemapDesc.width = irradianceTexWidth;
+    const auto irradianceCubemap = Device::Get()->CreateTexture(irradianceCubemapDesc, {});
+
+    irradianceCubemap->SetSampler(sampler);
+    colorAttachment->SetSampler(sampler);
+
+    TextureCopy src;
+    src.usage = SHADER_READ_ONLY;
+    src.layerNum = 0;
+    src.mipLevel = 0;
+
     for (int i = 0; i < 6; i++)
     {
-        irradianceMapShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-        fb.BindAttachmentToCubemapFace(irradianceMap, 0, i);
-        RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        RendererCommand::Draw(va->GetVertexBuffer());
-    }
-    fb.UnBind();
+        Camera camera;
+        camera.view = captureViews[i];
+        camera.projection = projectionMatrix;
+        void* ptr = buffer->Map();
+        memcpy(ptr, &camera, sizeof(Camera));
+        buffer->UnMap();
+        rendererState->OnUpdate(pipeline);
+        renderer.BeginFrame(nullptr);
+        renderer.EncodeState(rendererState);
+        renderer.Draw(vertexBuffer);
+        renderer.EndFrame();
 
-    environmentContext->irradianceMap = irradianceMap;
+        TextureCopy dst;
+        dst.usage = SHADER_READ_ONLY;
+        dst.layerNum = i;
+        dst.mipLevel = 0;
+        irradianceCubemap->CopyFrom(colorAttachment, src, dst);
+    }
+
+
+    environmentContext->irradianceMap = irradianceCubemap;
     R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", loaderContext.path);
 }
 
 void EnvironmentMapLoader::ComputeRadianceMap()
 {
-    TextureSpecification prefilterTextureSpec{ prefilterTexWidth,
-                                               prefilterTexHeight,
-                                               3,
-                                               TextureType::CUBEMAP,
-                                               TextureFormat::RGB32F };
-    const auto prefilterMapShader = AssetManager::Get().LoadAsset<Shader>(
-            "/Assets/Shaders/Utils/envmap_to_radiance_map",
-            "envmap_to_radiance_map",
-            LoaderOptions());
-    auto prefilteredMap = Texture::Create(prefilterTextureSpec, CubemapFaces());
-    prefilteredMap->SetSampler(Sampler::Create({
-                                                       SamplerFilter::Linear,
-                                                       SamplerFilter::Linear,
-                                                       SamplerFilter::Linear,
-                                                       true }));
-    prefilteredMap->GenerateMipmaps();
-    FramebufferSpecification fbSpec;
-    fbSpec.width = prefilterTexWidth;
-    fbSpec.height = prefilterTexHeight;
-    fbSpec.attachments = FramebufferAttachmentSpecification(
-            {
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
-            }
-    );
-    Framebuffer fb(fbSpec);
-    prefilteredMap->GetSampler()->Bind(1);
+    ShaderProgramDescriptor shaderProgramDescriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/Utils/envmap_to_radiance_map.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/Utils/envmap_to_radiance_map.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+    VertexBufferLayout layout;
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec2>();
+    shaderProgramDescriptor.layout = layout;
+    shaderProgramDescriptor.reflection.textures = { 1 };
+    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
+    shaderProgramDescriptor.reflection.buffers[{ 2, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
+    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
+    
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::RGBA16_SFLOAT;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = prefilterTexWidth;
+    colorAttachmentDesc.height = prefilterTexHeight;
+    auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = prefilterTexWidth;
+    depthAttachmentDesc.height = prefilterTexHeight;
+    const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
+
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = { prefilterTexWidth, prefilterTexHeight };
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+    
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+
+    const auto pipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+
+    Renderer renderer;
+    renderer.SetPipeline(pipeline);
+    const auto rendererState = RendererCommand::CreateRendererState();
+    
+    struct Camera
+    {
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+    float roughness;
+    
+    BufferDescriptor bufferDescriptor{};
+    bufferDescriptor.type = BufferType::VERTEX;
+    bufferDescriptor.size = sizeof(cubeVertexData);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, cubeVertexData);
+
+    bufferDescriptor.type = BufferType::UNIFORM;
+    bufferDescriptor.size = sizeof(Camera);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
+    bufferDescriptor.type = BufferType::UNIFORM;
+    bufferDescriptor.size = sizeof(roughness);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    const auto roughnessBuffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
+    
+    rendererState->SetVertexBuffer(buffer, 0);
+    rendererState->SetTexture(environmentContext->envMap, 1);
+    rendererState->SetFragmentBuffer(roughnessBuffer, 2);
+
+    SamplerDescriptor samplerDescriptor{};
+    const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
+    TextureDescriptor prefilterCubemapDesc;
+    prefilterCubemapDesc.type = TextureType::CUBEMAP;
+    prefilterCubemapDesc.componentAmount = 4;
+    prefilterCubemapDesc.format = Format::RGBA16_SFLOAT;
+    prefilterCubemapDesc.height = prefilterTexWidth;
+    prefilterCubemapDesc.width = prefilterTexHeight;
+    prefilterCubemapDesc.mipLevels = maxMipLevels;
+    const auto prefilterCubemap = Device::Get()->CreateTexture(prefilterCubemapDesc, {});
+
+    prefilterCubemap->SetSampler(sampler);
+    colorAttachment->SetSampler(sampler);
+    
     for (int mipLevel = 0; mipLevel < maxMipLevels; mipLevel++)
     {
         uint32_t mipWidth = prefilterTexWidth * std::pow(0.5, mipLevel);
         uint32_t mipHeight = prefilterTexHeight * std::pow(0.5, mipLevel);
-        fb.Resize(mipWidth, mipHeight);
-        fb.Bind();
-        prefilterMapShader->Bind();
-        prefilteredMap->Bind(1);
-        environmentContext->envMap->Bind();
-        const auto& va = cube->GetVertexArray();
-        va->Bind();
-        va->GetVertexBuffer()->Bind();
-
-        float roughness = (float) mipLevel / (float) (maxMipLevels - 1);
-        prefilterMapShader->SetUniform1f("u_Roughness", roughness);
+        pipeline->Resize(mipWidth, mipHeight);
+        colorAttachment = pipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
+        roughness = static_cast<float>(mipLevel) / static_cast<float>(maxMipLevels - 1);
+        auto roughnessPtr = roughnessBuffer->Map();
+        memcpy(roughnessPtr, &roughness, sizeof(roughness));
+        roughnessBuffer->UnMap();
+        
         for (int i = 0; i < 6; i++)
         {
-            prefilterMapShader->SetUniformMat4f("u_ViewProjection", projectionMatrix * captureViews[i]);
-            fb.BindAttachmentToCubemapFace(prefilteredMap, 0, i, mipLevel);
-            RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            RendererCommand::Draw(va->GetVertexBuffer());
+            Camera camera;
+            camera.view = captureViews[i];
+            camera.projection = projectionMatrix;
+            
+            auto ptr = buffer->Map();
+            memcpy(ptr, &camera, sizeof(camera));
+            buffer->UnMap();
+            
+            rendererState->OnUpdate(pipeline);
+            renderer.BeginFrame(nullptr);
+            renderer.EncodeState(rendererState);
+            renderer.Draw(vertexBuffer);
+            renderer.EndFrame();
+            
+            TextureCopy src;
+            src.usage = SHADER_READ_ONLY;
+            src.layerNum = 0;
+            src.mipLevel = 0;
+            
+            TextureCopy dst;
+            dst.usage = SHADER_READ_ONLY;
+            dst.layerNum = i;
+            dst.mipLevel = mipLevel;
+            
+            
+            prefilterCubemap->CopyFrom(colorAttachment, src, dst);
         }
     }
-    fb.UnBind();
-
-    environmentContext->prefilterMap = prefilteredMap;
-    R_CORE_TRACE("Finished computing prefilter map for texture \"{0}\"", loaderContext.path);
+    
+    environmentContext->prefilterMap = prefilterCubemap;
+    R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", loaderContext.path);
 }
 
 void EnvironmentMapLoader::ComputeLUT()
 {
-    TextureSpecification specification{ lutTexWidth,
-                                        lutTexHeight,
-                                        3,
-                                        TextureType::TEXTURE_2D,
-                                        TextureFormat::RGB32F };
-    auto lutTexture = Texture::Create(specification, std::vector<uint8_t>());
-    lutTexture->SetSampler(Sampler::Create({ SamplerFilter::Linear,
-                                             SamplerFilter::Linear,
-                                             SamplerFilter::Linear,
-                                             false }));
-    const auto lutShader = AssetManager::Get().LoadAsset<Shader>(
-            "/Assets/Shaders/Utils/brdf",
-            "brdf",
-            LoaderOptions());
+    ShaderProgramDescriptor shaderProgramDescriptor;
+    ShaderDescriptor vertexShader;
+    vertexShader.path = "/Assets/Shaders/Utils/brdf.vert";
+    vertexShader.type = ShaderType::VERTEX;
+    ShaderDescriptor fragmentShader;
+    fragmentShader.path = "/Assets/Shaders/Utils/brdf.frag";
+    fragmentShader.type = ShaderType::FRAGMENT;
+    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+    VertexBufferLayout layout;
+    layout.Push<glm::vec3>();
+    layout.Push<glm::vec2>();
+    shaderProgramDescriptor.layout = layout;
+    const auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
+    
+    TextureDescriptor colorAttachmentDesc{};
+    colorAttachmentDesc.format = Format::RG16_SFLOAT;
+    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+    colorAttachmentDesc.width = lutTexWidth;
+    colorAttachmentDesc.height = lutTexHeight;
+    auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+    TextureDescriptor depthAttachmentDesc{};
+    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+    depthAttachmentDesc.width = lutTexWidth;
+    depthAttachmentDesc.height = lutTexHeight;
+    const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
+    
+    RenderPassDescriptor renderPassDescriptor{};
+    renderPassDescriptor.extent = { lutTexWidth, lutTexHeight };
+    renderPassDescriptor.offscreen = true;
+    AttachmentDescriptor depth{};
+    depth.loadOperation = AttachmentLoadOperation::CLEAR;
+    depth.texture = depthAttachment;
+    AttachmentDescriptor color{};
+    color.texture = colorAttachment;
+    color.loadOperation = AttachmentLoadOperation::CLEAR;
+    renderPassDescriptor.colorAttachments = { color };
+    renderPassDescriptor.depthStencilAttachment = { depth };
+    
+    GraphicsPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.shader = shader;
+    
+    const auto pipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
 
-    FramebufferSpecification fbSpec;
-    fbSpec.width = lutTexWidth;
-    fbSpec.height = lutTexHeight;
-    fbSpec.attachments = FramebufferAttachmentSpecification(
-            {
-                    FramebufferTextureSpecification(FramebufferTextureFormat::RGBA8)
-            }
-    );
-    Framebuffer fb(fbSpec);
-    const auto quad = MeshBuilder::QuadGeometry();
-    fb.Bind();
-    lutShader->Bind();
-    lutTexture->GetSampler()->Bind();
-    lutTexture->Bind();
-    const auto& va = quad->GetVertexArray();
-    va->Bind();
-    va->GetVertexBuffer()->Bind();
+    Renderer renderer;
+    renderer.SetPipeline(pipeline);
+    const auto rendererState = RendererCommand::CreateRendererState();
+    
+    SamplerDescriptor samplerDescriptor{};
+    const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
+    colorAttachment->SetSampler(sampler);
+    
+    BufferDescriptor bufferDescriptor{};
+    bufferDescriptor.type = BufferType::VERTEX;
+    bufferDescriptor.size = sizeof(quadVertexData);
+    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+    const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, quadVertexData);
+    
+    rendererState->OnUpdate(pipeline);
+    renderer.BeginFrame(nullptr);
+    renderer.EncodeState(rendererState);
+    renderer.Draw(vertexBuffer);
+    renderer.EndFrame();
+    
+    environmentContext->brdfLut = colorAttachment;
+    R_CORE_TRACE("Finished computing BRDF map for texture \"{0}\"", loaderContext.path);
+}
 
-    fb.BindAttachmentToTexture(lutTexture, 0);
-    RendererCommand::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    RendererCommand::Draw(va->GetVertexBuffer());
-
-    fb.UnBind();
-
-    environmentContext->brdfLut = lutTexture;
+AssetHandle EnvironmentMapLoader::FinishLoading()
+{
+    return manager->CacheAsset(environmentContext, AssetType::ENVIRONMENT_MAP);
 }

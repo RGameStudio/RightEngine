@@ -84,9 +84,9 @@ std::shared_ptr<MeshComponent> MeshBuilder::CubeGeometry()
     layout.Push<float>(2);
 
     auto mesh = std::make_shared<MeshComponent>();
-    auto vertexArray = std::make_shared<VertexArray>();
-    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(cubeVertexData, sizeof(cubeVertexData)), layout);
-    mesh->SetVertexArray(vertexArray);
+//    auto vertexArray = std::make_shared<VertexArray>();
+//    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(cubeVertexData, sizeof(cubeVertexData)), layout);
+//    mesh->SetVertexArray(vertexArray);
     return mesh;
 }
 
@@ -98,9 +98,9 @@ std::shared_ptr<MeshComponent> MeshBuilder::PlaneGeometry()
     layout.Push<float>(2);
 
     auto mesh = std::make_shared<MeshComponent>();
-    auto vertexArray = std::make_shared<VertexArray>();
-    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(planeVertexData, sizeof(planeVertexData)), layout);
-    mesh->SetVertexArray(vertexArray);
+//    auto vertexArray = std::make_shared<VertexArray>();
+//    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(planeVertexData, sizeof(planeVertexData)), layout);
+//    mesh->SetVertexArray(vertexArray);
     return mesh;
 }
 
@@ -111,8 +111,8 @@ std::shared_ptr<MeshComponent> MeshBuilder::QuadGeometry()
     layout.Push<float>(2);
 
     auto mesh = std::make_shared<MeshComponent>();
-    auto vertexArray = std::make_shared<VertexArray>();
-    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(quadVertices, sizeof(quadVertices)), layout);
-    mesh->SetVertexArray(vertexArray);
+//    auto vertexArray = std::make_shared<VertexArray>();
+//    vertexArray->AddBuffer(std::make_shared<VertexBuffer>(quadVertices, sizeof(quadVertices)), layout);
+//    mesh->SetVertexArray(vertexArray);
     return mesh;
 }

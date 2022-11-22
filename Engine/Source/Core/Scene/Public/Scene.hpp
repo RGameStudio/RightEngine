@@ -11,14 +11,14 @@ namespace RightEngine
     class Scene : public std::enable_shared_from_this<Scene>
     {
     public:
-        virtual void OnUpdate();
+        virtual void OnUpdate(float deltaTime);
 
         const std::shared_ptr<Camera>& GetCamera() const;
         void SetCamera(const std::shared_ptr<Camera>& camera);
 
         const std::shared_ptr<Entity>& GetRootNode() const;
 
-        const entt::registry& GetRegistry() const;
+        entt::registry& GetRegistry();
         std::shared_ptr<Entity> CreateEntity();
         void DestroyEntity(const std::shared_ptr<Entity>& node);
 

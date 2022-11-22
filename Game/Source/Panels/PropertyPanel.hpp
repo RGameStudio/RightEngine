@@ -2,6 +2,7 @@
 
 #include "Scene.hpp"
 #include "Entity.hpp"
+#include "AssetBase.hpp"
 #include <memory>
 
 namespace RightEngine
@@ -22,5 +23,6 @@ namespace RightEngine
     private:
         std::shared_ptr<Scene> scene;
         std::shared_ptr<Entity> selectedEntity;
+        std::unordered_map<std::string, AssetHandle> environmentMaps;
     };
 }

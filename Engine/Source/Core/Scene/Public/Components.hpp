@@ -1,9 +1,9 @@
 #pragma once
 
-#include "VertexArray.hpp"
 #include "Material.hpp"
 #include "EnvironmentMapLoader.hpp"
 #include <glm/glm.hpp>
+#include <crossguid/guid.hpp>
 
 namespace RightEngine
 {
@@ -17,13 +17,14 @@ namespace RightEngine
 
         std::string name{ "Entity" };
         uint32_t id;
+        xg::Guid guid{ xg::newGuid() };
     };
 
     // TODO: Add dirty flag, so we can recalculate transform only when needed
     class TransformComponent
     {
     public:
-        inline const glm::vec3& GetWorldPosition() const
+        inline const glm::vec3 GetWorldPosition() const
         { return transformMatrix[3]; }
 
         inline glm::vec3& GetLocalPosition()
@@ -62,11 +63,24 @@ namespace RightEngine
     public:
         MeshComponent();
 
-        const std::shared_ptr<VertexArray>& GetVertexArray() const;
-        void SetVertexArray(std::shared_ptr<VertexArray>& newVertexArray);
+        const std::shared_ptr<Buffer>& GetVertexBuffer() const
+        { return vertexBuffer; }
+        void SetVertexBuffer(const std::shared_ptr<Buffer>& aVertexBuffer, const std::shared_ptr<VertexBufferLayout>& aLayout)
+        {
+            vertexBuffer = aVertexBuffer;
+            vertexLayout = aLayout;
+        }
+
+        const std::shared_ptr<Buffer>& GetIndexBuffer() const
+        { return indexBuffer; }
+        void SetIndexBuffer(const std::shared_ptr<Buffer>& anIndexBuffer)
+        { indexBuffer = anIndexBuffer; }
 
         const std::shared_ptr<Material>& GetMaterial() const;
         void SetMaterial(const std::shared_ptr<Material>& newMaterial);
+
+        const std::shared_ptr<VertexBufferLayout>& GetVertexLayout() const
+        { return vertexLayout; }
 
         inline bool IsVisible() const
         { return isVisible; }
@@ -75,8 +89,10 @@ namespace RightEngine
         { isVisible = aIsVisible; }
 
     private:
-        std::shared_ptr<VertexArray> vertexArray;
+        std::shared_ptr<Buffer> vertexBuffer;
+        std::shared_ptr<Buffer> indexBuffer;
         std::shared_ptr<Material> material;
+        std::shared_ptr<VertexBufferLayout> vertexLayout;
         bool isVisible{ true };
     };
 
@@ -100,6 +116,7 @@ namespace RightEngine
     struct SkyboxComponent
     {
         SkyboxType type;
-        std::shared_ptr<EnvironmentContext> environment;
+        AssetHandle environmentHandle;
+        bool isDirty{ true };
     };
 }

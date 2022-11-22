@@ -1,6 +1,6 @@
 #include "RendererAPI.hpp"
-#include "OpenGL/OpenGLRendererAPI.hpp"
 #include "Assert.hpp"
+#include "Vulkan/VulkanRendererAPI.hpp"
 
 using namespace RightEngine;
 
@@ -10,7 +10,9 @@ std::shared_ptr<RendererAPI> RendererAPI::Create(GPU_API GpuApi)
     switch (GpuApi)
     {
         case GPU_API::OpenGL:
-            return std::make_shared<OpenGLRendererAPI>();
+        R_CORE_ASSERT(false, "OpenGL is deprecated!");
+        case GPU_API::Vulkan:
+            return std::make_shared<VulkanRendererAPI>();
         default:
             R_CORE_ASSERT(false, "Unknown GPU API!");
     }

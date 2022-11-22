@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Texture.hpp"
+#include "AssetLoader.hpp"
 #include <string>
 #include <vector>
 
@@ -8,19 +9,24 @@ namespace RightEngine
 {
     struct TextureLoaderOptions
     {
+        TextureType type = TextureType::TEXTURE_2D;
+        Format format = Format::NONE;
+        bool chooseFormat{ true };
+        bool flipVertically{ true };
     };
 
-    class TextureLoader
+    class TextureLoader : public AssetLoader
     {
     public:
-        TextureLoader(const TextureLoaderOptions& options = TextureLoaderOptions());
+        AssetHandle Load(const std::string& path,
+                         const TextureLoaderOptions& options = {}) const;
 
-        //TODO: Investigate why returning struct here leads to crash
-        std::pair<std::vector<uint8_t>, TextureSpecification> Load(const std::string& path, bool flipVertically = false) const;
-
-        std::shared_ptr<Texture> CreateTexture(const std::string& path, bool flipVertically = false) const;
+        void LoadAsync(AssetHandle& handle,
+                       const std::string& path,
+                       const TextureLoaderOptions& options = {}) const;
 
     private:
-        TextureLoaderOptions options;
+        std::pair<std::vector<uint8_t>, TextureDescriptor> LoadTextureData(const std::string& path,
+                                                                const TextureLoaderOptions& options = {}) const;
     };
 }
