@@ -114,12 +114,13 @@ void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
         R_CORE_ASSERT(false, "failed to begin recording command buffer!");
     }
 
-    memset(&renderPassInfo, 0, sizeof(VkRenderPassBeginInfo));
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = vkPipeline->GetRenderPass();
-    renderPassInfo.framebuffer = vkPipeline->GetFramebuffer();
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = VulkanConverters::Extent(vkPipeline->GetRenderPassDescriptor().extent);
+    auto* renderPassInfo = new VkRenderPassBeginInfo;
+    memset(renderPassInfo, 0, sizeof(VkRenderPassBeginInfo));
+    renderPassInfo->sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo->renderPass = vkPipeline->GetRenderPass();
+    renderPassInfo->framebuffer = vkPipeline->GetFramebuffer();
+    renderPassInfo->renderArea.offset = {0, 0};
+    renderPassInfo->renderArea.extent = VulkanConverters::Extent(vkPipeline->GetRenderPassDescriptor().extent);
 
     static std::vector<VkClearValue> clearValues = {};
     for (const auto& attachment : vkPipeline->GetRenderPassDescriptor().colorAttachments)
@@ -134,14 +135,14 @@ void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
                                 vkPipeline->GetRenderPassDescriptor().depthStencilAttachment.clearValue.stencil };
     clearValues.push_back(clearValue);
 
-    renderPassInfo.clearValueCount = clearValues.size();
-    renderPassInfo.pClearValues = clearValues.data();
+    renderPassInfo->clearValueCount = clearValues.size();
+    renderPassInfo->pClearValues = clearValues.data();
 
     VkPipeline nativePipeline = vkPipeline->GetPipeline();
 
-    cmd->Enqueue([this, nativePipeline](auto buffer)
+    cmd->Enqueue([renderPassInfo, nativePipeline](auto buffer)
                  {
-                     vkCmdBeginRenderPass(VK_CMD(buffer)->GetBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+                     vkCmdBeginRenderPass(VK_CMD(buffer)->GetBuffer(), renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
                      if (nativePipeline)
                      {
                          vkCmdBindPipeline(VK_CMD(buffer)->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, nativePipeline);

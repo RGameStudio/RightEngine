@@ -63,7 +63,6 @@ namespace RightEngine
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
-        VkRenderPassBeginInfo renderPassInfo{};
         VkImageCopy imageCopy;
         mutable std::unordered_map<VkImage, VkImageLayout> imageLayouts;
 

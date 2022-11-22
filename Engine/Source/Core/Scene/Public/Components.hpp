@@ -114,6 +114,7 @@ namespace RightEngine
     struct SkyboxComponent
     {
         SkyboxType type;
-        std::shared_ptr<EnvironmentContext> environment;
+        AssetHandle environmentHandle;
+        bool isDirty{ true };
     };
 }

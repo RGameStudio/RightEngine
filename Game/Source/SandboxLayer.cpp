@@ -463,10 +463,10 @@ void SandboxLayer::OnAttach()
     sceneData.skyboxCube->AddComponent<MeshComponent>(skyboxMesh);
     sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("Skybox", sceneData.newEntityId++));
     auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
-    skyboxComponent.environment = assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle);
+    skyboxComponent.environmentHandle = sceneData.environmentHandle;
     sceneData.skyboxPipelineState = RendererCommand::CreateRendererState();
     sceneData.skyboxPipelineState->SetVertexBuffer(sceneData.vpBuffer, 0);
-    sceneData.skyboxPipelineState->SetTexture(skyboxComponent.environment->envMap, 1);
+    sceneData.skyboxPipelineState->SetTexture(assetManager.GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->envMap, 1);
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
     sceneData.propertyPanel.SetScene(scene);
@@ -674,6 +674,20 @@ void SandboxLayer::OnUpdate(float ts)
 
     renderer->SetPipeline(sceneData.skyboxPipeline);
     renderer->BeginFrame(nullptr);
+    const auto skyboxView = scene->GetRegistry().view<SkyboxComponent>();
+    // TODO: Add black skybox for fallback
+    R_ASSERT(!skyboxView.empty(), "No skybox was set!");
+    R_ASSERT(skyboxView.size() == 1, "There must only 1 skybox in scene!");
+    const auto& skyboxEntityID = skyboxView.front();
+    auto& skyboxComponent = scene->GetRegistry().get<SkyboxComponent>(skyboxEntityID);
+    if (skyboxComponent.isDirty)
+    {
+        sceneData.skyboxPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->envMap, 1);
+        sceneData.pbrPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->irradianceMap, 8);
+        sceneData.pbrPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->prefilterMap, 9);
+        sceneData.pbrPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->brdfLut, 10);
+        skyboxComponent.isDirty = false;
+    }
     sceneData.skyboxPipelineState->OnUpdate(sceneData.skyboxPipeline);
     renderer->EncodeState(sceneData.skyboxPipelineState);
     renderer->Draw(sceneData.skyboxVertexBuffer);
@@ -689,13 +703,6 @@ void SandboxLayer::OnUpdate(float ts)
     renderer->SetPipeline(sceneData.presentPipeline);
     renderer->BeginFrame(nullptr);
     renderer->EndFrame();
-
-    const auto skyboxView = scene->GetRegistry().view<SkyboxComponent>();
-    // TODO: Add black skybox for fallback
-    R_ASSERT(!skyboxView.empty(), "No skybox was set!");
-    R_ASSERT(skyboxView.size() == 1, "There must only 1 skybox in scene!");
-    const auto& skyboxEntityID = skyboxView.front();
-    const auto& skybox = scene->GetRegistry().get<SkyboxComponent>(skyboxEntityID);
 }
 
 void SandboxLayer::OnImGuiRender()

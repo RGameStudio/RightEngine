@@ -147,9 +147,11 @@ void PropertyPanel::OnImGuiRender()
 
         DrawComponent<SkyboxComponent>("Skybox", selectedEntity, [this](auto& component)
         {
-            ImGui::LabelText("Image name", "%s", component.environment->name.c_str());
+            auto& assetManager = AssetManager::Get();
+            const auto& currentEnvironment = assetManager.GetAsset<EnvironmentContext>(component.environmentHandle);
+            ImGui::LabelText("Image name", "%s", currentEnvironment->name.c_str());
             ImGui::Separator();
-            ImGuiLayer::Image(component.environment->equirectangularTexture, ImVec2(512, 256), ImVec2(0, 1), ImVec2(1, 0));
+            ImGuiLayer::Image(currentEnvironment->equirectangularTexture, ImVec2(512, 256), ImVec2(0, 1), ImVec2(1, 0));
 
             fileDialog.SetTitle("Open new environment map");
             fileDialog.SetTypeFilters({ ".hdr" });
@@ -162,7 +164,12 @@ void PropertyPanel::OnImGuiRender()
             {
                 const auto filePath = fileDialog.GetSelected().string();
                 // TODO: Add delimiters for other OSs
-                const auto filename = String::Split(filePath, "/").back();
+#ifdef R_WIN32
+                const std::string delimiter = "\\";
+#else
+                const std::string delimiter = "/";
+#endif
+                const auto filename = String::Split(filePath, delimiter).back();
                 const std::filesystem::path from = filePath;
                 const std::filesystem::path to = Path::ConvertEnginePathToOSPath("/Assets/Textures/") + filename;
                 R_CORE_TRACE("{0}", filename);
@@ -184,7 +191,8 @@ void PropertyPanel::OnImGuiRender()
                     environmentMaps[id] = environmentHandle;
                 }
 
-                component.environment = AssetManager::Get().GetAsset<EnvironmentContext>(environmentMaps[id]);
+                component.environmentHandle = environmentMaps[id];
+                component.isDirty = true;
             }
         });
 
