@@ -12,7 +12,9 @@
 #include "KeyCodes.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 using namespace RightEngine;
 
@@ -149,6 +151,8 @@ namespace
         std::shared_ptr<Buffer> skyboxVertexBuffer;
 
         bool isViewportHovered{ false };
+        std::shared_ptr<Entity> selectedEntity;
+        ImGuizmo::OPERATION gizmoType{ ImGuizmo::TRANSLATE };
     };
 
     static LayerSceneData sceneData;
@@ -248,6 +252,7 @@ namespace
             if (ImGui::IsItemClicked())
             {
                 sceneData.propertyPanel.SetSelectedEntity(entity);
+                sceneData.selectedEntity = entity;
             }
             if (node_open)
             {
@@ -832,8 +837,54 @@ void SandboxLayer::OnImGuiRender()
     }
     ImGuiLayer::Image(attachment, sceneData.viewportSize);
     sceneData.camera->SetAspectRatio(viewportSize.x / viewportSize.y);
+
+    if (sceneData.selectedEntity)
+    {
+        if (sceneData.isViewportHovered)
+        {
+            if (Input::IsKeyDown(R_KEY_T))
+            {
+                sceneData.gizmoType = ImGuizmo::TRANSLATE;
+            }
+            else if (Input::IsKeyDown(R_KEY_R))
+            {
+                sceneData.gizmoType = ImGuizmo::ROTATE;
+            }
+            else if (Input::IsKeyDown(R_KEY_B))
+            {
+                sceneData.gizmoType = ImGuizmo::SCALE;
+            }
+        }
+        ImGuizmo::SetOrthographic(false);
+        ImGuizmo::SetDrawlist();
+        ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+
+        glm::mat4 cameraView = sceneData.camera->GetViewMatrix();
+        glm::mat4 cameraProjection = sceneData.camera->GetProjectionMatrix();
+
+        auto& entityTransformComponent = sceneData.selectedEntity->GetComponent<TransformComponent>();
+        glm::mat4 entityTransform = entityTransformComponent.GetWorldTransformMatrix();
+
+        ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+                             (ImGuizmo::OPERATION)sceneData.gizmoType, ImGuizmo::LOCAL, glm::value_ptr(entityTransform));
+
+
+        if (ImGuizmo::IsUsing())
+        {
+            glm::vec3 position, rotation, scale;
+            Utils::DecomposeTransform(entityTransform, position, rotation, scale);
+
+            auto deltaRotation = rotation - entityTransformComponent.GetRotation();
+            entityTransformComponent.SetPosition(position);
+            entityTransformComponent.SetRotationRadians(entityTransformComponent.GetRotation() + deltaRotation);
+            entityTransformComponent.SetScale(scale);
+        }
+    }
+
     ImGui::End();
+
     sceneData.propertyPanel.OnImGuiRender();
+
     ImGui::End();
 }
 

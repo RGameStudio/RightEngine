@@ -45,3 +45,6 @@ Just a bunch of screenshots, that show progress of engine development
 
 ## 05-11-2022 (Implemented skybox)
 ![05-11-2022](https://i.imgur.com/PQNFRD2.png)
+
+## 25-11-2022 (Added ImGuizmo)
+![25-11-2022](https://i.imgur.com/2cxs4PJ.png)

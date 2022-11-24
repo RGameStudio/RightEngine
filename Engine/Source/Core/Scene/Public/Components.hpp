@@ -36,7 +36,10 @@ namespace RightEngine
         glm::vec3& GetRotation()
         { return rotation; }
 
-        void SetRotation(const glm::vec3& newRotation)
+        void SetRotationDegree(const glm::vec3& newRotation)
+        { rotation = glm::radians(newRotation); }
+
+        void SetRotationRadians(const glm::vec3& newRotation)
         { rotation = newRotation; }
 
         glm::vec3& GetScale()
@@ -55,6 +58,7 @@ namespace RightEngine
 
     private:
         glm::vec3 position{0.0f, 0.0f, 0.0f};
+        // In radians
         glm::vec3 rotation{0.0f, 0.0f, 0.0f};
         glm::vec3 scale{1.0f, 1.0f, 1.0f};
         glm::mat4 transformMatrix{glm::mat4(1.0f)};

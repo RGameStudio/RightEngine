@@ -11,6 +11,7 @@
 #include <imgui.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <backends/imgui_impl_glfw.h>
+#include <ImGuizmo.h>
 #include <vulkan/vulkan.h>
 #include <algorithm>
 
@@ -104,6 +105,7 @@ void VulkanImguiLayerImpl::Begin()
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 }
 
 void VulkanImguiLayerImpl::End(const std::shared_ptr<CommandBuffer>& cmd)

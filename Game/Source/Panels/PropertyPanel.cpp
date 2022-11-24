@@ -141,8 +141,9 @@ void PropertyPanel::OnImGuiRender()
         {
             auto& position = component.GetLocalPosition();
             DrawVec3Control("Position", position);
-            auto& rotation = component.GetRotation();
+            auto rotation = glm::degrees(component.GetRotation());
             DrawVec3Control("Rotation", rotation);
+            component.SetRotationDegree(rotation);
             auto& scale = component.GetScale();
             DrawVec3Control("Scale", scale);
         });
