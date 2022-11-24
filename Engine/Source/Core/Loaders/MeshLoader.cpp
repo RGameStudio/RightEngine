@@ -22,11 +22,10 @@ namespace
         glm::vec3 biTangent;
     };
 
-    std::shared_ptr<MeshComponent> BuildMesh(const std::vector<Vertex>& vertices,
-                                             const std::vector<uint32_t>& indexes,
-                                             const std::shared_ptr<Material>& material)
+    std::shared_ptr<Mesh> BuildMesh(const std::vector<Vertex>& vertices,
+                                    const std::vector<uint32_t>& indexes)
     {
-        R_CORE_ASSERT(!vertices.empty() && material != nullptr, "");
+        R_CORE_ASSERT(!vertices.empty(), "");
         VertexBufferLayout layout;
         layout.Push<float>(3);
         layout.Push<float>(3);
@@ -34,7 +33,7 @@ namespace
         layout.Push<float>(3);
         layout.Push<float>(3);
 
-        auto mesh = std::make_shared<MeshComponent>();
+        auto mesh = std::make_shared<Mesh>();
         BufferDescriptor vertexBufferDescriptor{};
         vertexBufferDescriptor.type = BufferType::VERTEX;
         vertexBufferDescriptor.size = vertices.size() * sizeof(Vertex);
@@ -51,7 +50,6 @@ namespace
             const auto indexBuffer = Device::Get()->CreateBuffer(indexBufferDescriptor, indexes.data());
             mesh->SetIndexBuffer(indexBuffer);
         }
-        mesh->SetMaterial(material);
 
         return mesh;
     }
@@ -101,7 +99,7 @@ void MeshLoader::ProcessNode(const aiNode* node, const aiScene* scene, std::shar
     }
 }
 
-std::shared_ptr<MeshComponent> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene* scene)
+std::shared_ptr<Mesh> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indexes;
@@ -211,7 +209,7 @@ std::shared_ptr<MeshComponent> MeshLoader::ProcessMesh(const aiMesh* mesh, const
         material->textureData.roughness = roughness.front();
     }
 #endif
-    auto builtMesh = BuildMesh(vertices, indexes, material);
+    auto builtMesh = BuildMesh(vertices, indexes);
 
     return builtMesh;
 }
@@ -247,4 +245,17 @@ std::vector<std::shared_ptr<Texture>> MeshLoader::LoadTextures(const aiMaterial*
         }
     }
     return textures;
+}
+
+AssetHandle MeshLoader::Load(const std::shared_ptr<Buffer>& vertexBuffer,
+                             const std::shared_ptr<VertexBufferLayout>& layout,
+                             const std::shared_ptr<Buffer>& indexBuffer)
+{
+    auto mesh = std::make_shared<Mesh>();
+    mesh->SetVertexBuffer(vertexBuffer, layout);
+    mesh->SetIndexBuffer(indexBuffer);
+
+    auto meshNode = std::make_shared<MeshNode>();
+    meshNode->meshes.push_back(mesh);
+    return manager->CacheAsset(meshNode, AssetType::MESH);
 }

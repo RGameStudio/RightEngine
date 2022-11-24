@@ -205,46 +205,18 @@ namespace
         entity->AddComponent<TagComponent>(tag);
     }
 
-    void CreateEntitiesFromMeshTree(std::shared_ptr<Entity>& entity,
-                                    const std::shared_ptr<MeshNode>& tree,
-                                    const std::shared_ptr<Scene>& scene)
-    {
-        if (!entity)
-        {
-            entity = scene->CreateEntity();
-            AddTag(entity);
-        }
-
-        for (auto& mesh: tree->meshes)
-        {
-            auto newMeshEntity = scene->CreateEntity();
-            AddTag(newMeshEntity);
-            newMeshEntity->AddComponent<MeshComponent>(*mesh);
-            entity->AddChild(newMeshEntity);
-        }
-
-        for (auto& child: tree->children)
-        {
-            if (child->meshes.empty())
-            {
-                continue;
-            }
-            auto newChild = scene->CreateEntity();
-            AddTag(newChild);
-            entity->AddChild(newChild);
-            CreateEntitiesFromMeshTree(newChild, child, scene);
-        }
-    }
-
     std::shared_ptr<Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene,
-                                                const std::shared_ptr<MeshNode>& meshTree = nullptr,
+                                                const AssetHandle* meshHandle = nullptr,
                                                 GeometryType type = GeometryType::NONE)
     {
         std::shared_ptr<Entity> node = scene->CreateEntity();
-        if (meshTree)
+        if (meshHandle)
         {
-            CreateEntitiesFromMeshTree(node, meshTree, scene);
-        } else
+            MeshComponent meshComponent;
+            meshComponent.SetMesh(*meshHandle);
+            node->AddComponent<MeshComponent>(meshComponent);
+        }
+        else
         {
             if (type != GeometryType::NONE)
             {
@@ -294,12 +266,11 @@ void SandboxLayer::OnAttach()
                                                 glm::vec3(0, 1, 0));
     scene = Scene::Create();
 
-    std::shared_ptr<Entity> gun = CreateTestSceneNode(scene, assetManager.GetAsset<MeshNode>(sceneData.backpackHandle));
+    std::shared_ptr<Entity> gun = CreateTestSceneNode(scene, &sceneData.backpackHandle);
     gun->GetComponent<TagComponent>().name = "Gun";
 
-    auto& gunMesh = gun->GetChildren().back();
-    auto& gunTransform = gunMesh->GetComponent<TransformComponent>();
-    auto& textureData = gunMesh->GetComponent<MeshComponent>().GetMaterial()->textureData;
+    auto& gunTransform = gun->GetComponent<TransformComponent>();
+    auto& textureData = gun->GetComponent<MeshComponent>().GetMaterial()->textureData;
 
     const auto& textureLoader = assetManager.GetLoader<TextureLoader>();
     textureLoader->LoadAsync(textureData.albedo, "/Assets/Textures/backpack_albedo.jpg");
@@ -459,7 +430,8 @@ void SandboxLayer::OnAttach()
     bufferDesc.memoryType = MemoryType::CPU_GPU;
     bufferDesc.type = BufferType::VERTEX;
     skyboxMesh.SetVisibility(false);
-    skyboxMesh.SetVertexBuffer(Device::Get()->CreateBuffer(bufferDesc, nullptr), std::make_shared<VertexBufferLayout>(skyboxLayout));
+    skyboxMesh.SetMesh(assetManager.GetLoader<MeshLoader>()->Load(Device::Get()->CreateBuffer(bufferDesc, nullptr),
+                                                                  std::make_shared<VertexBufferLayout>(skyboxLayout)));
     sceneData.skyboxCube->AddComponent<MeshComponent>(skyboxMesh);
     sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("Skybox", sceneData.newEntityId++));
     auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
@@ -505,12 +477,12 @@ void SandboxLayer::OnAttach()
     GraphicsPipelineDescriptor presentPipelineDesc{};
     presentPipelineDesc.shader = nullptr;
     RenderPassDescriptor presentRenderPassDescriptor{};
-    presentRenderPassDescriptor.extent = { windowW, windowH };
+    presentRenderPassDescriptor.extent = {windowW, windowH};
     presentRenderPassDescriptor.offscreen = false;
     AttachmentDescriptor presentColor{};
     presentColor.texture = presentAttachment;
     presentColor.loadOperation = AttachmentLoadOperation::LOAD;
-    presentRenderPassDescriptor.colorAttachments = { presentColor };
+    presentRenderPassDescriptor.colorAttachments = {presentColor};
 
     sceneData.presentPipeline = Device::Get()->CreateGraphicsPipeline(presentPipelineDesc, presentRenderPassDescriptor);
     EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(SandboxLayer::OnEvent));
@@ -523,7 +495,7 @@ void SandboxLayer::OnAttach()
     uiAttachment.storeOperation = AttachmentStoreOperation::STORE;
 
     RenderPassDescriptor uiRenderpass{};
-    uiRenderpass.extent = { windowW, windowH };
+    uiRenderpass.extent = {windowW, windowH};
     uiRenderpass.offscreen = true;
     uiRenderpass.colorAttachments.emplace_back(uiAttachment);
 
@@ -657,7 +629,7 @@ void SandboxLayer::OnUpdate(float ts)
         ptr = sceneData.materialUniformBuffer->Map();
         memcpy(ptr, &material->materialData, sizeof(MaterialData));
         sceneData.materialUniformBuffer->UnMap();
-        renderer->Draw(mesh.GetVertexBuffer(), mesh.GetIndexBuffer());
+        renderer->Draw(mesh);
     }
 
     renderer->EndFrame();

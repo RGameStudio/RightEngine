@@ -15,9 +15,9 @@ namespace RightEngine
         TagComponent()
         {}
 
-        std::string name{ "Entity" };
+        std::string name{"Entity"};
         uint32_t id;
-        xg::Guid guid{ xg::newGuid() };
+        xg::Guid guid{xg::newGuid()};
     };
 
     // TODO: Add dirty flag, so we can recalculate transform only when needed
@@ -46,54 +46,49 @@ namespace RightEngine
         { scale = newScale; }
 
         glm::mat4 GetLocalTransformMatrix() const;
+
         const glm::mat4& GetWorldTransformMatrix() const;
 
         void RecalculateTransform(TransformComponent& parentTransform);
+
         void RecalculateTransform();
 
     private:
-        glm::vec3 position{ 0.0f, 0.0f, 0.0f };
-        glm::vec3 rotation{ 0.0f, 0.0f, 0.0f };
-        glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
-        glm::mat4 transformMatrix{ glm::mat4(1.0f) };
+        glm::vec3 position{0.0f, 0.0f, 0.0f};
+        glm::vec3 rotation{0.0f, 0.0f, 0.0f};
+        glm::vec3 scale{1.0f, 1.0f, 1.0f};
+        glm::mat4 transformMatrix{glm::mat4(1.0f)};
     };
 
     class MeshComponent
     {
     public:
-        MeshComponent();
+        MeshComponent()
+        { material = std::make_shared<Material>(); }
 
-        const std::shared_ptr<Buffer>& GetVertexBuffer() const
-        { return vertexBuffer; }
-        void SetVertexBuffer(const std::shared_ptr<Buffer>& aVertexBuffer, const std::shared_ptr<VertexBufferLayout>& aLayout)
-        {
-            vertexBuffer = aVertexBuffer;
-            vertexLayout = aLayout;
-        }
+        void SetVisibility(bool aVisible)
+        { isVisible = aVisible; }
 
-        const std::shared_ptr<Buffer>& GetIndexBuffer() const
-        { return indexBuffer; }
-        void SetIndexBuffer(const std::shared_ptr<Buffer>& anIndexBuffer)
-        { indexBuffer = anIndexBuffer; }
-
-        const std::shared_ptr<Material>& GetMaterial() const;
-        void SetMaterial(const std::shared_ptr<Material>& newMaterial);
-
-        const std::shared_ptr<VertexBufferLayout>& GetVertexLayout() const
-        { return vertexLayout; }
-
-        inline bool IsVisible() const
+        const bool& IsVisible() const
         { return isVisible; }
 
-        void SetVisibility(bool aIsVisible)
-        { isVisible = aIsVisible; }
+        const std::shared_ptr<Material>& GetMaterial() const
+        { return material; }
+
+        void SetMaterial(const std::shared_ptr<Material>& aMaterial)
+        { material = aMaterial; }
+
+        const AssetHandle& GetMesh() const
+        { return mesh; }
+
+        void SetMesh(const AssetHandle& handle)
+        { mesh = handle; }
 
     private:
-        std::shared_ptr<Buffer> vertexBuffer;
-        std::shared_ptr<Buffer> indexBuffer;
+        AssetHandle mesh;
+        //TODO: Make material a separate asset
         std::shared_ptr<Material> material;
-        std::shared_ptr<VertexBufferLayout> vertexLayout;
-        bool isVisible{ true };
+        bool isVisible;
     };
 
     enum class LightType
@@ -103,9 +98,9 @@ namespace RightEngine
 
     struct LightComponent
     {
-        LightType type{ LightType::DIRECTIONAL };
-        glm::vec3 color{ 1.0f, 1.0f, 1.0f };
-        float intensity{ 1000.0f };
+        LightType type{LightType::DIRECTIONAL};
+        glm::vec3 color{1.0f, 1.0f, 1.0f};
+        float intensity{1000.0f};
     };
 
     enum class SkyboxType
@@ -117,6 +112,6 @@ namespace RightEngine
     {
         SkyboxType type;
         AssetHandle environmentHandle;
-        bool isDirty{ true };
+        bool isDirty{true};
     };
 }

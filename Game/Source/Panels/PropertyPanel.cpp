@@ -200,6 +200,7 @@ void PropertyPanel::OnImGuiRender()
 
         DrawComponent<MeshComponent>("Mesh", selectedEntity, [](auto& component)
         {
+            auto& assetManager = AssetManager::Get();
             bool isVisible = component.IsVisible();
             ImGui::Checkbox("Is visible", &isVisible);
             component.SetVisibility(isVisible);

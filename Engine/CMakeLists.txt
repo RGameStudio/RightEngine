@@ -23,7 +23,6 @@ set(ENGINE_SRC
         Source/Core/UI/ImGuiLayer.cpp
         Source/Core/UI/ImGuiBuild.cpp
         Source/Core/Scene/Components/Transform.cpp
-        Source/Core/Scene/Components/Mesh.cpp
         Source/Core/Loaders/TextureLoader.cpp
         Source/Core/RHI/Sampler.cpp
         Source/Core/Utils/String.cpp

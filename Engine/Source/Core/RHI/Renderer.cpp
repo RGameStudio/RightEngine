@@ -3,6 +3,7 @@
 #include "Scene.hpp"
 #include "Application.hpp"
 #include "GraphicsPipeline.hpp"
+#include "AssetManager.hpp"
 #include <glm/ext/matrix_clip_space.hpp>
 
 using namespace RightEngine;
@@ -12,24 +13,6 @@ Renderer::Renderer()
     CommandBufferDescriptor descriptor;
     descriptor.type = CommandBufferType::GRAPHICS;
     commandBuffer = Device::Get()->CreateCommandBuffer(descriptor);
-}
-
-void Renderer::SubmitMesh(const std::shared_ptr<Shader>& shader,
-                          const MeshComponent& mesh,
-                          const glm::mat4& transform)
-{
-//    shader->Bind();
-//    shader->SetUniformMat4f("u_ViewProjection", sceneData.viewProjectionMatrix);
-//    shader->SetUniformMat4f("u_Transform", transform);
-    const auto& ib = mesh.GetIndexBuffer();
-    const auto& vb = mesh.GetVertexBuffer();
-    if (ib)
-    {
-//        RendererCommand::DrawIndexed(ib);
-    } else
-    {
-//        RendererCommand::Draw(vb);
-    }
 }
 
 void Renderer::BeginFrame(const std::shared_ptr<Camera>& camera)
@@ -78,4 +61,23 @@ RendererSettings& Renderer::GetSettings()
 GPU_API Renderer::GetAPI()
 {
     return RendererAPI::GetAPI();
+}
+
+void Renderer::Draw(const MeshComponent& meshComponent)
+{
+    const auto mesh = AssetManager::Get().GetAsset<MeshNode>(meshComponent.GetMesh());
+    Draw(mesh);
+}
+
+void Renderer::Draw(const std::shared_ptr<MeshNode>& meshNode)
+{
+    for (const auto& mesh : meshNode->meshes)
+    {
+        Draw(mesh->GetVertexBuffer(), mesh->GetIndexBuffer());
+    }
+
+    for (const auto& nextNode : meshNode->children)
+    {
+        Draw(nextNode);
+    }
 }
