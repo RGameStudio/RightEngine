@@ -26,7 +26,8 @@ target_link_libraries(Game
         vk-tools
         VulkanMemoryAllocator
         crossguid
-        TBB::tbb)
+        TBB::tbb
+        ImGuizmo)
 
 add_custom_target(CopyShaderFilesToGame ALL DEPENDS ${GLSL_ROOT_DIR})
 

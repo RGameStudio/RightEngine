@@ -147,6 +147,8 @@ namespace
         std::shared_ptr<Buffer> cameraPosBuffer;
         std::shared_ptr<ImGuiLayer> imGuiLayer;
         std::shared_ptr<Buffer> skyboxVertexBuffer;
+
+        bool isViewportHovered{ false };
     };
 
     static LayerSceneData sceneData;
@@ -215,8 +217,7 @@ namespace
             MeshComponent meshComponent;
             meshComponent.SetMesh(*meshHandle);
             node->AddComponent<MeshComponent>(meshComponent);
-        }
-        else
+        } else
         {
             if (type != GeometryType::NONE)
             {
@@ -503,6 +504,7 @@ void SandboxLayer::OnAttach()
 
     sceneData.imGuiLayer = std::make_shared<ImGuiLayer>(sceneData.uiPipeline);
     Application::Get().PushOverlay(sceneData.imGuiLayer);
+    sceneData.camera->SetActive(false);
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -536,26 +538,26 @@ void SandboxLayer::OnUpdate(float ts)
         sceneData.newViewportSize = {0, 0};
     }
 
-    if (Input::IsKeyDown(R_KEY_C))
-    {
-        sceneData.camera->SetActive(!sceneData.camera->IsActive());
-    }
+    sceneData.camera->SetActive(Input::IsMouseButtonDown(MouseButton::Right) && sceneData.isViewportHovered);
 
-    if (Input::IsKeyDown(R_KEY_W))
+    if (sceneData.camera->IsActive())
     {
-        sceneData.camera->Move(R_KEY_W);
-    }
-    if (Input::IsKeyDown(R_KEY_S))
-    {
-        sceneData.camera->Move(R_KEY_S);
-    }
-    if (Input::IsKeyDown(R_KEY_A))
-    {
-        sceneData.camera->Move(R_KEY_A);
-    }
-    if (Input::IsKeyDown(R_KEY_D))
-    {
-        sceneData.camera->Move(R_KEY_D);
+        if (Input::IsKeyDown(R_KEY_W))
+        {
+            sceneData.camera->Move(R_KEY_W);
+        }
+        if (Input::IsKeyDown(R_KEY_S))
+        {
+            sceneData.camera->Move(R_KEY_S);
+        }
+        if (Input::IsKeyDown(R_KEY_A))
+        {
+            sceneData.camera->Move(R_KEY_A);
+        }
+        if (Input::IsKeyDown(R_KEY_D))
+        {
+            sceneData.camera->Move(R_KEY_D);
+        }
     }
 
     scene->OnUpdate(ts);
@@ -815,6 +817,7 @@ void SandboxLayer::OnImGuiRender()
     ImGui::End();
 
     ImGui::Begin("Viewport");
+    sceneData.isViewportHovered = ImGui::IsWindowHovered();
     const auto attachment = sceneData.pbrPipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
     if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y)

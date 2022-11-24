@@ -31,3 +31,6 @@
 [submodule "Lib/oneTBB"]
 	path = Lib/oneTBB
 	url = git@github.com:oneapi-src/oneTBB.git
+[submodule "Lib/ImGuizmo"]
+	path = Lib/ImGuizmo
+	url = git@github.com:rbetik12/ImGuizmo.git
