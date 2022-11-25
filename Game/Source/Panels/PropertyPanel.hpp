@@ -24,5 +24,6 @@ namespace RightEngine
         std::shared_ptr<Scene> scene;
         std::shared_ptr<Entity> selectedEntity;
         std::unordered_map<std::string, AssetHandle> environmentMaps;
+        std::unordered_map<std::string, AssetHandle> meshes;
     };
 }

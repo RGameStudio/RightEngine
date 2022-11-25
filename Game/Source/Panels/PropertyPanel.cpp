@@ -80,6 +80,29 @@ namespace
     }
 
     ImGui::FileBrowser fileDialog;
+
+    std::string CopyFileToAssetDirectory(const std::string& filePath, const std::string& assetDirectory)
+    {
+#ifdef R_WIN32
+        const std::string delimiter = "\\";
+#else
+        const std::string delimiter = "/";
+#endif
+        auto filename = String::Split(filePath, delimiter).back();
+        const std::filesystem::path from = filePath;
+        const std::filesystem::path to = Path::ConvertEnginePathToOSPath("/Assets/Textures/") + filename;
+        R_CORE_TRACE("{0}", filename);
+        try
+        {
+            std::filesystem::copy(from, to, std::filesystem::copy_options::update_existing);
+        }
+        catch (std::exception& ex)
+        {
+            R_CORE_ASSERT(false, ex.what());
+        }
+
+        return filename;
+    }
 }
 
 PropertyPanel::PropertyPanel(const std::shared_ptr<Scene>& aScene)
@@ -165,32 +188,15 @@ void PropertyPanel::OnImGuiRender()
             fileDialog.Display();
             if (fileDialog.HasSelected())
             {
-                const auto filePath = fileDialog.GetSelected().string();
-                // TODO: Add delimiters for other OSs
-#ifdef R_WIN32
-                const std::string delimiter = "\\";
-#else
-                const std::string delimiter = "/";
-#endif
-                const auto filename = String::Split(filePath, delimiter).back();
-                const std::filesystem::path from = filePath;
-                const std::filesystem::path to = Path::ConvertEnginePathToOSPath("/Assets/Textures/") + filename;
-                R_CORE_TRACE("{0}", filename);
-                try
-                {
-                    std::filesystem::copy(from, to, std::filesystem::copy_options::update_existing);
-                }
-                catch (std::exception& ex)
-                {
-                    R_CORE_ASSERT(false, ex.what());
-                }
+                const auto assetDir = "/Assets/Textures/";
+                const auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
                 fileDialog.ClearSelected();
 
                 const auto id = String::Split(filename, ".").front();
 
                 if (environmentMaps.find(id) == environmentMaps.end())
                 {
-                    const auto environmentHandle = AssetManager::Get().GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/" + filename, true);
+                    const auto environmentHandle = AssetManager::Get().GetLoader<EnvironmentMapLoader>()->Load(assetDir + filename, true);
                     environmentMaps[id] = environmentHandle;
                 }
 
@@ -199,12 +205,39 @@ void PropertyPanel::OnImGuiRender()
             }
         });
 
-        DrawComponent<MeshComponent>("Mesh", selectedEntity, [](auto& component)
+        DrawComponent<MeshComponent>("Mesh", selectedEntity, [this](auto& component)
         {
             auto& assetManager = AssetManager::Get();
+            ImGui::LabelText("Mesh GUID", "%s", component.GetMesh().guid.str().c_str());
+            ImGui::Separator();
             bool isVisible = component.IsVisible();
             ImGui::Checkbox("Is visible", &isVisible);
             component.SetVisibility(isVisible);
+            ImGui::Separator();
+
+            fileDialog.SetTitle("Open new mesh");
+            fileDialog.SetTypeFilters({ ".obj", ".fbx", ".gltf" });
+            if (ImGui::Button("Open"))
+            {
+                fileDialog.Open();
+            }
+            fileDialog.Display();
+            if (fileDialog.HasSelected())
+            {
+                const auto assetDir = "/Assets/Models/";
+                const auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
+                fileDialog.ClearSelected();
+
+                const auto id = String::Split(filename, ".").front();
+
+                if (meshes.find(id) == meshes.end())
+                {
+                    const auto meshHandle = AssetManager::Get().GetLoader<MeshLoader>()->Load(assetDir + filename);
+                    meshes[id] = meshHandle;
+                }
+
+                component.SetMesh(meshes[id]);
+            }
         });
     }
     ImGui::End();
