@@ -88,11 +88,18 @@ namespace RightEngine
         void SetMesh(const AssetHandle& handle)
         { mesh = handle; }
 
+        void SetDirty(bool dirty)
+        { isDirty = dirty; }
+
+        bool IsDirty() const
+        { return isDirty; }
+
     private:
         AssetHandle mesh;
         //TODO: Make material a separate asset
         std::shared_ptr<Material> material;
         bool isVisible;
+        bool isDirty;
     };
 
     enum class LightType

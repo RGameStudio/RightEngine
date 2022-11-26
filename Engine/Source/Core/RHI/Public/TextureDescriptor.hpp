@@ -38,6 +38,8 @@ namespace RightEngine
                 case Format::RGB32_SFLOAT:
                 case Format::RGBA32_SFLOAT:
                     return sizeof(float) * componentAmount;
+                case Format::R8_SRGB:
+                case Format::RGB8_SRGB:
                 case Format::RGBA8_SRGB:
                     return sizeof(uint8_t) * componentAmount;
                 default:

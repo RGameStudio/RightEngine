@@ -27,6 +27,8 @@ namespace
             return Format::RGBA32_SFLOAT;
         }
 
+        // TODO: Add check for SRGB support
+#if 0
         switch (componentsAmount)
         {
             case 1:
@@ -37,6 +39,18 @@ namespace
                 return Format::RGBA8_UINT;
             default:
                 R_CORE_ASSERT(false, "");
+        }
+#endif
+        switch (componentsAmount)
+        {
+            case 1:
+                return Format::R8_SRGB;
+            case 3:
+                return Format::RGB8_SRGB;
+            case 4:
+                return Format::RGBA8_SRGB;
+            default:
+            R_CORE_ASSERT(false, "");
         }
     }
 }
@@ -70,19 +84,19 @@ std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::LoadTextureData
 
     TextureDescriptor descriptor;
     int desiredComponents = 0;
+    R_CORE_ASSERT(stbi_info_from_memory((stbi_uc*) fileBuffer.data(),
+                                        fileBuffer.size(),
+                                        &descriptor.width, &descriptor.height, &descriptor.componentAmount), "");
+    desiredComponents = descriptor.componentAmount == 3 ? 4 : descriptor.componentAmount;
     if (options.chooseFormat)
     {
-        if (!stbi_info_from_memory((stbi_uc*) fileBuffer.data(), fileBuffer.size(), &descriptor.width, &descriptor.height, &descriptor.componentAmount))
-        {
-            R_CORE_ASSERT(false, "");
-        }
         R_CORE_ASSERT(descriptor.width > 0 && descriptor.height > 0 && descriptor.componentAmount > 0, "");
-        desiredComponents = descriptor.componentAmount == 3 ? 4 : descriptor.componentAmount;
         descriptor.format = ChooseTextureFormat(isHdr, desiredComponents);
     }
     else
     {
         R_CORE_ASSERT(descriptor.format != Format::NONE, "");
+        descriptor.format = options.format;
     }
 
     void* buffer = nullptr;
@@ -138,6 +152,7 @@ AssetHandle TextureLoader::Load(const std::string& path,
     auto [data, descriptor] = LoadTextureData(path, options);
     descriptor.type = options.type;
     auto texture = Device::Get()->CreateTexture(descriptor, data);
+    texture->SetSampler(Device::Get()->CreateSampler({}));
     return manager->CacheAsset(texture, AssetType::IMAGE);
 }
 
@@ -145,11 +160,8 @@ void TextureLoader::LoadAsync(AssetHandle& handle,
                               const std::string& path,
                               const TextureLoaderOptions& options) const
 {
-    taskGroup.run([&, path = std::move(path)]()
+    taskGroup.run([&, path = std::move(path), options = std::move(options)]()
     {
-        auto [data, descriptor] = LoadTextureData(path, options);
-        descriptor.type = options.type;
-        auto texture = Device::Get()->CreateTexture(descriptor, data);
-        handle = manager->CacheAsset(texture, AssetType::IMAGE);
+        handle = Load(path, options);
     });
 }

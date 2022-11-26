@@ -48,3 +48,6 @@ Just a bunch of screenshots, that show progress of engine development
 
 ## 25-11-2022 (Added ImGuizmo)
 ![25-11-2022](https://i.imgur.com/2cxs4PJ.png)
+
+## 26-11-2022 (Added Material editing panel)
+![26-11-2022](https://i.imgur.com/LrYrriL.png)

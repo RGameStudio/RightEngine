@@ -80,6 +80,8 @@ namespace
     }
 
     ImGui::FileBrowser fileDialog;
+    AssetHandle editorDefaultTexture;
+    const std::string texturesDir = "/Assets/Textures/";
 
     std::string CopyFileToAssetDirectory(const std::string& filePath, const std::string& assetDirectory)
     {
@@ -103,11 +105,39 @@ namespace
 
         return filename;
     }
+
+    std::string OpenFileDialogOnItemClick(const std::string& title,
+                                          const std::vector<std::string>& filters,
+                                          const std::string& assetDir)
+    {
+        fileDialog.SetTitle(title);
+        fileDialog.SetTypeFilters(filters);
+        if (ImGui::IsItemClicked())
+        {
+            fileDialog.Open();
+        }
+        fileDialog.Display();
+
+        if (fileDialog.HasSelected())
+        {
+            auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
+            fileDialog.ClearSelected();
+            return filename;
+        }
+
+        return "";
+    }
 }
 
 PropertyPanel::PropertyPanel(const std::shared_ptr<Scene>& aScene)
 {
     scene = aScene;
+}
+
+void PropertyPanel::Init()
+{
+    editorDefaultTexture = AssetManager::Get().GetLoader<TextureLoader>()->Load("/Assets/Textures/editor_default_texture.png");
+    AssetManager::Get().GetAsset<Texture>(editorDefaultTexture)->SetSampler(Device::Get()->CreateSampler({}));
 }
 
 void PropertyPanel::SetScene(const std::shared_ptr<Scene>& aScene)
@@ -237,6 +267,46 @@ void PropertyPanel::OnImGuiRender()
                 }
 
                 component.SetMesh(meshes[id]);
+            }
+
+            ImGui::Separator();
+            if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+            {
+                auto& material = component.GetMaterial();
+                ImGui::TableNextColumn();
+                ImGui::LabelText("", "Albedo");
+                if (material->materialData.hasAlbedo)
+                {
+                    ImGuiLayer::Image(assetManager.GetAsset<Texture>(material->textureData.albedo), ImVec2(64, 64), ImVec2(0, 1), ImVec2(1, 0));
+                    if (ImGui::IsItemClicked(1))
+                    {
+                        material->textureData.albedo = {};
+                    }
+                }
+                else
+                {
+                    ImGuiLayer::Image(assetManager.GetAsset<Texture>(editorDefaultTexture), ImVec2(64, 64));
+                }
+
+                const auto filename = OpenFileDialogOnItemClick("Choose albedo texture", { ".png", ".jpg" }, texturesDir);
+                if (!filename.empty())
+                {
+                    const auto id = String::Split(filename, ".").front();
+
+                    if (textures.find(id) == textures.end())
+                    {
+                        const auto textureHandle = AssetManager::Get().GetLoader<TextureLoader>()->Load(texturesDir + filename);
+                        textures[id] = textureHandle;
+                    }
+
+                    material->textureData.albedo = textures[id];
+                    component.SetDirty(true);
+                }
+
+                ImGui::TableNextColumn();
+                ImGui::ColorEdit4("", &material->materialData.albedo.x);
+
+                ImGui::EndTable();
             }
         });
     }

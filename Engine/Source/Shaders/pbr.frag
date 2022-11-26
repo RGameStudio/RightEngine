@@ -19,11 +19,11 @@ layout(binding = 2) uniform MaterialData
     bool u_HasAO;
 };
 
-layout(binding = 3) uniform usampler2D u_Albedo;
-layout(binding = 4) uniform usampler2D u_Normal;
-layout(binding = 5) uniform usampler2D u_Metallic;
-layout(binding = 6) uniform usampler2D u_Rougness;
-layout(binding = 7) uniform usampler2D u_AO;
+layout(binding = 3) uniform sampler2D u_Albedo;
+layout(binding = 4) uniform sampler2D u_Normal;
+layout(binding = 5) uniform sampler2D u_Metallic;
+layout(binding = 6) uniform sampler2D u_Rougness;
+layout(binding = 7) uniform sampler2D u_AO;
 layout(binding = 8) uniform samplerCube u_IrradianceMap;
 layout(binding = 9) uniform samplerCube u_PrefilterMap;
 layout(binding = 10) uniform sampler2D u_BRDFLUT;
@@ -121,7 +121,7 @@ void main()
 
     if (u_HasAlbedo)
     {
-        albedo = pow(texture(u_Albedo, f_UV).rgb / vec3(255), vec3(2.2));
+        albedo = texture(u_Albedo, f_UV).rgb;
     }
     else
     {
@@ -162,19 +162,6 @@ void main()
     else
     {
         ao = 1.0f;
-    }
-
-    if (ao > 1.0f)
-    {
-        ao /= 255;
-    }
-    if (metallic > 1.0f)
-    {
-        metallic /= 255;
-    }
-    if (roughness > 1.0f)
-    {
-        roughness /= 255;
     }
 
     vec3 V = normalize(u_CameraPosition.xyz - f_WorldPos);

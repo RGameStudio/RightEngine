@@ -265,6 +265,8 @@ namespace
 
 void SandboxLayer::OnAttach()
 {
+    sceneData.propertyPanel.Init();
+
     auto& assetManager = AssetManager::Get();
     sceneData.backpackHandle = assetManager.GetLoader<MeshLoader>()->Load("/Assets/Models/backpack.obj");
 
@@ -614,10 +616,10 @@ void SandboxLayer::OnUpdate(float ts)
     memcpy(ptr, &cameraPosBuffer, sizeof(CameraPosBuffer));
     sceneData.cameraPosBuffer->UnMap();
 
-    for (const auto& entity: scene->GetRegistry().view<MeshComponent>())
+    for (auto& entity: scene->GetRegistry().view<MeshComponent>())
     {
-        const auto& transform = scene->GetRegistry().get<TransformComponent>(entity);
-        const auto& mesh = scene->GetRegistry().get<MeshComponent>(entity);
+        auto& transform = scene->GetRegistry().get<TransformComponent>(entity);
+        auto& mesh = scene->GetRegistry().get<MeshComponent>(entity);
         if (!mesh.IsVisible())
         {
             continue;
@@ -636,6 +638,19 @@ void SandboxLayer::OnUpdate(float ts)
         ptr = sceneData.materialUniformBuffer->Map();
         memcpy(ptr, &material->materialData, sizeof(MaterialData));
         sceneData.materialUniformBuffer->UnMap();
+
+        if (mesh.IsDirty())
+        {
+            auto& assetManager = AssetManager::Get();
+            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.albedo), 3);
+            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.normal), 4);
+            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.metallic), 5);
+            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.roughness), 6);
+            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.ao), 7);
+            sceneData.pbrPipelineState->OnUpdate(sceneData.pbrPipeline);
+            renderer->EncodeState(sceneData.pbrPipelineState);
+            mesh.SetDirty(false);
+        }
         renderer->Draw(mesh);
     }
 

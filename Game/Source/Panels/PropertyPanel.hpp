@@ -20,10 +20,13 @@ namespace RightEngine
 
         void OnImGuiRender();
 
+        void Init();
+
     private:
         std::shared_ptr<Scene> scene;
         std::shared_ptr<Entity> selectedEntity;
         std::unordered_map<std::string, AssetHandle> environmentMaps;
         std::unordered_map<std::string, AssetHandle> meshes;
+        std::unordered_map<std::string, AssetHandle> textures;
     };
 }

@@ -68,6 +68,10 @@ namespace RightEngine
                     return VK_FORMAT_R16G16B16A16_UNORM;
                 case Format::BGRA8_UNORM:
                     return VK_FORMAT_B8G8R8A8_UNORM;
+                case Format::R8_SRGB:
+                    return VK_FORMAT_R8_SRGB;
+                case Format::RGB8_SRGB:
+                    return VK_FORMAT_R8G8B8_SRGB;
                 default:
                     R_CORE_ASSERT(false, "");
             }
