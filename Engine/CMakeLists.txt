@@ -45,7 +45,11 @@ set(ENGINE_SRC
         Source/Core/RHI/RendererState.cpp
         Source/Core/RHI/Vulkan/VulkanRendererState.cpp
         Source/Core/RHI/Vulkan/VulkanImguiLayerImpl.cpp
-        Source/Core/Loaders/AssetLoader.cpp Source/Core/Utils/Utils.cpp)
+        Source/Core/Loaders/AssetLoader.cpp
+        Source/Core/Utils/Utils.cpp
+        Source/Core/Utils/Filesystem.cpp
+        Source/Core/Utils/OS/Win32/Win32FilesystemImpl.cpp
+        Source/Core/Utils/OS/Win32/Win32FilesystemImpl.hpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

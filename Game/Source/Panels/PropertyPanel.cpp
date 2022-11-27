@@ -4,15 +4,19 @@
 #include "Path.hpp"
 #include "AssetManager.hpp"
 #include "ImGuiLayer.hpp"
+#include "Filesystem.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <imfilebrowser.h>
 #include <filesystem>
 
 using namespace RightEngine;
 
 namespace
 {
+    AssetHandle editorDefaultTexture;
+    const std::string texturesDir = "/Assets/Textures/";
+    bool isDisplayCalled = false;
+
     void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
     {
         ImGuiIO& io = ImGui::GetIO();
@@ -79,18 +83,9 @@ namespace
         ImGui::PopID();
     }
 
-    ImGui::FileBrowser fileDialog;
-    AssetHandle editorDefaultTexture;
-    const std::string texturesDir = "/Assets/Textures/";
-
     std::string CopyFileToAssetDirectory(const std::string& filePath, const std::string& assetDirectory)
     {
-#ifdef R_WIN32
-        const std::string delimiter = "\\";
-#else
-        const std::string delimiter = "/";
-#endif
-        auto filename = String::Split(filePath, delimiter).back();
+        auto filename = String::Split(filePath, "/").back();
         const std::filesystem::path from = filePath;
         const std::filesystem::path to = Path::ConvertEnginePathToOSPath("/Assets/Textures/") + filename;
         R_CORE_TRACE("{0}", filename);
@@ -110,22 +105,60 @@ namespace
                                           const std::vector<std::string>& filters,
                                           const std::string& assetDir)
     {
-        fileDialog.SetTitle(title);
-        fileDialog.SetTypeFilters(filters);
+//        fileDialog.SetTitle(title);
+//        fileDialog.SetTypeFilters(filters);
         if (ImGui::IsItemClicked())
         {
-            fileDialog.Open();
+//            fileDialog.Open();
         }
-        fileDialog.Display();
 
-        if (fileDialog.HasSelected())
-        {
-            auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
-            fileDialog.ClearSelected();
-            return filename;
-        }
+//        fileDialog.Display();
+
+//        if (fileDialog.HasSelected())
+//        {
+//            auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
+//            fileDialog.ClearSelected();
+//            return filename;
+//        }
 
         return "";
+    }
+
+    void DrawMaterialEditorTab(const std::string& label,
+                               bool hasTexture,
+                               AssetHandle& textureHandle,
+                               std::unordered_map<std::string, AssetHandle>& textures,
+                               MeshComponent& component)
+    {
+        auto& assetManager = AssetManager::Get();
+        ImGui::LabelText("", label.c_str());
+        if (hasTexture)
+        {
+            ImGuiLayer::Image(assetManager.GetAsset<Texture>(textureHandle), ImVec2(64, 64), ImVec2(0, 1), ImVec2(1, 0));
+            if (ImGui::IsItemClicked(1))
+            {
+                textureHandle = {};
+            }
+        }
+        else
+        {
+            ImGuiLayer::Image(assetManager.GetAsset<Texture>(editorDefaultTexture), ImVec2(64, 64));
+        }
+
+        const auto filename = OpenFileDialogOnItemClick("Choose texture", { ".png", ".jpg" }, texturesDir);
+        if (!filename.empty())
+        {
+            const auto id = String::Split(filename, ".").front();
+
+            if (textures.find(id) == textures.end())
+            {
+                const auto newTextureHandle = AssetManager::Get().GetLoader<TextureLoader>()->Load(texturesDir + filename);
+                textures[id] = newTextureHandle;
+            }
+
+            textureHandle = textures[id];
+            component.SetDirty(true);
+        }
     }
 }
 
@@ -172,6 +205,7 @@ void DrawComponent(const std::string& componentName, const std::shared_ptr<Entit
 
 void PropertyPanel::OnImGuiRender()
 {
+    isDisplayCalled = false;
     ImGui::Begin("Properties");
     if (selectedEntity)
     {
@@ -209,24 +243,19 @@ void PropertyPanel::OnImGuiRender()
             ImGui::Separator();
             ImGuiLayer::Image(currentEnvironment->equirectangularTexture, ImVec2(512, 256), ImVec2(0, 1), ImVec2(1, 0));
 
-            fileDialog.SetTitle("Open new environment map");
-            fileDialog.SetTypeFilters({ ".hdr" });
             if (ImGui::Button("Open"))
             {
-                fileDialog.Open();
-            }
-            fileDialog.Display();
-            if (fileDialog.HasSelected())
-            {
-                const auto assetDir = "/Assets/Textures/";
-                const auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
-                fileDialog.ClearSelected();
-
+                const auto filepath = Filesystem::OpenFileDialog().string();
+                if (filepath.empty())
+                {
+                    return;
+                }
+                const auto filename = CopyFileToAssetDirectory(filepath, texturesDir);
                 const auto id = String::Split(filename, ".").front();
 
                 if (environmentMaps.find(id) == environmentMaps.end())
                 {
-                    const auto environmentHandle = AssetManager::Get().GetLoader<EnvironmentMapLoader>()->Load(assetDir + filename, true);
+                    const auto environmentHandle = AssetManager::Get().GetLoader<EnvironmentMapLoader>()->Load(texturesDir + filename, true);
                     environmentMaps[id] = environmentHandle;
                 }
 
@@ -245,66 +274,45 @@ void PropertyPanel::OnImGuiRender()
             component.SetVisibility(isVisible);
             ImGui::Separator();
 
-            fileDialog.SetTitle("Open new mesh");
-            fileDialog.SetTypeFilters({ ".obj", ".fbx", ".gltf" });
-            if (ImGui::Button("Open"))
-            {
-                fileDialog.Open();
-            }
-            fileDialog.Display();
-            if (fileDialog.HasSelected())
-            {
-                const auto assetDir = "/Assets/Models/";
-                const auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
-                fileDialog.ClearSelected();
-
-                const auto id = String::Split(filename, ".").front();
-
-                if (meshes.find(id) == meshes.end())
-                {
-                    const auto meshHandle = AssetManager::Get().GetLoader<MeshLoader>()->Load(assetDir + filename);
-                    meshes[id] = meshHandle;
-                }
-
-                component.SetMesh(meshes[id]);
-            }
+//            fileDialog.SetTitle("Open new mesh");
+//            fileDialog.SetTypeFilters({ ".obj", ".fbx", ".gltf" });
+//            if (ImGui::Button("Open"))
+//            {
+//                fileDialog.Open();
+//            }
+//            fileDialog.Display();
+//            if (fileDialog.HasSelected())
+//            {
+//                const auto assetDir = "/Assets/Models/";
+//                const auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
+//                fileDialog.ClearSelected();
+//
+//                const auto id = String::Split(filename, ".").front();
+//
+//                if (meshes.find(id) == meshes.end())
+//                {
+//                    const auto meshHandle = AssetManager::Get().GetLoader<MeshLoader>()->Load(assetDir + filename);
+//                    meshes[id] = meshHandle;
+//                }
+//
+//                component.SetMesh(meshes[id]);
+//            }
 
             ImGui::Separator();
             if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
             {
                 auto& material = component.GetMaterial();
                 ImGui::TableNextColumn();
-                ImGui::LabelText("", "Albedo");
-                if (material->materialData.hasAlbedo)
-                {
-                    ImGuiLayer::Image(assetManager.GetAsset<Texture>(material->textureData.albedo), ImVec2(64, 64), ImVec2(0, 1), ImVec2(1, 0));
-                    if (ImGui::IsItemClicked(1))
-                    {
-                        material->textureData.albedo = {};
-                    }
-                }
-                else
-                {
-                    ImGuiLayer::Image(assetManager.GetAsset<Texture>(editorDefaultTexture), ImVec2(64, 64));
-                }
-
-                const auto filename = OpenFileDialogOnItemClick("Choose albedo texture", { ".png", ".jpg" }, texturesDir);
-                if (!filename.empty())
-                {
-                    const auto id = String::Split(filename, ".").front();
-
-                    if (textures.find(id) == textures.end())
-                    {
-                        const auto textureHandle = AssetManager::Get().GetLoader<TextureLoader>()->Load(texturesDir + filename);
-                        textures[id] = textureHandle;
-                    }
-
-                    material->textureData.albedo = textures[id];
-                    component.SetDirty(true);
-                }
-
+                bool hasAlbedo =  material->materialData.hasAlbedo;
+                DrawMaterialEditorTab("Albedo", hasAlbedo, material->textureData.albedo, textures, component);
                 ImGui::TableNextColumn();
                 ImGui::ColorEdit4("", &material->materialData.albedo.x);
+
+                ImGui::TableNextColumn();
+                bool hasNormal =  material->materialData.hasNormal;
+                DrawMaterialEditorTab("Normal", hasNormal, material->textureData.normal, textures, component);
+                ImGui::TableNextColumn();
+
 
                 ImGui::EndTable();
             }
