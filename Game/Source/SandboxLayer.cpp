@@ -642,8 +642,14 @@ void SandboxLayer::OnUpdate(float ts)
         if (mesh.IsDirty())
         {
             auto& assetManager = AssetManager::Get();
-            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.albedo), 3);
-            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.normal), 4);
+            if (textureData.albedo.guid.isValid())
+            {
+                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.albedo), 3);
+            }
+            if (textureData.normal.guid.isValid())
+            {
+                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.normal), 4);
+            }
             sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.metallic), 5);
             sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.roughness), 6);
             sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.ao), 7);

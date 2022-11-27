@@ -15,6 +15,7 @@ namespace
 {
     AssetHandle editorDefaultTexture;
     const std::string texturesDir = "/Assets/Textures/";
+    const auto modelsDir = "/Assets/Models/";
     bool isDisplayCalled = false;
 
     void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
@@ -105,21 +106,11 @@ namespace
                                           const std::vector<std::string>& filters,
                                           const std::string& assetDir)
     {
-//        fileDialog.SetTitle(title);
-//        fileDialog.SetTypeFilters(filters);
         if (ImGui::IsItemClicked())
         {
-//            fileDialog.Open();
+            const auto filepath = Filesystem::OpenFileDialog(filters).string();
+            return CopyFileToAssetDirectory(filepath, assetDir);
         }
-
-//        fileDialog.Display();
-
-//        if (fileDialog.HasSelected())
-//        {
-//            auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
-//            fileDialog.ClearSelected();
-//            return filename;
-//        }
 
         return "";
     }
@@ -274,29 +265,22 @@ void PropertyPanel::OnImGuiRender()
             component.SetVisibility(isVisible);
             ImGui::Separator();
 
-//            fileDialog.SetTitle("Open new mesh");
-//            fileDialog.SetTypeFilters({ ".obj", ".fbx", ".gltf" });
-//            if (ImGui::Button("Open"))
-//            {
-//                fileDialog.Open();
-//            }
-//            fileDialog.Display();
-//            if (fileDialog.HasSelected())
-//            {
-//                const auto assetDir = "/Assets/Models/";
-//                const auto filename = CopyFileToAssetDirectory(fileDialog.GetSelected().string(), assetDir);
-//                fileDialog.ClearSelected();
-//
-//                const auto id = String::Split(filename, ".").front();
-//
-//                if (meshes.find(id) == meshes.end())
-//                {
-//                    const auto meshHandle = AssetManager::Get().GetLoader<MeshLoader>()->Load(assetDir + filename);
-//                    meshes[id] = meshHandle;
-//                }
-//
-//                component.SetMesh(meshes[id]);
-//            }
+            if (ImGui::Button("Open"))
+            {
+                const auto filepath = Filesystem::OpenFileDialog().string();
+                if (!filepath.empty())
+                {
+                    const auto filename = CopyFileToAssetDirectory(filepath, modelsDir);
+                    const auto id = String::Split(filename, ".").front();
+                    if (meshes.find(id) == meshes.end())
+                    {
+                        const auto meshHandle = AssetManager::Get().GetLoader<MeshLoader>()->Load(modelsDir + filename);
+                        meshes[id] = meshHandle;
+                    }
+
+                    component.SetMesh(meshes[id]);
+                }
+            }
 
             ImGui::Separator();
             if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))

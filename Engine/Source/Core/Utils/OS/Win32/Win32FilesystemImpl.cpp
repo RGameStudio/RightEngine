@@ -15,6 +15,7 @@ namespace
 {
     std::string GetWin32FileFilterString(const std::vector<std::string>& filters)
     {
+        // TODO: Implement proper filter builder
         std::stringstream filterSS;
         for (const auto& filter : filters)
         {
