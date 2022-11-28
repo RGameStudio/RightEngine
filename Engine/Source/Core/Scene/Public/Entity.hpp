@@ -53,6 +53,9 @@ namespace RightEngine
         const std::vector<std::shared_ptr<Entity>>& GetChildren() const;
         std::vector<std::shared_ptr<Entity>> GetAllChildren() const;
 
+        std::shared_ptr<Entity> GetParent() const
+        { return parent.lock(); }
+
     protected:
         entt::entity entityHandle;
 

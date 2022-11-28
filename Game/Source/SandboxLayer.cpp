@@ -242,22 +242,49 @@ namespace
         return node;
     }
 
-    void ImGuiAddTreeNodeChildren(const std::shared_ptr<Entity>& node)
+    void ImGuiAddTreeNodeChildren(const std::shared_ptr<Entity>& node, const std::shared_ptr<Scene>& scene)
     {
         for (const auto& entity: node->GetChildren())
         {
             const auto& tag = entity->GetComponent<TagComponent>();
             ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow;
-            bool node_open = ImGui::TreeNodeEx((void*) tag.id, node_flags, "%s", tag.name.c_str());
+            bool node_open = ImGui::TreeNodeEx((char*) tag.guid.str().c_str(), node_flags, "%s", tag.name.c_str());
             if (ImGui::IsItemClicked())
             {
                 sceneData.propertyPanel.SetSelectedEntity(entity);
                 sceneData.selectedEntity = entity;
             }
+
+            bool destroyEntity = false;
+            if (ImGui::BeginPopupContextItem(nullptr, ImGuiPopupFlags_MouseButtonRight))
+            {
+                if (ImGui::MenuItem("Destroy Entity"))
+                {
+                    destroyEntity = true;
+                }
+                ImGui::EndPopup();
+            }
+
             if (node_open)
             {
-                ImGuiAddTreeNodeChildren(entity);
+                ImGuiAddTreeNodeChildren(entity, scene);
                 ImGui::TreePop();
+            }
+
+            if (destroyEntity)
+            {
+                const auto children = entity->GetChildren();
+                const auto parentNode = entity->GetParent();
+                for (const auto& child : children)
+                {
+                    parentNode->AddChild(child);
+                }
+
+                scene->DestroyEntity(entity);
+                parentNode->RemoveChild(entity);
+                sceneData.propertyPanel.SetSelectedEntity(nullptr);
+                sceneData.selectedEntity = nullptr;
+                return;
             }
         }
     }
@@ -836,10 +863,23 @@ void SandboxLayer::OnImGuiRender()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
         const auto& node = scene->GetRootNode();
-        ImGuiAddTreeNodeChildren(node);
+        ImGuiAddTreeNodeChildren(node, scene);
         ImGui::TreePop();
         ImGui::PopStyleVar();
     }
+
+    if (ImGui::BeginPopupContextWindow(nullptr, 1, false))
+    {
+        if (ImGui::MenuItem("Create Empty Entity"))
+        {
+            auto entity = scene->CreateEntity();
+            entity->AddComponent<TagComponent>();
+            scene->GetRootNode()->AddChild(entity);
+        }
+
+        ImGui::EndPopup();
+    }
+
     ImGui::End();
 
     ImGui::Begin("Viewport");

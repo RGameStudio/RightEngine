@@ -46,7 +46,7 @@ std::shared_ptr<Entity> Scene::CreateEntity()
 
 void Scene::DestroyEntity(const std::shared_ptr<Entity>& node)
 {
-    // TODO: Implement
+    registry.destroy(node->entityHandle);
 }
 
 void Scene::UpdateNodeTransformRecursively(const std::shared_ptr<Entity>& node)
