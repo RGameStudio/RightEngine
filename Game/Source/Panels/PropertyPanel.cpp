@@ -186,10 +186,30 @@ void DrawComponent(const std::string& componentName, const std::shared_ptr<Entit
         auto& component = entity->GetComponent<T>();
         bool open = ImGui::TreeNodeEx((void*) typeid(T).hash_code(), treeNodeFlags, componentName.c_str());
 
+        ImGui::SameLine();
+        if (ImGui::Button("+"))
+        {
+            ImGui::OpenPopup("ComponentSettings");
+        }
+
+        bool removeComponent = false;
+        if (ImGui::BeginPopup("ComponentSettings"))
+        {
+            if (ImGui::MenuItem("Remove component"))
+                removeComponent = true;
+
+            ImGui::EndPopup();
+        }
+
         if (open)
         {
             uiFunction(component);
             ImGui::TreePop();
+        }
+
+        if (removeComponent)
+        {
+            entity->RemoveComponent<T>();
         }
     }
 }
@@ -200,6 +220,16 @@ void PropertyPanel::OnImGuiRender()
     ImGui::Begin("Properties");
     if (selectedEntity)
     {
+        if (ImGui::Button("Add Component"))
+            ImGui::OpenPopup("AddComponent");
+
+        if (ImGui::BeginPopup("AddComponent"))
+        {
+            DisplayAddComponentEntry<MeshComponent>("Mesh");
+
+            ImGui::EndPopup();
+        }
+
         DrawComponent<TagComponent>("Tag", selectedEntity, [](auto& component)
         {
             const size_t bufSize = 256;
@@ -301,6 +331,7 @@ void PropertyPanel::OnImGuiRender()
                 ImGui::EndTable();
             }
         });
+
     }
     ImGui::End();
 }

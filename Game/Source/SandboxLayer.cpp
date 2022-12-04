@@ -223,20 +223,20 @@ namespace
             node->AddComponent<MeshComponent>(meshComponent);
         } else
         {
-            if (type != GeometryType::NONE)
-            {
-                std::shared_ptr<MeshComponent> mesh = nullptr;
-                switch (type)
-                {
-                    case GeometryType::CUBE:
-                        mesh = MeshBuilder::CubeGeometry();
-                        break;
-                    case GeometryType::PLANE:
-                        mesh = MeshBuilder::PlaneGeometry();
-                        break;
-                }
-                node->AddComponent<MeshComponent>(std::move(*mesh));
-            }
+//            if (type != GeometryType::NONE)
+//            {
+//                std::shared_ptr<MeshComponent> mesh = nullptr;
+//                switch (type)
+//                {
+//                    case GeometryType::CUBE:
+//                        mesh = MeshBuilder::CubeGeometry();
+//                        break;
+//                    case GeometryType::PLANE:
+//                        mesh = MeshBuilder::PlaneGeometry();
+//                        break;
+//                }
+//                node->AddComponent<MeshComponent>(std::move(*mesh));
+//            }
         }
         AddTag(node);
         return node;
@@ -669,17 +669,26 @@ void SandboxLayer::OnUpdate(float ts)
         if (mesh.IsDirty())
         {
             auto& assetManager = AssetManager::Get();
-            if (textureData.albedo.guid.isValid())
+            if (materialData.hasAlbedo)
             {
                 sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.albedo), 3);
             }
-            if (textureData.normal.guid.isValid())
+            if (materialData.hasNormal)
             {
                 sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.normal), 4);
             }
-            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.metallic), 5);
-            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.roughness), 6);
-            sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.ao), 7);
+            if (materialData.hasMetallic)
+            {
+                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.metallic), 5);
+            }
+            if (materialData.hasRoughness)
+            {
+                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.roughness), 6);
+            }
+            if (materialData.hasAO)
+            {
+                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.ao), 7);
+            }
             sceneData.pbrPipelineState->OnUpdate(sceneData.pbrPipeline);
             renderer->EncodeState(sceneData.pbrPipelineState);
             mesh.SetDirty(false);

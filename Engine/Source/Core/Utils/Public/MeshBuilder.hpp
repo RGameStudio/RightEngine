@@ -5,11 +5,18 @@
 
 namespace RightEngine
 {
+    struct DefaultMesh
+    {
+        bool wasLoaded{ false };
+        AssetHandle handle;
+    };
+
     class MeshBuilder
     {
     public:
-        static std::shared_ptr<MeshComponent> CubeGeometry();
-        static std::shared_ptr<MeshComponent> PlaneGeometry();
-        static std::shared_ptr<MeshComponent> QuadGeometry();
+        static AssetHandle Cube();
+
+    private:
+        static DefaultMesh cube;
     };
 }

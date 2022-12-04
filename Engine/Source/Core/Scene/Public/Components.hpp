@@ -67,8 +67,7 @@ namespace RightEngine
     class MeshComponent
     {
     public:
-        MeshComponent()
-        { material = std::make_shared<Material>(); }
+        MeshComponent();
 
         void SetVisibility(bool aVisible)
         { isVisible = aVisible; }

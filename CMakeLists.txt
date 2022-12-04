@@ -11,6 +11,10 @@ elseif (APPLE)
     add_compile_definitions(R_APPLE)
 endif()
 
+if (MSVC)
+    add_compile_options("/MP")
+endif()
+
 set(GLSL_ROOT_DIR ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders)
 set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
              ${GLSL_ROOT_DIR}/Basic/basic.vert

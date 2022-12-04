@@ -3,6 +3,7 @@
 #include "Scene.hpp"
 #include "Entity.hpp"
 #include "AssetBase.hpp"
+#include <imgui.h>
 #include <memory>
 
 namespace RightEngine
@@ -23,6 +24,19 @@ namespace RightEngine
         void Init();
 
     private:
+        template<typename T>
+        void DisplayAddComponentEntry(const std::string& entryName)
+        {
+            if (!selectedEntity->HasComponent<T>())
+            {
+                if (ImGui::MenuItem(entryName.c_str()))
+                {
+                    selectedEntity->AddComponent<T>();
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+        }
+
         std::shared_ptr<Scene> scene;
         std::shared_ptr<Entity> selectedEntity;
         std::unordered_map<std::string, AssetHandle> environmentMaps;
