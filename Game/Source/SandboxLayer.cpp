@@ -52,6 +52,7 @@ namespace
         std::shared_ptr<ImGuiLayer> imGuiLayer;
         std::shared_ptr<Buffer> skyboxVertexBuffer;
         std::shared_ptr<SceneRenderer> renderer;
+        SceneRendererSettings rendererSettings;
 
         bool isViewportHovered{ false };
         std::shared_ptr<Entity> selectedEntity;
@@ -210,11 +211,11 @@ void SandboxLayer::OnAttach()
     Application::Get().PushOverlay(sceneData.imGuiLayer);
     sceneData.camera->SetActive(false);
     sceneData.renderer->SetUIPassCallback([&](const std::shared_ptr<CommandBuffer>& cmd)
-    {
-       sceneData.imGuiLayer->Begin();
-       OnImGuiRender();
-       sceneData.imGuiLayer->End(cmd);
-    });
+                                          {
+                                              sceneData.imGuiLayer->Begin();
+                                              OnImGuiRender();
+                                              sceneData.imGuiLayer->End(cmd);
+                                          });
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -265,7 +266,9 @@ void SandboxLayer::OnUpdate(float ts)
     auto& assetManager = AssetManager::Get();
     sceneData.renderer->SetScene(scene);
     sceneData.renderer->BeginScene(scene->GetCamera(),
-                                  assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle), lightData);
+                                   assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle),
+                                   lightData,
+                                   sceneData.rendererSettings);
 
     for (auto& entity: scene->GetRegistry().view<MeshComponent>())
     {
@@ -278,7 +281,9 @@ void SandboxLayer::OnUpdate(float ts)
             continue;
         }
 
-        sceneData.renderer->SubmitMeshNode(assetManager.GetAsset<MeshNode>(meshComponent.GetMesh()), material, transform.GetWorldTransformMatrix());
+        sceneData.renderer->SubmitMeshNode(assetManager.GetAsset<MeshNode>(meshComponent.GetMesh()),
+                                           material,
+                                           transform.GetWorldTransformMatrix());
     }
 
     sceneData.renderer->EndScene();
@@ -436,7 +441,7 @@ void SandboxLayer::OnImGuiRender()
 
     ImGui::Begin("Viewport");
     sceneData.isViewportHovered = ImGui::IsWindowHovered();
-    const auto attachment = sceneData.renderer->GetPass(PassType::PBR)->GetRenderPassDescriptor().colorAttachments.front().texture;
+    const auto attachment = sceneData.renderer->GetFinalImage();
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
     if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y)
     {
@@ -495,6 +500,10 @@ void SandboxLayer::OnImGuiRender()
     ImGui::End();
 
     sceneData.propertyPanel.OnImGuiRender();
+
+    ImGui::Begin("Renderer settings");
+    ImGui::DragFloat("Gamma", &sceneData.rendererSettings.gamma, 0.1, 1.0, 3.2);
+    ImGui::End();
 
     ImGui::End();
 }

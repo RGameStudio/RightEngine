@@ -54,6 +54,15 @@ namespace
             -1.0f, 1.0f, 1.0f,    // bottom-left
     };
 
+    float quadVertices[] = {
+            -1.0, 1.0, 0.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, -1.0, 1.0, 0.0,
+            1.0, -1.0, 1.0, 0.0,
+            -1.0, -1.0, 0.0, 0.0,
+            -1.0, 1.0, 0.0, 1.0
+    };
+
     std::shared_ptr<Texture> GetTexture(const AssetHandle& handle)
     {
         return AssetManager::Get().GetAsset<Texture>(handle);
@@ -118,6 +127,25 @@ void SceneRenderer::CreateShaders()
         skyboxShaderDesc.reflection.textures = { 3 };
         skyboxShaderDesc.reflection.buffers[{ 1, ShaderType::VERTEX }] = BufferType::UNIFORM;
         skyboxShader = Device::Get()->CreateShader(skyboxShaderDesc);
+    }
+
+    //Postprocess
+    {
+        ShaderProgramDescriptor postprocessShaderDesc{};
+        ShaderDescriptor vertexShader;
+        vertexShader.path = "/Assets/Shaders/postprocess.vert";
+        vertexShader.type = ShaderType::VERTEX;
+        ShaderDescriptor fragmentShader;
+        fragmentShader.path = "/Assets/Shaders/postprocess.frag";
+        fragmentShader.type = ShaderType::FRAGMENT;
+        postprocessShaderDesc.shaders = { vertexShader, fragmentShader };
+        VertexBufferLayout postprocessLayout;
+        postprocessLayout.Push<glm::vec2>();
+        postprocessLayout.Push<glm::vec2>();
+        postprocessShaderDesc.layout = postprocessLayout;
+        postprocessShaderDesc.reflection.textures = { 3 };
+        postprocessShaderDesc.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
+        postprocessShader = Device::Get()->CreateShader(postprocessShaderDesc);
     }
 }
 
@@ -193,6 +221,44 @@ void SceneRenderer::CreateOffscreenPasses()
         renderPassDescriptor.depthStencilAttachment = { depth };
         skyboxPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
     }
+
+    // Postprocess
+    {
+        GraphicsPipelineDescriptor pipelineDescriptor{};
+        pipelineDescriptor.shader = postprocessShader;
+
+        RenderPassDescriptor renderPassDescriptor{};
+        renderPassDescriptor.name = "Postprocess";
+        renderPassDescriptor.extent = viewport;
+        renderPassDescriptor.offscreen = true;
+
+        TextureDescriptor colorAttachmentDesc{};
+        colorAttachmentDesc.format = Format::BGRA8_SRGB;
+        colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+        colorAttachmentDesc.width = viewport.x;
+        colorAttachmentDesc.height = viewport.y;
+        const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+        colorAttachment->SetSampler(defaultSampler);
+        TextureDescriptor depthAttachmentDesc{};
+        depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+        depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+        depthAttachmentDesc.width = viewport.x;
+        depthAttachmentDesc.height = viewport.y;
+        const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
+
+        AttachmentDescriptor depth{};
+        depth.loadOperation = AttachmentLoadOperation::CLEAR;
+        depth.texture = depthAttachment;
+
+        AttachmentDescriptor color{};
+        color.loadOperation = AttachmentLoadOperation::LOAD;
+        color.storeOperation = AttachmentStoreOperation::STORE;
+        color.texture = colorAttachment;
+
+        renderPassDescriptor.colorAttachments = { color };
+        renderPassDescriptor.depthStencilAttachment = { depth };
+        postprocessPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+    }
 }
 
 void SceneRenderer::CreateOnscreenPasses()
@@ -254,12 +320,24 @@ void SceneRenderer::CreateBuffers()
     uniformBufferSet->Create(sizeof(UBCameraData), 1);
     uniformBufferSet->Create(65536, 2);
     uniformBufferSet->Create(sizeof(UBLightData), 11);
+    uniformBufferSet->Create(sizeof(SceneRendererSettings), 12);
 
-    BufferDescriptor bufferDescriptor{};
-    bufferDescriptor.size = sizeof(skyboxVertices);
-    bufferDescriptor.type = BufferType::VERTEX;
-    bufferDescriptor.memoryType = MemoryType::CPU_GPU;
-    skyboxVertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, &skyboxVertices);
+    {
+        BufferDescriptor bufferDescriptor{};
+        bufferDescriptor.size = sizeof(skyboxVertices);
+        bufferDescriptor.type = BufferType::VERTEX;
+        bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+        skyboxVertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, &skyboxVertices);
+    }
+
+    {
+        BufferDescriptor bufferDescriptor{};
+        bufferDescriptor.size = sizeof(quadVertices);
+        bufferDescriptor.type = BufferType::VERTEX;
+        bufferDescriptor.memoryType = MemoryType::CPU_GPU;
+        fullscreenQuadVertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, &quadVertices);
+    }
+
 }
 
 void SceneRenderer::SubmitMeshNode(const std::shared_ptr<MeshNode>& meshNode, const std::shared_ptr<Material>& material, const glm::mat4& transform)
@@ -287,7 +365,8 @@ void SceneRenderer::SubmitMesh(const std::shared_ptr<Mesh>& mesh, const std::sha
 
 void SceneRenderer::BeginScene(const std::shared_ptr<Camera>& camera,
                                const std::shared_ptr<EnvironmentContext>& environment,
-                               const std::vector<LightData>& lights)
+                               const std::vector<LightData>& lights,
+                               const SceneRendererSettings& rendererSettings)
 {
     R_CORE_ASSERT(lights.size() < 30, "");
     cameraDataUB.position = glm::vec4(camera->GetPosition(), 1.0);
@@ -301,12 +380,14 @@ void SceneRenderer::BeginScene(const std::shared_ptr<Camera>& camera,
 
     uniformBufferSet->Get(1)->SetData(&cameraDataUB, sizeof(cameraDataUB));
     uniformBufferSet->Get(11)->SetData(&lightDataUB, sizeof(lightDataUB));
+    uniformBufferSet->Get(12)->SetData(&rendererSettings, sizeof(rendererSettings));
 }
 
 void SceneRenderer::EndScene()
 {
     PBRPass();
     SkyboxPass();
+    PostprocessPass();
 
     UIPass();
     Present();
@@ -384,6 +465,23 @@ void SceneRenderer::SkyboxPass()
     renderer.EndFrame();
 }
 
+void SceneRenderer::PostprocessPass()
+{
+    renderer.SetPipeline(postprocessPipeline);
+    renderer.BeginFrame(nullptr);
+
+    auto& settingsBuffer = uniformBufferSet->Get(12);
+
+    auto rs = RendererCommand::CreateRendererState();
+    rs->SetTexture(pbrPipeline->GetRenderPassDescriptor().colorAttachments.front().texture, 3);
+    rs->SetFragmentBuffer(settingsBuffer, 12);
+
+    rs->OnUpdate(renderer.GetActivePipeline());
+    renderer.EncodeState(rs);
+    renderer.Draw(fullscreenQuadVertexBuffer);
+    renderer.EndFrame();
+}
+
 void SceneRenderer::UIPass()
 {
     renderer.SetPipeline(uiPipeline);
@@ -423,7 +521,14 @@ const std::shared_ptr<GraphicsPipeline>& SceneRenderer::GetPass(PassType type) c
             return skyboxPipeline;
         case PassType::PRESENT:
             return presentPipeline;
+        case PassType::POSTPROCESS:
+            return postprocessPipeline;
         default:
         R_CORE_ASSERT(false, "")
     }
+}
+
+const std::shared_ptr<Texture>& SceneRenderer::GetFinalImage() const
+{
+    return postprocessPipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
 }

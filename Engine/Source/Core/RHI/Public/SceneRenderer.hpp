@@ -7,13 +7,20 @@
 
 namespace RightEngine
 {
+    struct SceneRendererSettings
+    {
+        float gamma{ 1.7f };
+    };
+
     enum class PassType
     {
         PBR,
         SKYBOX,
+        POSTPROCESS,
         UI,
         PRESENT
     };
+
     struct LightData
     {
         glm::vec4 color;
@@ -39,7 +46,8 @@ namespace RightEngine
 
         void BeginScene(const std::shared_ptr<Camera>& camera,
                         const std::shared_ptr<EnvironmentContext>& environment,
-                        const std::vector<LightData>& lights);
+                        const std::vector<LightData>& lights,
+                        const SceneRendererSettings& rendererSettings = {});
         void EndScene();
 
         void Resize(int x, int y);
@@ -48,6 +56,7 @@ namespace RightEngine
         { uiPassCallback = callback; }
 
         const std::shared_ptr<GraphicsPipeline>& GetPass(PassType type) const;
+        const std::shared_ptr<Texture>& GetFinalImage() const;
 
     private:
         void CreateShaders();
@@ -59,6 +68,7 @@ namespace RightEngine
         // Passes
         void PBRPass();
         void SkyboxPass();
+        void PostprocessPass();
         void UIPass();
         void Present();
         void Clear();
@@ -72,17 +82,20 @@ namespace RightEngine
         std::shared_ptr<UniformBufferSet> uniformBufferSet;
         Renderer renderer;
         std::shared_ptr<Buffer> skyboxVertexBuffer;
+        std::shared_ptr<Buffer> fullscreenQuadVertexBuffer;
         std::function<void(const std::shared_ptr<CommandBuffer>&)> uiPassCallback;
 
         //Pipelines
         std::shared_ptr<GraphicsPipeline> pbrPipeline;
         std::shared_ptr<GraphicsPipeline> skyboxPipeline;
+        std::shared_ptr<GraphicsPipeline> postprocessPipeline;
         std::shared_ptr<GraphicsPipeline> uiPipeline;
         std::shared_ptr<GraphicsPipeline> presentPipeline;
 
         // TODO: Move shaders to ShaderLibrary
         std::shared_ptr<Shader> pbrShader;
         std::shared_ptr<Shader> skyboxShader;
+        std::shared_ptr<Shader> postprocessShader;
 
         struct DrawCommand
         {
