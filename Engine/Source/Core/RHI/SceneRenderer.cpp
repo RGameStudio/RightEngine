@@ -123,6 +123,12 @@ void SceneRenderer::CreateShaders()
 
 void SceneRenderer::CreatePasses()
 {
+    CreateOffscreenPasses();
+    CreateOnscreenPasses();
+}
+
+void SceneRenderer::CreateOffscreenPasses()
+{
     //PBR
     {
         TextureDescriptor colorAttachmentDesc{};
@@ -132,12 +138,6 @@ void SceneRenderer::CreatePasses()
         colorAttachmentDesc.height = viewport.y;
         const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
         colorAttachment->SetSampler(defaultSampler);
-        TextureDescriptor normalAttachmentDesc{};
-        normalAttachmentDesc.format = Format::RGBA16_SFLOAT;
-        normalAttachmentDesc.type = TextureType::TEXTURE_2D;
-        normalAttachmentDesc.width = viewport.x;
-        normalAttachmentDesc.height = viewport.y;
-        const auto normalAttachemnt = Device::Get()->CreateTexture(normalAttachmentDesc, {});
         TextureDescriptor depthAttachmentDesc{};
         depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
         depthAttachmentDesc.type = TextureType::TEXTURE_2D;
@@ -159,9 +159,6 @@ void SceneRenderer::CreatePasses()
         color.texture = colorAttachment;
         color.loadOperation = AttachmentLoadOperation::CLEAR;
         color.storeOperation = AttachmentStoreOperation::STORE;
-        AttachmentDescriptor normal{};
-        normal.loadOperation = AttachmentLoadOperation::CLEAR;
-        normal.texture = normalAttachemnt;
         renderPassDescriptor.colorAttachments = { color };
         renderPassDescriptor.depthStencilAttachment = { depth };
         pbrPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
@@ -179,6 +176,7 @@ void SceneRenderer::CreatePasses()
         pipelineDescriptor.cullMode = CullMode::FRONT;
 
         RenderPassDescriptor renderPassDescriptor{};
+        renderPassDescriptor.name = "Skybox";
         renderPassDescriptor.extent = viewport;
         renderPassDescriptor.offscreen = true;
 
@@ -195,7 +193,10 @@ void SceneRenderer::CreatePasses()
         renderPassDescriptor.depthStencilAttachment = { depth };
         skyboxPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
     }
+}
 
+void SceneRenderer::CreateOnscreenPasses()
+{
     // Present
     {
         TextureDescriptor presentAttachmentDesc{};
@@ -214,7 +215,7 @@ void SceneRenderer::CreatePasses()
         AttachmentDescriptor presentColor{};
         presentColor.texture = presentAttachment;
         presentColor.loadOperation = AttachmentLoadOperation::LOAD;
-        presentRenderPassDescriptor.colorAttachments = {presentColor};
+        presentRenderPassDescriptor.colorAttachments = { presentColor };
 
         presentPipeline = Device::Get()->CreateGraphicsPipeline(presentPipelineDesc, presentRenderPassDescriptor);
     }
@@ -240,6 +241,7 @@ void SceneRenderer::CreatePasses()
     }
 }
 
+
 void SceneRenderer::CreateBuffers()
 {
     const size_t maxEntitiesAmount = 512;
@@ -262,12 +264,12 @@ void SceneRenderer::CreateBuffers()
 
 void SceneRenderer::SubmitMeshNode(const std::shared_ptr<MeshNode>& meshNode, const std::shared_ptr<Material>& material, const glm::mat4& transform)
 {
-    for (const auto& mesh : meshNode->meshes)
+    for (const auto& mesh: meshNode->meshes)
     {
         SubmitMesh(mesh, material, transform);
     }
 
-    for (const auto& child : meshNode->children)
+    for (const auto& child: meshNode->children)
     {
         SubmitMeshNode(child, material, transform);
     }
@@ -405,8 +407,8 @@ void SceneRenderer::Clear()
 
 void SceneRenderer::Resize(int x, int y)
 {
-    pbrPipeline->Resize(x, y);
-    skyboxPipeline->Resize(x, y);
+    viewport = { x, y };
+    CreateOffscreenPasses();
 }
 
 const std::shared_ptr<GraphicsPipeline>& SceneRenderer::GetPass(PassType type) const
@@ -422,6 +424,6 @@ const std::shared_ptr<GraphicsPipeline>& SceneRenderer::GetPass(PassType type) c
         case PassType::PRESENT:
             return presentPipeline;
         default:
-            R_CORE_ASSERT(false, "")
+        R_CORE_ASSERT(false, "")
     }
 }

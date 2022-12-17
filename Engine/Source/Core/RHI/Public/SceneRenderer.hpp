@@ -52,6 +52,8 @@ namespace RightEngine
     private:
         void CreateShaders();
         void CreatePasses();
+        void CreateOffscreenPasses();
+        void CreateOnscreenPasses();
         void CreateBuffers();
 
         // Passes
