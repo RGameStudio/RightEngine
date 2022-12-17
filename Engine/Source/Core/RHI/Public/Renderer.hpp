@@ -47,9 +47,12 @@ namespace RightEngine
         void Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer = nullptr);
         void Draw(const MeshComponent& meshComponent);
         void Draw(const std::shared_ptr<MeshNode>& meshNode);
+        void Draw(const std::shared_ptr<Mesh>& mesh);
         void EncodeState(const std::shared_ptr<RendererState>& state);
 
         void SetPipeline(const std::shared_ptr<GraphicsPipeline>& aPipeline);
+        const std::shared_ptr<GraphicsPipeline>& GetActivePipeline() const
+        { return pipeline; }
 
         void Configure();
 

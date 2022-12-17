@@ -1,22 +1,22 @@
 #version 450 core
 layout (location = 0) out vec4 aAlbedo;
-//layout (location = 1) out vec4 aNormal;
 
-layout(location = 0) in vec2 f_UV;
-layout(location = 1) in vec3 f_Normal;
-layout(location = 2) in vec3 f_WorldPos;
-layout(location = 3) in mat3 f_TBN;
+struct VertexOutput
+{
+    vec2 UV;
+    vec3 Normal;
+    vec3 WorldPos;
+    mat3 TBN;
+    vec4 CameraPosition;
+};
 
-layout(binding = 2) uniform MaterialData
+layout(location = 0) in VertexOutput Output;
+
+layout (binding = 2) uniform UBMaterialData
 {
     vec4 u_AlbedoV;
     float u_MetallicV;
     float u_RoughnessV;
-    bool u_HasAlbedo;
-    bool u_HasNormal;
-    bool u_HasMetallic;
-    bool u_HasRoughness;
-    bool u_HasAO;
 };
 
 layout(binding = 3) uniform sampler2D u_Albedo;
@@ -35,31 +35,21 @@ struct Light
     vec4 rotation;
     float intensity;
     int type;
-    vec2 _padding_;
 };
 
 layout(binding = 11) uniform LightBuffer
 {
-// X - Overall lights amount
-// Y - Directional lights amount
-// Z - Point lights amount
-// W - TBD
-    ivec4 u_LightsAmount;
+    int u_LightsAmount;
     Light u_Light[30];
-};
-
-layout(binding = 12) uniform CameraPos
-{
-    vec4 u_CameraPosition;
 };
 
 const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
 {
-    vec3 tangentNormal = texture(u_Normal, f_UV).xyz;
+    vec3 tangentNormal = texture(u_Normal, Output.UV).xyz;
     tangentNormal = tangentNormal * 2.0 - 1.0;
-    return normalize(f_TBN * tangentNormal);
+    return normalize(Output.TBN * tangentNormal);
 }
 
 // ----------------------------------------------------------------------------
@@ -110,61 +100,19 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 
 void main()
 {
-//    aAlbedo = vec4(1.0f);
-//    aNormal = vec4(1.0f);
-//    return;
     vec3 albedo;
     vec3 N;
     float metallic;
     float roughness;
     float ao;
 
-    if (u_HasAlbedo)
-    {
-        albedo = texture(u_Albedo, f_UV).rgb;
-    }
-    else
-    {
-        albedo = u_AlbedoV.rgb;
-    }
+    albedo = texture(u_Albedo, Output.UV).rgb;
+    N = getNormalFromMap();
+    metallic = texture(u_Metallic, Output.UV).r;
+    roughness = texture(u_Rougness, Output.UV).r;
+    ao = texture(u_AO, Output.UV).r;
 
-    if (u_HasNormal)
-    {
-        N = getNormalFromMap();
-    }
-    else
-    {
-        N = f_Normal;
-    }
-
-    if (u_HasMetallic)
-    {
-        metallic = texture(u_Metallic, f_UV).r;
-    }
-    else
-    {
-        metallic = u_MetallicV;
-    }
-
-    if (u_HasRoughness)
-    {
-        roughness = texture(u_Rougness, f_UV).r;
-    }
-    else
-    {
-        roughness = u_RoughnessV;
-    }
-
-    if (u_HasAO)
-    {
-        ao = texture(u_AO, f_UV).r;
-    }
-    else
-    {
-        ao = 1.0f;
-    }
-
-    vec3 V = normalize(u_CameraPosition.xyz - f_WorldPos);
+    vec3 V = normalize(Output.CameraPosition.xyz - Output.WorldPos);
     vec3 R = reflect(-V, N);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
@@ -174,20 +122,16 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for (int i = 0; i < u_LightsAmount.x; ++i)
+    for (int i = 0; i < u_LightsAmount; ++i)
     {
         if (u_Light[i].type > 0)
         {
             albedo += 0.1f;
         }
-        if (u_Light[i]._padding_.x > 0)
-        {
-            albedo += 0.1f;
-        }
         // calculate per-light radiance
-        vec3 L = normalize(vec3(u_Light[i].position) - f_WorldPos);
+        vec3 L = normalize(vec3(u_Light[i].position) - Output.WorldPos);
         vec3 H = normalize(V + L);
-        float distance = length(vec3(u_Light[i].position) - f_WorldPos);
+        float distance = length(vec3(u_Light[i].position) - Output.WorldPos);
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = vec3(u_Light[i].color) * u_Light[i].intensity * attenuation;
         //        albedo = u_Light[i].color * u_Light[i].intensity;

@@ -16,6 +16,8 @@ namespace RightEngine
         virtual void* Map() const = 0;
         virtual void UnMap() const = 0;
 
+        void SetData(const void* data, size_t size, size_t offset = 0) const;
+
         void SetNeedToSync(bool aIsSyncNeeded)
         { isSyncNeeded = aIsSyncNeeded; }
 

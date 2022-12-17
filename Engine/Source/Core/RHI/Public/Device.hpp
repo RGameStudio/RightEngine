@@ -22,16 +22,18 @@ namespace RightEngine
     class Texture;
     class Sampler;
 
-    struct DeviceInfo
+    struct DeviceProperties
     {
-
+        size_t minUniformBufferOffsetAlignment;
     };
 
     class Device : public std::enable_shared_from_this<Device>
     {
     public:
-        const DeviceInfo& GetInfo() const
-        { return info; }
+        const DeviceProperties& GetInfo() const
+        { return properties; }
+
+        size_t GetAlignedGPUDataSize(size_t dataSize) const;
 
         virtual ~Device() = default;
 
@@ -58,6 +60,6 @@ namespace RightEngine
         {}
 
         static std::shared_ptr<Device> device;
-        DeviceInfo info{};
+        DeviceProperties properties{};
     };
 }

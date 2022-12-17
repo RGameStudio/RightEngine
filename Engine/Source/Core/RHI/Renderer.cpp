@@ -73,11 +73,16 @@ void Renderer::Draw(const std::shared_ptr<MeshNode>& meshNode)
 {
     for (const auto& mesh : meshNode->meshes)
     {
-        Draw(mesh->GetVertexBuffer(), mesh->GetIndexBuffer());
+        Draw(mesh);
     }
 
     for (const auto& nextNode : meshNode->children)
     {
         Draw(nextNode);
     }
+}
+
+void Renderer::Draw(const std::shared_ptr<Mesh>& mesh)
+{
+    Draw(mesh->GetVertexBuffer(), mesh->GetIndexBuffer());
 }

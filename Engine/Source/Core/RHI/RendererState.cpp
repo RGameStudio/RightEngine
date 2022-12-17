@@ -10,7 +10,7 @@ namespace
         const auto bufferIt = buffers.find({ slot, stage });
         if (bufferIt == buffers.end())
         {
-            R_CORE_ASSERT(false, "");
+//            R_CORE_ASSERT(false, "");
             return nullptr;
         }
 
@@ -23,7 +23,7 @@ const std::shared_ptr<Texture>& RendererState::GetTexture(int slot)
     const auto textureIt = textures.find({ slot });
     if (textureIt == textures.end())
     {
-        R_CORE_ASSERT(false, "");
+//        R_CORE_ASSERT(false, "");
         return nullptr;
     }
     return textureIt->second;
@@ -42,9 +42,9 @@ const std::shared_ptr<Buffer>& RendererState::GetFragmentBuffer(int slot)
     return GetBuffer(buffers, slot, ShaderType::FRAGMENT);
 }
 
-void RendererState::SetFragmentBuffer(const std::shared_ptr<Buffer>& buffer, int slot)
+void RendererState::SetFragmentBuffer(const std::shared_ptr<Buffer>& buffer, int slot, int offset, int stride)
 {
-    SetBuffer(buffer, slot, ShaderType::FRAGMENT);
+    SetBuffer(buffer, slot, ShaderType::FRAGMENT, offset, stride);
 }
 
 const std::shared_ptr<Buffer>& RendererState::GetVertexBuffer(int slot)
@@ -52,15 +52,22 @@ const std::shared_ptr<Buffer>& RendererState::GetVertexBuffer(int slot)
     return GetBuffer(buffers, slot, ShaderType::VERTEX);
 }
 
-void RendererState::SetVertexBuffer(const std::shared_ptr<Buffer>& buffer, int slot)
+void RendererState::SetVertexBuffer(const std::shared_ptr<Buffer>& buffer, int slot, int offset, int stride)
 {
-    SetBuffer(buffer, slot, ShaderType::VERTEX);
+    SetBuffer(buffer, slot, ShaderType::VERTEX, offset, stride);
 }
 
-void RendererState::SetBuffer(const std::shared_ptr<Buffer>& buffer, int slot, ShaderStage stage)
+void RendererState::SetBuffer(const std::shared_ptr<Buffer>& buffer, int slot, ShaderStage stage, int offset, int stride)
 {
     R_CORE_ASSERT(buffer, "");
-    buffers[{ slot, stage }] = buffer;
+
+    BufferRef ref{ slot, stage };
+    buffers[ref] = buffer;
     isSyncNeeded = true;
-    buffersToSync.push_back({{ slot, stage }, buffer });
+    buffersToSync.emplace_back( ref, buffer );
+
+    if (stride != 0)
+    {
+        offsets[ref] = { offset, stride };
+    }
 }

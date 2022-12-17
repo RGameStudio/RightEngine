@@ -317,14 +317,12 @@ void PropertyPanel::OnImGuiRender()
             {
                 auto& material = component.GetMaterial();
                 ImGui::TableNextColumn();
-                bool hasAlbedo =  material->materialData.hasAlbedo;
-                DrawMaterialEditorTab("Albedo", hasAlbedo, material->textureData.albedo, textures, component);
+                DrawMaterialEditorTab("Albedo", true, material->textureData.albedo, textures, component);
                 ImGui::TableNextColumn();
                 ImGui::ColorEdit4("", &material->materialData.albedo.x);
 
                 ImGui::TableNextColumn();
-                bool hasNormal =  material->materialData.hasNormal;
-                DrawMaterialEditorTab("Normal", hasNormal, material->textureData.normal, textures, component);
+                DrawMaterialEditorTab("Normal", true, material->textureData.normal, textures, component);
                 ImGui::TableNextColumn();
 
 

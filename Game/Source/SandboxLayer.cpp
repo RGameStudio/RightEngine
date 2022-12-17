@@ -10,6 +10,7 @@
 #include "MeshLoader.hpp"
 #include "AssetManager.hpp"
 #include "KeyCodes.hpp"
+#include "SceneRenderer.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -20,80 +21,6 @@ using namespace RightEngine;
 
 namespace
 {
-    float skyboxVertices[] = {
-            // back face
-            -1.0f, -1.0f, -1.0f,   // bottom-left
-            1.0f, 1.0f, -1.0f,   // top-right
-            1.0f, -1.0f, -1.0f,   // bottom-right
-            1.0f, 1.0f, -1.0f,   // top-right
-            -1.0f, -1.0f, -1.0f,   // bottom-left
-            -1.0f, 1.0f, -1.0f,   // top-left
-            // front face
-            -1.0f, -1.0f, 1.0f,   // bottom-left
-            1.0f, -1.0f, 1.0f,   // bottom-right
-            1.0f, 1.0f, 1.0f,   // top-right
-            1.0f, 1.0f, 1.0f,   // top-right
-            -1.0f, 1.0f, 1.0f,   // top-left
-            -1.0f, -1.0f, 1.0f,   // bottom-left
-            // left face
-            -1.0f, 1.0f, 1.0f,  // top-right
-            -1.0f, 1.0f, -1.0f,  // top-left
-            -1.0f, -1.0f, -1.0f,  // bottom-left
-            -1.0f, -1.0f, -1.0f,  // bottom-left
-            -1.0f, -1.0f, 1.0f,  // bottom-right
-            -1.0f, 1.0f, 1.0f,  // top-right
-            // right face
-            1.0f, 1.0f, 1.0f,   // top-left
-            1.0f, -1.0f, -1.0f,   // bottom-right
-            1.0f, 1.0f, -1.0f,   // top-right
-            1.0f, -1.0f, -1.0f,  // bottom-right
-            1.0f, 1.0f, 1.0f,   // top-left
-            1.0f, -1.0f, 1.0f,   // bottom-left
-            // bottom face
-            -1.0f, -1.0f, -1.0f,   // top-right
-            1.0f, -1.0f, -1.0f,   // top-left
-            1.0f, -1.0f, 1.0f,   // bottom-left
-            1.0f, -1.0f, 1.0f,   // bottom-left
-            -1.0f, -1.0f, 1.0f,   // bottom-right
-            -1.0f, -1.0f, -1.0f,   // top-right
-            // top face
-            -1.0f, 1.0f, -1.0f,  // top-left
-            1.0f, 1.0f, 1.0f,   // bottom-right
-            1.0f, 1.0f, -1.0f,   // top-right
-            1.0f, 1.0f, 1.0f,   // bottom-right
-            -1.0f, 1.0f, -1.0f,   // top-left
-            -1.0f, 1.0f, 1.0f,    // bottom-left
-    };
-
-    struct ShaderLight
-    {
-        glm::vec4 color;
-        glm::vec4 position;
-        glm::vec4 rotation;
-        float intensity;
-        int type;
-        glm::vec2 _padding_;
-    };
-
-    struct LightBuffer
-    {
-        glm::ivec4 lightsAmount;
-        ShaderLight light[30];
-    };
-
-    enum class TextureSlot
-    {
-        ALBEDO_TEXTURE_SLOT = 0,
-        NORMAL_TEXTURE_SLOT,
-        METALLIC_TEXTURE_SLOT,
-        ROUGHNESS_TEXTURE_SLOT,
-        AO_TEXTURE_SLOT,
-        SKYBOX_TEXTURE_SLOT,
-        PREFILTER_TEXTURE_SLOT,
-        IRRADIANCE_TEXTURE_SLOT,
-        BRDF_LUT_TEXTURE_SLOT
-    };
-
     enum class GeometryType
     {
         NONE,
@@ -106,49 +33,25 @@ namespace
 
     struct UIState
     {
-        bool isCameraOptionsOpen{true};
-    };
-
-    struct VPBuffer
-    {
-        glm::mat4 viewProjection;
-    };
-
-    struct TransformBuffer
-    {
-        glm::mat4 transform;
-    };
-
-    struct CameraPosBuffer
-    {
-        glm::vec4 pos;
+        bool isCameraOptionsOpen{ true };
     };
 
     struct LayerSceneData
     {
-        std::shared_ptr<GraphicsPipeline> pbrPipeline;
-        std::shared_ptr<RendererState> pbrPipelineState;
-        std::shared_ptr<GraphicsPipeline> skyboxPipeline;
-        std::shared_ptr<GraphicsPipeline> presentPipeline;
-        std::shared_ptr<GraphicsPipeline> uiPipeline;
-        std::shared_ptr<RendererState> skyboxPipelineState;
-        std::shared_ptr<Buffer> materialUniformBuffer;
         std::shared_ptr<Camera> camera;
         std::shared_ptr<Entity> skyboxCube;
-        ImVec2 viewportSize{width, height};
-        ImVec2 newViewportSize{0, 0};
-        uint32_t newEntityId{1};
+        ImVec2 viewportSize{ width, height };
+        ImVec2 newViewportSize{ 0, 0 };
+        uint32_t newEntityId{ 1 };
         PropertyPanel propertyPanel;
         MeshLoader meshLoader;
         AssetHandle backpackHandle;
         std::shared_ptr<Buffer> lightUniformBuffer;
         UIState uiState;
         AssetHandle environmentHandle;
-        std::shared_ptr<Buffer> vpBuffer;
-        std::shared_ptr<Buffer> transBuffer;
-        std::shared_ptr<Buffer> cameraPosBuffer;
         std::shared_ptr<ImGuiLayer> imGuiLayer;
         std::shared_ptr<Buffer> skyboxVertexBuffer;
+        std::shared_ptr<SceneRenderer> renderer;
 
         bool isViewportHovered{ false };
         std::shared_ptr<Entity> selectedEntity;
@@ -156,46 +59,6 @@ namespace
     };
 
     static LayerSceneData sceneData;
-
-
-    void TryTextureBind(MaterialData& materialData, const AssetHandle& textureHandle, TextureSlot slot)
-    {
-        bool hasTexture = false;
-        if (textureHandle.guid.isValid())
-        {
-            hasTexture = true;
-        }
-
-        switch (slot)
-        {
-            case TextureSlot::ALBEDO_TEXTURE_SLOT:
-                materialData.hasAlbedo = hasTexture;
-                break;
-            case TextureSlot::NORMAL_TEXTURE_SLOT:
-                materialData.hasNormal = hasTexture;
-                break;
-            case TextureSlot::METALLIC_TEXTURE_SLOT:
-                materialData.hasMetallic = hasTexture;
-                break;
-            case TextureSlot::ROUGHNESS_TEXTURE_SLOT:
-                materialData.hasRoughness = hasTexture;
-                break;
-            case TextureSlot::AO_TEXTURE_SLOT:
-                materialData.hasAO = hasTexture;
-                break;
-            default:
-            R_ASSERT(false, "Unknown texture slot!");
-        }
-    }
-
-    void BindTextures(MaterialData& material, const TextureData& textures)
-    {
-        TryTextureBind(material, textures.albedo, TextureSlot::ALBEDO_TEXTURE_SLOT);
-        TryTextureBind(material, textures.normal, TextureSlot::NORMAL_TEXTURE_SLOT);
-        TryTextureBind(material, textures.metallic, TextureSlot::METALLIC_TEXTURE_SLOT);
-        TryTextureBind(material, textures.roughness, TextureSlot::ROUGHNESS_TEXTURE_SLOT);
-        TryTextureBind(material, textures.ao, TextureSlot::AO_TEXTURE_SLOT);
-    }
 
     void AddTag(std::shared_ptr<Entity>& entity, const std::string& name = "")
     {
@@ -221,22 +84,6 @@ namespace
             MeshComponent meshComponent;
             meshComponent.SetMesh(*meshHandle);
             node->AddComponent<MeshComponent>(meshComponent);
-        } else
-        {
-//            if (type != GeometryType::NONE)
-//            {
-//                std::shared_ptr<MeshComponent> mesh = nullptr;
-//                switch (type)
-//                {
-//                    case GeometryType::CUBE:
-//                        mesh = MeshBuilder::CubeGeometry();
-//                        break;
-//                    case GeometryType::PLANE:
-//                        mesh = MeshBuilder::PlaneGeometry();
-//                        break;
-//                }
-//                node->AddComponent<MeshComponent>(std::move(*mesh));
-//            }
         }
         AddTag(node);
         return node;
@@ -275,7 +122,7 @@ namespace
             {
                 const auto children = entity->GetChildren();
                 const auto parentNode = entity->GetParent();
-                for (const auto& child : children)
+                for (const auto& child: children)
                 {
                     parentNode->AddChild(child);
                 }
@@ -293,6 +140,8 @@ namespace
 void SandboxLayer::OnAttach()
 {
     sceneData.propertyPanel.Init();
+    sceneData.renderer = std::make_shared<SceneRenderer>();
+    sceneData.renderer->Init();
 
     auto& assetManager = AssetManager::Get();
     sceneData.backpackHandle = assetManager.GetLoader<MeshLoader>()->Load("/Assets/Models/backpack.obj");
@@ -321,159 +170,12 @@ void SandboxLayer::OnAttach()
     SamplerDescriptor samplerDesc{};
     const auto sampler = Device::Get()->CreateSampler(samplerDesc);
 
-    ShaderProgramDescriptor shaderProgramDescriptor;
-    ShaderDescriptor vertexShader;
-    vertexShader.path = "/Assets/Shaders/pbr.vert";
-    vertexShader.type = ShaderType::VERTEX;
-    ShaderDescriptor fragmentShader;
-    fragmentShader.path = "/Assets/Shaders/pbr.frag";
-    fragmentShader.type = ShaderType::FRAGMENT;
-    shaderProgramDescriptor.shaders = {vertexShader, fragmentShader};
-    VertexBufferLayout layout;
-    layout.Push<glm::vec3>();
-    layout.Push<glm::vec3>();
-    layout.Push<glm::vec2>();
-    layout.Push<glm::vec3>();
-    layout.Push<glm::vec3>();
-    shaderProgramDescriptor.layout = layout;
-    shaderProgramDescriptor.reflection.textures = {3, 4, 5, 6, 7, 8, 9, 10};
-    shaderProgramDescriptor.reflection.buffers[{0, ShaderType::VERTEX}] = BufferType::UNIFORM;
-    shaderProgramDescriptor.reflection.buffers[{1, ShaderType::VERTEX}] = BufferType::UNIFORM;
-    shaderProgramDescriptor.reflection.buffers[{2, ShaderType::FRAGMENT}] = BufferType::UNIFORM;
-    shaderProgramDescriptor.reflection.buffers[{11, ShaderType::FRAGMENT}] = BufferType::UNIFORM;
-    shaderProgramDescriptor.reflection.buffers[{12, ShaderType::FRAGMENT}] = BufferType::UNIFORM;
-    auto shader = Device::Get()->CreateShader(shaderProgramDescriptor);
-
-    renderer = std::make_shared<Renderer>();
-
-    TextureDescriptor colorAttachmentDesc{};
-    colorAttachmentDesc.format = Format::BGRA8_SRGB;
-    colorAttachmentDesc.type = TextureType::TEXTURE_2D;
-    colorAttachmentDesc.width = sceneData.viewportSize.x;
-    colorAttachmentDesc.height = sceneData.viewportSize.y;
-    const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
-    colorAttachment->SetSampler(sampler);
-    TextureDescriptor normalAttachmentDesc{};
-    normalAttachmentDesc.format = Format::RGBA16_SFLOAT;
-    normalAttachmentDesc.type = TextureType::TEXTURE_2D;
-    normalAttachmentDesc.width = sceneData.viewportSize.x;
-    normalAttachmentDesc.height = sceneData.viewportSize.y;
-    const auto normalAttachemnt = Device::Get()->CreateTexture(normalAttachmentDesc, {});
-    TextureDescriptor depthAttachmentDesc{};
-    depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
-    depthAttachmentDesc.type = TextureType::TEXTURE_2D;
-    depthAttachmentDesc.width = sceneData.viewportSize.x;
-    depthAttachmentDesc.height = sceneData.viewportSize.y;
-    const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
-
-    BufferDescriptor bufferDesc{};
-    bufferDesc.type = BufferType::UNIFORM;
-    bufferDesc.size = sizeof(MaterialData);
-    bufferDesc.memoryType = MemoryType::CPU_GPU;
-    sceneData.materialUniformBuffer = Device::Get()->CreateBuffer(bufferDesc, nullptr);
-
-    bufferDesc.size = sizeof(LightBuffer);
-    sceneData.lightUniformBuffer = Device::Get()->CreateBuffer(bufferDesc, nullptr);
-
-    bufferDesc.size = sizeof(TransformBuffer);
-    sceneData.transBuffer = Device::Get()->CreateBuffer(bufferDesc, nullptr);
-
-    bufferDesc.size = sizeof(VPBuffer);
-    sceneData.vpBuffer = Device::Get()->CreateBuffer(bufferDesc, nullptr);
-
-    bufferDesc.size = sizeof(CameraPosBuffer);
-    sceneData.cameraPosBuffer = Device::Get()->CreateBuffer(bufferDesc, nullptr);
-
-    bufferDesc.size = sizeof(skyboxVertices);
-    bufferDesc.type = BufferType::VERTEX;
-    bufferDesc.memoryType = MemoryType::CPU_GPU;
-    sceneData.skyboxVertexBuffer = Device::Get()->CreateBuffer(bufferDesc, &skyboxVertices);
-
-    GraphicsPipelineDescriptor pipelineDescriptor;
-    pipelineDescriptor.shader = shader;
-
-    RenderPassDescriptor renderPassDescriptor{};
-    renderPassDescriptor.extent = {sceneData.viewportSize.x, sceneData.viewportSize.y};
-    renderPassDescriptor.offscreen = true;
-    AttachmentDescriptor depth{};
-    depth.loadOperation = AttachmentLoadOperation::CLEAR;
-    depth.texture = depthAttachment;
-    AttachmentDescriptor color{};
-    color.texture = colorAttachment;
-    color.loadOperation = AttachmentLoadOperation::CLEAR;
-    color.storeOperation = AttachmentStoreOperation::STORE;
-    AttachmentDescriptor normal{};
-    normal.loadOperation = AttachmentLoadOperation::CLEAR;
-    normal.texture = normalAttachemnt;
-    renderPassDescriptor.colorAttachments = {color};
-    renderPassDescriptor.depthStencilAttachment = {depth};
-    sceneData.pbrPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
-    sceneData.pbrPipelineState = RendererCommand::CreateRendererState();
-
     sceneData.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_circus.hdr");
 
-    sceneData.pbrPipelineState->SetVertexBuffer(sceneData.vpBuffer, 0);
-    sceneData.pbrPipelineState->SetVertexBuffer(sceneData.transBuffer, 1);
-    sceneData.pbrPipelineState->SetFragmentBuffer(sceneData.materialUniformBuffer, 2);
-    sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.albedo), 3);
-    sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.normal), 4);
-    sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.metallic), 5);
-    sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.roughness), 6);
-    sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.ao), 7);
-    sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle)->irradianceMap, 8);
-    sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle)->prefilterMap, 9);
-    sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle)->brdfLut, 10);
-    sceneData.pbrPipelineState->SetFragmentBuffer(sceneData.lightUniformBuffer, 11);
-    sceneData.pbrPipelineState->SetFragmentBuffer(sceneData.cameraPosBuffer, 12);
-
-    sceneData.pbrPipelineState->GetTexture(3)->SetSampler(sampler);
-    sceneData.pbrPipelineState->GetTexture(4)->SetSampler(sampler);
-    sceneData.pbrPipelineState->GetTexture(5)->SetSampler(sampler);
-    sceneData.pbrPipelineState->GetTexture(6)->SetSampler(sampler);
-    sceneData.pbrPipelineState->GetTexture(7)->SetSampler(sampler);
-
-    ShaderProgramDescriptor skyboxShaderDesc{};
-    vertexShader.path = "/Assets/Shaders/skybox.vert";
-    vertexShader.type = ShaderType::VERTEX;
-    fragmentShader.path = "/Assets/Shaders/skybox.frag";
-    fragmentShader.type = ShaderType::FRAGMENT;
-    skyboxShaderDesc.shaders = {vertexShader, fragmentShader};
-    VertexBufferLayout skyboxLayout;
-    skyboxLayout.Push<glm::vec3>();
-    skyboxShaderDesc.layout = skyboxLayout;
-    skyboxShaderDesc.reflection.textures = {1};
-    skyboxShaderDesc.reflection.buffers[{0, ShaderType::VERTEX}] = BufferType::UNIFORM;
-    shader = Device::Get()->CreateShader(skyboxShaderDesc);
-
-    pipelineDescriptor.shader = shader;
-    pipelineDescriptor.depthCompareOp = CompareOp::LESS_OR_EQUAL;
-    pipelineDescriptor.cullMode = CullMode::FRONT;
-    renderPassDescriptor.extent = {sceneData.viewportSize.x, sceneData.viewportSize.y};
-    renderPassDescriptor.offscreen = true;
-    depth.loadOperation = AttachmentLoadOperation::LOAD;
-    depth.texture = depthAttachment;
-    color.loadOperation = AttachmentLoadOperation::LOAD;
-    color.storeOperation = AttachmentStoreOperation::STORE;
-    color.texture = colorAttachment;
-    renderPassDescriptor.colorAttachments = {color};
-    renderPassDescriptor.depthStencilAttachment = {depth};
-    sceneData.skyboxPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
-
     sceneData.skyboxCube = scene->CreateEntity();
-    MeshComponent skyboxMesh;
-    bufferDesc.size = sizeof(skyboxVertices);
-    bufferDesc.memoryType = MemoryType::CPU_GPU;
-    bufferDesc.type = BufferType::VERTEX;
-    skyboxMesh.SetVisibility(false);
-    skyboxMesh.SetMesh(assetManager.GetLoader<MeshLoader>()->Load(Device::Get()->CreateBuffer(bufferDesc, nullptr),
-                                                                  std::make_shared<VertexBufferLayout>(skyboxLayout)));
-    sceneData.skyboxCube->AddComponent<MeshComponent>(skyboxMesh);
     sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("Skybox", sceneData.newEntityId++));
     auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
     skyboxComponent.environmentHandle = sceneData.environmentHandle;
-    sceneData.skyboxPipelineState = RendererCommand::CreateRendererState();
-    sceneData.skyboxPipelineState->SetVertexBuffer(sceneData.vpBuffer, 0);
-    sceneData.skyboxPipelineState->SetTexture(assetManager.GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->envMap, 1);
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
 
     sceneData.propertyPanel.SetScene(scene);
@@ -501,75 +203,26 @@ void SandboxLayer::OnAttach()
     int windowW, windowH;
     glfwGetFramebufferSize(window, &windowW, &windowH);
 
-    TextureDescriptor presentAttachmentDesc{};
-    presentAttachmentDesc.format = Format::BGRA8_SRGB;
-    presentAttachmentDesc.type = TextureType::TEXTURE_2D;
-    presentAttachmentDesc.width = windowW;
-    presentAttachmentDesc.height = windowH;
-    const auto presentAttachment = Device::Get()->CreateTexture(presentAttachmentDesc, {});
-    presentAttachment->SetSampler(sampler);
 
-    GraphicsPipelineDescriptor presentPipelineDesc{};
-    presentPipelineDesc.shader = nullptr;
-    RenderPassDescriptor presentRenderPassDescriptor{};
-    presentRenderPassDescriptor.extent = {windowW, windowH};
-    presentRenderPassDescriptor.offscreen = false;
-    AttachmentDescriptor presentColor{};
-    presentColor.texture = presentAttachment;
-    presentColor.loadOperation = AttachmentLoadOperation::LOAD;
-    presentRenderPassDescriptor.colorAttachments = {presentColor};
-
-    sceneData.presentPipeline = Device::Get()->CreateGraphicsPipeline(presentPipelineDesc, presentRenderPassDescriptor);
     EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(SandboxLayer::OnEvent));
-    GraphicsPipelineDescriptor uiPipelineDesc{};
-    uiPipelineDesc.shader = nullptr;
 
-    AttachmentDescriptor uiAttachment{};
-    uiAttachment.texture = presentAttachment;
-    uiAttachment.loadOperation = AttachmentLoadOperation::CLEAR;
-    uiAttachment.storeOperation = AttachmentStoreOperation::STORE;
-
-    RenderPassDescriptor uiRenderpass{};
-    uiRenderpass.extent = {windowW, windowH};
-    uiRenderpass.offscreen = true;
-    uiRenderpass.colorAttachments.emplace_back(uiAttachment);
-
-    sceneData.uiPipeline = Device::Get()->CreateGraphicsPipeline(uiPipelineDesc, uiRenderpass);
-
-    sceneData.imGuiLayer = std::make_shared<ImGuiLayer>(sceneData.uiPipeline);
+    sceneData.imGuiLayer = std::make_shared<ImGuiLayer>(sceneData.renderer->GetPass(PassType::UI));
     Application::Get().PushOverlay(sceneData.imGuiLayer);
     sceneData.camera->SetActive(false);
+    sceneData.renderer->SetUIPassCallback([&](const std::shared_ptr<CommandBuffer>& cmd)
+    {
+       sceneData.imGuiLayer->Begin();
+       OnImGuiRender();
+       sceneData.imGuiLayer->End(cmd);
+    });
 }
 
 void SandboxLayer::OnUpdate(float ts)
 {
     if (sceneData.newViewportSize.x != 0 && sceneData.newViewportSize.y != 0)
     {
-        sceneData.pbrPipeline->Resize(static_cast<uint32_t>(sceneData.newViewportSize.x), static_cast<uint32_t>(sceneData.newViewportSize.y));
-        GraphicsPipelineDescriptor pipelineDescriptor;
-        pipelineDescriptor.shader = sceneData.skyboxPipeline->GetPipelineDescriptor().shader;
-        pipelineDescriptor.depthCompareOp = CompareOp::LESS_OR_EQUAL;
-        pipelineDescriptor.cullMode = CullMode::FRONT;
-
-        RenderPassDescriptor renderPassDescriptor;
-        renderPassDescriptor.extent = {sceneData.viewportSize.x, sceneData.viewportSize.y};
-        renderPassDescriptor.offscreen = true;
-        AttachmentDescriptor depth;
-        depth.loadOperation = AttachmentLoadOperation::LOAD;
-        depth.texture = sceneData.pbrPipeline->GetRenderPassDescriptor().depthStencilAttachment.texture;
-        AttachmentDescriptor color;
-        color.loadOperation = AttachmentLoadOperation::LOAD;
-        color.storeOperation = AttachmentStoreOperation::STORE;
-        color.texture = sceneData.pbrPipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
-        renderPassDescriptor.colorAttachments = {color};
-        renderPassDescriptor.depthStencilAttachment = {depth};
-
-        sceneData.skyboxPipelineState = RendererCommand::CreateRendererState();
-        sceneData.skyboxPipelineState->SetVertexBuffer(sceneData.vpBuffer, 0);
-        sceneData.skyboxPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(sceneData.environmentHandle)->envMap, 1);
-
-        sceneData.skyboxPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
-        sceneData.newViewportSize = {0, 0};
+        sceneData.renderer->Resize(sceneData.newViewportSize.x, sceneData.newViewportSize.y);
+        sceneData.newViewportSize = { 0, 0 };
     }
 
     sceneData.camera->SetActive(Input::IsMouseButtonDown(MouseButton::Right) && sceneData.isViewportHovered);
@@ -596,149 +249,39 @@ void SandboxLayer::OnUpdate(float ts)
 
     scene->OnUpdate(ts);
 
-    renderer->SetPipeline(sceneData.pbrPipeline);
-    renderer->BeginFrame(nullptr);
-    sceneData.pbrPipelineState->OnUpdate(sceneData.pbrPipeline);
-    renderer->EncodeState(sceneData.pbrPipelineState);
-    VPBuffer buffer;
-    auto projection = sceneData.camera->GetProjectionMatrix();
-    projection[1][1] *= -1;
-    buffer.viewProjection = projection * sceneData.camera->GetViewMatrix();
-    auto ptr = sceneData.vpBuffer->Map();
-    memcpy(ptr, &buffer, sizeof(VPBuffer));
-    sceneData.vpBuffer->UnMap();
-
-    LightBuffer lightBuffer;
-    std::memset(&lightBuffer, 0, sizeof(LightBuffer));
+    std::vector<LightData> lightData;
     for (const auto& entityID: scene->GetRegistry().view<LightComponent>())
     {
         const auto& transform = scene->GetRegistry().get<TransformComponent>(entityID);
         const auto& light = scene->GetRegistry().get<LightComponent>(entityID);
-        ShaderLight shaderLight;
+        LightData shaderLight{};
         shaderLight.type = static_cast<int>(light.type);
         shaderLight.position = glm::vec4(transform.GetWorldPosition(), 1);
         shaderLight.color = glm::vec4(light.color, 1);
         shaderLight.intensity = light.intensity;
-        lightBuffer.light[lightBuffer.lightsAmount.x] = shaderLight;
-        lightBuffer.lightsAmount.x += 1;
-        switch (light.type)
-        {
-            case LightType::DIRECTIONAL:
-                lightBuffer.lightsAmount.y += 1;
-                break;
-            default:
-            R_ASSERT(false, "");
-        }
+        lightData.emplace_back(shaderLight);
     }
 
-    ptr = sceneData.lightUniformBuffer->Map();
-    memcpy(ptr, &lightBuffer, sizeof(lightBuffer));
-    sceneData.lightUniformBuffer->UnMap();
-
-    R_ASSERT(lightBuffer.lightsAmount.x < 30, "");
-
-    CameraPosBuffer cameraPosBuffer;
-    cameraPosBuffer.pos = glm::vec4(sceneData.camera->GetPosition(), 0);
-    ptr = sceneData.cameraPosBuffer->Map();
-    memcpy(ptr, &cameraPosBuffer, sizeof(CameraPosBuffer));
-    sceneData.cameraPosBuffer->UnMap();
+    auto& assetManager = AssetManager::Get();
+    sceneData.renderer->SetScene(scene);
+    sceneData.renderer->BeginScene(scene->GetCamera(),
+                                  assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle), lightData);
 
     for (auto& entity: scene->GetRegistry().view<MeshComponent>())
     {
-        auto& transform = scene->GetRegistry().get<TransformComponent>(entity);
-        auto& mesh = scene->GetRegistry().get<MeshComponent>(entity);
-        if (!mesh.IsVisible())
+        const auto& tag = scene->GetRegistry().get<TagComponent>(entity);
+        const auto& transform = scene->GetRegistry().get<TransformComponent>(entity);
+        const auto& meshComponent = scene->GetRegistry().get<MeshComponent>(entity);
+        const auto& material = meshComponent.GetMaterial();
+        if (!meshComponent.IsVisible())
         {
             continue;
         }
 
-        auto& materialData = mesh.GetMaterial()->materialData;
-        const auto& textureData = mesh.GetMaterial()->textureData;
-        TransformBuffer transformBuffer;
-        transformBuffer.transform = transform.GetWorldTransformMatrix();
-        ptr = sceneData.transBuffer->Map();
-        memcpy(ptr, &transformBuffer, sizeof(transformBuffer));
-        sceneData.transBuffer->UnMap();
-
-        const auto& material = mesh.GetMaterial();
-        BindTextures(material->materialData, material->textureData);
-        ptr = sceneData.materialUniformBuffer->Map();
-        memcpy(ptr, &material->materialData, sizeof(MaterialData));
-        sceneData.materialUniformBuffer->UnMap();
-
-        if (mesh.IsDirty())
-        {
-            auto& assetManager = AssetManager::Get();
-            if (materialData.hasAlbedo)
-            {
-                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.albedo), 3);
-            }
-            if (materialData.hasNormal)
-            {
-                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.normal), 4);
-            }
-            if (materialData.hasMetallic)
-            {
-                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.metallic), 5);
-            }
-            if (materialData.hasRoughness)
-            {
-                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.roughness), 6);
-            }
-            if (materialData.hasAO)
-            {
-                sceneData.pbrPipelineState->SetTexture(assetManager.GetAsset<Texture>(textureData.ao), 7);
-            }
-            sceneData.pbrPipelineState->OnUpdate(sceneData.pbrPipeline);
-            renderer->EncodeState(sceneData.pbrPipelineState);
-            mesh.SetDirty(false);
-        }
-        renderer->Draw(mesh);
+        sceneData.renderer->SubmitMeshNode(assetManager.GetAsset<MeshNode>(meshComponent.GetMesh()), material, transform.GetWorldTransformMatrix());
     }
 
-    renderer->EndFrame();
-
-    projection = sceneData.camera->GetProjectionMatrix();
-    projection[1][1] *= -1;
-    auto cameraTransform = TransformComponent();
-    cameraTransform.SetPosition(sceneData.camera->GetPosition());
-    cameraTransform.RecalculateTransform();
-    buffer.viewProjection = projection * glm::mat4(glm::mat3(scene->GetCamera()->GetViewMatrix()));
-    ptr = sceneData.vpBuffer->Map();
-    memcpy(ptr, &buffer, sizeof(VPBuffer));
-    sceneData.vpBuffer->UnMap();
-
-    renderer->SetPipeline(sceneData.skyboxPipeline);
-    renderer->BeginFrame(nullptr);
-    const auto skyboxView = scene->GetRegistry().view<SkyboxComponent>();
-    // TODO: Add black skybox for fallback
-    R_ASSERT(!skyboxView.empty(), "No skybox was set!");
-    R_ASSERT(skyboxView.size() == 1, "There must only 1 skybox in scene!");
-    const auto& skyboxEntityID = skyboxView.front();
-    auto& skyboxComponent = scene->GetRegistry().get<SkyboxComponent>(skyboxEntityID);
-    if (skyboxComponent.isDirty)
-    {
-        sceneData.skyboxPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->envMap, 1);
-        sceneData.pbrPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->irradianceMap, 8);
-        sceneData.pbrPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->prefilterMap, 9);
-        sceneData.pbrPipelineState->SetTexture(AssetManager::Get().GetAsset<EnvironmentContext>(skyboxComponent.environmentHandle)->brdfLut, 10);
-        skyboxComponent.isDirty = false;
-    }
-    sceneData.skyboxPipelineState->OnUpdate(sceneData.skyboxPipeline);
-    renderer->EncodeState(sceneData.skyboxPipelineState);
-    renderer->Draw(sceneData.skyboxVertexBuffer);
-    renderer->EndFrame();
-
-    renderer->SetPipeline(sceneData.uiPipeline);
-    renderer->BeginFrame(nullptr);
-    sceneData.imGuiLayer->Begin();
-    OnImGuiRender();
-    sceneData.imGuiLayer->End(renderer->GetCmd());
-    renderer->EndFrame();
-
-    renderer->SetPipeline(sceneData.presentPipeline);
-    renderer->BeginFrame(nullptr);
-    renderer->EndFrame();
+    sceneData.renderer->EndScene();
 }
 
 void SandboxLayer::OnImGuiRender()
@@ -828,7 +371,7 @@ void SandboxLayer::OnImGuiRender()
             ImGui::SliderFloat("Z Far", &zFar, 10.0f, 1000.0f);
             camera->SetFar(zFar);
 
-            std::array<const char*, 3> aspectRatios = {"16/9", "4/3", "Fit to window"};
+            std::array<const char*, 3> aspectRatios = { "16/9", "4/3", "Fit to window" };
             static const char* currentRatio = aspectRatios[2];
             if (ImGui::BeginCombo("Aspect ratio", currentRatio))
             {
@@ -893,7 +436,7 @@ void SandboxLayer::OnImGuiRender()
 
     ImGui::Begin("Viewport");
     sceneData.isViewportHovered = ImGui::IsWindowHovered();
-    const auto attachment = sceneData.pbrPipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
+    const auto attachment = sceneData.renderer->GetPass(PassType::PBR)->GetRenderPassDescriptor().colorAttachments.front().texture;
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
     if (viewportSize.x != sceneData.viewportSize.x || viewportSize.y != sceneData.viewportSize.y)
     {
@@ -915,12 +458,10 @@ void SandboxLayer::OnImGuiRender()
             if (Input::IsKeyDown(R_KEY_T))
             {
                 sceneData.gizmoType = ImGuizmo::TRANSLATE;
-            }
-            else if (Input::IsKeyDown(R_KEY_R))
+            } else if (Input::IsKeyDown(R_KEY_R))
             {
                 sceneData.gizmoType = ImGuizmo::ROTATE;
-            }
-            else if (Input::IsKeyDown(R_KEY_B))
+            } else if (Input::IsKeyDown(R_KEY_B))
             {
                 sceneData.gizmoType = ImGuizmo::SCALE;
             }
@@ -936,7 +477,7 @@ void SandboxLayer::OnImGuiRender()
         glm::mat4 entityTransform = entityTransformComponent.GetWorldTransformMatrix();
 
         ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-                             (ImGuizmo::OPERATION)sceneData.gizmoType, ImGuizmo::LOCAL, glm::value_ptr(entityTransform));
+                             (ImGuizmo::OPERATION) sceneData.gizmoType, ImGuizmo::LOCAL, glm::value_ptr(entityTransform));
 
 
         if (ImGuizmo::IsUsing())

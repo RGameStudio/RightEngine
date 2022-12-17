@@ -75,6 +75,8 @@ namespace RightEngine
             return { basePtr->guid };
         }
 
+        const AssetHandle& GetDefaultTexture() const;
+
         AssetManager(const AssetManager& other) = delete;
         AssetManager& operator=(const AssetManager& other) = delete;
         AssetManager(AssetManager&& other) = delete;
@@ -84,6 +86,8 @@ namespace RightEngine
         std::unordered_map<xg::Guid, std::shared_ptr<AssetBase>> assetCache;
         std::unordered_map<std::type_index, std::shared_ptr<AssetLoader>> loaders;
         std::mutex assetCacheMutex;
+
+        mutable AssetHandle defaultTexture;
 
         AssetManager() = default;
         ~AssetManager() = default;

@@ -23,3 +23,14 @@ std::shared_ptr<Buffer> Device::CreateBuffer(const BufferDescriptor& bufferDescr
 {
     return std::shared_ptr<Buffer>();
 }
+
+size_t Device::GetAlignedGPUDataSize(size_t dataSize) const
+{
+    if (dataSize % properties.minUniformBufferOffsetAlignment == 0)
+    {
+        return dataSize;
+    }
+
+    const size_t offsetsCount = dataSize / properties.minUniformBufferOffsetAlignment + 1;
+    return offsetsCount * properties.minUniformBufferOffsetAlignment;
+}

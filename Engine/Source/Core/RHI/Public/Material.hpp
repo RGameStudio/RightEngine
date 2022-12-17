@@ -12,15 +12,12 @@ namespace RightEngine
         glm::vec4 albedo{ 1.0f, 1.0f, 1.0f, 1.0f };
         float metallic{ 0.0f };
         float roughness{ 1.0f };
-        int hasAlbedo{ false };
-        int hasNormal{ false };
-        int hasMetallic{ false };
-        int hasRoughness{ false };
-        int hasAO{ false };
     };
 
     struct TextureData
     {
+        TextureData();
+
         AssetHandle albedo;
         AssetHandle normal;
         AssetHandle metallic;

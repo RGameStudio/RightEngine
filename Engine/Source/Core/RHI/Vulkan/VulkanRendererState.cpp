@@ -35,8 +35,21 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
                     const auto buffer = bufferPtr.lock();
                     VkDescriptorBufferInfo bufferInfo{};
                     bufferInfo.buffer = std::static_pointer_cast<VulkanBuffer>(buffer)->GetBuffer();
-                    bufferInfo.offset = 0;
-                    bufferInfo.range = buffer->GetDescriptor().size;
+                    const auto& offsetRef = offsets.find(bufferRef);
+                    if (offsetRef == offsets.end())
+                    {
+                        bufferInfo.offset = 0;
+                        bufferInfo.range = buffer->GetDescriptor().size;
+                    }
+                    else
+                    {
+                        const size_t offset = offsetRef->second.offset;
+                        const size_t stride = offsetRef->second.stride;
+                        const size_t minDeviceOffset =  Device::Get()->GetInfo().minUniformBufferOffsetAlignment;
+                        R_CORE_ASSERT(offset % minDeviceOffset == 0, "");
+                        bufferInfo.offset = offset;
+                        bufferInfo.range = stride;
+                    }
 
                     bufferInfos.push_back(bufferInfo);
 

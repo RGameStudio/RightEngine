@@ -3,7 +3,7 @@ layout (location = 0) out vec4 aAlbedo;
 
 layout(location = 0) in vec3 f_WorldPos;
 
-layout(binding = 1) uniform samplerCube u_Skybox;
+layout(binding = 3) uniform samplerCube u_Skybox;
 
 void main()
 {

@@ -153,6 +153,11 @@ VulkanDevice::VulkanDevice(const std::shared_ptr<RenderingContext>& context,
     auto surf = std::static_pointer_cast<VulkanSurface>(surface);
     vulkanSurface = surf;
     Init(ctx);
+
+    VkPhysicalDeviceProperties deviceProps;
+    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProps);
+
+    properties.minUniformBufferOffsetAlignment = deviceProps.limits.minUniformBufferOffsetAlignment;
 }
 
 void VulkanDevice::Init(const std::shared_ptr<VulkanRenderingContext>& context)
