@@ -15,7 +15,7 @@ Renderer::Renderer()
     commandBuffer = Device::Get()->CreateCommandBuffer(descriptor);
 }
 
-void Renderer::BeginFrame(const std::shared_ptr<Camera>& camera)
+void Renderer::BeginFrame()
 {
     RendererCommand::BeginFrame(commandBuffer, pipeline);
 }

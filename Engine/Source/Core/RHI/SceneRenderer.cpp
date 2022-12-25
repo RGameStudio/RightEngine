@@ -363,16 +363,17 @@ void SceneRenderer::SubmitMesh(const std::shared_ptr<Mesh>& mesh, const std::sha
     drawList.emplace_back(dc);
 }
 
-void SceneRenderer::BeginScene(const std::shared_ptr<Camera>& camera,
+void SceneRenderer::BeginScene(const CameraData& cameraData,
                                const std::shared_ptr<EnvironmentContext>& environment,
                                const std::vector<LightData>& lights,
                                const SceneRendererSettings& rendererSettings)
 {
     R_CORE_ASSERT(lights.size() < 30, "");
-    cameraDataUB.position = glm::vec4(camera->GetPosition(), 1.0);
-    auto projection = camera->GetProjectionMatrix();
+    camera = cameraData;
+    cameraDataUB.position = glm::vec4(camera.position, 1.0);
+    auto projection = camera.projection;
     projection[1][1] *= -1;
-    cameraDataUB.viewProjection = projection * camera->GetViewMatrix();
+    cameraDataUB.viewProjection = projection * camera.view;
 
     lightDataUB.lightsAmount = lights.size();
     memcpy(&lightDataUB.light, lights.data(), lights.size());
@@ -397,7 +398,7 @@ void SceneRenderer::EndScene()
 void SceneRenderer::PBRPass()
 {
     renderer.SetPipeline(pbrPipeline);
-    renderer.BeginFrame(nullptr);
+    renderer.BeginFrame();
     std::vector<std::shared_ptr<RendererState>> rendererStates(512);
 
     auto& transformBuffer = uniformBufferSet->Get(0);
@@ -444,15 +445,14 @@ void SceneRenderer::PBRPass()
 void SceneRenderer::SkyboxPass()
 {
     renderer.SetPipeline(skyboxPipeline);
-    renderer.BeginFrame(nullptr);
+    renderer.BeginFrame();
 
     auto& cameraBuffer = uniformBufferSet->Get(1);
-    const auto& camera = scene->GetCamera();
 
     UBCameraData skyboxCameraData{};
-    auto projection = camera->GetProjectionMatrix();
+    auto projection = camera.projection;
     projection[1][1] *= -1;
-    skyboxCameraData.viewProjection = projection * glm::mat4(glm::mat3(camera->GetViewMatrix()));
+    skyboxCameraData.viewProjection = projection * glm::mat4(glm::mat3(camera.view));
     cameraBuffer->SetData(&skyboxCameraData, sizeof(UBCameraData));
 
     auto rs = RendererCommand::CreateRendererState();
@@ -468,7 +468,7 @@ void SceneRenderer::SkyboxPass()
 void SceneRenderer::PostprocessPass()
 {
     renderer.SetPipeline(postprocessPipeline);
-    renderer.BeginFrame(nullptr);
+    renderer.BeginFrame();
 
     auto& settingsBuffer = uniformBufferSet->Get(12);
 
@@ -485,7 +485,7 @@ void SceneRenderer::PostprocessPass()
 void SceneRenderer::UIPass()
 {
     renderer.SetPipeline(uiPipeline);
-    renderer.BeginFrame(nullptr);
+    renderer.BeginFrame();
     R_CORE_ASSERT(uiPassCallback, "");
     uiPassCallback(renderer.GetCmd());
     renderer.EndFrame();
@@ -494,7 +494,7 @@ void SceneRenderer::UIPass()
 void SceneRenderer::Present()
 {
     renderer.SetPipeline(presentPipeline);
-    renderer.BeginFrame(nullptr);
+    renderer.BeginFrame();
     renderer.EndFrame();
 }
 

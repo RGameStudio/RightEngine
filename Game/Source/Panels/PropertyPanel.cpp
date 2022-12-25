@@ -226,6 +226,7 @@ void PropertyPanel::OnImGuiRender()
         if (ImGui::BeginPopup("AddComponent"))
         {
             DisplayAddComponentEntry<MeshComponent>("Mesh");
+            DisplayAddComponentEntry<CameraComponent>("Camera");
 
             ImGui::EndPopup();
         }
@@ -240,7 +241,6 @@ void PropertyPanel::OnImGuiRender()
             //TODO: Change name only if buf was changed
             component.name = std::string(buf);
             ImGui::Separator();
-            ImGui::LabelText("Entity ID", "%d", component.id);
             ImGui::Separator();
             ImGui::LabelText("GUID", "%s", component.guid.str().c_str());
         });
@@ -251,7 +251,10 @@ void PropertyPanel::OnImGuiRender()
             DrawVec3Control("Position", position);
             auto rotation = glm::degrees(component.GetRotation());
             DrawVec3Control("Rotation", rotation);
-            component.SetRotationDegree(rotation);
+            if (rotation != component.GetRotation())
+            {
+                component.SetRotationDegree(rotation);
+            }
             auto& scale = component.GetScale();
             DrawVec3Control("Scale", scale);
         });
@@ -330,6 +333,64 @@ void PropertyPanel::OnImGuiRender()
             }
         });
 
+        DrawComponent<CameraComponent>("Camera", selectedEntity, [this](auto& component)
+        {
+            bool isPrimary = component.IsPrimary();
+            ImGui::Checkbox("Is primary", &isPrimary);
+            component.SetPrimary(isPrimary);
+
+            float speed = component.GetMovementSpeed();
+            ImGui::SliderFloat("Movement speed", &speed, 40.0f, 150.0f);
+            component.SetMovementSpeed(speed);
+
+            float fov = component.GetFOV();
+            ImGui::SliderFloat("FOV", &fov, 30.0f, 100.0f);
+            component.SetFOV(fov);
+
+            float zNear = component.GetNear();
+            ImGui::SliderFloat("Z Near", &zNear, 0.1f, 1.0f);
+            component.SetNear(zNear);
+
+            float zFar = component.GetFar();
+            ImGui::SliderFloat("Z Far", &zFar, 10.0f, 1000.0f);
+            component.SetFar(zFar);
+
+            std::array<const char*, 3> aspectRatios = { "16/9", "4/3", "Fit to window" };
+            static const char* currentRatio = aspectRatios[2];
+            if (ImGui::BeginCombo("Aspect ratio", currentRatio))
+            {
+                for (int i = 0; i < aspectRatios.size(); i++)
+                {
+                    bool isSelected = (currentRatio == aspectRatios[i]);
+                    if (ImGui::Selectable(aspectRatios[i], isSelected))
+                    {
+                        currentRatio = aspectRatios[i];
+                    }
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            if (currentRatio)
+            {
+                float newAspectRatio;
+                if (std::strcmp(currentRatio, aspectRatios[0]) == 0)
+                {
+                    newAspectRatio = 16.0f / 9.0f;
+                }
+                if (std::strcmp(currentRatio, aspectRatios[1]) == 0)
+                {
+                    newAspectRatio = 4.0f / 3.0f;
+                }
+                if (std::strcmp(currentRatio, aspectRatios[2]) == 0)
+                {
+                    newAspectRatio = component.GetAspectRatio();
+                }
+                component.SetAspectRatio(newAspectRatio);
+            }
+        });
     }
     ImGui::End();
 }

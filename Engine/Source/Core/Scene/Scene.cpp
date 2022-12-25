@@ -17,19 +17,7 @@ std::shared_ptr<Scene> Scene::Create()
 
 void RightEngine::Scene::OnUpdate(float deltaTime)
 {
-    camera->OnUpdate(deltaTime);
     UpdateNodeTransformRecursively(rootNode);
-}
-
-void RightEngine::Scene::SetCamera(const std::shared_ptr<Camera>& camera)
-{
-    R_CORE_ASSERT(!this->camera, "Camera was already set!");
-    this->camera = camera;
-}
-
-const std::shared_ptr<Camera>& RightEngine::Scene::GetCamera() const
-{
-    return camera;
 }
 
 const std::shared_ptr<Entity>& Scene::GetRootNode() const
@@ -37,10 +25,17 @@ const std::shared_ptr<Entity>& Scene::GetRootNode() const
     return rootNode;
 }
 
-std::shared_ptr<Entity> Scene::CreateEntity()
+std::shared_ptr<Entity> Scene::CreateEntity(const std::string& name, bool addToRoot)
 {
     std::shared_ptr<Entity> entity = std::make_shared<Entity>(registry.create(), shared_from_this());
     entity->AddComponent<TransformComponent>();
+    entity->AddComponent<TagComponent>(name);
+
+    if (addToRoot)
+    {
+        rootNode->AddChild(entity);
+    }
+
     return entity;
 }
 

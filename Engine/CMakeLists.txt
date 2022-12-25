@@ -13,7 +13,6 @@ set(ENGINE_SRC
         Source/Core/RHI/Renderer.cpp
         Source/Core/Utils/Input.cpp
         Source/Core/Window/GLFWWindow.cpp
-        Source/Core/Scene/Camera.cpp
         Source/Core/Scene/Entity.cpp
         Source/Core/Scene/Scene.cpp
         Source/Core/RHI/Material.cpp
@@ -24,7 +23,6 @@ set(ENGINE_SRC
         Source/Core/RHI/RendererAPI.cpp
         Source/Core/UI/ImGuiLayer.cpp
         Source/Core/UI/ImGuiBuild.cpp
-        Source/Core/Scene/Components/Transform.cpp
         Source/Core/Loaders/TextureLoader.cpp
         Source/Core/RHI/Sampler.cpp
         Source/Core/Utils/String.cpp
@@ -51,7 +49,9 @@ set(ENGINE_SRC
         Source/Core/Utils/Utils.cpp
         Source/Core/Utils/Filesystem.cpp
         Source/Core/Utils/OS/Win32/Win32FilesystemImpl.cpp
-        Source/Core/Scene/Components/Components.cpp Source/Core/RHI/SceneRenderer.cpp Source/Core/RHI/Buffer.cpp)
+        Source/Core/Scene/Components/Components.cpp
+        Source/Core/RHI/SceneRenderer.cpp
+        Source/Core/RHI/Buffer.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

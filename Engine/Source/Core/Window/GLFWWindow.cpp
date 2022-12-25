@@ -2,7 +2,7 @@
 #include "Core.hpp"
 #include "MouseEvent.hpp"
 #include "KeyEvent.hpp"
-#include <vulkan/vulkan.h>
+#include "KeyCodes.hpp"
 
 namespace RightEngine
 {
@@ -31,6 +31,29 @@ namespace RightEngine
 
         glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
         {
+            if (key == R_KEY_UNKNOWN)
+            {
+                switch (action)
+                {
+                    case GLFW_PRESS:
+                    {
+                        R_CORE_WARN("Unknown key press event!");
+                        break;
+                    }
+                    case GLFW_RELEASE:
+                    {
+                        R_CORE_WARN("Unknown key release event!");
+                        break;
+                    }
+                    case GLFW_REPEAT:
+                    {
+                        R_CORE_WARN("Unknown key repeat event!");
+                        break;
+                    }
+                }
+                return;
+            }
+
             switch (action)
             {
                 case GLFW_PRESS:

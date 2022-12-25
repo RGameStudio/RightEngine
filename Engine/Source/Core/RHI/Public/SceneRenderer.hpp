@@ -30,6 +30,13 @@ namespace RightEngine
         int type;
     };
 
+    struct CameraData
+    {
+        glm::vec3 position;
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+
     class SceneRenderer
     {
     public:
@@ -44,7 +51,7 @@ namespace RightEngine
         void SubmitMeshNode(const std::shared_ptr<MeshNode>& meshNode, const std::shared_ptr<Material>& material, const glm::mat4& transform);
         void SubmitMesh(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material, const glm::mat4& transform);
 
-        void BeginScene(const std::shared_ptr<Camera>& camera,
+        void BeginScene(const CameraData& cameraData,
                         const std::shared_ptr<EnvironmentContext>& environment,
                         const std::vector<LightData>& lights,
                         const SceneRendererSettings& rendererSettings = {});
@@ -124,5 +131,6 @@ namespace RightEngine
         // Per frame data
         std::vector<DrawCommand> drawList;
         EnvironmentContext sceneEnvironment;
+        CameraData camera;
     };
 }

@@ -9,14 +9,13 @@ namespace RightEngine
 {
     struct TagComponent
     {
-        TagComponent(const std::string& name, uint32_t id = 0) : name(name), id(id)
+        TagComponent(const std::string& name) : name(name)
         {}
 
         TagComponent()
         {}
 
-        std::string name{"Entity"};
-        uint32_t id;
+        std::string name;
         xg::Guid guid{xg::newGuid()};
     };
 
@@ -123,5 +122,80 @@ namespace RightEngine
         SkyboxType type;
         AssetHandle environmentHandle;
         bool isDirty{true};
+    };
+
+    class CameraComponent
+    {
+    public:
+        CameraComponent(const glm::vec3& worldUp);
+        CameraComponent();
+        ~CameraComponent();
+
+        void OnUpdate(float dt);
+        // Rotation must be in degrees
+        glm::vec3 Rotate(float x, float y, const glm::vec3& oldRotation);
+        glm::vec3 Rotate(const glm::vec3& newRotation);
+        glm::vec3 Move(int keycode, const glm::vec3& oldPosition);
+
+        glm::mat4 GetViewMatrix(const glm::vec3& position) const;
+        glm::mat4 GetProjectionMatrix() const;
+
+        float GetMovementSpeed() const
+        { return movementSpeed; }
+        void SetMovementSpeed(float aSpeed)
+        { movementSpeed = aSpeed; }
+
+        inline float GetFOV(bool asRadians = false) const
+        {
+            if (asRadians)
+            {
+                return glm::radians(fov);
+            }
+            return fov;
+        }
+        inline float GetAspectRatio() const
+        { return aspectRatio; }
+        inline float GetNear() const
+        { return zNear; }
+        inline float GetFar() const
+        { return zFar; }
+
+        void SetFOV(float aFOV)
+        { fov = aFOV; }
+        void SetAspectRatio(float aAspectRatio)
+        { aspectRatio = aAspectRatio; }
+        void SetNear(float aNear)
+        { zNear = aNear; }
+        void SetFar(float aFar)
+        { zFar = aFar; }
+        void SetActive(bool aIsActive)
+        { isActive = aIsActive; }
+        void SetPrimary(bool aIsPrimary)
+        { isPrimary = aIsPrimary; }
+
+        bool IsActive() const
+        { return isActive; }
+        bool IsPrimary() const
+        { return isPrimary; }
+
+    private:
+        void UpdateVectors(const glm::vec3& rotation);
+
+        glm::vec3 front;
+        glm::vec3 worldUp;
+        glm::vec3 up;
+        float zNear{ 0.1f };
+        float zFar{ 500.0f };
+        float aspectRatio{ 16.0f / 9.0f };
+        float fov{ 50.0f };
+        float movementSpeed{ 40.0f };
+        float sensitivity{ 0.25f };
+        float actualSpeed{ 1.0f };
+        float prevXMousePos{ -1 };
+        float prevYMousePos{ -1 };
+        float positionDelta{ 0.0f };
+
+        bool isActive{ false };
+        bool isPrimary{ false };
     };
 }

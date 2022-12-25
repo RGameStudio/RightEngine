@@ -108,6 +108,5 @@ bool RightEngine::Input::OnEvent(const Event& inputEvent)
         currentMouseOffset = event.GetOffset();
     }
 
-
     return true;
 }

@@ -11,6 +11,7 @@
 #include "AssetManager.hpp"
 #include "KeyCodes.hpp"
 #include "SceneRenderer.hpp"
+#include "MouseEvent.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -38,11 +39,9 @@ namespace
 
     struct LayerSceneData
     {
-        std::shared_ptr<Camera> camera;
         std::shared_ptr<Entity> skyboxCube;
         ImVec2 viewportSize{ width, height };
         ImVec2 newViewportSize{ 0, 0 };
-        uint32_t newEntityId{ 1 };
         PropertyPanel propertyPanel;
         MeshLoader meshLoader;
         AssetHandle backpackHandle;
@@ -59,21 +58,7 @@ namespace
         ImGuizmo::OPERATION gizmoType{ ImGuizmo::TRANSLATE };
     };
 
-    static LayerSceneData sceneData;
-
-    void AddTag(std::shared_ptr<Entity>& entity, const std::string& name = "")
-    {
-        TagComponent tag;
-        tag.id = sceneData.newEntityId++;
-        if (name.empty())
-        {
-            tag.name = "Entity" + std::to_string(tag.id);
-        } else
-        {
-            tag.name = name;
-        }
-        entity->AddComponent<TagComponent>(tag);
-    }
+    LayerSceneData sceneData;
 
     std::shared_ptr<Entity> CreateTestSceneNode(const std::shared_ptr<Scene>& scene,
                                                 const AssetHandle* meshHandle = nullptr,
@@ -86,7 +71,6 @@ namespace
             meshComponent.SetMesh(*meshHandle);
             node->AddComponent<MeshComponent>(meshComponent);
         }
-        AddTag(node);
         return node;
     }
 
@@ -146,16 +130,18 @@ void SandboxLayer::OnAttach()
 
     auto& assetManager = AssetManager::Get();
     sceneData.backpackHandle = assetManager.GetLoader<MeshLoader>()->Load("/Assets/Models/backpack.obj");
-
-    sceneData.camera = std::make_shared<Camera>(glm::vec3(0, 0, -5),
-                                                glm::vec3(0, 1, 0));
     scene = Scene::Create();
 
-    std::shared_ptr<Entity> gun = CreateTestSceneNode(scene, &sceneData.backpackHandle);
-    gun->GetComponent<TagComponent>().name = "Gun";
+    auto editorCamera = scene->CreateEntity("Editor camera", true);
+    CameraComponent camera;
+    camera.SetActive(true);
+    camera.SetPrimary(true);
+    editorCamera->AddComponent<CameraComponent>(camera);
 
-    auto& gunTransform = gun->GetComponent<TransformComponent>();
-    auto& textureData = gun->GetComponent<MeshComponent>().GetMaterial()->textureData;
+    std::shared_ptr<Entity> backpack = CreateTestSceneNode(scene, &sceneData.backpackHandle);
+    backpack->GetComponent<TagComponent>().name = "Backpack";
+    auto& gunTransform = backpack->GetComponent<TransformComponent>();
+    auto& textureData = backpack->GetComponent<MeshComponent>().GetMaterial()->textureData;
 
     const auto& textureLoader = assetManager.GetLoader<TextureLoader>();
     textureLoader->LoadAsync(textureData.albedo, "/Assets/Textures/backpack_albedo.jpg");
@@ -165,16 +151,14 @@ void SandboxLayer::OnAttach()
     textureLoader->LoadAsync(textureData.ao, "/Assets/Textures/backpack_ao.jpg");
     textureLoader->WaitAllLoaders();
 
-    scene->SetCamera(sceneData.camera);
-    scene->GetRootNode()->AddChild(gun);
+    scene->GetRootNode()->AddChild(backpack);
 
     SamplerDescriptor samplerDesc{};
     const auto sampler = Device::Get()->CreateSampler(samplerDesc);
 
     sceneData.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_circus.hdr");
 
-    sceneData.skyboxCube = scene->CreateEntity();
-    sceneData.skyboxCube->AddComponent<TagComponent>(TagComponent("Skybox", sceneData.newEntityId++));
+    sceneData.skyboxCube = scene->CreateEntity("Skybox", true);
     auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
     skyboxComponent.environmentHandle = sceneData.environmentHandle;
     scene->GetRootNode()->AddChild(sceneData.skyboxCube);
@@ -204,12 +188,10 @@ void SandboxLayer::OnAttach()
     int windowW, windowH;
     glfwGetFramebufferSize(window, &windowW, &windowH);
 
-
     EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(SandboxLayer::OnEvent));
 
     sceneData.imGuiLayer = std::make_shared<ImGuiLayer>(sceneData.renderer->GetPass(PassType::UI));
     Application::Get().PushOverlay(sceneData.imGuiLayer);
-    sceneData.camera->SetActive(false);
     sceneData.renderer->SetUIPassCallback([&](const std::shared_ptr<CommandBuffer>& cmd)
                                           {
                                               sceneData.imGuiLayer->Begin();
@@ -226,29 +208,44 @@ void SandboxLayer::OnUpdate(float ts)
         sceneData.newViewportSize = { 0, 0 };
     }
 
-    sceneData.camera->SetActive(Input::IsMouseButtonDown(MouseButton::Right) && sceneData.isViewportHovered);
+    scene->OnUpdate(ts);
 
-    if (sceneData.camera->IsActive())
+    CameraData cameraData{};
+    for (const auto eCamera : scene->GetRegistry().view<CameraComponent>())
     {
-        if (Input::IsKeyDown(R_KEY_W))
+        auto& camera = scene->GetRegistry().get<CameraComponent>(eCamera);
+        auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
+        camera.Rotate(glm::degrees(transform.GetRotation()));
+        camera.OnUpdate(ts);
+        if (camera.IsPrimary())
         {
-            sceneData.camera->Move(R_KEY_W);
-        }
-        if (Input::IsKeyDown(R_KEY_S))
-        {
-            sceneData.camera->Move(R_KEY_S);
-        }
-        if (Input::IsKeyDown(R_KEY_A))
-        {
-            sceneData.camera->Move(R_KEY_A);
-        }
-        if (Input::IsKeyDown(R_KEY_D))
-        {
-            sceneData.camera->Move(R_KEY_D);
+            camera.SetActive(Input::IsMouseButtonDown(MouseButton::Right) && sceneData.isViewportHovered);
+            if (camera.IsActive())
+            {
+                glm::vec3 position = transform.GetLocalPosition();
+                if (Input::IsKeyDown(R_KEY_W))
+                {
+                    position = camera.Move(R_KEY_W, position);
+                }
+                if (Input::IsKeyDown(R_KEY_S))
+                {
+                    position = camera.Move(R_KEY_S, position);
+                }
+                if (Input::IsKeyDown(R_KEY_A))
+                {
+                    position = camera.Move(R_KEY_A, position);
+                }
+                if (Input::IsKeyDown(R_KEY_D))
+                {
+                    position = camera.Move(R_KEY_D, position);
+                }
+                transform.SetPosition(position);
+            }
+            cameraData.position = transform.GetWorldPosition();
+            cameraData.view = camera.GetViewMatrix(cameraData.position);
+            cameraData.projection = camera.GetProjectionMatrix();
         }
     }
-
-    scene->OnUpdate(ts);
 
     std::vector<LightData> lightData;
     for (const auto& entityID: scene->GetRegistry().view<LightComponent>())
@@ -265,7 +262,7 @@ void SandboxLayer::OnUpdate(float ts)
 
     auto& assetManager = AssetManager::Get();
     sceneData.renderer->SetScene(scene);
-    sceneData.renderer->BeginScene(scene->GetCamera(),
+    sceneData.renderer->BeginScene(cameraData,
                                    assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle),
                                    lightData,
                                    sceneData.rendererSettings);
@@ -342,77 +339,7 @@ void SandboxLayer::OnImGuiRender()
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Window"))
-        {
-            if (ImGui::MenuItem("Camera options"))
-            {
-                sceneData.uiState.isCameraOptionsOpen = true;
-            }
-            ImGui::EndMenu();
-        }
-
         ImGui::EndMenuBar();
-    }
-
-    if (sceneData.uiState.isCameraOptionsOpen)
-    {
-        if (ImGui::Begin("Camera Options", &sceneData.uiState.isCameraOptionsOpen))
-        {
-            auto& camera = sceneData.camera;
-
-            float speed = camera->GetMovementSpeed();
-            ImGui::SliderFloat("Movement speed", &speed, 40.0f, 150.0f);
-            camera->SetMovementSpeed(speed);
-
-            float fov = camera->GetFOV();
-            ImGui::SliderFloat("FOV", &fov, 30.0f, 100.0f);
-            camera->SetFOV(fov);
-
-            float zNear = camera->GetNear();
-            ImGui::SliderFloat("Z Near", &zNear, 0.1f, 1.0f);
-            camera->SetNear(zNear);
-
-            float zFar = camera->GetFar();
-            ImGui::SliderFloat("Z Far", &zFar, 10.0f, 1000.0f);
-            camera->SetFar(zFar);
-
-            std::array<const char*, 3> aspectRatios = { "16/9", "4/3", "Fit to window" };
-            static const char* currentRatio = aspectRatios[2];
-            if (ImGui::BeginCombo("Aspect ratio", currentRatio))
-            {
-                for (int i = 0; i < aspectRatios.size(); i++)
-                {
-                    bool isSelected = (currentRatio == aspectRatios[i]);
-                    if (ImGui::Selectable(aspectRatios[i], isSelected))
-                    {
-                        currentRatio = aspectRatios[i];
-                    }
-                    if (isSelected)
-                    {
-                        ImGui::SetItemDefaultFocus();
-                    }
-                }
-                ImGui::EndCombo();
-            }
-            if (currentRatio)
-            {
-                float newAspectRatio;
-                if (std::strcmp(currentRatio, aspectRatios[0]) == 0)
-                {
-                    newAspectRatio = 16.0f / 9.0f;
-                }
-                if (std::strcmp(currentRatio, aspectRatios[1]) == 0)
-                {
-                    newAspectRatio = 4.0f / 3.0f;
-                }
-                if (std::strcmp(currentRatio, aspectRatios[2]) == 0)
-                {
-                    newAspectRatio = camera->GetAspectRatio();
-                }
-                camera->SetAspectRatio(newAspectRatio);
-            }
-        }
-        ImGui::End();
     }
 
     ImGui::Begin("Scene Hierarchy");
@@ -429,9 +356,7 @@ void SandboxLayer::OnImGuiRender()
     {
         if (ImGui::MenuItem("Create Empty Entity"))
         {
-            auto entity = scene->CreateEntity();
-            entity->AddComponent<TagComponent>();
-            scene->GetRootNode()->AddChild(entity);
+            auto entity = scene->CreateEntity("New entity", true);
         }
 
         ImGui::EndPopup();
@@ -454,7 +379,7 @@ void SandboxLayer::OnImGuiRender()
         sceneData.viewportSize = viewportSize;
     }
     ImGuiLayer::Image(attachment, sceneData.viewportSize);
-    sceneData.camera->SetAspectRatio(viewportSize.x / viewportSize.y);
+//    sceneData.camera->SetAspectRatio(viewportSize.x / viewportSize.y);
 
     if (sceneData.selectedEntity)
     {
@@ -475,8 +400,22 @@ void SandboxLayer::OnImGuiRender()
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
-        glm::mat4 cameraView = sceneData.camera->GetViewMatrix();
-        glm::mat4 cameraProjection = sceneData.camera->GetProjectionMatrix();
+        CameraComponent camera{};
+        glm::vec3 cameraPos;
+        for (const auto& eCamera : scene->GetRegistry().view<CameraComponent>())
+        {
+            auto& cameraComp = scene->GetRegistry().get<CameraComponent>(eCamera);
+            auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
+            if (cameraComp.IsPrimary())
+            {
+                camera = cameraComp;
+                cameraPos = transform.GetWorldPosition();
+                break;
+            }
+        }
+
+        glm::mat4 cameraView = camera.GetViewMatrix(cameraPos);
+        glm::mat4 cameraProjection = camera.GetProjectionMatrix();
 
         auto& entityTransformComponent = sceneData.selectedEntity->GetComponent<TransformComponent>();
         glm::mat4 entityTransform = entityTransformComponent.GetWorldTransformMatrix();
@@ -513,7 +452,17 @@ bool SandboxLayer::OnEvent(const Event& event)
     if (event.GetType() == MouseMovedEvent::descriptor)
     {
         MouseMovedEvent mouseMovedEvent = static_cast<const MouseMovedEvent&>(event);
-        sceneData.camera->Rotate(mouseMovedEvent.GetX(), mouseMovedEvent.GetY());
+        for (const auto& eCamera : scene->GetRegistry().view<CameraComponent>())
+        {
+            auto& camera = scene->GetRegistry().get<CameraComponent>(eCamera);
+            auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
+            if (camera.IsPrimary())
+            {
+                auto rotation = camera.Rotate(mouseMovedEvent.GetX(), mouseMovedEvent.GetY(), glm::degrees(transform.GetRotation()));
+                transform.SetRotationRadians(glm::radians(rotation));
+                break;
+            }
+        }
         return true;
     }
 

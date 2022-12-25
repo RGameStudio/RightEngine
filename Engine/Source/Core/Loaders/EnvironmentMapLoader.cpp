@@ -2,7 +2,6 @@
 #include "TextureLoader.hpp"
 #include "MeshBuilder.hpp"
 #include "Shader.hpp"
-#include "Camera.hpp"
 #include "Renderer.hpp"
 #include "RendererCommand.hpp"
 #include "String.hpp"
@@ -241,7 +240,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
         memcpy(ptr, &camera, sizeof(Camera));
         buffer->UnMap();
         rendererState->OnUpdate(pipeline);
-        renderer.BeginFrame(nullptr);
+        renderer.BeginFrame();
         renderer.EncodeState(rendererState);
         renderer.Draw(vertexBuffer);
         renderer.EndFrame();
@@ -356,7 +355,7 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
         memcpy(ptr, &camera, sizeof(Camera));
         buffer->UnMap();
         rendererState->OnUpdate(pipeline);
-        renderer.BeginFrame(nullptr);
+        renderer.BeginFrame();
         renderer.EncodeState(rendererState);
         renderer.Draw(vertexBuffer);
         renderer.EndFrame();
@@ -489,7 +488,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
             buffer->UnMap();
             
             rendererState->OnUpdate(pipeline);
-            renderer.BeginFrame(nullptr);
+            renderer.BeginFrame();
             renderer.EncodeState(rendererState);
             renderer.Draw(vertexBuffer);
             renderer.EndFrame();
@@ -574,7 +573,7 @@ void EnvironmentMapLoader::ComputeLUT()
     const auto vertexBuffer = Device::Get()->CreateBuffer(bufferDescriptor, quadVertexData);
     
     rendererState->OnUpdate(pipeline);
-    renderer.BeginFrame(nullptr);
+    renderer.BeginFrame();
     renderer.EncodeState(rendererState);
     renderer.Draw(vertexBuffer);
     renderer.EndFrame();

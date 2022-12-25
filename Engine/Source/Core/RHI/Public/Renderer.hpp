@@ -3,7 +3,6 @@
 #include "Window.hpp"
 #include "Components.hpp"
 #include "Config.hpp"
-#include "Camera.hpp"
 #include "Shader.hpp"
 #include "Scene.hpp"
 #include "Types.hpp"
@@ -41,7 +40,7 @@ namespace RightEngine
     public:
         Renderer();
 
-        void BeginFrame(const std::shared_ptr<Camera>& camera);
+        void BeginFrame();
         void EndFrame();
 
         void Draw(const std::shared_ptr<Buffer>& vertexBuffer, const std::shared_ptr<Buffer>& indexBuffer = nullptr);

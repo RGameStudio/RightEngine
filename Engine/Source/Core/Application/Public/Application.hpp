@@ -2,7 +2,6 @@
 
 #include "Shader.hpp"
 #include "Window.hpp"
-#include "Camera.hpp"
 #include "Scene.hpp"
 #include "Layer.hpp"
 #include "ImGuiLayer.hpp"
