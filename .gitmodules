@@ -34,3 +34,6 @@
 [submodule "Lib/ImGuizmo"]
 	path = Lib/ImGuizmo
 	url = git@github.com:rbetik12/ImGuizmo.git
+[submodule "Lib/yaml-cpp"]
+	path = Lib/yaml-cpp
+	url = git@github.com:jbeder/yaml-cpp.git

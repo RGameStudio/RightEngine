@@ -247,15 +247,15 @@ void PropertyPanel::OnImGuiRender()
 
         DrawComponent<TransformComponent>("Transform", selectedEntity, [](auto& component)
         {
-            auto& position = component.GetLocalPosition();
+            auto& position = component.position;
             DrawVec3Control("Position", position);
-            auto rotation = glm::degrees(component.GetRotation());
+            auto rotation = glm::degrees(component.rotation);
             DrawVec3Control("Rotation", rotation);
-            if (rotation != component.GetRotation())
+            if (rotation != component.rotation)
             {
                 component.SetRotationDegree(rotation);
             }
-            auto& scale = component.GetScale();
+            auto& scale = component.scale;
             DrawVec3Control("Scale", scale);
         });
 

@@ -20,32 +20,17 @@ namespace RightEngine
     };
 
     // TODO: Add dirty flag, so we can recalculate transform only when needed
-    class TransformComponent
+    struct TransformComponent
     {
     public:
         inline const glm::vec3 GetWorldPosition() const
         { return transformMatrix[3]; }
-
-        inline glm::vec3& GetLocalPosition()
-        { return position; }
-
-        void SetPosition(const glm::vec3& newPosition)
-        { position = newPosition; }
-
-        glm::vec3& GetRotation()
-        { return rotation; }
 
         void SetRotationDegree(const glm::vec3& newRotation)
         { rotation = glm::radians(newRotation); }
 
         void SetRotationRadians(const glm::vec3& newRotation)
         { rotation = newRotation; }
-
-        glm::vec3& GetScale()
-        { return scale; }
-
-        void SetScale(const glm::vec3& newScale)
-        { scale = newScale; }
 
         glm::mat4 GetLocalTransformMatrix() const;
 
@@ -55,7 +40,6 @@ namespace RightEngine
 
         void RecalculateTransform();
 
-    private:
         glm::vec3 position{0.0f, 0.0f, 0.0f};
         // In radians
         glm::vec3 rotation{0.0f, 0.0f, 0.0f};

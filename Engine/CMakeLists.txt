@@ -51,7 +51,7 @@ set(ENGINE_SRC
         Source/Core/Utils/OS/Win32/Win32FilesystemImpl.cpp
         Source/Core/Scene/Components/Components.cpp
         Source/Core/RHI/SceneRenderer.cpp
-        Source/Core/RHI/Buffer.cpp)
+        Source/Core/RHI/Buffer.cpp Source/Core/Scene/SceneSerializer.cpp)
 
 add_library(Engine STATIC ${ENGINE_SRC})
 target_compile_definitions(Engine PUBLIC OPENGL_MAJOR_VERSION=4 OPENGL_MINOR_VERSION=5)

@@ -29,7 +29,9 @@ target_link_libraries(Game
         VulkanMemoryAllocator
         crossguid
         TBB::tbb
-        ImGuizmo)
+        ImGuizmo
+        yaml-cpp
+        )
 
 add_custom_target(CopyShaderFilesToGame ALL DEPENDS ${GLSL_ROOT_DIR})
 

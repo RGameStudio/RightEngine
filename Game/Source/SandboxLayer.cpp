@@ -12,6 +12,7 @@
 #include "KeyCodes.hpp"
 #include "SceneRenderer.hpp"
 #include "MouseEvent.hpp"
+#include "SceneSerializer.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -171,7 +172,7 @@ void SandboxLayer::OnAttach()
     lightComponent.intensity = 500.0f;
     lightComponent.color = glm::vec3(1.0f, 1.0f, 1.0f);
     light->AddComponent<LightComponent>(lightComponent);
-    light->GetComponent<TransformComponent>().SetPosition(glm::vec3(0, 10, -15));
+    light->GetComponent<TransformComponent>().position = glm::vec3(0, 10, -15);
 
     auto light1 = CreateTestSceneNode(scene, nullptr, GeometryType::NONE);
     light1->GetComponent<TagComponent>().name = "Light1";
@@ -179,7 +180,7 @@ void SandboxLayer::OnAttach()
     lightComponent1.intensity = 500.0f;
     lightComponent1.color = glm::vec3(1.0f, 1.0f, 1.0f);
     light1->AddComponent<LightComponent>(lightComponent);
-    light1->GetComponent<TransformComponent>().SetPosition(glm::vec3(0, 10, 15));
+    light1->GetComponent<TransformComponent>().position = glm::vec3(0, 10, 15);
 
     scene->GetRootNode()->AddChild(light);
     scene->GetRootNode()->AddChild(light1);
@@ -198,6 +199,9 @@ void SandboxLayer::OnAttach()
                                               OnImGuiRender();
                                               sceneData.imGuiLayer->End(cmd);
                                           });
+
+    SceneSerializer serializer(scene);
+    serializer.Serialize("/scene.yaml");
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -215,14 +219,14 @@ void SandboxLayer::OnUpdate(float ts)
     {
         auto& camera = scene->GetRegistry().get<CameraComponent>(eCamera);
         auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
-        camera.Rotate(glm::degrees(transform.GetRotation()));
+        camera.Rotate(glm::degrees(transform.rotation));
         camera.OnUpdate(ts);
         if (camera.IsPrimary())
         {
             camera.SetActive(Input::IsMouseButtonDown(MouseButton::Right) && sceneData.isViewportHovered);
             if (camera.IsActive())
             {
-                glm::vec3 position = transform.GetLocalPosition();
+                glm::vec3 position = transform.position;
                 if (Input::IsKeyDown(R_KEY_W))
                 {
                     position = camera.Move(R_KEY_W, position);
@@ -239,7 +243,7 @@ void SandboxLayer::OnUpdate(float ts)
                 {
                     position = camera.Move(R_KEY_D, position);
                 }
-                transform.SetPosition(position);
+                transform.position = position;
             }
             cameraData.position = transform.GetWorldPosition();
             cameraData.view = camera.GetViewMatrix(cameraData.position);
@@ -429,10 +433,10 @@ void SandboxLayer::OnImGuiRender()
             glm::vec3 position, rotation, scale;
             Utils::DecomposeTransform(entityTransform, position, rotation, scale);
 
-            auto deltaRotation = rotation - entityTransformComponent.GetRotation();
-            entityTransformComponent.SetPosition(position);
-            entityTransformComponent.SetRotationRadians(entityTransformComponent.GetRotation() + deltaRotation);
-            entityTransformComponent.SetScale(scale);
+            auto deltaRotation = rotation - entityTransformComponent.rotation;
+            entityTransformComponent.position = position;
+            entityTransformComponent.SetRotationRadians(entityTransformComponent.rotation + deltaRotation);
+            entityTransformComponent.scale = scale;
         }
     }
 
@@ -458,7 +462,7 @@ bool SandboxLayer::OnEvent(const Event& event)
             auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
             if (camera.IsPrimary())
             {
-                auto rotation = camera.Rotate(mouseMovedEvent.GetX(), mouseMovedEvent.GetY(), glm::degrees(transform.GetRotation()));
+                auto rotation = camera.Rotate(mouseMovedEvent.GetX(), mouseMovedEvent.GetY(), glm::degrees(transform.rotation));
                 transform.SetRotationRadians(glm::radians(rotation));
                 break;
             }
