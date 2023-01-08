@@ -11,7 +11,8 @@ namespace RightEngine
         IMAGE,
         MESH,
         ENVIRONMENT_MAP,
-        SHADER
+        SHADER,
+        MATERIAL
     };
 
     class AssetBase

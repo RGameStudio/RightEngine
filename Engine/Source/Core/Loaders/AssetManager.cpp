@@ -1,4 +1,5 @@
 #include "AssetManager.hpp"
+#include "MaterialLoader.hpp"
 
 using namespace RightEngine;
 
@@ -19,4 +20,17 @@ const AssetHandle& AssetManager::GetDefaultTexture() const
     }
 
     return defaultTexture;
+}
+
+const AssetHandle& AssetManager::GetDefaultMaterial() const
+{
+    static bool wasLoaded = false;
+
+    if (!wasLoaded)
+    {
+        defaultMaterial = GetLoader<MaterialLoader>()->Load();
+        wasLoaded = true;
+    }
+
+    return defaultMaterial;
 }

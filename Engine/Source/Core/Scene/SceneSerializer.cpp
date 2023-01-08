@@ -179,17 +179,24 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
     output << YAML::Key << "Entity";
     output << YAML::BeginSeq;
 
-    SerializeComponent<TagComponent>(output, entity, "TagComponent", [&](const auto& component)
+    SerializeComponent<TagComponent>(output, entity, "Tag component", [&](const auto& component)
     {
         SerializeKeyValue(output, "GUID", component.guid);
         SerializeKeyValue(output, "Name", component.name);
     });
 
-    SerializeComponent<TransformComponent>(output, entity, "TransformComponent", [&](const auto& component)
+    SerializeComponent<TransformComponent>(output, entity, "Transform component", [&](const auto& component)
     {
         SerializeKeyValue(output, "Position", component.position);
         SerializeKeyValue(output, "Rotation", component.rotation);
         SerializeKeyValue(output, "Scale", component.scale);
+    });
+
+    SerializeComponent<MeshComponent>(output, entity, "Mesh component", [&](const auto& component)
+    {
+        SerializeKeyValue(output, "Mesh GUID", component.GetMesh().guid);
+        SerializeKeyValue(output, "Material GUID", component.GetMaterial().guid);
+        SerializeKeyValue(output, "Is visible", component.IsVisible());
     });
 
     output << YAML::EndSeq;

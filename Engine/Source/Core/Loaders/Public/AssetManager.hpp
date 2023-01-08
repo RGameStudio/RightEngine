@@ -76,6 +76,7 @@ namespace RightEngine
         }
 
         const AssetHandle& GetDefaultTexture() const;
+        const AssetHandle& GetDefaultMaterial() const;
 
         AssetManager(const AssetManager& other) = delete;
         AssetManager& operator=(const AssetManager& other) = delete;
@@ -88,6 +89,7 @@ namespace RightEngine
         std::mutex assetCacheMutex;
 
         mutable AssetHandle defaultTexture;
+        mutable AssetHandle defaultMaterial;
 
         AssetManager() = default;
         ~AssetManager() = default;

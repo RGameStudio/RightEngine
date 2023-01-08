@@ -13,6 +13,7 @@
 #include "SceneRenderer.hpp"
 #include "MouseEvent.hpp"
 #include "SceneSerializer.hpp"
+#include "MaterialLoader.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -142,15 +143,19 @@ void SandboxLayer::OnAttach()
     std::shared_ptr<Entity> backpack = CreateTestSceneNode(scene, &sceneData.backpackHandle);
     backpack->GetComponent<TagComponent>().name = "Backpack";
     auto& gunTransform = backpack->GetComponent<TransformComponent>();
-    auto& textureData = backpack->GetComponent<MeshComponent>().GetMaterial()->textureData;
+    auto& backpackMesh = backpack->GetComponent<MeshComponent>();
+    auto backpackMaterialRef = assetManager.GetLoader<MaterialLoader>()->Load();
+    auto backpackMaterial = assetManager.GetAsset<Material>(backpackMaterialRef);
 
     const auto& textureLoader = assetManager.GetLoader<TextureLoader>();
-    textureLoader->LoadAsync(textureData.albedo, "/Assets/Textures/backpack_albedo.jpg");
-    textureLoader->LoadAsync(textureData.normal, "/Assets/Textures/backpack_normal.png");
-    textureLoader->LoadAsync(textureData.roughness, "/Assets/Textures/backpack_roughness.jpg");
-    textureLoader->LoadAsync(textureData.metallic, "/Assets/Textures/backpack_metallic.jpg");
-    textureLoader->LoadAsync(textureData.ao, "/Assets/Textures/backpack_ao.jpg");
+    textureLoader->LoadAsync(backpackMaterial->textureData.albedo, "/Assets/Textures/backpack_albedo.jpg");
+    textureLoader->LoadAsync(backpackMaterial->textureData.normal, "/Assets/Textures/backpack_normal.png");
+    textureLoader->LoadAsync(backpackMaterial->textureData.roughness, "/Assets/Textures/backpack_roughness.jpg");
+    textureLoader->LoadAsync(backpackMaterial->textureData.metallic, "/Assets/Textures/backpack_metallic.jpg");
+    textureLoader->LoadAsync(backpackMaterial->textureData.ao, "/Assets/Textures/backpack_ao.jpg");
     textureLoader->WaitAllLoaders();
+
+    backpackMesh.SetMaterial(backpackMaterialRef);
 
     scene->GetRootNode()->AddChild(backpack);
 
@@ -276,14 +281,14 @@ void SandboxLayer::OnUpdate(float ts)
         const auto& tag = scene->GetRegistry().get<TagComponent>(entity);
         const auto& transform = scene->GetRegistry().get<TransformComponent>(entity);
         const auto& meshComponent = scene->GetRegistry().get<MeshComponent>(entity);
-        const auto& material = meshComponent.GetMaterial();
+        const auto& materialRef = meshComponent.GetMaterial();
         if (!meshComponent.IsVisible())
         {
             continue;
         }
 
         sceneData.renderer->SubmitMeshNode(assetManager.GetAsset<MeshNode>(meshComponent.GetMesh()),
-                                           material,
+                                           assetManager.GetAsset<Material>(materialRef),
                                            transform.GetWorldTransformMatrix());
     }
 

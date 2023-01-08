@@ -318,7 +318,8 @@ void PropertyPanel::OnImGuiRender()
             ImGui::Separator();
             if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
             {
-                auto& material = component.GetMaterial();
+                auto& materialRef = component.GetMaterial();
+                auto material = AssetManager::Get().GetAsset<Material>(materialRef);
                 ImGui::TableNextColumn();
                 DrawMaterialEditorTab("Albedo", true, material->textureData.albedo, textures, component);
                 ImGui::TableNextColumn();

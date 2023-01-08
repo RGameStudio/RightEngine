@@ -1,6 +1,7 @@
 #include "Components.hpp"
 #include "MeshBuilder.hpp"
 #include "KeyCodes.hpp"
+#include "AssetManager.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,7 +13,8 @@ using namespace RightEngine;
 // Mesh-----------------------------------------------------------------------------------------------------------------------------------------------
 MeshComponent::MeshComponent()
 {
-    material = std::make_shared<Material>();
+    auto& assetManager = AssetManager::Get();
+    material = assetManager.GetDefaultMaterial();
     // TODO: Remove that temporary cube mesh creation in favor of proper asset management with content panel
     mesh = MeshBuilder::Cube();
 }

@@ -25,8 +25,10 @@ namespace RightEngine
         AssetHandle ao;
     };
 
-    struct Material
+    struct Material : public AssetBase
     {
+        ASSET_BASE()
+
         TextureData textureData;
         MaterialData materialData;
     };

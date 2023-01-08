@@ -8,6 +8,7 @@
 #include "Surface.hpp"
 #include "AssetManager.hpp"
 #include "Filesystem.hpp"
+#include "MaterialLoader.hpp"
 #include <memory>
 
 namespace RightEngine
@@ -41,6 +42,7 @@ namespace RightEngine
         manager.RegisterLoader<TextureLoader>(std::make_shared<TextureLoader>());
         manager.RegisterLoader<EnvironmentMapLoader>(std::make_shared<EnvironmentMapLoader>());
         manager.RegisterLoader<MeshLoader>(std::make_shared<MeshLoader>());
+        manager.RegisterLoader<MaterialLoader>(std::make_shared<MaterialLoader>());
 
         Filesystem::Init();
 

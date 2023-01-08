@@ -58,10 +58,10 @@ namespace RightEngine
         const bool& IsVisible() const
         { return isVisible; }
 
-        const std::shared_ptr<Material>& GetMaterial() const
+        const AssetHandle& GetMaterial() const
         { return material; }
 
-        void SetMaterial(const std::shared_ptr<Material>& aMaterial)
+        void SetMaterial(const AssetHandle& aMaterial)
         { material = aMaterial; }
 
         const AssetHandle& GetMesh() const
@@ -78,8 +78,7 @@ namespace RightEngine
 
     private:
         AssetHandle mesh;
-        //TODO: Make material a separate asset
-        std::shared_ptr<Material> material;
+        AssetHandle material;
         bool isVisible;
         bool isDirty;
     };
