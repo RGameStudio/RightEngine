@@ -153,7 +153,7 @@ AssetHandle TextureLoader::Load(const std::string& path,
     descriptor.type = options.type;
     auto texture = Device::Get()->CreateTexture(descriptor, data);
     texture->SetSampler(Device::Get()->CreateSampler({}));
-    return manager->CacheAsset(texture, AssetType::IMAGE);
+    return manager->CacheAsset(texture, path, AssetType::IMAGE);
 }
 
 void TextureLoader::LoadAsync(AssetHandle& handle,

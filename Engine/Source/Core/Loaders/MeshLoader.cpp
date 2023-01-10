@@ -80,7 +80,7 @@ AssetHandle MeshLoader::Load(const std::string& aPath)
     auto meshTree = std::make_shared<MeshNode>();
     ProcessNode(scene->mRootNode, scene, meshTree);
 
-    return manager->CacheAsset(meshTree, AssetType::MESH);
+    return manager->CacheAsset(meshTree, aPath, AssetType::MESH);
 }
 
 void MeshLoader::ProcessNode(const aiNode* node, const aiScene* scene, std::shared_ptr<MeshNode>& meshNode)
@@ -257,5 +257,5 @@ AssetHandle MeshLoader::Load(const std::shared_ptr<Buffer>& vertexBuffer,
 
     auto meshNode = std::make_shared<MeshNode>();
     meshNode->meshes.push_back(mesh);
-    return manager->CacheAsset(meshNode, AssetType::MESH);
+    return manager->CacheAsset(meshNode, "", AssetType::MESH);
 }

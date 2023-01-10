@@ -63,7 +63,7 @@ namespace RightEngine
         }
 
         template<class T>
-        AssetHandle CacheAsset(const std::shared_ptr<T>& ptr, AssetType type)
+        AssetHandle CacheAsset(const std::shared_ptr<T>& ptr, std::string_view path, AssetType type)
         {
             std::lock_guard<std::mutex> lock(assetCacheMutex);
             R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
@@ -71,6 +71,7 @@ namespace RightEngine
             R_CORE_ASSERT(basePtr != nullptr, "");
             basePtr->guid = xg::newGuid();
             basePtr->type = type;
+            basePtr->path = path;
             assetCache[basePtr->guid] = basePtr;
             return { basePtr->guid };
         }

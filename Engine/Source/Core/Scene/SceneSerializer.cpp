@@ -1,6 +1,7 @@
 #include "SceneSerializer.hpp"
 #include "Path.hpp"
 #include "Entity.hpp"
+#include "AssetManager.hpp"
 #include <fstream>
 
 using namespace RightEngine;
@@ -123,8 +124,28 @@ namespace YAML
 
 namespace
 {
+    void SerializeList(YAML::Emitter& output, const std::string& listName, std::function<void()> listFn)
+    {
+        output << YAML::BeginMap;
+        output << YAML::Key << listName << YAML::Value << YAML::BeginSeq;
+        listFn();
+        output << YAML::EndSeq;
+        output << YAML::EndMap;
+    }
+
     template<typename T>
-    void SerializeComponent(YAML::Emitter& output, const std::shared_ptr<Entity>& entity, const std::string& componentName, std::function<void(const T&)> componentCallback)
+    void SerializeKeyValue(YAML::Emitter& output, const std::string& key, const T& value)
+    {
+        output << YAML::BeginMap;
+        output << YAML::Key << key << YAML::Value << value;
+        output << YAML::EndMap;
+    }
+
+    template<typename T>
+    void SerializeComponent(YAML::Emitter& output,
+                            const std::shared_ptr<Entity>& entity,
+                            const std::string& componentName,
+                            std::function<void(const T&)> componentCallback)
     {
         if (entity->HasComponent<T>())
         {
@@ -136,11 +157,55 @@ namespace
         }
     }
 
-    template<typename T>
-    void SerializeKeyValue(YAML::Emitter& output, const std::string& key, const T& value)
+    std::string GetAssetTypeString(AssetType type)
     {
+        switch (type)
+        {
+            case AssetType::IMAGE:
+                return "Image";
+            case AssetType::MESH:
+                return "Mesh";
+            case AssetType::ENVIRONMENT_MAP:
+                return "Environment Map";
+            case AssetType::SHADER:
+                return "Shader";
+            case AssetType::MATERIAL:
+                return "Material";
+            default:
+            R_CORE_ASSERT(false, "")
+        }
+    }
+
+    void SerializeAsset(YAML::Emitter& output, const xg::Guid& guid)
+    {
+        const auto assetPtr = AssetManager::Get().GetAsset<AssetBase>({ guid });
+        R_CORE_ASSERT(assetPtr, "");
+
         output << YAML::BeginMap;
-        output << YAML::Key << key << YAML::Value << value;
+        output << YAML::Key << GetAssetTypeString(assetPtr->type) << YAML::Value << YAML::BeginSeq;
+        SerializeKeyValue(output, "GUID", assetPtr->guid);
+        SerializeKeyValue(output, "Path", assetPtr->path);
+        if (assetPtr->type == AssetType::MATERIAL)
+        {
+            const auto materialPtr = AssetManager::Get().GetAsset<Material>({ guid });
+
+            SerializeList(output, "Texture Data", [&]()
+            {
+                SerializeKeyValue(output, "Albedo GUID", materialPtr->textureData.albedo.guid);
+                SerializeKeyValue(output, "Normal GUID", materialPtr->textureData.normal.guid);
+                SerializeKeyValue(output, "Roughness GUID", materialPtr->textureData.roughness.guid);
+                SerializeKeyValue(output, "Metallic GUID", materialPtr->textureData.metallic.guid);
+                SerializeKeyValue(output, "AO GUID", materialPtr->textureData.ao.guid);
+            });
+
+            SerializeList(output, "Material Data", [&]()
+            {
+                SerializeKeyValue(output, "Albedo", materialPtr->materialData.albedo);
+                SerializeKeyValue(output, "Roughness", materialPtr->materialData.roughness);
+                SerializeKeyValue(output, "Metallic", materialPtr->materialData.metallic);
+            });
+        }
+        output << YAML::EndSeq;
         output << YAML::EndMap;
     }
 }
@@ -156,6 +221,9 @@ bool SceneSerializer::Serialize(const std::string& path)
     output << YAML::Key << "Scene" << YAML::Value << "Untitled";
     output << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
     SerializeEntity(output, scene->GetRootNode());
+    output << YAML::EndSeq;
+    output << YAML::Key << "Assets" << YAML::Value << YAML::BeginSeq;
+    SerializeAssets(output);
     output << YAML::EndSeq;
     output << YAML::EndMap;
 
@@ -197,6 +265,8 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
         SerializeKeyValue(output, "Mesh GUID", component.GetMesh().guid);
         SerializeKeyValue(output, "Material GUID", component.GetMaterial().guid);
         SerializeKeyValue(output, "Is visible", component.IsVisible());
+        sceneAssets.insert(component.GetMesh().guid);
+        SaveMaterial(component.GetMaterial());
     });
 
     SerializeComponent<LightComponent>(output, entity, "Light component", [&](const auto& component)
@@ -210,6 +280,7 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
     {
         SerializeKeyValue(output, "Type", static_cast<int>(component.type));
         SerializeKeyValue(output, "Skybox GUID", component.environmentHandle.guid);
+        sceneAssets.insert(component.environmentHandle.guid);
     });
 
     SerializeComponent<CameraComponent>(output, entity, "Camera component", [&](const auto& component)
@@ -234,4 +305,26 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
     {
         SerializeEntity(output, child);
     }
+}
+
+void SceneSerializer::SerializeAssets(YAML::Emitter& output)
+{
+    for (auto& guid : sceneAssets)
+    {
+        SerializeAsset(output, guid);
+    }
+}
+
+void SceneSerializer::SaveMaterial(const AssetHandle& handle)
+{
+    const auto assetPtr = AssetManager::Get().GetAsset<Material>(handle);
+    R_CORE_ASSERT(assetPtr, "");
+
+    sceneAssets.insert(assetPtr->textureData.albedo.guid);
+    sceneAssets.insert(assetPtr->textureData.normal.guid);
+    sceneAssets.insert(assetPtr->textureData.roughness.guid);
+    sceneAssets.insert(assetPtr->textureData.metallic.guid);
+    sceneAssets.insert(assetPtr->textureData.ao.guid);
+
+    sceneAssets.insert(handle.guid);
 }

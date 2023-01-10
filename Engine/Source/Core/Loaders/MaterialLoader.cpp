@@ -7,5 +7,5 @@ using namespace RightEngine;
 AssetHandle MaterialLoader::Load()
 {
     const auto material = std::make_shared<Material>();
-    return manager->CacheAsset(material, AssetType::MATERIAL);
+    return manager->CacheAsset(material, "", AssetType::MATERIAL);
 }

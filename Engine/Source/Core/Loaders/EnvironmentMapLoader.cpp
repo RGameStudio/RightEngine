@@ -584,5 +584,5 @@ void EnvironmentMapLoader::ComputeLUT()
 
 AssetHandle EnvironmentMapLoader::FinishLoading()
 {
-    return manager->CacheAsset(environmentContext, AssetType::ENVIRONMENT_MAP);
+    return manager->CacheAsset(environmentContext, loaderContext.path, AssetType::ENVIRONMENT_MAP);
 }
