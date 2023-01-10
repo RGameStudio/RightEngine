@@ -70,17 +70,10 @@ namespace RightEngine
         void SetMesh(const AssetHandle& handle)
         { mesh = handle; }
 
-        void SetDirty(bool dirty)
-        { isDirty = dirty; }
-
-        bool IsDirty() const
-        { return isDirty; }
-
     private:
         AssetHandle mesh;
         AssetHandle material;
         bool isVisible;
-        bool isDirty;
     };
 
     enum class LightType
@@ -96,6 +89,7 @@ namespace RightEngine
     };
 
     enum class SkyboxType
+
     {
         CUBE = 0
     };
@@ -104,12 +98,10 @@ namespace RightEngine
     {
         SkyboxType type;
         AssetHandle environmentHandle;
-        bool isDirty{true};
     };
 
-    class CameraComponent
+    struct CameraComponent
     {
-    public:
         CameraComponent(const glm::vec3& worldUp);
         CameraComponent();
         ~CameraComponent();
@@ -123,11 +115,6 @@ namespace RightEngine
         glm::mat4 GetViewMatrix(const glm::vec3& position) const;
         glm::mat4 GetProjectionMatrix() const;
 
-        float GetMovementSpeed() const
-        { return movementSpeed; }
-        void SetMovementSpeed(float aSpeed)
-        { movementSpeed = aSpeed; }
-
         inline float GetFOV(bool asRadians = false) const
         {
             if (asRadians)
@@ -136,33 +123,6 @@ namespace RightEngine
             }
             return fov;
         }
-        inline float GetAspectRatio() const
-        { return aspectRatio; }
-        inline float GetNear() const
-        { return zNear; }
-        inline float GetFar() const
-        { return zFar; }
-
-        void SetFOV(float aFOV)
-        { fov = aFOV; }
-        void SetAspectRatio(float aAspectRatio)
-        { aspectRatio = aAspectRatio; }
-        void SetNear(float aNear)
-        { zNear = aNear; }
-        void SetFar(float aFar)
-        { zFar = aFar; }
-        void SetActive(bool aIsActive)
-        { isActive = aIsActive; }
-        void SetPrimary(bool aIsPrimary)
-        { isPrimary = aIsPrimary; }
-
-        bool IsActive() const
-        { return isActive; }
-        bool IsPrimary() const
-        { return isPrimary; }
-
-    private:
-        void UpdateVectors(const glm::vec3& rotation);
 
         glm::vec3 front;
         glm::vec3 worldUp;
@@ -176,9 +136,11 @@ namespace RightEngine
         float actualSpeed{ 1.0f };
         float prevXMousePos{ -1 };
         float prevYMousePos{ -1 };
-        float positionDelta{ 0.0f };
 
         bool isActive{ false };
         bool isPrimary{ false };
+
+    private:
+        void UpdateVectors(const glm::vec3& rotation);
     };
 }

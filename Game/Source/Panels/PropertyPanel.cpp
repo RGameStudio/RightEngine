@@ -148,7 +148,6 @@ namespace
             }
 
             textureHandle = textures[id];
-            component.SetDirty(true);
         }
     }
 }
@@ -284,7 +283,6 @@ void PropertyPanel::OnImGuiRender()
                 }
 
                 component.environmentHandle = environmentMaps[id];
-                component.isDirty = true;
             }
         });
 
@@ -336,25 +334,15 @@ void PropertyPanel::OnImGuiRender()
 
         DrawComponent<CameraComponent>("Camera", selectedEntity, [this](auto& component)
         {
-            bool isPrimary = component.IsPrimary();
-            ImGui::Checkbox("Is primary", &isPrimary);
-            component.SetPrimary(isPrimary);
+            ImGui::Checkbox("Is primary", &component.isPrimary);
 
-            float speed = component.GetMovementSpeed();
-            ImGui::SliderFloat("Movement speed", &speed, 40.0f, 150.0f);
-            component.SetMovementSpeed(speed);
+            ImGui::SliderFloat("Movement speed", &component.movementSpeed, 40.0f, 150.0f);
 
-            float fov = component.GetFOV();
-            ImGui::SliderFloat("FOV", &fov, 30.0f, 100.0f);
-            component.SetFOV(fov);
+            ImGui::SliderFloat("FOV", &component.fov, 30.0f, 100.0f);
 
-            float zNear = component.GetNear();
-            ImGui::SliderFloat("Z Near", &zNear, 0.1f, 1.0f);
-            component.SetNear(zNear);
+            ImGui::SliderFloat("Z Near", &component.zNear, 0.1f, 1.0f);
 
-            float zFar = component.GetFar();
-            ImGui::SliderFloat("Z Far", &zFar, 10.0f, 1000.0f);
-            component.SetFar(zFar);
+            ImGui::SliderFloat("Z Far", &component.zFar, 10.0f, 1000.0f);
 
             std::array<const char*, 3> aspectRatios = { "16/9", "4/3", "Fit to window" };
             static const char* currentRatio = aspectRatios[2];
@@ -387,9 +375,9 @@ void PropertyPanel::OnImGuiRender()
                 }
                 if (std::strcmp(currentRatio, aspectRatios[2]) == 0)
                 {
-                    newAspectRatio = component.GetAspectRatio();
+                    newAspectRatio = component.aspectRatio;
                 }
-                component.SetAspectRatio(newAspectRatio);
+                component.aspectRatio = newAspectRatio;
             }
         });
     }

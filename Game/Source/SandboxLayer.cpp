@@ -136,8 +136,8 @@ void SandboxLayer::OnAttach()
 
     auto editorCamera = scene->CreateEntity("Editor camera", true);
     CameraComponent camera;
-    camera.SetActive(true);
-    camera.SetPrimary(true);
+    camera.isActive = true;
+    camera.isPrimary = true;
     editorCamera->AddComponent<CameraComponent>(camera);
 
     std::shared_ptr<Entity> backpack = CreateTestSceneNode(scene, &sceneData.backpackHandle);
@@ -226,10 +226,10 @@ void SandboxLayer::OnUpdate(float ts)
         auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
         camera.Rotate(glm::degrees(transform.rotation));
         camera.OnUpdate(ts);
-        if (camera.IsPrimary())
+        if (camera.isPrimary)
         {
-            camera.SetActive(Input::IsMouseButtonDown(MouseButton::Right) && sceneData.isViewportHovered);
-            if (camera.IsActive())
+            camera.isActive = Input::IsMouseButtonDown(MouseButton::Right) && sceneData.isViewportHovered;
+            if (camera.isActive)
             {
                 glm::vec3 position = transform.position;
                 if (Input::IsKeyDown(R_KEY_W))
@@ -415,7 +415,7 @@ void SandboxLayer::OnImGuiRender()
         {
             auto& cameraComp = scene->GetRegistry().get<CameraComponent>(eCamera);
             auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
-            if (cameraComp.IsPrimary())
+            if (cameraComp.isPrimary)
             {
                 camera = cameraComp;
                 cameraPos = transform.GetWorldPosition();
@@ -465,7 +465,7 @@ bool SandboxLayer::OnEvent(const Event& event)
         {
             auto& camera = scene->GetRegistry().get<CameraComponent>(eCamera);
             auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
-            if (camera.IsPrimary())
+            if (camera.isPrimary)
             {
                 auto rotation = camera.Rotate(mouseMovedEvent.GetX(), mouseMovedEvent.GetY(), glm::degrees(transform.rotation));
                 transform.SetRotationRadians(glm::radians(rotation));

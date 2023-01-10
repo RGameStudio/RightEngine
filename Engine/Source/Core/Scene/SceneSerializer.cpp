@@ -199,6 +199,34 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
         SerializeKeyValue(output, "Is visible", component.IsVisible());
     });
 
+    SerializeComponent<LightComponent>(output, entity, "Light component", [&](const auto& component)
+    {
+        SerializeKeyValue(output, "Type", static_cast<int>(component.type));
+        SerializeKeyValue(output, "Color", component.color);
+        SerializeKeyValue(output, "Intensity", component.intensity);
+    });
+
+    SerializeComponent<SkyboxComponent>(output, entity, "Skybox component", [&](const auto& component)
+    {
+        SerializeKeyValue(output, "Type", static_cast<int>(component.type));
+        SerializeKeyValue(output, "Skybox GUID", component.environmentHandle.guid);
+    });
+
+    SerializeComponent<CameraComponent>(output, entity, "Camera component", [&](const auto& component)
+    {
+        SerializeKeyValue(output, "Front", component.front);
+        SerializeKeyValue(output, "World up", component.worldUp);
+        SerializeKeyValue(output, "Up", component.up);
+        SerializeKeyValue(output, "Z near", component.zNear);
+        SerializeKeyValue(output, "Z far", component.zFar);
+        SerializeKeyValue(output, "Aspect ratio", component.aspectRatio);
+        SerializeKeyValue(output, "FOV", component.GetFOV());
+        SerializeKeyValue(output, "Movement speed", component.movementSpeed);
+        SerializeKeyValue(output, "Sensitivity", component.sensitivity);
+        SerializeKeyValue(output, "Active", component.isActive);
+        SerializeKeyValue(output, "Primary", component.isPrimary);
+    });
+
     output << YAML::EndSeq;
     output << YAML::EndMap;
 
