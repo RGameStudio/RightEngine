@@ -28,6 +28,8 @@ namespace RightEngine
         glm::vec4 rotation;
         float intensity;
         int type;
+        float radiusInner;
+        float radiusOuter;
     };
 
     struct CameraData

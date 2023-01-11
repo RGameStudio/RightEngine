@@ -150,6 +150,19 @@ namespace
             textureHandle = textures[id];
         }
     }
+
+    std::string LightTypeToStr(LightType type)
+    {
+        switch (type)
+        {
+            case LightType::DIRECTIONAL:
+                return "Directional";
+            case LightType::POINT:
+                return "Point";
+            default:
+            R_CORE_ASSERT(false, "")
+        }
+    }
 }
 
 PropertyPanel::PropertyPanel(const std::shared_ptr<Scene>& aScene)
@@ -379,6 +392,40 @@ void PropertyPanel::OnImGuiRender()
                 }
                 component.aspectRatio = newAspectRatio;
             }
+        });
+
+        DrawComponent<LightComponent>("Light", selectedEntity, [this](auto& component)
+        {
+            std::array<LightType, 2> lightTypes = { LightType::DIRECTIONAL, LightType::POINT };
+            if (ImGui::BeginCombo("Light type", LightTypeToStr(component.type).c_str()))
+            {
+                for (auto& type : lightTypes)
+                {
+                    bool isSelected = component.type == type;
+                    if (ImGui::Selectable(LightTypeToStr(type).c_str(), isSelected))
+                    {
+                        component.type = type;
+                    }
+
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+
+            ImGui::Separator();
+
+            glm::vec3 color = component.color * 255.0f;
+            DrawVec3Control("Color", color);
+            component.color = glm::clamp(color / 255.0f, 0.0f, 1.0f);
+
+            ImGui::Separator();
+
+            ImGui::SliderFloat("Intensity", &component.intensity, 0.0f, 10000.0f);
+            ImGui::SliderFloat("Outer radius", &component.outerRadius, 0.0f, 1000.0f);
+            ImGui::SliderFloat("Inner radius", &component.innerRadius, 0.0f, 1000.0f);
         });
     }
     ImGui::End();

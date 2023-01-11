@@ -35,6 +35,8 @@ struct Light
     vec4 rotation;
     float intensity;
     int type;
+    float radiusInner;
+    float radiusOuter;
 };
 
 layout(binding = 11) uniform LightBuffer
@@ -132,7 +134,12 @@ void main()
         vec3 L = normalize(vec3(u_Light[i].position) - Output.WorldPos);
         vec3 H = normalize(V + L);
         float distance = length(vec3(u_Light[i].position) - Output.WorldPos);
-        float attenuation = 1.0 / (distance * distance);
+        float attenuation = 1.0f;
+        if (u_Light[i].type == 1)
+        {
+            attenuation /= (distance * distance);
+            attenuation *= clamp((u_Light[i].radiusOuter - distance) / (u_Light[i].radiusOuter - u_Light[i].radiusInner), 0.0f, 1.0f);
+        }
         vec3 radiance = vec3(u_Light[i].color) * u_Light[i].intensity * attenuation;
         //        albedo = u_Light[i].color * u_Light[i].intensity;
         // Cook-Torrance BRDF

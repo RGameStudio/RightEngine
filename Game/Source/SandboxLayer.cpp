@@ -48,8 +48,6 @@ namespace
         MeshLoader meshLoader;
         AssetHandle backpackHandle;
         std::shared_ptr<Buffer> lightUniformBuffer;
-        UIState uiState;
-        AssetHandle environmentHandle;
         std::shared_ptr<ImGuiLayer> imGuiLayer;
         std::shared_ptr<Buffer> skyboxVertexBuffer;
         std::shared_ptr<SceneRenderer> renderer;
@@ -162,12 +160,9 @@ void SandboxLayer::OnAttach()
     SamplerDescriptor samplerDesc{};
     const auto sampler = Device::Get()->CreateSampler(samplerDesc);
 
-    sceneData.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_circus.hdr");
-
     sceneData.skyboxCube = scene->CreateEntity("Skybox", true);
     auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
-    skyboxComponent.environmentHandle = sceneData.environmentHandle;
-    scene->GetRootNode()->AddChild(sceneData.skyboxCube);
+    skyboxComponent.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_circus.hdr");
 
     sceneData.propertyPanel.SetScene(scene);
 
@@ -207,6 +202,13 @@ void SandboxLayer::OnAttach()
 
     SceneSerializer serializer(scene);
     serializer.Serialize("/scene.yaml");
+
+    int skybox = 0;
+//    for (auto id : scene->GetRegistry().view<TagComponent>())
+//    {
+//        auto tag = scene->GetRegistry().get<TagComponent>(id);
+//        R_CORE_TRACE("");
+//    }
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -266,13 +268,24 @@ void SandboxLayer::OnUpdate(float ts)
         shaderLight.position = glm::vec4(transform.GetWorldPosition(), 1);
         shaderLight.color = glm::vec4(light.color, 1);
         shaderLight.intensity = light.intensity;
+        shaderLight.radiusInner = light.innerRadius;
+        shaderLight.radiusOuter = light.outerRadius;
         lightData.emplace_back(shaderLight);
     }
 
     auto& assetManager = AssetManager::Get();
+
+    AssetHandle environmentHandle;
+    for (const auto& entityID: scene->GetRegistry().view<SkyboxComponent>())
+    {
+        R_CORE_ASSERT(!environmentHandle.guid.isValid(), "")
+        const auto& skybox = scene->GetRegistry().get<SkyboxComponent>(entityID);
+        environmentHandle = skybox.environmentHandle;
+    }
+
     sceneData.renderer->SetScene(scene);
     sceneData.renderer->BeginScene(cameraData,
-                                   assetManager.GetAsset<EnvironmentContext>(sceneData.environmentHandle),
+                                   assetManager.GetAsset<EnvironmentContext>(environmentHandle),
                                    lightData,
                                    sceneData.rendererSettings);
 

@@ -78,7 +78,8 @@ namespace RightEngine
 
     enum class LightType
     {
-        DIRECTIONAL = 0
+        DIRECTIONAL = 0,
+        POINT
     };
 
     struct LightComponent
@@ -86,6 +87,9 @@ namespace RightEngine
         LightType type{LightType::DIRECTIONAL};
         glm::vec3 color{1.0f, 1.0f, 1.0f};
         float intensity{1000.0f};
+
+        float outerRadius{50.0f};
+        float innerRadius{20.0f};
     };
 
     enum class SkyboxType
