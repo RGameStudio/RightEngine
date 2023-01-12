@@ -121,8 +121,9 @@ namespace RightEngine
 
         struct UBLightData
         {
-            int lightsAmount;
             LightData light[30];
+            int lightsAmount;
+            glm::vec3 dummy;
         } lightDataUB;
 
         struct UBTransformData

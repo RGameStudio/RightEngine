@@ -376,7 +376,7 @@ void SceneRenderer::BeginScene(const CameraData& cameraData,
     cameraDataUB.viewProjection = projection * camera.view;
 
     lightDataUB.lightsAmount = lights.size();
-    memcpy(&lightDataUB.light, lights.data(), lights.size());
+    memcpy(&lightDataUB.light, lights.data(), lights.size() * sizeof(LightData));
     sceneEnvironment = *environment;
 
     uniformBufferSet->Get(1)->SetData(&cameraDataUB, sizeof(cameraDataUB));

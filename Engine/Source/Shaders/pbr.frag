@@ -41,8 +41,9 @@ struct Light
 
 layout(binding = 11) uniform LightBuffer
 {
-    int u_LightsAmount;
     Light u_Light[30];
+    int u_LightsAmount;
+    vec3 dummy;
 };
 
 const float PI = 3.14159265359;

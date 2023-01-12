@@ -162,7 +162,7 @@ void SandboxLayer::OnAttach()
 
     sceneData.skyboxCube = scene->CreateEntity("Skybox", true);
     auto& skyboxComponent = sceneData.skyboxCube->AddComponent<SkyboxComponent>();
-    skyboxComponent.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_circus.hdr");
+    skyboxComponent.environmentHandle = assetManager.GetLoader<EnvironmentMapLoader>()->Load("/Assets/Textures/env_studio.hdr");
 
     sceneData.propertyPanel.SetScene(scene);
 
