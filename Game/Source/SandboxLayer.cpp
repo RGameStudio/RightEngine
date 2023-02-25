@@ -68,7 +68,7 @@ namespace
         if (meshHandle)
         {
             MeshComponent meshComponent;
-            meshComponent.SetMesh(*meshHandle);
+            meshComponent.mesh = *meshHandle;
             node->AddComponent<MeshComponent>(meshComponent);
         }
         return node;
@@ -153,7 +153,7 @@ void SandboxLayer::OnAttach()
     textureLoader->LoadAsync(backpackMaterial->textureData.ao, "/Assets/Textures/backpack_ao.jpg");
     textureLoader->WaitAllLoaders();
 
-    backpackMesh.SetMaterial(backpackMaterialRef);
+    backpackMesh.material = backpackMaterialRef;
 
     scene->GetRootNode()->AddChild(backpack);
 
@@ -199,16 +199,6 @@ void SandboxLayer::OnAttach()
                                               OnImGuiRender();
                                               sceneData.imGuiLayer->End(cmd);
                                           });
-
-    SceneSerializer serializer(scene);
-    serializer.Serialize("/scene.yaml");
-
-    int skybox = 0;
-//    for (auto id : scene->GetRegistry().view<TagComponent>())
-//    {
-//        auto tag = scene->GetRegistry().get<TagComponent>(id);
-//        R_CORE_TRACE("");
-//    }
 }
 
 void SandboxLayer::OnUpdate(float ts)
@@ -294,13 +284,13 @@ void SandboxLayer::OnUpdate(float ts)
         const auto& tag = scene->GetRegistry().get<TagComponent>(entity);
         const auto& transform = scene->GetRegistry().get<TransformComponent>(entity);
         const auto& meshComponent = scene->GetRegistry().get<MeshComponent>(entity);
-        const auto& materialRef = meshComponent.GetMaterial();
-        if (!meshComponent.IsVisible())
+        const auto& materialRef = meshComponent.material;
+        if (!meshComponent.isVisible)
         {
             continue;
         }
 
-        sceneData.renderer->SubmitMeshNode(assetManager.GetAsset<MeshNode>(meshComponent.GetMesh()),
+        sceneData.renderer->SubmitMeshNode(assetManager.GetAsset<MeshNode>(meshComponent.mesh),
                                            assetManager.GetAsset<Material>(materialRef),
                                            transform.GetWorldTransformMatrix());
     }
@@ -357,6 +347,20 @@ void SandboxLayer::OnImGuiRender()
             if (ImGui::MenuItem("Exit"))
             {
                 EventDispatcher::Get().Emit(ShutdownEvent());
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Scene"))
+        {
+            if (ImGui::MenuItem("Save"))
+            {
+                SceneSerializer serializer(scene);
+                serializer.Serialize("/" + scene->GetName() + ".yaml");
+            }
+            if (ImGui::MenuItem("Load"))
+            {
+                //TODO: Implement
             }
             ImGui::EndMenu();
         }

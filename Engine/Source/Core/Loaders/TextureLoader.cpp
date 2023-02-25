@@ -149,11 +149,7 @@ std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::LoadTextureData
 AssetHandle TextureLoader::Load(const std::string& path,
                                 const TextureLoaderOptions& options) const
 {
-    auto [data, descriptor] = LoadTextureData(path, options);
-    descriptor.type = options.type;
-    auto texture = Device::Get()->CreateTexture(descriptor, data);
-    texture->SetSampler(Device::Get()->CreateSampler({}));
-    return manager->CacheAsset(texture, path, AssetType::IMAGE);
+    return _Load(path, options, xg::Guid());
 }
 
 void TextureLoader::LoadAsync(AssetHandle& handle,
@@ -162,6 +158,24 @@ void TextureLoader::LoadAsync(AssetHandle& handle,
 {
     taskGroup.run([&, path = std::move(path), options = std::move(options)]()
     {
-        handle = Load(path, options);
+        handle = _Load(path, options, xg::Guid());
     });
+}
+
+AssetHandle TextureLoader::LoadWithGUID(const std::string& path,
+                                        const TextureLoaderOptions& options,
+                                        const xg::Guid& guid) const
+{
+    return _Load(path, options, guid);
+}
+
+AssetHandle TextureLoader::_Load(const std::string& path,
+                                 const TextureLoaderOptions& options,
+                                 const xg::Guid& guid) const
+{
+    auto [data, descriptor] = LoadTextureData(path, options);
+    descriptor.type = options.type;
+    auto texture = Device::Get()->CreateTexture(descriptor, data);
+    texture->SetSampler(Device::Get()->CreateSampler({}));
+    return manager->CacheAsset(texture, path, AssetType::IMAGE, guid);
 }

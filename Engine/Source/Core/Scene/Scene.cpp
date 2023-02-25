@@ -67,3 +67,12 @@ entt::registry& Scene::GetRegistry()
 {
     return registry;
 }
+
+std::shared_ptr<Entity> Scene::CreateEntityWithGuid(const std::string& name, const xg::Guid& guid, bool addToRoot)
+{
+    auto entity = CreateEntity(name, addToRoot);
+    auto& tag = entity->GetComponent<TagComponent>();
+    tag.guid = guid;
+
+    return entity;
+}

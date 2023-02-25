@@ -33,6 +33,7 @@ namespace RightEngine
         ~EnvironmentMapLoader() = default;
 
         AssetHandle Load(const std::string& path, bool flipVertically = false);
+        AssetHandle LoadWithGUID(const std::string& path, const xg::Guid& guid, bool flipVertically = false);
 
     private:
         void ComputeEnvironmentMap();
@@ -40,6 +41,7 @@ namespace RightEngine
         void ComputeRadianceMap();
         void ComputeLUT();
         AssetHandle FinishLoading();
+        AssetHandle _Load(const std::string& path, const xg::Guid& guid, bool flipVertically);
 
         std::shared_ptr<EnvironmentContext> environmentContext;
         EnvironmentMapLoaderContext loaderContext;

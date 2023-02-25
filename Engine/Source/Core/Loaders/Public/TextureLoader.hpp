@@ -25,8 +25,14 @@ namespace RightEngine
                        const std::string& path,
                        const TextureLoaderOptions& options = {}) const;
 
+        AssetHandle LoadWithGUID(const std::string& path,
+                                 const TextureLoaderOptions& options = {},
+                                 const xg::Guid& guid = {}) const;
+
     private:
         std::pair<std::vector<uint8_t>, TextureDescriptor> LoadTextureData(const std::string& path,
-                                                                const TextureLoaderOptions& options = {}) const;
+                                                                           const TextureLoaderOptions& options = {}) const;
+
+        AssetHandle _Load(const std::string& path, const TextureLoaderOptions& options, const xg::Guid& guid) const;
     };
 }

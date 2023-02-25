@@ -52,13 +52,15 @@ namespace RightEngine
                          const std::shared_ptr<VertexBufferLayout>& layout,
                          const std::shared_ptr<Buffer>& indexBuffer = nullptr);
 
-    private:
-        void ProcessNode(const aiNode* node, const aiScene* scene, std::shared_ptr<MeshNode>& meshNode);
-        std::shared_ptr<Mesh> ProcessMesh(const aiMesh* mesh, const aiScene* scene);
-        std::vector<std::shared_ptr<Texture>> LoadTextures(const aiMaterial* mat, aiTextureType type);
+        AssetHandle LoadWithGUID(const std::string& path, const xg::Guid& guid);
 
     private:
         std::string meshDir;
         std::unordered_map<std::string, std::shared_ptr<Texture>> loadedTextures;
+
+        void ProcessNode(const aiNode* node, const aiScene* scene, std::shared_ptr<MeshNode>& meshNode);
+        std::shared_ptr<Mesh> ProcessMesh(const aiMesh* mesh, const aiScene* scene);
+        std::vector<std::shared_ptr<Texture>> LoadTextures(const aiMaterial* mat, aiTextureType type);
+        AssetHandle _Load(const std::string& path, const xg::Guid& guid);
     };
 }

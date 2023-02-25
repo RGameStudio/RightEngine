@@ -2,9 +2,26 @@ cmake_minimum_required(VERSION 3.19)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(Game Source/Start.cpp
-        Source/SandboxLayer.cpp
-        Source/Panels/PropertyPanel.cpp)
+file(GLOB_RECURSE SOURCE_FILES
+        "${CMAKE_SOURCE_DIR}/Game/Source/*.cpp"
+        "${CMAKE_SOURCE_DIR}/Game/Source/*.hpp"
+        )
+
+add_executable(Game ${SOURCE_FILES})
+
+if (MSVC)
+    set(CMAKE_STARTUP_PROJECT Game)
+endif()
+
+# Create source groups for each directory
+foreach(FILE ${SOURCE_FILES})
+    # Get the path relative to the source directory
+    file(RELATIVE_PATH RELATIVE_FILE ${CMAKE_SOURCE_DIR} ${FILE})
+    # Get the directory of the file
+    get_filename_component(DIR ${RELATIVE_FILE} DIRECTORY)
+    # Create the source group
+    source_group(${DIR} FILES ${FILE})
+endforeach()
 
 set_target_properties(Game
         PROPERTIES
@@ -12,25 +29,7 @@ set_target_properties(Game
 
 target_link_libraries(Game
         Engine
-        easyargs
-        glfw
-        stb_image
-        imgui
-        assimp
-        glslang
-        MachineIndependent
-        GenericCodeGen
-        OGLCompiler
-        OSDependent
-        SPIRV
-        ${Vulkan_LIBRARY}
-        glslang-default-resource-limits
-        vk-tools
-        VulkanMemoryAllocator
-        crossguid
-        TBB::tbb
-        ImGuizmo
-        yaml-cpp
+        ${THIRD_PARTY_LIB}
         )
 
 add_custom_target(CopyShaderFilesToGame ALL DEPENDS ${GLSL_ROOT_DIR})
@@ -57,8 +56,5 @@ add_custom_command(
 
 add_dependencies(Game CopyResourceFilesToGame)
 
-if (WIN32)
-#    add_compile_definitions(WIN32)
-elseif(APPLE)
-    add_compile_definitions(APPLE)
-endif()
+set_target_properties(CopyResourceFilesToGame PROPERTIES FOLDER ${CUSTOM_TARGET_DIR_NAME})
+set_target_properties(CopyShaderFilesToGame PROPERTIES FOLDER ${CUSTOM_TARGET_DIR_NAME})

@@ -57,30 +57,7 @@ namespace
 
 AssetHandle MeshLoader::Load(const std::string& aPath)
 {
-    const size_t lastDelimIndex = aPath.find_last_of('/');
-    std::string meshName = aPath.substr(lastDelimIndex, aPath.size() - 1 - lastDelimIndex);
-    meshDir = aPath.substr(0, lastDelimIndex);
-    Assimp::Importer importer;
-    auto scene = importer.ReadFile(Path::ConvertEnginePathToOSPath(aPath),
-                                         aiProcess_Triangulate
-                                         | aiProcess_GenSmoothNormals
-                                         | aiProcess_FlipUVs
-                                         | aiProcess_CalcTangentSpace
-                                         | aiProcess_GenUVCoords
-                                         | aiProcess_OptimizeGraph
-                                         | aiProcess_OptimizeMeshes
-                                         | aiProcess_JoinIdenticalVertices);
-
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-    {
-        R_CORE_ERROR("ASSIMP ERROR: {0}", importer.GetErrorString());
-        return {};
-    }
-
-    auto meshTree = std::make_shared<MeshNode>();
-    ProcessNode(scene->mRootNode, scene, meshTree);
-
-    return manager->CacheAsset(meshTree, aPath, AssetType::MESH);
+    return _Load(aPath, xg::Guid());
 }
 
 void MeshLoader::ProcessNode(const aiNode* node, const aiScene* scene, std::shared_ptr<MeshNode>& meshNode)
@@ -258,4 +235,37 @@ AssetHandle MeshLoader::Load(const std::shared_ptr<Buffer>& vertexBuffer,
     auto meshNode = std::make_shared<MeshNode>();
     meshNode->meshes.push_back(mesh);
     return manager->CacheAsset(meshNode, "", AssetType::MESH);
+}
+
+AssetHandle MeshLoader::LoadWithGUID(const std::string& path, const xg::Guid& guid)
+{
+    return _Load(path, guid);
+}
+
+AssetHandle MeshLoader::_Load(const std::string& path, const xg::Guid& guid)
+{
+    const size_t lastDelimIndex = path.find_last_of('/');
+    std::string meshName = path.substr(lastDelimIndex, path.size() - 1 - lastDelimIndex);
+    meshDir = path.substr(0, lastDelimIndex);
+    Assimp::Importer importer;
+    auto scene = importer.ReadFile(Path::ConvertEnginePathToOSPath(path),
+                                   aiProcess_Triangulate
+                                   | aiProcess_GenSmoothNormals
+                                   | aiProcess_FlipUVs
+                                   | aiProcess_CalcTangentSpace
+                                   | aiProcess_GenUVCoords
+                                   | aiProcess_OptimizeGraph
+                                   | aiProcess_OptimizeMeshes
+                                   | aiProcess_JoinIdenticalVertices);
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    {
+        R_CORE_ERROR("ASSIMP ERROR: {0}", importer.GetErrorString());
+        return {};
+    }
+
+    auto meshTree = std::make_shared<MeshNode>();
+    ProcessNode(scene->mRootNode, scene, meshTree);
+
+    return manager->CacheAsset(meshTree, path, AssetType::MESH, guid);
 }

@@ -302,11 +302,11 @@ void PropertyPanel::OnImGuiRender()
         DrawComponent<MeshComponent>("Mesh", selectedEntity, [this](auto& component)
         {
             auto& assetManager = AssetManager::Get();
-            ImGui::LabelText("Mesh GUID", "%s", component.GetMesh().guid.str().c_str());
+            ImGui::LabelText("Mesh GUID", "%s", component.mesh.guid.str().c_str());
             ImGui::Separator();
-            bool isVisible = component.IsVisible();
+            bool isVisible = component.isVisible;
             ImGui::Checkbox("Is visible", &isVisible);
-            component.SetVisibility(isVisible);
+            component.isVisible = isVisible;
             ImGui::Separator();
 
             if (ImGui::Button("Open"))
@@ -322,14 +322,14 @@ void PropertyPanel::OnImGuiRender()
                         meshes[id] = meshHandle;
                     }
 
-                    component.SetMesh(meshes[id]);
+                    component.mesh = meshes[id];
                 }
             }
 
             ImGui::Separator();
             if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
             {
-                auto& materialRef = component.GetMaterial();
+                auto& materialRef = component.material;
                 auto material = AssetManager::Get().GetAsset<Material>(materialRef);
                 ImGui::TableNextColumn();
                 DrawMaterialEditorTab("Albedo", true, material->textureData.albedo, textures, component);

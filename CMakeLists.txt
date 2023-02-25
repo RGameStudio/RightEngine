@@ -15,6 +15,8 @@ if (MSVC)
     add_compile_options("/MP")
 endif()
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 set(GLSL_ROOT_DIR ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders)
 set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
              ${GLSL_ROOT_DIR}/Basic/basic.vert
@@ -72,27 +74,96 @@ include_directories(Engine/Source/Core/Scene/Public)
 include_directories(Engine/Source/Core/UI/Public)
 include_directories(Engine/Source/Core/Loaders/Public)
 
-#include(Lib/glslang/CMakeLists.txt)
-
-add_subdirectory(Engine)
-add_subdirectory(Game)
-add_subdirectory(Tests)
-add_subdirectory(Sandbox)
 add_subdirectory(Lib/spdlog)
-add_subdirectory(Lib/Glad)
-add_subdirectory(Lib/googletest)
 add_subdirectory(Lib/easyargs)
-add_subdirectory(Lib/glfw)
 add_subdirectory(Lib/glm)
 add_subdirectory(Lib/stb_image)
-add_subdirectory (Lib/imgui)
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build the assimp viewing tools")
-add_subdirectory(Lib/assimp)
+add_subdirectory(Lib/imgui)
 add_subdirectory(Lib/glslang)
 add_subdirectory(Lib/vk-tools/)
 add_subdirectory(Lib/VulkanMemoryAllocator)
-add_subdirectory(Lib/crossguid)
-add_subdirectory(Lib/oneTBB)
 add_subdirectory(Lib/hash-library)
 add_subdirectory(Lib/ImGuizmo)
+
+#set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Enable yaml-cpp contrib in library")
+#set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Enable parse tools")
+set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "Build as shared library")
+#set(YAML_CPP_INSTALL OFF CACHE BOOL "Enable generation of yaml-cpp install targets")
+#set(YAML_CPP_FORMAT_SOURCE OFF CACHE BOOL "Format source")
 add_subdirectory(Lib/yaml-cpp)
+
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs")
+add_subdirectory(Lib/glfw)
+
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build the assimp viewing tools")
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build the assimp tests")
+set(ASSIMP_INSTALL OFF CACHE BOOL "Install assimp as separate lib")
+add_subdirectory(Lib/assimp)
+
+set(CROSSGUID_TESTS OFF CACHE BOOL "Build test runner")
+add_subdirectory(Lib/crossguid)
+
+set(TBB_TEST OFF CACHE BOOL "Build tbb tests")
+set(TBBMALLOC_BUILD OFF CACHE BOOL "Build tbb malloc")
+add_subdirectory(Lib/oneTBB)
+
+set(BUILD_GMOCK OFF CACHE BOOL "Builds the googlemock subproject")
+set(INSTALL_GTEST OFF CACHE BOOL "Enable installation of googletest.")
+add_subdirectory(Lib/googletest)
+
+set(THIRD_PARTY_LIB
+        glfw
+        stb_image
+        imgui
+        assimp
+        glslang
+        MachineIndependent
+        GenericCodeGen
+        OGLCompiler
+        OSDependent
+        SPIRV
+        ${Vulkan_LIBRARY}
+        glslang-default-resource-limits
+        vk-tools
+        VulkanMemoryAllocator
+        crossguid
+        easyargs
+        tbb
+        ImGuizmo
+        yaml-cpp
+        )
+
+set(THIRD_PARTY_PROJECT_DIR_NAME "Lib")
+set(CUSTOM_TARGET_DIR_NAME "Custom")
+
+set_target_properties(glfw PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(stb_image PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(imgui PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(assimp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(zlibstatic PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(glslang PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(MachineIndependent PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(GenericCodeGen PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(OGLCompiler PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(OSDependent PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(SPIRV PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(glslang-default-resource-limits PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(vk-tools PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(VulkanMemoryAllocator PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(tbb PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(ImGuizmo PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(yaml-cpp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(yaml-cpp-parse PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(yaml-cpp-read PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(yaml-cpp-sandbox PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(crossguid PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(easyargs PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(gtest PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(gtest_main PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(hash-library PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(spdlog PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(uninstall PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+
+add_subdirectory(Engine)
+add_subdirectory(Game)

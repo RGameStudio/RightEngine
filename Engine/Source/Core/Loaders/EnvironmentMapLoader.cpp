@@ -118,14 +118,7 @@ EnvironmentMapLoader::EnvironmentMapLoader()
 
 AssetHandle EnvironmentMapLoader::Load(const std::string& path, bool flipVertically)
 {
-    environmentContext = std::make_shared<EnvironmentContext>();
-    loaderContext.path = path;
-    environmentContext->name = GetTextureName(path);
-    ComputeEnvironmentMap();
-    ComputeIrradianceMap();
-    ComputeRadianceMap();
-    ComputeLUT();
-    return FinishLoading();
+    return _Load(path, xg::newGuid(), flipVertically);
 }
 
 void EnvironmentMapLoader::ComputeEnvironmentMap()
@@ -585,4 +578,21 @@ void EnvironmentMapLoader::ComputeLUT()
 AssetHandle EnvironmentMapLoader::FinishLoading()
 {
     return manager->CacheAsset(environmentContext, loaderContext.path, AssetType::ENVIRONMENT_MAP);
+}
+
+AssetHandle EnvironmentMapLoader::_Load(const std::string& path, const xg::Guid& guid, const bool flipVertically)
+{
+    environmentContext = std::make_shared<EnvironmentContext>();
+    loaderContext.path = path;
+    environmentContext->name = GetTextureName(path);
+    ComputeEnvironmentMap();
+    ComputeIrradianceMap();
+    ComputeRadianceMap();
+    ComputeLUT();
+    return FinishLoading();
+}
+
+AssetHandle EnvironmentMapLoader::LoadWithGUID(const std::string& path, const xg::Guid& guid, bool flipVertically)
+{
+    return _Load(path, guid, flipVertically);
 }

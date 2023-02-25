@@ -9,14 +9,16 @@ namespace RightEngine
 {
     struct TagComponent
     {
+        TagComponent() = default;
+
         TagComponent(const std::string& name) : name(name)
         {}
 
-        TagComponent()
+        TagComponent(std::string_view name, const xg::Guid& guid) : name(name), guid(guid)
         {}
 
         std::string name;
-        xg::Guid guid{xg::newGuid()};
+        xg::Guid guid{ xg::newGuid() };
     };
 
     // TODO: Add dirty flag, so we can recalculate transform only when needed
@@ -52,25 +54,6 @@ namespace RightEngine
     public:
         MeshComponent();
 
-        void SetVisibility(bool aVisible)
-        { isVisible = aVisible; }
-
-        const bool& IsVisible() const
-        { return isVisible; }
-
-        const AssetHandle& GetMaterial() const
-        { return material; }
-
-        void SetMaterial(const AssetHandle& aMaterial)
-        { material = aMaterial; }
-
-        const AssetHandle& GetMesh() const
-        { return mesh; }
-
-        void SetMesh(const AssetHandle& handle)
-        { mesh = handle; }
-
-    private:
         AssetHandle mesh;
         AssetHandle material;
         bool isVisible;

@@ -2,6 +2,7 @@
 #include "Path.hpp"
 #include "Entity.hpp"
 #include "AssetManager.hpp"
+#include "MaterialLoader.hpp"
 #include <fstream>
 
 using namespace RightEngine;
@@ -126,19 +127,15 @@ namespace
 {
     void SerializeList(YAML::Emitter& output, const std::string& listName, std::function<void()> listFn)
     {
-        output << YAML::BeginMap;
-        output << YAML::Key << listName << YAML::Value << YAML::BeginSeq;
+        output << YAML::Key << listName << YAML::Value << YAML::BeginMap;
         listFn();
-        output << YAML::EndSeq;
         output << YAML::EndMap;
     }
 
     template<typename T>
     void SerializeKeyValue(YAML::Emitter& output, const std::string& key, const T& value)
     {
-        output << YAML::BeginMap;
         output << YAML::Key << key << YAML::Value << value;
-        output << YAML::EndMap;
     }
 
     template<typename T>
@@ -149,10 +146,9 @@ namespace
     {
         if (entity->HasComponent<T>())
         {
+            output << YAML::Key << componentName;
             output << YAML::BeginMap;
-            output << YAML::Key << componentName << YAML::Value << YAML::BeginSeq;
             componentCallback(entity->GetComponent<T>());
-            output << YAML::EndSeq;
             output << YAML::EndMap;
         }
     }
@@ -182,9 +178,10 @@ namespace
         R_CORE_ASSERT(assetPtr, "");
 
         output << YAML::BeginMap;
-        output << YAML::Key << GetAssetTypeString(assetPtr->type) << YAML::Value << YAML::BeginSeq;
+        output << YAML::Key << "Asset" << YAML::Value << YAML::BeginMap;
         SerializeKeyValue(output, "GUID", assetPtr->guid);
         SerializeKeyValue(output, "Path", assetPtr->path);
+        SerializeKeyValue(output, "Type", static_cast<uint32_t>(assetPtr->type));
         if (assetPtr->type == AssetType::MATERIAL)
         {
             const auto materialPtr = AssetManager::Get().GetAsset<Material>({ guid });
@@ -205,7 +202,7 @@ namespace
                 SerializeKeyValue(output, "Metallic", materialPtr->materialData.metallic);
             });
         }
-        output << YAML::EndSeq;
+        output << YAML::EndMap;
         output << YAML::EndMap;
     }
 }
@@ -218,7 +215,7 @@ bool SceneSerializer::Serialize(const std::string& path)
 {
     YAML::Emitter output;
     output << YAML::BeginMap;
-    output << YAML::Key << "Scene" << YAML::Value << "Untitled";
+    output << YAML::Key << "Scene" << YAML::Value << scene->GetName();
     output << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
     SerializeEntity(output, scene->GetRootNode());
     output << YAML::EndSeq;
@@ -236,7 +233,94 @@ bool SceneSerializer::Serialize(const std::string& path)
 
 bool SceneSerializer::Deserialize(const std::string& path)
 {
-    return false;
+    YAML::Node data;
+    try
+    {
+        data = YAML::LoadFile(Path::ConvertEnginePathToOSPath(path));
+    }
+    catch (YAML::ParserException e)
+    {
+        R_CORE_ERROR("Failed to load scene file '{0}'\n     {1}", path, e.what());
+        return false;
+    }
+
+    if (!data["Scene"])
+        return false;
+
+    std::string sceneName = data["Scene"].as<std::string>();
+    R_CORE_TRACE("Deserializing scene '{0}'", sceneName);
+
+    DeserializeAssets(data);
+
+    auto entities = data["Entities"];
+
+    for (auto entityIt : entities)
+    {
+        auto entity = entityIt["Entity"];
+
+        auto tagComponent = entity["Tag component"];
+        auto name = tagComponent["Name"].as<std::string>();
+        auto tag = tagComponent["GUID"].as<std::string>();
+
+        auto entityPtr = scene->CreateEntityWithGuid(name, xg::Guid(tag), true);
+
+        auto transformComponent = entity["Transform component"];
+        R_CORE_ASSERT(transformComponent.IsDefined(), "");
+
+        auto& tc = entityPtr->GetComponent<TransformComponent>();
+        tc.position = transformComponent["Position"].as<glm::vec3>();
+        tc.rotation = transformComponent["Rotation"].as<glm::vec3>();
+        tc.scale = transformComponent["Scale"].as<glm::vec3>();
+
+        // TODO: Implement validation of all handles
+        auto& am = AssetManager::Get();
+        auto meshComponent = entity["Mesh component"];
+        if (meshComponent)
+        {
+            auto& mc = entityPtr->AddComponent<MeshComponent>();
+            mc.material = { meshComponent["Material GUID"].as<xg::Guid>() };
+            mc.mesh = { meshComponent["Mesh GUID"].as<xg::Guid>() };
+            mc.isVisible = { meshComponent["Is visible"].as<bool>() };
+        }
+
+        auto lightComponent = entity["Light component"];
+        if (lightComponent)
+        {
+            auto& lc = entityPtr->AddComponent<LightComponent>();
+            lc.type = static_cast<LightType>(lightComponent["Type"].as<uint32_t>());
+            lc.color = lightComponent["Color"].as<glm::vec3>();
+            lc.intensity = lightComponent["Intensity"].as<float>();
+            lc.outerRadius = lightComponent["Outer Radius"].as<float>();
+            lc.innerRadius = lightComponent["Inner Radius"].as<float>();
+        }
+
+        auto skyboxComponent = entity["Skybox component"];
+        if (skyboxComponent)
+        {
+            auto& sc = entityPtr->AddComponent<SkyboxComponent>();
+            sc.type = static_cast<SkyboxType>(skyboxComponent["Type"].as<uint32_t>());
+            sc.environmentHandle = { skyboxComponent["Skybox GUID"].as<xg::Guid>() };
+        }
+
+        auto cameraComponent = entity["Camera component"];
+        if (cameraComponent)
+        {
+            auto& cc = entityPtr->AddComponent<CameraComponent>();
+            cc.front = cameraComponent["Front"].as<glm::vec3>();
+            cc.worldUp = cameraComponent["World up"].as<glm::vec3>();
+            cc.up = cameraComponent["Up"].as<glm::vec3>();
+            cc.zNear = cameraComponent["Z near"].as<float>();
+            cc.zFar = cameraComponent["Z far"].as<float>();
+            cc.aspectRatio = cameraComponent["Aspect ratio"].as<float>();
+            cc.fov = cameraComponent["FOV"].as<float>();
+            cc.movementSpeed = cameraComponent["Movement speed"].as<float>();
+            cc.sensitivity = cameraComponent["Sensitivity"].as<float>();
+            cc.isActive = cameraComponent["Active"].as<bool>();
+            cc.isPrimary = cameraComponent["Primary"].as<bool>();
+        }
+    }
+
+    return true;
 }
 
 void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_ptr<Entity>& entity)
@@ -244,8 +328,7 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
     R_CORE_ASSERT(entity->HasComponent<TagComponent>(), "");
 
     output << YAML::BeginMap;
-    output << YAML::Key << "Entity";
-    output << YAML::BeginSeq;
+    output << YAML::Key << "Entity" << YAML::Value << YAML::BeginMap;
 
     SerializeComponent<TagComponent>(output, entity, "Tag component", [&](const auto& component)
     {
@@ -262,11 +345,11 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
 
     SerializeComponent<MeshComponent>(output, entity, "Mesh component", [&](const auto& component)
     {
-        SerializeKeyValue(output, "Mesh GUID", component.GetMesh().guid);
-        SerializeKeyValue(output, "Material GUID", component.GetMaterial().guid);
-        SerializeKeyValue(output, "Is visible", component.IsVisible());
-        sceneAssets.insert(component.GetMesh().guid);
-        SaveMaterial(component.GetMaterial());
+        SerializeKeyValue(output, "Mesh GUID", component.mesh.guid);
+        SerializeKeyValue(output, "Material GUID", component.material.guid);
+        SerializeKeyValue(output, "Is visible", component.isVisible);
+        sceneAssets.insert(component.mesh.guid);
+        SaveMaterial(component.material);
     });
 
     SerializeComponent<LightComponent>(output, entity, "Light component", [&](const auto& component)
@@ -274,6 +357,8 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
         SerializeKeyValue(output, "Type", static_cast<int>(component.type));
         SerializeKeyValue(output, "Color", component.color);
         SerializeKeyValue(output, "Intensity", component.intensity);
+        SerializeKeyValue(output, "Outer Radius", component.outerRadius);
+        SerializeKeyValue(output, "Inner Radius", component.innerRadius);
     });
 
     SerializeComponent<SkyboxComponent>(output, entity, "Skybox component", [&](const auto& component)
@@ -298,7 +383,7 @@ void SceneSerializer::SerializeEntity(YAML::Emitter& output, const std::shared_p
         SerializeKeyValue(output, "Primary", component.isPrimary);
     });
 
-    output << YAML::EndSeq;
+    output << YAML::EndMap;
     output << YAML::EndMap;
 
     for (const auto& child : entity->GetChildren())
@@ -327,4 +412,89 @@ void SceneSerializer::SaveMaterial(const AssetHandle& handle)
     sceneAssets.insert(assetPtr->textureData.ao.guid);
 
     sceneAssets.insert(handle.guid);
+}
+
+void SceneSerializer::LoadDependencies(const std::vector<std::shared_ptr<AssetDependency>>& assetDependencies)
+{
+    for (const auto dep : assetDependencies)
+    {
+        switch (dep->type)
+        {
+            case AssetType::MESH:
+            {
+                MeshLoader loader;
+                loader.LoadWithGUID(dep->path, dep->guid);
+                break;
+            }
+            case AssetType::ENVIRONMENT_MAP:
+            {
+                EnvironmentMapLoader loader;
+                loader.LoadWithGUID(dep->path, dep->guid);
+                break;
+            }
+            case AssetType::SHADER:
+                break;
+            case AssetType::IMAGE:
+            {
+                TextureLoader loader;
+                loader.LoadWithGUID(dep->path, {}, dep->guid);
+                break;
+            }
+            case AssetType::MATERIAL:
+            {
+                MaterialLoader loader;
+                loader.LoadWithGUID(dep->guid);
+                break;
+            }
+            default:
+            R_CORE_ASSERT(false, "")
+        }
+    }
+}
+
+void SceneSerializer::DeserializeAssets(YAML::Node& node)
+{
+    auto assets = node["Assets"];
+    std::vector<std::shared_ptr<AssetDependency>> dependencies;
+
+    for (auto assetIt : assets)
+    {
+        auto asset = assetIt["Asset"];
+
+        AssetType type = static_cast<AssetType>(asset["Type"].as<uint32_t>());
+        std::shared_ptr<AssetDependency> dependency;
+        if (type == AssetType::MATERIAL)
+        {
+            dependency = std::make_shared<MaterialAssetDependency>();
+        }
+        else
+        {
+            dependency = std::make_shared<AssetDependency>();
+        }
+
+        dependency->type = type;
+        dependency->guid = asset["GUID"].as<xg::Guid>();
+        dependency->path = asset["Path"].as<std::string>();
+
+        if (type == AssetType::MATERIAL)
+        {
+            auto materialDependency = std::static_pointer_cast<MaterialAssetDependency>(dependency);
+            R_CORE_ASSERT(materialDependency, "");
+            auto textureData = asset["Texture Data"];
+            materialDependency->albedoGuid = textureData["Albedo GUID"].as<xg::Guid>();
+            materialDependency->normalGuid = textureData["Normal GUID"].as<xg::Guid>();
+            materialDependency->roughnessGuid = textureData["Roughness GUID"].as<xg::Guid>();
+            materialDependency->metallicGuid = textureData["Metallic GUID"].as<xg::Guid>();
+            materialDependency->aoGuid = textureData["AO GUID"].as<xg::Guid>();
+
+            auto materialData = asset["Material Data"];
+            materialDependency->albedo = materialData["Albedo"].as<glm::vec3>();
+            materialDependency->metallic = materialData["Metallic"].as<float>();
+            materialDependency->roughness = materialData["Roughness"].as<float>();
+        }
+
+        dependencies.push_back(dependency);
+    }
+
+    LoadDependencies(dependencies);
 }

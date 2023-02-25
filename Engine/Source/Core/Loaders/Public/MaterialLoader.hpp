@@ -9,6 +9,7 @@ namespace RightEngine
     {
     public:
         AssetHandle Load();
+        AssetHandle LoadWithGUID(const xg::Guid& guid);
 
     private:
 

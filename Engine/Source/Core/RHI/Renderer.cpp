@@ -65,7 +65,7 @@ GPU_API Renderer::GetAPI()
 
 void Renderer::Draw(const MeshComponent& meshComponent)
 {
-    const auto mesh = AssetManager::Get().GetAsset<MeshNode>(meshComponent.GetMesh());
+    const auto mesh = AssetManager::Get().GetAsset<MeshNode>(meshComponent.mesh);
     Draw(mesh);
 }
 
