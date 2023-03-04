@@ -575,9 +575,10 @@ void EnvironmentMapLoader::ComputeLUT()
     R_CORE_TRACE("Finished computing BRDF map for texture \"{0}\"", loaderContext.path);
 }
 
-AssetHandle EnvironmentMapLoader::FinishLoading()
+AssetHandle EnvironmentMapLoader::FinishLoading(const xg::Guid& guid)
 {
-    return manager->CacheAsset(environmentContext, loaderContext.path, AssetType::ENVIRONMENT_MAP);
+    R_CORE_ASSERT(manager, "")
+    return manager->CacheAsset(environmentContext, loaderContext.path, AssetType::ENVIRONMENT_MAP, guid);
 }
 
 AssetHandle EnvironmentMapLoader::_Load(const std::string& path, const xg::Guid& guid, const bool flipVertically)
@@ -589,7 +590,7 @@ AssetHandle EnvironmentMapLoader::_Load(const std::string& path, const xg::Guid&
     ComputeIrradianceMap();
     ComputeRadianceMap();
     ComputeLUT();
-    return FinishLoading();
+    return FinishLoading(guid);
 }
 
 AssetHandle EnvironmentMapLoader::LoadWithGUID(const std::string& path, const xg::Guid& guid, bool flipVertically)

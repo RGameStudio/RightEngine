@@ -40,7 +40,7 @@ namespace RightEngine
         void ComputeIrradianceMap();
         void ComputeRadianceMap();
         void ComputeLUT();
-        AssetHandle FinishLoading();
+        AssetHandle FinishLoading(const xg::Guid& guid);
         AssetHandle _Load(const std::string& path, const xg::Guid& guid, bool flipVertically);
 
         std::shared_ptr<EnvironmentContext> environmentContext;

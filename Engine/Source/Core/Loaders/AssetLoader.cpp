@@ -10,6 +10,7 @@ void AssetLoader::OnRegister(AssetManager* aManager)
 
 void AssetLoader::RemoveAsset(const AssetHandle& handle)
 {
+    R_CORE_ASSERT(manager, "")
     manager->RemoveAsset(handle);
 }
 

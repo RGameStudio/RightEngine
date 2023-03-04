@@ -177,5 +177,6 @@ AssetHandle TextureLoader::_Load(const std::string& path,
     descriptor.type = options.type;
     auto texture = Device::Get()->CreateTexture(descriptor, data);
     texture->SetSampler(Device::Get()->CreateSampler({}));
+    R_CORE_ASSERT(manager, "")
     return manager->CacheAsset(texture, path, AssetType::IMAGE, guid);
 }

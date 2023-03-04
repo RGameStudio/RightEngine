@@ -1,11 +1,11 @@
 #include "EntryPoint.hpp"
-#include "SandboxLayer.hpp"
+#include "GameLayer.hpp"
 
-static std::shared_ptr<SandboxLayer> layer;
+static std::shared_ptr<GameLayer> layer;
 
 void GameApplication::OnStart()
 {
-    layer = std::make_shared<SandboxLayer>();
+    layer = std::make_shared<GameLayer>();
     RightEngine::Application::Get().PushLayer(layer);
 }
 

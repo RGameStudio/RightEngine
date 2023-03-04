@@ -234,6 +234,7 @@ AssetHandle MeshLoader::Load(const std::shared_ptr<Buffer>& vertexBuffer,
 
     auto meshNode = std::make_shared<MeshNode>();
     meshNode->meshes.push_back(mesh);
+    R_CORE_ASSERT(manager, "")
     return manager->CacheAsset(meshNode, "", AssetType::MESH);
 }
 
@@ -267,5 +268,6 @@ AssetHandle MeshLoader::_Load(const std::string& path, const xg::Guid& guid)
     auto meshTree = std::make_shared<MeshNode>();
     ProcessNode(scene->mRootNode, scene, meshTree);
 
+    R_CORE_ASSERT(manager, "")
     return manager->CacheAsset(meshTree, path, AssetType::MESH, guid);
 }

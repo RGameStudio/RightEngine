@@ -3,6 +3,9 @@
 #include "Scene.hpp"
 #include <yaml-cpp/yaml.h>
 #include <unordered_map>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace RightEngine
 {
@@ -21,7 +24,7 @@ namespace RightEngine
         xg::Guid metallicGuid;
         xg::Guid aoGuid;
 
-        glm::vec3 albedo;
+        glm::vec4 albedo;
         float roughness;
         float metallic;
     };
@@ -31,8 +34,13 @@ namespace RightEngine
     public:
         SceneSerializer(const std::shared_ptr<Scene>& aScene);
 
-        bool Serialize(const std::string& path);
-        bool Deserialize(const std::string& path);
+        /*
+         * Path must be an absolute or relative to current working directory
+         */
+        bool Serialize(const fs::path& path);
+        bool Deserialize(const fs::path& path);
+
+        std::shared_ptr<Scene> GetScene() { R_CORE_ASSERT(scene, ""); return scene; }
 
     private:
         void SerializeEntity(YAML::Emitter& output, const std::shared_ptr<Entity>& entity);

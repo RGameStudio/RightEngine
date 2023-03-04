@@ -211,7 +211,7 @@ SceneSerializer::SceneSerializer(const std::shared_ptr<Scene>& scene) : scene(sc
 {
 }
 
-bool SceneSerializer::Serialize(const std::string& path)
+bool SceneSerializer::Serialize(const fs::path& path)
 {
     YAML::Emitter output;
     output << YAML::BeginMap;
@@ -224,23 +224,22 @@ bool SceneSerializer::Serialize(const std::string& path)
     output << YAML::EndSeq;
     output << YAML::EndMap;
 
-    auto aPath = Path::ConvertEnginePathToOSPath(path);
-    std::ofstream fout(aPath);
+    std::ofstream fout(path);
     fout << output.c_str();
-    R_CORE_INFO("Serialized scene to {} successfully!", Path::ConvertEnginePathToOSPath(path));
+    R_CORE_INFO("Serialized scene to {} successfully!", path.generic_u8string().c_str());
     return true;
 }
 
-bool SceneSerializer::Deserialize(const std::string& path)
+bool SceneSerializer::Deserialize(const fs::path& path)
 {
     YAML::Node data;
     try
     {
-        data = YAML::LoadFile(Path::ConvertEnginePathToOSPath(path));
+        data = YAML::LoadFile(path.generic_u8string());
     }
     catch (YAML::ParserException e)
     {
-        R_CORE_ERROR("Failed to load scene file '{0}'\n     {1}", path, e.what());
+        R_CORE_ERROR("Failed to load scene file '{0}'\n     {1}", path.generic_u8string().c_str(), e.what());
         return false;
     }
 
@@ -416,34 +415,48 @@ void SceneSerializer::SaveMaterial(const AssetHandle& handle)
 
 void SceneSerializer::LoadDependencies(const std::vector<std::shared_ptr<AssetDependency>>& assetDependencies)
 {
+    // TODO: We can use fork-join model here to make asset loading faster
+    auto& am = AssetManager::Get();
     for (const auto dep : assetDependencies)
     {
         switch (dep->type)
         {
             case AssetType::MESH:
             {
-                MeshLoader loader;
-                loader.LoadWithGUID(dep->path, dep->guid);
+                auto loader = am.GetLoader<MeshLoader>();
+                loader->LoadWithGUID(dep->path, dep->guid);
                 break;
             }
             case AssetType::ENVIRONMENT_MAP:
             {
-                EnvironmentMapLoader loader;
-                loader.LoadWithGUID(dep->path, dep->guid);
+                auto loader = am.GetLoader<EnvironmentMapLoader>();
+                loader->LoadWithGUID(dep->path, dep->guid);
                 break;
             }
             case AssetType::SHADER:
                 break;
             case AssetType::IMAGE:
             {
-                TextureLoader loader;
-                loader.LoadWithGUID(dep->path, {}, dep->guid);
+                auto loader = am.GetLoader<TextureLoader>();
+                loader->LoadWithGUID(dep->path, {}, dep->guid);
                 break;
             }
             case AssetType::MATERIAL:
             {
-                MaterialLoader loader;
-                loader.LoadWithGUID(dep->guid);
+                auto loader = am.GetLoader<MaterialLoader>();
+                const auto ah = loader->LoadWithGUID(dep->guid);
+                auto material = am.GetAsset<Material>(ah);
+                R_CORE_ASSERT(material, "");
+                auto materialDep = std::static_pointer_cast<MaterialAssetDependency>(dep);
+                R_CORE_ASSERT(materialDep, "");
+                material->textureData.albedo = { materialDep->albedoGuid };
+                material->textureData.normal = { materialDep->normalGuid };
+                material->textureData.roughness = { materialDep->roughnessGuid };
+                material->textureData.metallic = { materialDep->metallicGuid };
+                material->textureData.ao = { materialDep->aoGuid };
+                material->materialData.albedo = materialDep->albedo;
+                material->materialData.metallic = materialDep->metallic;
+                material->materialData.roughness = materialDep->roughness;
                 break;
             }
             default:
@@ -488,7 +501,7 @@ void SceneSerializer::DeserializeAssets(YAML::Node& node)
             materialDependency->aoGuid = textureData["AO GUID"].as<xg::Guid>();
 
             auto materialData = asset["Material Data"];
-            materialDependency->albedo = materialData["Albedo"].as<glm::vec3>();
+            materialDependency->albedo = materialData["Albedo"].as<glm::vec4>();
             materialDependency->metallic = materialData["Metallic"].as<float>();
             materialDependency->roughness = materialData["Roughness"].as<float>();
         }
