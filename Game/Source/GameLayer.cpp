@@ -21,6 +21,8 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+#include "Path.hpp"
+
 using namespace RightEngine;
 
 namespace
@@ -46,6 +48,7 @@ namespace
         bool isViewportHovered{ false };
         std::shared_ptr<Entity> selectedEntity;
         ImGuizmo::OPERATION gizmoType{ ImGuizmo::TRANSLATE };
+        std::filesystem::path scenePath;
     };
 
     LayerSceneData sceneData;
@@ -280,8 +283,18 @@ void GameLayer::OnImGuiRender()
         {
             if (ImGui::MenuItem("Save"))
             {
+                if (sceneData.scenePath.empty())
+                {
+                    R_WARN("Scene path wasn't set!");
+                }
                 SceneSerializer serializer(scene);
-                serializer.Serialize(scene->GetName() + ".yaml");
+                serializer.Serialize(sceneData.scenePath);
+            }
+            if (ImGui::MenuItem("Save As"))
+            {
+                sceneData.scenePath = Filesystem::SaveFileDialog({ "All Files(*.*)", "*.*"});
+                SceneSerializer serializer(scene);
+                serializer.Serialize(sceneData.scenePath);
             }
             if (ImGui::MenuItem("Load"))
             {
@@ -290,8 +303,9 @@ void GameLayer::OnImGuiRender()
                 if (!path.empty())
                 {
                     serializer.Deserialize(path.generic_u8string());
+                    sceneData.scenePath = path;
+                	newScene = serializer.GetScene();
                 }
-                newScene = serializer.GetScene();
             }
             ImGui::EndMenu();
         }
@@ -428,7 +442,13 @@ bool GameLayer::OnEvent(const Event& event)
 
 void GameLayer::LoadDefaultScene()
 {
+    if (!fs::exists(DEFAULT_SCENE_PATH))
+    {
+        R_CORE_ASSERT(false, "No default scene was found!");
+        return;
+    }
     SceneSerializer serializer(Scene::Create());
     R_CORE_ASSERT(serializer.Deserialize(DEFAULT_SCENE_PATH), "");
     scene = serializer.GetScene();
+    sceneData.scenePath = DEFAULT_SCENE_PATH;
 }

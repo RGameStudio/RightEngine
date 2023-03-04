@@ -43,7 +43,7 @@ add_custom_command(
 
 add_dependencies(Game CopyShaderFilesToGame)
 
-set(ASSETS_DIR ${CMAKE_SOURCE_DIR}/Game/Resources)
+set(ASSETS_DIR ${CMAKE_SOURCE_DIR}/Game/Assets)
 
 add_custom_target(CopyResourceFilesToGame ALL DEPENDS ${ASSETS_DIR})
 
@@ -58,3 +58,5 @@ add_dependencies(Game CopyResourceFilesToGame)
 
 set_target_properties(CopyResourceFilesToGame PROPERTIES FOLDER ${CUSTOM_TARGET_DIR_NAME})
 set_target_properties(CopyShaderFilesToGame PROPERTIES FOLDER ${CUSTOM_TARGET_DIR_NAME})
+
+add_compile_definitions("ASSETS_DIR=\"${ASSETS_DIR}\"")

@@ -319,6 +319,7 @@ bool SceneSerializer::Deserialize(const fs::path& path)
         }
     }
 
+    R_CORE_INFO("Loaded scene {} successfully!", path.generic_u8string().c_str());
     return true;
 }
 

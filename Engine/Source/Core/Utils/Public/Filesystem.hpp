@@ -9,6 +9,7 @@ namespace RightEngine
     {
     public:
         static std::filesystem::path OpenFileDialog(const std::vector<std::string>& filters = {});
+        static std::filesystem::path SaveFileDialog(const std::vector<std::string>& extensions = {});
 
         static void Init();
 

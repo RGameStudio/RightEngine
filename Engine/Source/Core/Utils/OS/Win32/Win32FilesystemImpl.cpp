@@ -24,13 +24,14 @@ namespace
         filterSS << "\0";
         return filterSS.str();
     }
+
+    constexpr int MAX_PATH_SIZE = 260;
 }
 
 std::filesystem::path Win32FilesystemImpl::OpenFilesystemDialog(const std::vector<std::string>& filters)
 {
-
     OPENFILENAMEA ofn;       // common dialog box structure
-    CHAR szFile[260] = { 0 };       // if using TCHAR macros
+    CHAR szFile[MAX_PATH_SIZE] = { 0 };       // if using TCHAR macros
 
     // Initialize OPENFILENAME
     ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -43,6 +44,30 @@ std::filesystem::path Win32FilesystemImpl::OpenFilesystemDialog(const std::vecto
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
     if (GetOpenFileNameA(&ofn) == TRUE)
+    {
+        std::string fp = ofn.lpstrFile;
+        std::replace(fp.begin(), fp.end(), '\\', '/');
+        return std::filesystem::path(fp);
+    }
+
+    return std::filesystem::path();
+}
+
+std::filesystem::path Win32FilesystemImpl::SaveFilesystemDialog(const std::vector<std::string>& extensions)
+{
+    OPENFILENAMEA ofn;
+    CHAR szFile[MAX_PATH_SIZE] = { 0 };
+
+    ZeroMemory(&ofn, sizeof(OPENFILENAME));
+    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetNativeHandle()));
+    ofn.lpstrFile = szFile;
+    ofn.nMaxFile = sizeof(szFile);
+    ofn.lpstrFilter = TEXT("All Files(*.*)\0(*.*)");
+    ofn.nFilterIndex = 1;
+    ofn.Flags = OFN_EXPLORER | OFN_OVERWRITEPROMPT;
+
+    if (GetSaveFileName(&ofn) == TRUE)
     {
         std::string fp = ofn.lpstrFile;
         std::replace(fp.begin(), fp.end(), '\\', '/');
