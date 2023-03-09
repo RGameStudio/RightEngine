@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB_RECURSE SOURCE_FILES
         "${CMAKE_SOURCE_DIR}/Engine/Source/*.cpp"
         "${CMAKE_SOURCE_DIR}/Engine/Source/*.hpp"
-        "${CMAKE_SOURCE_DIR}/Engine/Source/*.vert"
-        "${CMAKE_SOURCE_DIR}/Engine/Source/*.frag"
+        "${CMAKE_SOURCE_DIR}/Engine/Assets/Shaders/*.vert"
+        "${CMAKE_SOURCE_DIR}/Engine/Assets/Shaders/*.frag"
         )
 
 add_library(Engine STATIC ${SOURCE_FILES})
@@ -20,3 +20,6 @@ foreach(FILE ${SOURCE_FILES})
     # Create the source group
     source_group(${DIR} FILES ${FILE})
 endforeach()
+
+set(ENGINE_ASSETS_DIR ${CMAKE_SOURCE_DIR}/Engine/Assets)
+add_compile_definitions("ENGINE_ASSETS_DIR=\"${ENGINE_ASSETS_DIR}\"")

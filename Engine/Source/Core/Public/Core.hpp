@@ -12,6 +12,9 @@
 #include "Layer.hpp"
 #include "Application.hpp"
 #include "Types.hpp"
+#include "Path.hpp"
 
 extern RightEngine::GPU_API GGPU_API;
 
+extern std::string G_ASSET_DIR;
+extern std::string G_ENGINE_ASSET_DIR;

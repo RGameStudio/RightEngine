@@ -8,6 +8,7 @@
 bool GShouldStop = true;
 LaunchMode GLaunchMode = LaunchMode::Game;
 RightEngine::GPU_API GGPU_API = RightEngine::GPU_API::None;
+std::string G_ENGINE_ASSET_DIR = ENGINE_ASSETS_DIR;
 
 namespace RightEngine
 {

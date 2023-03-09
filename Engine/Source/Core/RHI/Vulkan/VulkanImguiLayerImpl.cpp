@@ -8,6 +8,7 @@
 #include "VulkanGraphicsPipeline.hpp"
 #include "VulkanTexture.hpp"
 #include "VulkanSampler.hpp"
+#include "Path.hpp"
 #include <imgui.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <backends/imgui_impl_glfw.h>
@@ -48,7 +49,7 @@ void VulkanImguiLayerImpl::OnAttach(const std::shared_ptr<GraphicsPipeline>& pip
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.Fonts->AddFontFromFileTTF("Assets/Fonts/Roboto-Regular.ttf", 20);
+    io.Fonts->AddFontFromFileTTF(Path::Absolute("/Fonts/Roboto-Regular.ttf").c_str(), 20);
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking

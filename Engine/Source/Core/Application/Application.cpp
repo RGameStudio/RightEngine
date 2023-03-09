@@ -45,6 +45,7 @@ namespace RightEngine
         manager.RegisterLoader<MaterialLoader>(std::make_shared<MaterialLoader>());
 
         Filesystem::Init();
+        Path::Init();
 
         static bool wasCalled = false;
         R_CORE_ASSERT(!wasCalled, "PostInit was called twice!");

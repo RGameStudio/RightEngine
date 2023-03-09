@@ -130,10 +130,10 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
 
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;
-    vertexShader.path = "/Assets/Shaders/Utils/envmap_to_cubemap.vert";
+    vertexShader.path = "/Engine/Shaders/Utils/envmap_to_cubemap.vert";
     vertexShader.type = ShaderType::VERTEX;
     ShaderDescriptor fragmentShader;
-    fragmentShader.path = "/Assets/Shaders/Utils/envmap_to_cubemap.frag";
+    fragmentShader.path = "/Engine/Shaders/Utils/envmap_to_cubemap.frag";
     fragmentShader.type = ShaderType::FRAGMENT;
     shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
     VertexBufferLayout layout;
@@ -253,10 +253,10 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
 {
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;
-    vertexShader.path = "/Assets/Shaders/Utils/envmap_to_irr_map.vert";
+    vertexShader.path = "/Engine/Shaders/Utils/envmap_to_irr_map.vert";
     vertexShader.type = ShaderType::VERTEX;
     ShaderDescriptor fragmentShader;
-    fragmentShader.path = "/Assets/Shaders/Utils/envmap_to_irr_map.frag";
+    fragmentShader.path = "/Engine/Shaders/Utils/envmap_to_irr_map.frag";
     fragmentShader.type = ShaderType::FRAGMENT;
     shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
     VertexBufferLayout layout;
@@ -369,10 +369,10 @@ void EnvironmentMapLoader::ComputeRadianceMap()
 {
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;
-    vertexShader.path = "/Assets/Shaders/Utils/envmap_to_radiance_map.vert";
+    vertexShader.path = "/Engine/Shaders/Utils/envmap_to_radiance_map.vert";
     vertexShader.type = ShaderType::VERTEX;
     ShaderDescriptor fragmentShader;
-    fragmentShader.path = "/Assets/Shaders/Utils/envmap_to_radiance_map.frag";
+    fragmentShader.path = "/Engine/Shaders/Utils/envmap_to_radiance_map.frag";
     fragmentShader.type = ShaderType::FRAGMENT;
     shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
     VertexBufferLayout layout;
@@ -509,10 +509,10 @@ void EnvironmentMapLoader::ComputeLUT()
 {
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;
-    vertexShader.path = "/Assets/Shaders/Utils/brdf.vert";
+    vertexShader.path = "/Engine/Shaders/Utils/brdf.vert";
     vertexShader.type = ShaderType::VERTEX;
     ShaderDescriptor fragmentShader;
-    fragmentShader.path = "/Assets/Shaders/Utils/brdf.frag";
+    fragmentShader.path = "/Engine/Shaders/Utils/brdf.frag";
     fragmentShader.type = ShaderType::FRAGMENT;
     shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
     VertexBufferLayout layout;

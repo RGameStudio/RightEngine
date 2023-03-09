@@ -32,31 +32,5 @@ target_link_libraries(Game
         ${THIRD_PARTY_LIB}
         )
 
-add_custom_target(CopyShaderFilesToGame ALL DEPENDS ${GLSL_ROOT_DIR})
-
-add_custom_command(
-        TARGET CopyShaderFilesToGame
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders
-        ${CMAKE_CURRENT_BINARY_DIR}/Assets/Shaders
-        DEPENDS ${GLSL_SRC})
-
-add_dependencies(Game CopyShaderFilesToGame)
-
 set(ASSETS_DIR ${CMAKE_SOURCE_DIR}/Game/Assets)
-
-add_custom_target(CopyResourceFilesToGame ALL DEPENDS ${ASSETS_DIR})
-
-add_custom_command(
-        TARGET CopyResourceFilesToGame
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${ASSETS_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}/Assets/
-        DEPENDS ${ASSETS_DIR})
-
-add_dependencies(Game CopyResourceFilesToGame)
-
-set_target_properties(CopyResourceFilesToGame PROPERTIES FOLDER ${CUSTOM_TARGET_DIR_NAME})
-set_target_properties(CopyShaderFilesToGame PROPERTIES FOLDER ${CUSTOM_TARGET_DIR_NAME})
-
 add_compile_definitions("ASSETS_DIR=\"${ASSETS_DIR}\"")

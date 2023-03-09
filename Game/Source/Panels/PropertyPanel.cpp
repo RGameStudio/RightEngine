@@ -14,8 +14,8 @@ using namespace RightEngine;
 namespace
 {
     AssetHandle editorDefaultTexture;
-    const std::string texturesDir = "/Assets/Textures/";
-    const auto modelsDir = "/Assets/Models/";
+    const std::string texturesDir = "/Textures/";
+    const auto modelsDir = "/Models/";
     bool isDisplayCalled = false;
 
     void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
@@ -88,7 +88,7 @@ namespace
     {
         auto filename = String::Split(filePath, "/").back();
         const std::filesystem::path from = filePath;
-        const std::filesystem::path to = Path::ConvertEnginePathToOSPath("/Assets/Textures/") + filename;
+        const std::filesystem::path to = Path::Absolute("/Assets/Textures/") + filename;
         R_CORE_TRACE("{0}", filename);
         try
         {
@@ -172,7 +172,7 @@ PropertyPanel::PropertyPanel(const std::shared_ptr<Scene>& aScene)
 
 void PropertyPanel::Init()
 {
-    editorDefaultTexture = AssetManager::Get().GetLoader<TextureLoader>()->Load("/Assets/Textures/editor_default_texture.png");
+    editorDefaultTexture = AssetManager::Get().GetLoader<TextureLoader>()->Load("/Textures/editor_default_texture.png");
     AssetManager::Get().GetAsset<Texture>(editorDefaultTexture)->SetSampler(Device::Get()->CreateSampler({}));
 }
 

@@ -59,7 +59,7 @@ std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::LoadTextureData
                                                                                  const TextureLoaderOptions& options) const
 {
 
-    std::ifstream file(Path::ConvertEnginePathToOSPath(path).c_str(), std::ios::binary | std::ios::ate);
+    std::ifstream file(Path::Absolute(path).c_str(), std::ios::binary | std::ios::ate);
     if (!file.is_open())
     {
         R_CORE_ASSERT(false, "");

@@ -16,3 +16,5 @@ void GameApplication::OnUpdate()
 void GameApplication::OnDestroy()
 {
 }
+
+std::string G_ASSET_DIR = ASSETS_DIR;

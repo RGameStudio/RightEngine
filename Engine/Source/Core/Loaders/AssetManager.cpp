@@ -15,7 +15,7 @@ const AssetHandle& AssetManager::GetDefaultTexture() const
 
     if (!wasLoaded)
     {
-        defaultTexture = GetLoader<TextureLoader>()->Load("/Assets/Textures/editor_default_image.png");
+        defaultTexture = GetLoader<TextureLoader>()->Load("/Textures/editor_default_image.png");
         wasLoaded = true;
     }
 

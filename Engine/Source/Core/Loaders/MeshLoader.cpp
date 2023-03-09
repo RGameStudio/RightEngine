@@ -249,7 +249,7 @@ AssetHandle MeshLoader::_Load(const std::string& path, const xg::Guid& guid)
     std::string meshName = path.substr(lastDelimIndex, path.size() - 1 - lastDelimIndex);
     meshDir = path.substr(0, lastDelimIndex);
     Assimp::Importer importer;
-    auto scene = importer.ReadFile(Path::ConvertEnginePathToOSPath(path),
+    auto scene = importer.ReadFile(Path::Absolute(path),
                                    aiProcess_Triangulate
                                    | aiProcess_GenSmoothNormals
                                    | aiProcess_FlipUVs

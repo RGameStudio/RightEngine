@@ -68,8 +68,8 @@ VulkanShader::VulkanShader(const std::shared_ptr<Device>& device, const ShaderPr
 ShaderProgramSource VulkanShader::ParseShaders(const std::string& vertexShaderPath,
                                                const std::string& fragmentShaderPath)
 {
-    std::ifstream vertexShaderStream(Path::ConvertEnginePathToOSPath(vertexShaderPath));
-    std::ifstream fragmentShaderStream(Path::ConvertEnginePathToOSPath(fragmentShaderPath));
+    std::ifstream vertexShaderStream(Path::Absolute(vertexShaderPath));
+    std::ifstream fragmentShaderStream(Path::Absolute(fragmentShaderPath));
 
     if (!vertexShaderStream.is_open())
     {

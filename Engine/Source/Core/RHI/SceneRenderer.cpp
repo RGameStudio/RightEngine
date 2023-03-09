@@ -89,10 +89,10 @@ void SceneRenderer::CreateShaders()
     {
         ShaderProgramDescriptor shaderProgramDescriptor;
         ShaderDescriptor vertexShader;
-        vertexShader.path = "/Assets/Shaders/pbr.vert";
+        vertexShader.path = "/Engine/Shaders/pbr.vert";
         vertexShader.type = ShaderType::VERTEX;
         ShaderDescriptor fragmentShader;
-        fragmentShader.path = "/Assets/Shaders/pbr.frag";
+        fragmentShader.path = "/Engine/Shaders/pbr.frag";
         fragmentShader.type = ShaderType::FRAGMENT;
         shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
         VertexBufferLayout layout;
@@ -115,10 +115,10 @@ void SceneRenderer::CreateShaders()
     {
         ShaderProgramDescriptor skyboxShaderDesc{};
         ShaderDescriptor vertexShader;
-        vertexShader.path = "/Assets/Shaders/skybox.vert";
+        vertexShader.path = "/Engine/Shaders/skybox.vert";
         vertexShader.type = ShaderType::VERTEX;
         ShaderDescriptor fragmentShader;
-        fragmentShader.path = "/Assets/Shaders/skybox.frag";
+        fragmentShader.path = "/Engine/Shaders/skybox.frag";
         fragmentShader.type = ShaderType::FRAGMENT;
         skyboxShaderDesc.shaders = { vertexShader, fragmentShader };
         VertexBufferLayout skyboxLayout;
@@ -133,10 +133,10 @@ void SceneRenderer::CreateShaders()
     {
         ShaderProgramDescriptor postprocessShaderDesc{};
         ShaderDescriptor vertexShader;
-        vertexShader.path = "/Assets/Shaders/postprocess.vert";
+        vertexShader.path = "/Engine/Shaders/postprocess.vert";
         vertexShader.type = ShaderType::VERTEX;
         ShaderDescriptor fragmentShader;
-        fragmentShader.path = "/Assets/Shaders/postprocess.frag";
+        fragmentShader.path = "/Engine/Shaders/postprocess.frag";
         fragmentShader.type = ShaderType::FRAGMENT;
         postprocessShaderDesc.shaders = { vertexShader, fragmentShader };
         VertexBufferLayout postprocessLayout;

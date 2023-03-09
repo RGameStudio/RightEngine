@@ -29,6 +29,7 @@ set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
              ${GLSL_ROOT_DIR}/Utils/envmap_to_cubemap.frag
              ${GLSL_ROOT_DIR}/Utils/envmap_to_cubemap.vert
         )
+
 if (WIN32)
     set(Vulkan_LIBRARY $ENV{Vulkan_LIBRARY})
     find_package(Vulkan REQUIRED FATAL_ERROR)
@@ -165,5 +166,6 @@ set_target_properties(hash-library PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_N
 set_target_properties(spdlog PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(uninstall PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 
-add_subdirectory(Engine)
 add_subdirectory(Game)
+add_subdirectory(Engine)
+add_subdirectory(Tests)

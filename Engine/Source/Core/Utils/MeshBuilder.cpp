@@ -7,7 +7,7 @@ AssetHandle MeshBuilder::Cube()
 {
     if (!cube.wasLoaded)
     {
-        cube.handle = AssetManager::Get().GetLoader<MeshLoader>()->Load("/Assets/Models/default_cube.fbx");
+        cube.handle = AssetManager::Get().GetLoader<MeshLoader>()->Load("/Models/default_cube.fbx");
     }
 
     return cube.handle;
