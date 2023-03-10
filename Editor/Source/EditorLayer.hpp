@@ -3,10 +3,10 @@
 #include "Core.hpp"
 #include "Texture.hpp"
 
-class GameLayer : public RightEngine::Layer
+class EditorLayer : public RightEngine::Layer
 {
 public:
-    GameLayer(): Layer("Game") {}
+    EditorLayer(): Layer("Game") {}
 
     virtual void OnAttach() override;
     virtual void OnUpdate(float ts) override;

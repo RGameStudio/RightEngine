@@ -166,6 +166,6 @@ set_target_properties(hash-library PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_N
 set_target_properties(spdlog PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(uninstall PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 
-add_subdirectory(Game)
+add_subdirectory(Editor)
 add_subdirectory(Engine)
 add_subdirectory(Tests)

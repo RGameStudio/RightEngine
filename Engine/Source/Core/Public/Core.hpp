@@ -18,3 +18,4 @@ extern RightEngine::GPU_API GGPU_API;
 
 extern std::string G_ASSET_DIR;
 extern std::string G_ENGINE_ASSET_DIR;
+extern std::string G_CONFIG_DIR;

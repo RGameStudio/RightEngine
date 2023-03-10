@@ -14,13 +14,18 @@ void Path::Init()
     initialized = true;
     aliasMap = {
         { "/Engine", G_ENGINE_ASSET_DIR },
-        { "/", G_ASSET_DIR }
+        { "/Config", G_CONFIG_DIR },
+        { "/", G_ASSET_DIR },
     };
 }
 
 std::string Path::Absolute(const std::string& enginePath)
 {
     std::string fullPath;
+    if (enginePath == "/Config/imgui.ini")
+    {
+        int kek;
+    }
     for (const auto& [alias, path] : aliasMap)
     {
 	    if (enginePath.rfind(alias, 0) == 0)

@@ -49,13 +49,18 @@ void VulkanImguiLayerImpl::OnAttach(const std::shared_ptr<GraphicsPipeline>& pip
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    
     io.Fonts->AddFontFromFileTTF(Path::Absolute("/Fonts/Roboto-Regular.ttf").c_str(), 20);
+    iniFilePath = Path::Absolute("/Config/imgui.ini");
+    io.IniFilename = iniFilePath.c_str();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+
+    ImGui::LoadIniSettingsFromDisk(io.IniFilename);
 
     Application& app = Application::Get();
     GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow()->GetNativeHandle());
@@ -86,6 +91,8 @@ void VulkanImguiLayerImpl::OnAttach(const std::shared_ptr<GraphicsPipeline>& pip
 
 void VulkanImguiLayerImpl::OnDetach()
 {
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::SaveIniSettingsToDisk(io.IniFilename);
     vkDestroyRenderPass(VK_DEVICE()->GetDevice(), renderPass, nullptr);
     vkDestroyDescriptorPool(VK_DEVICE()->GetDevice(), imguiPool, nullptr);
     ImGui_ImplVulkan_Shutdown();

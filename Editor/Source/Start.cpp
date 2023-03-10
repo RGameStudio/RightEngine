@@ -1,11 +1,11 @@
 #include "EntryPoint.hpp"
-#include "GameLayer.hpp"
+#include "EditorLayer.hpp"
 
-static std::shared_ptr<GameLayer> layer;
+static std::shared_ptr<EditorLayer> layer;
 
 void GameApplication::OnStart()
 {
-    layer = std::make_shared<GameLayer>();
+    layer = std::make_shared<EditorLayer>();
     RightEngine::Application::Get().PushLayer(layer);
 }
 
@@ -18,3 +18,4 @@ void GameApplication::OnDestroy()
 }
 
 std::string G_ASSET_DIR = ASSETS_DIR;
+std::string G_CONFIG_DIR = CONFIG_DIR;

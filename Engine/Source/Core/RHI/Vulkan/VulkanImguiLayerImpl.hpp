@@ -26,5 +26,6 @@ namespace RightEngine
         VkRenderPass renderPass;
         VkDescriptorPool imguiPool;
         std::unordered_map<VkImageView, VkDescriptorSet> imageViewToDescriptorSet;
+        std::string iniFilePath;
     };
 }

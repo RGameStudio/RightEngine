@@ -1,4 +1,4 @@
-#include "GameLayer.hpp"
+#include "EditorLayer.hpp"
 #include "Renderer.hpp"
 #include "RendererCommand.hpp"
 #include "Entity.hpp"
@@ -101,7 +101,7 @@ namespace
     }
 }
 
-void GameLayer::OnAttach()
+void EditorLayer::OnAttach()
 {
     sceneData.propertyPanel.Init();
     sceneData.renderer = std::make_shared<SceneRenderer>();
@@ -110,7 +110,7 @@ void GameLayer::OnAttach()
     const auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetNativeHandle());
     int windowW, windowH;
     glfwGetFramebufferSize(window, &windowW, &windowH);
-    EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(GameLayer::OnEvent));
+    EventDispatcher::Get().Subscribe(MouseMovedEvent::descriptor, EVENT_CALLBACK(EditorLayer::OnEvent));
     sceneData.imGuiLayer = std::make_shared<ImGuiLayer>(sceneData.renderer->GetPass(PassType::UI));
     Application::Get().PushOverlay(sceneData.imGuiLayer);
     sceneData.renderer->SetUIPassCallback([&](const std::shared_ptr<CommandBuffer>& cmd)
@@ -123,7 +123,7 @@ void GameLayer::OnAttach()
     LoadDefaultScene();
 }
 
-void GameLayer::OnUpdate(float ts)
+void EditorLayer::OnUpdate(float ts)
 {
     if (newScene)
     {
@@ -226,7 +226,7 @@ void GameLayer::OnUpdate(float ts)
     sceneData.renderer->EndScene();
 }
 
-void GameLayer::OnImGuiRender()
+void EditorLayer::OnImGuiRender()
 {
     bool dockspaceOpen = true;
     ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
@@ -418,7 +418,7 @@ void GameLayer::OnImGuiRender()
     ImGui::End();
 }
 
-bool GameLayer::OnEvent(const Event& event)
+bool EditorLayer::OnEvent(const Event& event)
 {
     if (event.GetType() == MouseMovedEvent::descriptor)
     {
@@ -440,7 +440,7 @@ bool GameLayer::OnEvent(const Event& event)
     return false;
 }
 
-void GameLayer::LoadDefaultScene()
+void EditorLayer::LoadDefaultScene()
 {
     if (!fs::exists(DEFAULT_SCENE_PATH))
     {
