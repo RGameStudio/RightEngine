@@ -15,6 +15,7 @@
 #include "SceneSerializer.hpp"
 #include "MaterialLoader.hpp"
 #include "Filesystem.hpp"
+#include "Panels/ContentBrowserPanel.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -24,6 +25,7 @@
 #include "Path.hpp"
 
 using namespace RightEngine;
+using namespace editor;
 
 namespace
 {
@@ -414,6 +416,8 @@ void EditorLayer::OnImGuiRender()
     ImGui::Begin("Renderer settings");
     ImGui::DragFloat("Gamma", &sceneData.rendererSettings.gamma, 0.1, 1.0, 3.2);
     ImGui::End();
+
+    contentBrowser.OnImGuiRender();
 
     ImGui::End();
 }

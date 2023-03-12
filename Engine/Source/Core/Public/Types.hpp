@@ -3,6 +3,7 @@
 #define GLFW_INCLUDE_NONE
 
 #include <GLFW/glfw3.h>
+#include <filesystem>
 
 namespace RightEngine
 {
@@ -78,3 +79,5 @@ namespace RightEngine
         FRAMEBUFFER_OUT_OF_DATE,
     };
 }
+
+namespace fs = std::filesystem;

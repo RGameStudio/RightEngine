@@ -128,17 +128,31 @@ void VulkanImguiLayerImpl::End(const std::shared_ptr<CommandBuffer>& cmd)
 
 void VulkanImguiLayerImpl::Image(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1)
 {
+    const auto descSet = GetDescriptorSet(texture);
+    ImGui::Image(descSet, size, uv0, uv1);
+}
+
+void VulkanImguiLayerImpl::ImageButton(const std::shared_ptr<Texture>& texture,
+                                       const ImVec2& size,
+                                       const ImVec2& uv0,
+                                       const ImVec2& uv1)
+{
+    const auto descSet = GetDescriptorSet(texture);
+    ImGui::ImageButton(descSet, size, uv0, uv1);
+}
+
+VkDescriptorSet VulkanImguiLayerImpl::GetDescriptorSet(const std::shared_ptr<Texture>& texture)
+{
     R_CORE_ASSERT(texture->GetSampler() && texture->GetWidth() > 0 && texture->GetHeight() > 0, "")
-    const auto vkTexture = std::static_pointer_cast<VulkanTexture>(texture);
+	const auto vkTexture = std::static_pointer_cast<VulkanTexture>(texture);
     const auto vkSampler = std::static_pointer_cast<VulkanSampler>(vkTexture->GetSampler());
     if (imageViewToDescriptorSet.find(vkTexture->GetImageView()) == imageViewToDescriptorSet.end())
     {
         imageViewToDescriptorSet[vkTexture->GetImageView()] = ImGui_ImplVulkan_AddTexture(vkSampler->GetSampler(),
-                                                                                          vkTexture->GetImageView(),
-                                                                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            vkTexture->GetImageView(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
-    const auto descSet = imageViewToDescriptorSet[vkTexture->GetImageView()];
-    ImGui::Image(descSet, size, uv0, uv1);
+    return imageViewToDescriptorSet.at(vkTexture->GetImageView());
 }
 
 void ImGuiLayer::CreateImpl()

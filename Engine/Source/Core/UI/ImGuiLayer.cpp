@@ -41,3 +41,8 @@ void ImGuiLayer::Image(const std::shared_ptr<Texture>& texture, const ImVec2& si
 {
     impl->Image(texture, size, uv0, uv1);
 }
+
+void ImGuiLayer::ImageButton(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1)
+{
+    impl->ImageButton(texture, size, uv0, uv1);
+}

@@ -27,6 +27,11 @@ namespace RightEngine
                           const ImVec2& uv0 = ImVec2(0, 0),
                           const ImVec2& uv1 = ImVec2(1, 1));
 
+        static void ImageButton(const std::shared_ptr<Texture>& texture,
+            const ImVec2& size,
+            const ImVec2& uv0 = ImVec2(0, 0),
+            const ImVec2& uv1 = ImVec2(1, 1));
+
     private:
         void CreateImpl();
 

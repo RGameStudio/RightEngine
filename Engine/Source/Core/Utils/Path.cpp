@@ -43,3 +43,22 @@ std::string Path::Absolute(const std::string& enginePath)
     R_CORE_ASSERT(!fullPath.empty(), "");
     return fullPath;
 }
+
+std::string Path::Engine(const std::string& absolutePath)
+{
+    std::string enginePath;
+    for (const auto& [alias, path] : aliasMap)
+    {
+        if (absolutePath.rfind(path, 0) == 0)
+        {
+            const auto kek = absolutePath.substr(path.size());
+            enginePath.append(alias).append(absolutePath.substr(path.size()));
+            if (enginePath.find("//") != std::string::npos)
+            {
+                enginePath.replace(0, 2, "/");
+            }
+            break;
+        }
+    }
+    return enginePath;
+}

@@ -24,5 +24,6 @@ namespace RightEngine
         virtual void End(const std::shared_ptr<CommandBuffer>& cmd) = 0;
 
         virtual void Image(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1) = 0;
+        virtual void ImageButton(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1) = 0;
     };
 }

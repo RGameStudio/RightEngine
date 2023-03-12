@@ -21,8 +21,11 @@ namespace RightEngine
         virtual void End(const std::shared_ptr<CommandBuffer>& cmd) override;
 
         virtual void Image(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1) override;
+        virtual void ImageButton(const std::shared_ptr<Texture>& texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1) override;
 
     private:
+        VkDescriptorSet GetDescriptorSet(const std::shared_ptr<Texture>& texture);
+
         VkRenderPass renderPass;
         VkDescriptorPool imguiPool;
         std::unordered_map<VkImageView, VkDescriptorSet> imageViewToDescriptorSet;

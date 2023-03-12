@@ -1,11 +1,11 @@
 #include "EntryPoint.hpp"
 #include "EditorLayer.hpp"
 
-static std::shared_ptr<EditorLayer> layer;
+static std::shared_ptr<editor::EditorLayer> layer;
 
 void GameApplication::OnStart()
 {
-    layer = std::make_shared<EditorLayer>();
+    layer = std::make_shared<editor::EditorLayer>();
     RightEngine::Application::Get().PushLayer(layer);
 }
 
