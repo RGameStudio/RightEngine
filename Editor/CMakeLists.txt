@@ -8,6 +8,7 @@ file(GLOB_RECURSE SOURCE_FILES
         )
 
 add_executable(Editor ${SOURCE_FILES})
+target_include_directories(Editor PRIVATE ${CMAKE_SOURCE_DIR}/Editor/Source/Public)
 
 if (MSVC)
     set(CMAKE_STARTUP_PROJECT Editor)

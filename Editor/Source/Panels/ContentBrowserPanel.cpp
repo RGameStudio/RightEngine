@@ -1,5 +1,6 @@
 #include "ContentBrowserPanel.hpp"
 #include "Core.hpp"
+#include "EditorCore.hpp"
 #include <filesystem>
 
 #include "AssetManager.hpp"
@@ -37,17 +38,28 @@ namespace editor
 
 		for (auto& dirEntry : fs::directory_iterator(currentDirectory))
 		{
-			auto icon = dirEntry.is_directory() ? directoryImage : fileImage;
+			const auto icon = dirEntry.is_directory() ? directoryImage : fileImage;
 			const auto filename = dirEntry.path().filename();
+			ImGui::PushID(filename.generic_string().c_str());
 			RightEngine::ImGuiLayer::ImageButton(RightEngine::AssetManager::Get().GetAsset<RightEngine::Texture>(icon), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+
+			if (ImGui::BeginDragDropSource())
+			{
+				const auto enginePath = RightEngine::Path::Engine(dirEntry.path().generic_string());
+				ImGui::SetDragDropPayload(C_CONTENT_BROWSER_DND_NAME, enginePath.c_str(), enginePath.size());
+				ImGui::Text("%s", enginePath.c_str());
+				ImGui::EndDragDropSource();
+			}
+
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				if (dirEntry.is_directory())
+				{
 					currentDirectory /= filename;
-
+				}
 			}
+			ImGui::PopID();
 			ImGui::TextWrapped(filename.generic_string().c_str());
-
 			ImGui::NextColumn();
 		}
 

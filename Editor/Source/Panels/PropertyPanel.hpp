@@ -6,7 +6,7 @@
 #include <imgui.h>
 #include <memory>
 
-namespace RightEngine
+namespace editor
 {
     class PropertyPanel
     {
@@ -14,10 +14,10 @@ namespace RightEngine
         PropertyPanel() = default;
         ~PropertyPanel() = default;
 
-        PropertyPanel(const std::shared_ptr<Scene>& aScene);
+        PropertyPanel(const std::shared_ptr<RightEngine::Scene>& aScene);
 
-        void SetScene(const std::shared_ptr<Scene>& aScene);
-        void SetSelectedEntity(const std::shared_ptr<Entity>& entity);
+        void SetScene(const std::shared_ptr<RightEngine::Scene>& aScene);
+        void SetSelectedEntity(const std::shared_ptr<RightEngine::Entity>& entity);
 
         void OnImGuiRender();
 
@@ -37,10 +37,10 @@ namespace RightEngine
             }
         }
 
-        std::shared_ptr<Scene> scene;
-        std::shared_ptr<Entity> selectedEntity;
-        std::unordered_map<std::string, AssetHandle> environmentMaps;
-        std::unordered_map<std::string, AssetHandle> meshes;
-        std::unordered_map<std::string, AssetHandle> textures;
+        std::shared_ptr<RightEngine::Scene> scene;
+        std::shared_ptr<RightEngine::Entity> selectedEntity;
+        std::unordered_map<std::string, RightEngine::AssetHandle> environmentMaps;
+        std::unordered_map<std::string, RightEngine::AssetHandle> meshes;
+        std::unordered_map<std::string, RightEngine::AssetHandle> textures;
     };
 }

@@ -51,6 +51,7 @@ namespace
         std::shared_ptr<Entity> selectedEntity;
         ImGuizmo::OPERATION gizmoType{ ImGuizmo::TRANSLATE };
         std::filesystem::path scenePath;
+        bool showDemoWindow{ false };
     };
 
     LayerSceneData sceneData;
@@ -310,6 +311,20 @@ void EditorLayer::OnImGuiRender()
                 }
             }
             ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Tools"))
+        {
+            if (ImGui::MenuItem("ImGui Demo window"))
+            {
+                sceneData.showDemoWindow = !sceneData.showDemoWindow;
+            }
+            ImGui::EndMenu();
+        }
+
+        if (sceneData.showDemoWindow)
+        {
+            ImGui::ShowDemoWindow();
         }
 
         ImGui::EndMenuBar();
