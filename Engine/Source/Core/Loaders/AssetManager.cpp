@@ -34,3 +34,16 @@ const AssetHandle& AssetManager::GetDefaultMaterial() const
 
     return defaultMaterial;
 }
+
+const AssetHandle& AssetManager::GetDefaultSkybox() const
+{
+    static bool wasLoaded = false;
+
+    if (!wasLoaded)
+    {
+        defaultSkybox = GetLoader<EnvironmentMapLoader>()->Load("/Textures/env_circus.hdr");
+        wasLoaded = true;
+    }
+
+    return defaultSkybox;
+}

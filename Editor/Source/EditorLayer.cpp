@@ -15,6 +15,7 @@
 #include "SceneSerializer.hpp"
 #include "MaterialLoader.hpp"
 #include "Filesystem.hpp"
+#include "EditorCore.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -104,6 +105,42 @@ namespace
     }
 }
 
+void EditorLayer::OpenScene(const fs::path& path)
+{
+    const auto scene = LoadScene(path);
+    R_ASSERT(scene, "");
+    sceneData.scenePath = path;
+    sceneData.propertyPanel.SetScene(scene);
+    m_scene = scene;
+}
+
+void EditorLayer::NewScene()
+{
+    m_scene = Scene::Create();
+    sceneData.propertyPanel.SetScene(m_scene);
+}
+
+void EditorLayer::LoadDefaultScene()
+{
+    OpenScene(C_DEFAULT_SCENE_PATH);
+}
+
+std::shared_ptr<RightEngine::Scene> EditorLayer::LoadScene(const fs::path& path)
+{
+    fs::path scenePath = path;
+    if (scenePath.is_relative())
+    {
+        scenePath = G_ASSET_DIR + path.generic_string();
+    }
+    if (!fs::exists(scenePath))
+    {
+        return nullptr;
+    }
+    SceneSerializer serializer(Scene::Create(true));
+    R_CORE_ASSERT(serializer.Deserialize(scenePath), "");
+    return serializer.GetScene();
+}
+
 void EditorLayer::OnAttach()
 {
     sceneData.propertyPanel.Init();
@@ -128,10 +165,10 @@ void EditorLayer::OnAttach()
 
 void EditorLayer::OnUpdate(float ts)
 {
-    if (newScene)
+    if (m_newScene)
     {
-        scene = newScene;
-        newScene = nullptr;
+        m_scene = m_newScene;
+        m_newScene = nullptr;
     }
     if (sceneData.newViewportSize.x != 0 && sceneData.newViewportSize.y != 0)
     {
@@ -139,13 +176,13 @@ void EditorLayer::OnUpdate(float ts)
         sceneData.newViewportSize = { 0, 0 };
     }
 
-    scene->OnUpdate(ts);
+    m_scene->OnUpdate(ts);
 
     CameraData cameraData{};
-    for (const auto eCamera : scene->GetRegistry().view<CameraComponent>())
+    for (const auto eCamera : m_scene->GetRegistry().view<CameraComponent>())
     {
-        auto& camera = scene->GetRegistry().get<CameraComponent>(eCamera);
-        auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
+        auto& camera = m_scene->GetRegistry().get<CameraComponent>(eCamera);
+        auto& transform = m_scene->GetRegistry().get<TransformComponent>(eCamera);
         camera.Rotate(glm::degrees(transform.rotation));
         camera.OnUpdate(ts);
         if (camera.isPrimary)
@@ -179,10 +216,10 @@ void EditorLayer::OnUpdate(float ts)
     }
 
     std::vector<LightData> lightData;
-    for (const auto& entityID: scene->GetRegistry().view<LightComponent>())
+    for (const auto& entityID: m_scene->GetRegistry().view<LightComponent>())
     {
-        const auto& transform = scene->GetRegistry().get<TransformComponent>(entityID);
-        const auto& light = scene->GetRegistry().get<LightComponent>(entityID);
+        const auto& transform = m_scene->GetRegistry().get<TransformComponent>(entityID);
+        const auto& light = m_scene->GetRegistry().get<LightComponent>(entityID);
         LightData shaderLight{};
         shaderLight.type = static_cast<int>(light.type);
         shaderLight.position = glm::vec4(transform.GetWorldPosition(), 1);
@@ -196,25 +233,25 @@ void EditorLayer::OnUpdate(float ts)
     auto& assetManager = AssetManager::Get();
 
     AssetHandle environmentHandle;
-    for (const auto& entityID: scene->GetRegistry().view<SkyboxComponent>())
+    for (const auto& entityID: m_scene->GetRegistry().view<SkyboxComponent>())
     {
         R_CORE_ASSERT(!environmentHandle.guid.isValid(), "")
-        const auto& skybox = scene->GetRegistry().get<SkyboxComponent>(entityID);
+        const auto& skybox = m_scene->GetRegistry().get<SkyboxComponent>(entityID);
         environmentHandle = skybox.environmentHandle;
         R_CORE_ASSERT(environmentHandle.guid.isValid(), "")
     }
 
-    sceneData.renderer->SetScene(scene);
+    sceneData.renderer->SetScene(m_scene);
     sceneData.renderer->BeginScene(cameraData,
                                    assetManager.GetAsset<EnvironmentContext>(environmentHandle),
                                    lightData,
                                    sceneData.rendererSettings);
 
-    for (auto& entity: scene->GetRegistry().view<MeshComponent>())
+    for (auto& entity: m_scene->GetRegistry().view<MeshComponent>())
     {
-        const auto& tag = scene->GetRegistry().get<TagComponent>(entity);
-        const auto& transform = scene->GetRegistry().get<TransformComponent>(entity);
-        const auto& meshComponent = scene->GetRegistry().get<MeshComponent>(entity);
+        const auto& tag = m_scene->GetRegistry().get<TagComponent>(entity);
+        const auto& transform = m_scene->GetRegistry().get<TransformComponent>(entity);
+        const auto& meshComponent = m_scene->GetRegistry().get<MeshComponent>(entity);
         const auto& materialRef = meshComponent.material;
         if (!meshComponent.isVisible)
         {
@@ -290,13 +327,13 @@ void EditorLayer::OnImGuiRender()
                 {
                     R_WARN("Scene path wasn't set!");
                 }
-                SceneSerializer serializer(scene);
+                SceneSerializer serializer(m_scene);
                 serializer.Serialize(sceneData.scenePath);
             }
             if (ImGui::MenuItem("Save As"))
             {
                 sceneData.scenePath = Filesystem::SaveFileDialog({ "All Files(*.*)", "*.*"});
-                SceneSerializer serializer(scene);
+                SceneSerializer serializer(m_scene);
                 serializer.Serialize(sceneData.scenePath);
             }
             if (ImGui::MenuItem("Load"))
@@ -307,8 +344,13 @@ void EditorLayer::OnImGuiRender()
                 {
                     serializer.Deserialize(path.generic_u8string());
                     sceneData.scenePath = path;
-                	newScene = serializer.GetScene();
+                	m_newScene = serializer.GetScene();
                 }
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("New"))
+            {
+                NewScene();
             }
             ImGui::EndMenu();
         }
@@ -334,8 +376,8 @@ void EditorLayer::OnImGuiRender()
     if (ImGui::TreeNodeEx("Root", ImGuiTreeNodeFlags_OpenOnArrow))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, ImGui::GetFontSize() * 3);
-        const auto& node = scene->GetRootNode();
-        ImGuiAddTreeNodeChildren(node, scene);
+        const auto& node = m_scene->GetRootNode();
+        ImGuiAddTreeNodeChildren(node, m_scene);
         ImGui::TreePop();
         ImGui::PopStyleVar();
     }
@@ -344,7 +386,7 @@ void EditorLayer::OnImGuiRender()
     {
         if (ImGui::MenuItem("Create Empty Entity"))
         {
-            auto entity = scene->CreateEntity("New entity", true);
+            auto entity = m_scene->CreateEntity("New entity", true);
         }
 
         ImGui::EndPopup();
@@ -369,6 +411,23 @@ void EditorLayer::OnImGuiRender()
     ImGuiLayer::Image(attachment, sceneData.viewportSize);
 //    sceneData.camera->SetAspectRatio(viewportSize.x / viewportSize.y);
 
+    if (ImGui::BeginDragDropTarget())
+    {
+        const auto payload = ImGui::AcceptDragDropPayload(C_CONTENT_BROWSER_DND_NAME);
+        if (payload)
+        {
+            static char pathBuff[256]{};
+            memset(pathBuff, 0, 256);
+            memcpy(pathBuff, payload->Data, payload->DataSize);
+            fs::path path = pathBuff;
+            if (path.extension() == ".scene")
+            {
+                OpenScene(path);
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
     if (sceneData.selectedEntity)
     {
         if (sceneData.isViewportHovered)
@@ -390,10 +449,10 @@ void EditorLayer::OnImGuiRender()
 
         CameraComponent camera{};
         glm::vec3 cameraPos;
-        for (const auto& eCamera : scene->GetRegistry().view<CameraComponent>())
+        for (const auto& eCamera : m_scene->GetRegistry().view<CameraComponent>())
         {
-            auto& cameraComp = scene->GetRegistry().get<CameraComponent>(eCamera);
-            auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
+            auto& cameraComp = m_scene->GetRegistry().get<CameraComponent>(eCamera);
+            auto& transform = m_scene->GetRegistry().get<TransformComponent>(eCamera);
             if (cameraComp.isPrimary)
             {
                 camera = cameraComp;
@@ -428,11 +487,13 @@ void EditorLayer::OnImGuiRender()
 
     sceneData.propertyPanel.OnImGuiRender();
 
-    ImGui::Begin("Renderer settings");
+    ImGui::Begin("Renderer");
     ImGui::DragFloat("Gamma", &sceneData.rendererSettings.gamma, 0.1, 1.0, 3.2);
+    ImGui::Separator();
+    ImGui::Text("Frame time %.2f ms", Input::frameTime);
     ImGui::End();
 
-    contentBrowser.OnImGuiRender();
+    m_contentBrowser.OnImGuiRender();
 
     ImGui::End();
 }
@@ -442,10 +503,10 @@ bool EditorLayer::OnEvent(const Event& event)
     if (event.GetType() == MouseMovedEvent::descriptor)
     {
         MouseMovedEvent mouseMovedEvent = static_cast<const MouseMovedEvent&>(event);
-        for (const auto& eCamera : scene->GetRegistry().view<CameraComponent>())
+        for (const auto& eCamera : m_scene->GetRegistry().view<CameraComponent>())
         {
-            auto& camera = scene->GetRegistry().get<CameraComponent>(eCamera);
-            auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
+            auto& camera = m_scene->GetRegistry().get<CameraComponent>(eCamera);
+            auto& transform = m_scene->GetRegistry().get<TransformComponent>(eCamera);
             if (camera.isPrimary)
             {
                 auto rotation = camera.Rotate(mouseMovedEvent.GetX(), mouseMovedEvent.GetY(), glm::degrees(transform.rotation));
@@ -457,17 +518,4 @@ bool EditorLayer::OnEvent(const Event& event)
     }
 
     return false;
-}
-
-void EditorLayer::LoadDefaultScene()
-{
-    if (!fs::exists(DEFAULT_SCENE_PATH))
-    {
-        R_CORE_ASSERT(false, "No default scene was found!");
-        return;
-    }
-    SceneSerializer serializer(Scene::Create());
-    R_CORE_ASSERT(serializer.Deserialize(DEFAULT_SCENE_PATH), "");
-    scene = serializer.GetScene();
-    sceneData.scenePath = DEFAULT_SCENE_PATH;
 }

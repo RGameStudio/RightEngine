@@ -85,6 +85,7 @@ namespace RightEngine
 
         const AssetHandle& GetDefaultTexture() const;
         const AssetHandle& GetDefaultMaterial() const;
+        const AssetHandle& GetDefaultSkybox() const;
 
         AssetManager(const AssetManager& other) = delete;
         AssetManager& operator=(const AssetManager& other) = delete;
@@ -98,6 +99,7 @@ namespace RightEngine
 
         mutable AssetHandle defaultTexture;
         mutable AssetHandle defaultMaterial;
+        mutable AssetHandle defaultSkybox;
 
         AssetManager() = default;
         ~AssetManager() = default;

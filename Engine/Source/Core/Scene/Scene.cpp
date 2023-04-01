@@ -1,16 +1,29 @@
 #include "Scene.hpp"
 #include "Assert.hpp"
+#include "AssetManager.hpp"
 #include "Entity.hpp"
 
 using namespace RightEngine;
 
-std::shared_ptr<Scene> Scene::Create()
+std::shared_ptr<Scene> Scene::Create(bool empty)
 {
     auto sceneRawPtr = new Scene();
 
     std::shared_ptr<Scene> scene;
     scene.reset(sceneRawPtr);
     scene->rootNode = scene->CreateEntity();
+
+    if (!empty)
+    {
+        auto camera = scene->CreateEntity("Editor camera");
+        auto& cc = camera->AddComponent<CameraComponent>();
+        cc.isPrimary = true;
+        auto skybox = scene->CreateEntity("Skybox");
+        auto& sc = skybox->AddComponent<SkyboxComponent>();
+        sc.environmentHandle = AssetManager::Get().GetDefaultSkybox();
+        scene->rootNode->AddChild(camera);
+        scene->rootNode->AddChild(skybox);
+    }
 
     return scene;
 }

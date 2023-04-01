@@ -17,13 +17,17 @@ namespace editor
         bool OnEvent(const Event& event);
 
         void LoadDefaultScene();
+        std::shared_ptr<RightEngine::Scene> LoadScene(const fs::path& path);
+
+        void NewScene();
+        void OpenScene(const fs::path& path);
 
     private:
-        std::shared_ptr<RightEngine::Scene> scene;
-        std::shared_ptr<RightEngine::Scene> newScene;
+        std::shared_ptr<RightEngine::Scene> m_scene;
+        std::shared_ptr<RightEngine::Scene> m_newScene;
 
-        ContentBrowserPanel contentBrowser;
+        ContentBrowserPanel m_contentBrowser;
 
-        const std::string DEFAULT_SCENE_PATH = G_ASSET_DIR + "/Scenes/Scene.yaml";
+        const std::string C_DEFAULT_SCENE_PATH = G_ASSET_DIR + "/Scenes/Scene.scene";
     };
 }

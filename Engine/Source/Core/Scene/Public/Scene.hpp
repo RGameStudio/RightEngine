@@ -26,7 +26,7 @@ namespace RightEngine
         const std::string& GetName() const
         { return name; }
 
-        static std::shared_ptr<Scene> Create();
+        static std::shared_ptr<Scene> Create(bool empty = false);
 
     private:
         std::shared_ptr<Entity> rootNode;
