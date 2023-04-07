@@ -23,6 +23,7 @@ namespace editor
         void OpenScene(const fs::path& path);
 
     private:
+        void Scene(const std::shared_ptr<RightEngine::Scene>& scene);
         std::shared_ptr<RightEngine::Scene> m_scene;
         std::shared_ptr<RightEngine::Scene> m_newScene;
 

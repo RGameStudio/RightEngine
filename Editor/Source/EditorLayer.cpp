@@ -110,14 +110,18 @@ void EditorLayer::OpenScene(const fs::path& path)
     const auto scene = LoadScene(path);
     R_ASSERT(scene, "");
     sceneData.scenePath = path;
+    Scene(scene);
+}
+
+void EditorLayer::Scene(const std::shared_ptr<RightEngine::Scene>& scene)
+{
+    m_newScene = scene;
     sceneData.propertyPanel.SetScene(scene);
-    m_scene = scene;
 }
 
 void EditorLayer::NewScene()
 {
-    m_scene = Scene::Create();
-    sceneData.propertyPanel.SetScene(m_scene);
+    Scene(Scene::Create());
 }
 
 void EditorLayer::LoadDefaultScene()
