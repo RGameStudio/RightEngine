@@ -32,6 +32,7 @@ namespace RightEngine
         std::shared_ptr<Entity> rootNode;
         std::string name{ "Scene" };
         entt::registry registry;
+        std::mutex m_mutex;
 
     private:
         friend class Entity;

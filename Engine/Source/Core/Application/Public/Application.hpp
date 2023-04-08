@@ -4,15 +4,12 @@
 #include "Window.hpp"
 #include "Scene.hpp"
 #include "Layer.hpp"
-#include "ImGuiLayer.hpp"
-#include "RenderingContext.hpp"
+#include "IService.hpp"
 #include <memory>
-#include <chrono>
+#include <typeindex>
 
 namespace RightEngine
 {
-    using namespace std::chrono;
-
     class Application
     {
     public:
@@ -25,6 +22,12 @@ namespace RightEngine
         void PushLayer(const std::shared_ptr<Layer>& layer);
         void PushOverlay(const std::shared_ptr<Layer>& layer);
 
+        template<class T>
+        void RegisterService();
+
+        template<class T>
+        std::shared_ptr<T> Service();
+
         const std::shared_ptr<Window>& GetWindow() const;
 
         void Init();
@@ -35,12 +38,45 @@ namespace RightEngine
         Application& operator=(Application&& other) = delete;
 
     private:
-        std::shared_ptr<Window> window;
-        std::vector<std::shared_ptr<Layer>> layers;
+        std::shared_ptr<Window> m_window;
+        std::vector<std::shared_ptr<Layer>> m_layers;
+        std::unordered_map<std::type_index, std::shared_ptr<IService>> m_services;
 
     private:
         Application();
         ~Application();
     };
 
+    Application& Instance();
+
+    template <class T>
+    void Application::RegisterService()
+    {
+        R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<IService, T>), "");
+        const auto typeIndex = std::type_index(typeid(T));
+        const auto serviceIt = m_services.find(typeIndex);
+        if (serviceIt == m_services.end())
+        {
+            auto service = std::make_shared<T>();
+            m_services[typeIndex] = service;
+            service->OnRegister();
+            return;
+        }
+        R_CORE_ASSERT(false, "")
+    }
+
+    template <class T>
+    std::shared_ptr<T> Application::Service()
+    {
+        R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<IService, T>), "");
+        const auto typeIndex = std::type_index(typeid(T));
+        const auto serviceIt = m_services.find(typeIndex);
+        if (serviceIt == m_services.end())
+        {
+            static std::shared_ptr<T> empty;
+            R_CORE_ASSERT(false, "");
+            return empty;
+        }
+        return std::static_pointer_cast<T>(serviceIt->second);
+    }
 }

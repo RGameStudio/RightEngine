@@ -3,7 +3,6 @@
 #include "RendererCommand.hpp"
 #include "Entity.hpp"
 #include "Components.hpp"
-#include "Texture.hpp"
 #include "TextureLoader.hpp"
 #include "Panels/PropertyPanel.hpp"
 #include "EnvironmentMapLoader.hpp"
@@ -13,17 +12,16 @@
 #include "SceneRenderer.hpp"
 #include "MouseEvent.hpp"
 #include "SceneSerializer.hpp"
-#include "MaterialLoader.hpp"
 #include "Filesystem.hpp"
 #include "EditorCore.hpp"
+#include "ImGuiLayer.hpp"
+#include "ThreadService.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <ImGuizmo.h>
-
-#include "Path.hpp"
 
 using namespace RightEngine;
 using namespace editor;

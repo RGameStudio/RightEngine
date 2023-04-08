@@ -74,6 +74,7 @@ include_directories(Engine/Source/Core/Utils/Public)
 include_directories(Engine/Source/Core/Scene/Public)
 include_directories(Engine/Source/Core/UI/Public)
 include_directories(Engine/Source/Core/Loaders/Public)
+include_directories(Engine/Source/Core/Service/Public)
 
 add_subdirectory(Lib/spdlog)
 add_subdirectory(Lib/easyargs)

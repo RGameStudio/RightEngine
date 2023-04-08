@@ -9,6 +9,7 @@
 #include "VulkanTexture.hpp"
 #include "VulkanSampler.hpp"
 #include "Path.hpp"
+#include "ImGuiLayer.hpp"
 #include <imgui.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <backends/imgui_impl_glfw.h>

@@ -83,6 +83,7 @@ entt::registry& Scene::GetRegistry()
 
 std::shared_ptr<Entity> Scene::CreateEntityWithGuid(const std::string& name, const xg::Guid& guid, bool addToRoot)
 {
+    std::lock_guard l(m_mutex);
     auto entity = CreateEntity(name, addToRoot);
     auto& tag = entity->GetComponent<TagComponent>();
     tag.guid = guid;

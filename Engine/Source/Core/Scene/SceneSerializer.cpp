@@ -4,8 +4,11 @@
 #include "AssetManager.hpp"
 #include "MaterialLoader.hpp"
 #include "Timer.hpp"
+#include "Application.hpp"
 #include <taskflow/taskflow.hpp>
 #include <fstream>
+
+#include "ThreadService.hpp"
 
 using namespace RightEngine;
 
@@ -252,78 +255,80 @@ bool SceneSerializer::Deserialize(const fs::path& path)
     std::string sceneName = data["Scene"].as<std::string>();
     R_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
-    DeserializeAssets(data);
+    auto ts = Instance().Service<ThreadService>();
+    auto resourceLoadFuture = ts->AddBackgroundTask([&]()
+    {
+    	DeserializeAssets(data);
+    });
 
     auto entities = data["Entities"];
-
     for (auto entityIt : entities)
     {
         auto entity = entityIt["Entity"];
 
-        auto tagComponent = entity["Tag component"];
-        auto name = tagComponent["Name"].as<std::string>();
-        auto tag = tagComponent["GUID"].as<std::string>();
+		    auto tagComponent = entity["Tag component"];
+		    auto name = tagComponent["Name"].as<std::string>();
+		    auto tag = tagComponent["GUID"].as<std::string>();
 
-        auto entityPtr = scene->CreateEntityWithGuid(name, xg::Guid(tag), true);
+		    auto entityPtr = scene->CreateEntityWithGuid(name, xg::Guid(tag), true);
 
-        auto transformComponent = entity["Transform component"];
-        R_CORE_ASSERT(transformComponent.IsDefined(), "");
+		    auto transformComponent = entity["Transform component"];
+		    R_CORE_ASSERT(transformComponent.IsDefined(), "");
 
-        auto& tc = entityPtr->GetComponent<TransformComponent>();
-        tc.position = transformComponent["Position"].as<glm::vec3>();
-        tc.rotation = transformComponent["Rotation"].as<glm::vec3>();
-        tc.scale = transformComponent["Scale"].as<glm::vec3>();
+		    auto& tc = entityPtr->GetComponent<TransformComponent>();
+		    tc.position = transformComponent["Position"].as<glm::vec3>();
+		    tc.rotation = transformComponent["Rotation"].as<glm::vec3>();
+		    tc.scale = transformComponent["Scale"].as<glm::vec3>();
 
-        // TODO: Implement validation of all handles
-        auto& am = AssetManager::Get();
-        auto meshComponent = entity["Mesh component"];
-        if (meshComponent)
-        {
-            auto& mc = entityPtr->AddComponent<MeshComponent>();
-            mc.material = { meshComponent["Material GUID"].as<xg::Guid>() };
-            mc.mesh = { meshComponent["Mesh GUID"].as<xg::Guid>() };
-            mc.isVisible = { meshComponent["Is visible"].as<bool>() };
-        }
+		    // TODO: Implement validation of all handles
+		    auto& am = AssetManager::Get();
+		    auto meshComponent = entity["Mesh component"];
+		    if (meshComponent)
+		    {
+		        auto& mc = entityPtr->AddComponent<MeshComponent>();
+		        mc.material = { meshComponent["Material GUID"].as<xg::Guid>() };
+		        mc.mesh = { meshComponent["Mesh GUID"].as<xg::Guid>() };
+		        mc.isVisible = { meshComponent["Is visible"].as<bool>() };
+		    }
 
-        auto lightComponent = entity["Light component"];
-        if (lightComponent)
-        {
-            auto& lc = entityPtr->AddComponent<LightComponent>();
-            lc.type = static_cast<LightType>(lightComponent["Type"].as<uint32_t>());
-            lc.color = lightComponent["Color"].as<glm::vec3>();
-            lc.intensity = lightComponent["Intensity"].as<float>();
-            lc.outerRadius = lightComponent["Outer Radius"].as<float>();
-            lc.innerRadius = lightComponent["Inner Radius"].as<float>();
-        }
+		    auto lightComponent = entity["Light component"];
+		    if (lightComponent)
+		    {
+		        auto& lc = entityPtr->AddComponent<LightComponent>();
+		        lc.type = static_cast<LightType>(lightComponent["Type"].as<uint32_t>());
+		        lc.color = lightComponent["Color"].as<glm::vec3>();
+		        lc.intensity = lightComponent["Intensity"].as<float>();
+		        lc.outerRadius = lightComponent["Outer Radius"].as<float>();
+		        lc.innerRadius = lightComponent["Inner Radius"].as<float>();
+		    }
 
-        auto skyboxComponent = entity["Skybox component"];
-        if (skyboxComponent)
-        {
-            auto& sc = entityPtr->AddComponent<SkyboxComponent>();
-            sc.type = static_cast<SkyboxType>(skyboxComponent["Type"].as<uint32_t>());
-            sc.environmentHandle = { skyboxComponent["Skybox GUID"].as<xg::Guid>() };
-        }
+		    auto skyboxComponent = entity["Skybox component"];
+		    if (skyboxComponent)
+		    {
+		        auto& sc = entityPtr->AddComponent<SkyboxComponent>();
+		        sc.type = static_cast<SkyboxType>(skyboxComponent["Type"].as<uint32_t>());
+		        sc.environmentHandle = { skyboxComponent["Skybox GUID"].as<xg::Guid>() };
+		    }
 
-        auto cameraComponent = entity["Camera component"];
-        if (cameraComponent)
-        {
-            auto& cc = entityPtr->AddComponent<CameraComponent>();
-            cc.front = cameraComponent["Front"].as<glm::vec3>();
-            cc.worldUp = cameraComponent["World up"].as<glm::vec3>();
-            cc.up = cameraComponent["Up"].as<glm::vec3>();
-            cc.zNear = cameraComponent["Z near"].as<float>();
-            cc.zFar = cameraComponent["Z far"].as<float>();
-            cc.aspectRatio = cameraComponent["Aspect ratio"].as<float>();
-            cc.fov = cameraComponent["FOV"].as<float>();
-            cc.movementSpeed = cameraComponent["Movement speed"].as<float>();
-            cc.sensitivity = cameraComponent["Sensitivity"].as<float>();
-            cc.isActive = cameraComponent["Active"].as<bool>();
-            cc.isPrimary = cameraComponent["Primary"].as<bool>();
-        }
+		    auto cameraComponent = entity["Camera component"];
+		    if (cameraComponent)
+		    {
+		        auto& cc = entityPtr->AddComponent<CameraComponent>();
+		        cc.front = cameraComponent["Front"].as<glm::vec3>();
+		        cc.worldUp = cameraComponent["World up"].as<glm::vec3>();
+		        cc.up = cameraComponent["Up"].as<glm::vec3>();
+		        cc.zNear = cameraComponent["Z near"].as<float>();
+		        cc.zFar = cameraComponent["Z far"].as<float>();
+		        cc.aspectRatio = cameraComponent["Aspect ratio"].as<float>();
+		        cc.fov = cameraComponent["FOV"].as<float>();
+		        cc.movementSpeed = cameraComponent["Movement speed"].as<float>();
+		        cc.sensitivity = cameraComponent["Sensitivity"].as<float>();
+		        cc.isActive = cameraComponent["Active"].as<bool>();
+		        cc.isPrimary = cameraComponent["Primary"].as<bool>();
+		    }
     }
-
-    R_CORE_INFO("Loaded scene {} successfully", path.generic_u8string().c_str());
-    R_CORE_INFO("Scene loading took {}s", timer.TimeInSeconds());
+    resourceLoadFuture.wait();
+    R_CORE_INFO("Loaded scene {} successfully for {}s", path.generic_u8string().c_str(), timer.TimeInSeconds());
     return true;
 }
 
@@ -456,8 +461,8 @@ void SceneSerializer::LoadDependencies(const std::vector<std::shared_ptr<AssetDe
             }
         }
     );
-    tf::Executor executor;
-    executor.run(taskflow).wait();
+
+    Instance().Service<ThreadService>()->AddBackgroundTaskflow(std::move(taskflow)).wait();
 
     // We must load materials only after other resources was load to be sure that all default ones will be properly set up
     for (const auto dep : assetDependencies)

@@ -5,14 +5,19 @@
 #include "Input.hpp"
 #include "ImGuiLayer.hpp"
 #include "Core.hpp"
-#include "Surface.hpp"
 #include "AssetManager.hpp"
 #include "Filesystem.hpp"
 #include "MaterialLoader.hpp"
+#include "ThreadService.hpp"
 #include <memory>
 
 namespace RightEngine
 {
+    Application& Instance()
+    {
+        return Application::Get();
+    }
+
     Application& Application::Get()
     {
         static Application application;
@@ -24,18 +29,19 @@ namespace RightEngine
 
     Application::~Application()
     {
-        for (auto& layer: layers)
+        for (auto& layer: m_layers)
         {
             layer->OnDetach();
             layer.reset();
         }
 
-        layers.clear();
+        m_layers.clear();
     }
 
     void Application::Init()
     {
-        window.reset(Window::Create("Right Editor", 1920, 1080));
+        RegisterService<ThreadService>();
+        m_window.reset(Window::Create("Right Editor", 1920, 1080));
         RendererCommand::Init(GGPU_API);
 
         auto& manager = AssetManager::Get();
@@ -56,9 +62,9 @@ namespace RightEngine
     void Application::OnUpdate()
     {
         Input::OnUpdate();
-        window->OnUpdate();
+        m_window->OnUpdate();
 
-        for (const auto& layer: layers)
+        for (const auto& layer: m_layers)
         {
             layer->OnUpdate(Input::deltaTime);
         }
@@ -66,26 +72,26 @@ namespace RightEngine
 
     void Application::OnUpdateEnd()
     {
-        window->Swap();
+        m_window->Swap();
     }
 
     void Application::PushLayer(const std::shared_ptr<Layer>& layer)
     {
         // TODO: Move to LayerStack data structure
         static int layerIndex = 0;
-        layers.emplace(layers.begin() + layerIndex, layer);
+        m_layers.emplace(m_layers.begin() + layerIndex, layer);
         layer->OnAttach();
     }
 
     void Application::PushOverlay(const std::shared_ptr<Layer>& layer)
     {
-        layers.emplace_back(layer);
+        m_layers.emplace_back(layer);
         layer->OnAttach();
     }
 
     const std::shared_ptr<Window>& Application::GetWindow() const
     {
-        return window;
+        return m_window;
     }
 
 }

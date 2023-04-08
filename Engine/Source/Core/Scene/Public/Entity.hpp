@@ -21,6 +21,7 @@ namespace RightEngine
         template<typename T, typename... Args>
         T& AddComponent(Args&&... args)
         {
+            std::lock_guard l(m_mutex);
             R_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
             T& component = scene.lock()->registry.emplace<T>(entityHandle, std::forward<Args>(args)...);
             return component;
@@ -29,6 +30,7 @@ namespace RightEngine
         template<typename T>
         T& GetComponent()
         {
+            std::lock_guard l(m_mutex);
             R_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
             return scene.lock()->registry.get<T>(entityHandle);
         }
@@ -36,6 +38,7 @@ namespace RightEngine
         template<typename T>
         bool HasComponent()
         {
+            std::lock_guard l(m_mutex);
             auto ptr = scene.lock()->registry.try_get<T>(entityHandle);
             return ptr ? true : false;
         }
@@ -65,6 +68,8 @@ namespace RightEngine
 
     private:
         void GetAllChildren(std::vector<std::shared_ptr<Entity>>& allChildren) const;
+
+        std::recursive_mutex m_mutex;
 
         friend class Scene;
     };
