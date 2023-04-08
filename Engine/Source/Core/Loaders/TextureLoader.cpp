@@ -156,10 +156,10 @@ void TextureLoader::LoadAsync(AssetHandle& handle,
                               const std::string& path,
                               const TextureLoaderOptions& options) const
 {
-    taskGroup.run([&, path = std::move(path), options = std::move(options)]()
-    {
+    //taskGroup.run([&, path = std::move(path), options = std::move(options)]()
+    //{
         handle = _Load(path, options, xg::Guid());
-    });
+    //});
 }
 
 AssetHandle TextureLoader::LoadWithGUID(const std::string& path,

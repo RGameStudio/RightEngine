@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AssetBase.hpp"
-#include <oneapi/tbb/task_group.h>
 #include <crossguid/guid.hpp>
 #include <functional>
 
@@ -18,6 +17,5 @@ namespace RightEngine
 
     protected:
         AssetManager* manager{ nullptr };
-        mutable oneapi::tbb::task_group taskGroup;
     };
 }

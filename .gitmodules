@@ -28,12 +28,12 @@
 [submodule "Lib/crossguid"]
 	path = Lib/crossguid
 	url = git@github.com:rbetik12/crossguid.git
-[submodule "Lib/oneTBB"]
-	path = Lib/oneTBB
-	url = git@github.com:oneapi-src/oneTBB.git
 [submodule "Lib/ImGuizmo"]
 	path = Lib/ImGuizmo
 	url = git@github.com:rbetik12/ImGuizmo.git
 [submodule "Lib/yaml-cpp"]
 	path = Lib/yaml-cpp
 	url = git@github.com:rbetik12/yaml-cpp.git
+[submodule "Lib/taskflow"]
+	path = Lib/taskflow
+	url = git@github.com:taskflow/taskflow.git

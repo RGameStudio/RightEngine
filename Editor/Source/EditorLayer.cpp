@@ -504,6 +504,10 @@ void EditorLayer::OnImGuiRender()
 
 bool EditorLayer::OnEvent(const Event& event)
 {
+    if (!m_scene)
+    {
+        return false;
+    }
     if (event.GetType() == MouseMovedEvent::descriptor)
     {
         MouseMovedEvent mouseMovedEvent = static_cast<const MouseMovedEvent&>(event);

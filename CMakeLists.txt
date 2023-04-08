@@ -56,10 +56,10 @@ include_directories(${CMAKE_BINARY_DIR}/Lib/assimp/include)
 include_directories(Lib/vk-tools/)
 include_directories(Lib/VulkanMemoryAllocator/include)
 include_directories(Lib/crossguid/include)
-include_directories(Lib/oneTBB/include)
 include_directories(Lib/hash-library)
 include_directories(Lib/ImGuizmo)
 include_directories(Lib/yaml-cpp/include)
+include_directories(Lib/taskflow)
 
 include_directories(Engine/Source/Public)
 include_directories(Engine/Source/Core/Public)
@@ -104,13 +104,16 @@ add_subdirectory(Lib/assimp)
 set(CROSSGUID_TESTS OFF CACHE BOOL "Build test runner")
 add_subdirectory(Lib/crossguid)
 
-set(TBB_TEST OFF CACHE BOOL "Build tbb tests")
-set(TBBMALLOC_BUILD OFF CACHE BOOL "Build tbb malloc")
-add_subdirectory(Lib/oneTBB)
-
 set(BUILD_GMOCK OFF CACHE BOOL "Builds the googlemock subproject")
 set(INSTALL_GTEST OFF CACHE BOOL "Enable installation of googletest.")
 add_subdirectory(Lib/googletest)
+
+set(TF_BUILD_BENCHMARKS OFF CACHE BOOL "Enables builds of benchmarks")
+set(TF_BUILD_CUDA OFF CACHE BOOL "Enables builds of cuda code")
+set(TF_BUILD_SYCL OFF CACHE BOOL "Enables builds of sycl code")
+set(TF_BUILD_TESTS OFF CACHE BOOL "Enables builds of tests")
+set(TF_BUILD_EXAMPLES OFF CACHE BOOL "Enables builds of examples")
+add_subdirectory(Lib/taskflow)
 
 set(THIRD_PARTY_LIB
         glfw
@@ -129,9 +132,9 @@ set(THIRD_PARTY_LIB
         VulkanMemoryAllocator
         crossguid
         easyargs
-        tbb
         ImGuizmo
         yaml-cpp
+        Taskflow
         )
 
 set(THIRD_PARTY_PROJECT_DIR_NAME "Lib")
@@ -152,7 +155,6 @@ set_target_properties(SPIRV PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(glslang-default-resource-limits PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(vk-tools PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(VulkanMemoryAllocator PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(tbb PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(ImGuizmo PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(yaml-cpp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(yaml-cpp-parse PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
@@ -165,7 +167,7 @@ set_target_properties(gtest_main PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAM
 set_target_properties(hash-library PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(spdlog PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(uninstall PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(Taskflow PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 
 add_subdirectory(Editor)
 add_subdirectory(Engine)
-add_subdirectory(Tests)

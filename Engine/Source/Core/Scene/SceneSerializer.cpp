@@ -3,6 +3,8 @@
 #include "Entity.hpp"
 #include "AssetManager.hpp"
 #include "MaterialLoader.hpp"
+#include "Timer.hpp"
+#include <taskflow/taskflow.hpp>
 #include <fstream>
 
 using namespace RightEngine;
@@ -232,6 +234,7 @@ bool SceneSerializer::Serialize(const fs::path& path)
 
 bool SceneSerializer::Deserialize(const fs::path& path)
 {
+    Timer timer;
     YAML::Node data;
     try
     {
@@ -319,7 +322,8 @@ bool SceneSerializer::Deserialize(const fs::path& path)
         }
     }
 
-    R_CORE_INFO("Loaded scene {} successfully!", path.generic_u8string().c_str());
+    R_CORE_INFO("Loaded scene {} successfully", path.generic_u8string().c_str());
+    R_CORE_INFO("Scene loading took {}s", timer.TimeInSeconds());
     return true;
 }
 
@@ -416,12 +420,13 @@ void SceneSerializer::SaveMaterial(const AssetHandle& handle)
 
 void SceneSerializer::LoadDependencies(const std::vector<std::shared_ptr<AssetDependency>>& assetDependencies)
 {
-    // TODO: We can use fork-join model here to make asset loading faster
+    tf::Taskflow taskflow;
     auto& am = AssetManager::Get();
-    for (const auto dep : assetDependencies)
-    {
-        switch (dep->type)
+    taskflow.for_each(
+        assetDependencies.begin(), assetDependencies.end(), [&am](const auto dep)
         {
+            switch (dep->type)
+            {
             case AssetType::MESH:
             {
                 auto loader = am.GetLoader<MeshLoader>();
@@ -442,14 +447,18 @@ void SceneSerializer::LoadDependencies(const std::vector<std::shared_ptr<AssetDe
                 loader->LoadWithGUID(dep->path, {}, dep->guid);
                 break;
             }
-			case AssetType::MATERIAL:
+            case AssetType::MATERIAL:
             {
-	            continue;
+                break;
             }
             default:
-            R_CORE_ASSERT(false, "")
+                R_CORE_ASSERT(false, "")
+            }
         }
-    }
+    );
+    tf::Executor executor;
+    executor.run(taskflow).wait();
+
     // We must load materials only after other resources was load to be sure that all default ones will be properly set up
     for (const auto dep : assetDependencies)
     {
