@@ -144,50 +144,7 @@ std::shared_ptr<Mesh> MeshLoader::ProcessMesh(const aiMesh* mesh, const aiScene*
         }
     }
 
-    std::vector<std::shared_ptr<Texture>> albedo;
-    std::vector<std::shared_ptr<Texture>> normal;
-    std::vector<std::shared_ptr<Texture>> specular;
-    std::vector<std::shared_ptr<Texture>> roughness;
-#if 0
-    if (mesh->mMaterialIndex >= 0)
-    {
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        albedo = LoadTextures(material, aiTextureType_DIFFUSE);
-        normal = LoadTextures(material, aiTextureType_NORMALS);
-        specular = LoadTextures(material, aiTextureType_SPECULAR);
-        if (specular.empty())
-        {
-            specular = LoadTextures(material, aiTextureType_METALNESS);
-        }
-        roughness = LoadTextures(material, aiTextureType_DIFFUSE_ROUGHNESS);
-        if (roughness.empty())
-        {
-            roughness = LoadTextures(material, aiTextureType_SHININESS);
-        }
-    }
-#endif
-
-    auto material = std::make_shared<Material>();
-#if 0
-    if (!albedo.empty())
-    {
-        material->textureData.albedo = albedo.front();
-    }
-    if (!normal.empty())
-    {
-        material->textureData.normal = normal.front();
-    }
-    if (!specular.empty())
-    {
-        material->textureData.metallic = specular.front();
-    }
-    if (!roughness.empty())
-    {
-        material->textureData.roughness = roughness.front();
-    }
-#endif
     auto builtMesh = BuildMesh(vertices, indexes);
-
     return builtMesh;
 }
 
@@ -245,6 +202,14 @@ AssetHandle MeshLoader::LoadWithGUID(const std::string& path, const xg::Guid& gu
 
 AssetHandle MeshLoader::_Load(const std::string& path, const xg::Guid& guid)
 {
+    R_CORE_ASSERT(manager, "")
+
+	const auto asset = manager->GetAsset<MeshNode>(path);
+    if (asset)
+    {
+        return { asset->guid };
+    }
+
     const size_t lastDelimIndex = path.find_last_of('/');
     std::string meshName = path.substr(lastDelimIndex, path.size() - 1 - lastDelimIndex);
     meshDir = path.substr(0, lastDelimIndex);
@@ -267,7 +232,5 @@ AssetHandle MeshLoader::_Load(const std::string& path, const xg::Guid& guid)
 
     auto meshTree = std::make_shared<MeshNode>();
     ProcessNode(scene->mRootNode, scene, meshTree);
-
-    R_CORE_ASSERT(manager, "")
     return manager->CacheAsset(meshTree, path, AssetType::MESH, guid);
 }

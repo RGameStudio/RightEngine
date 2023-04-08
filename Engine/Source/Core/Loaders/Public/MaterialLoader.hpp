@@ -12,6 +12,6 @@ namespace RightEngine
         AssetHandle LoadWithGUID(const xg::Guid& guid);
 
     private:
-
+        AssetHandle _Load(std::string_view path, const xg::Guid& guid);
     };
 }

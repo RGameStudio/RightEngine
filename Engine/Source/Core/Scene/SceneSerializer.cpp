@@ -442,26 +442,33 @@ void SceneSerializer::LoadDependencies(const std::vector<std::shared_ptr<AssetDe
                 loader->LoadWithGUID(dep->path, {}, dep->guid);
                 break;
             }
-            case AssetType::MATERIAL:
+			case AssetType::MATERIAL:
             {
-                auto loader = am.GetLoader<MaterialLoader>();
-                const auto ah = loader->LoadWithGUID(dep->guid);
-                auto material = am.GetAsset<Material>(ah);
-                R_CORE_ASSERT(material, "");
-                auto materialDep = std::static_pointer_cast<MaterialAssetDependency>(dep);
-                R_CORE_ASSERT(materialDep, "");
-                material->textureData.albedo = { materialDep->albedoGuid };
-                material->textureData.normal = { materialDep->normalGuid };
-                material->textureData.roughness = { materialDep->roughnessGuid };
-                material->textureData.metallic = { materialDep->metallicGuid };
-                material->textureData.ao = { materialDep->aoGuid };
-                material->materialData.albedo = materialDep->albedo;
-                material->materialData.metallic = materialDep->metallic;
-                material->materialData.roughness = materialDep->roughness;
-                break;
+	            continue;
             }
             default:
             R_CORE_ASSERT(false, "")
+        }
+    }
+    // We must load materials only after other resources was load to be sure that all default ones will be properly set up
+    for (const auto dep : assetDependencies)
+    {
+        if (dep->type == AssetType::MATERIAL)
+        {
+            auto loader = am.GetLoader<MaterialLoader>();
+            const auto ah = loader->LoadWithGUID(dep->guid);
+            auto material = am.GetAsset<Material>(ah);
+            R_CORE_ASSERT(material, "");
+            auto materialDep = std::static_pointer_cast<MaterialAssetDependency>(dep);
+            R_CORE_ASSERT(materialDep, "");
+            material->textureData.albedo = { materialDep->albedoGuid };
+            material->textureData.normal = { materialDep->normalGuid };
+            material->textureData.roughness = { materialDep->roughnessGuid };
+            material->textureData.metallic = { materialDep->metallicGuid };
+            material->textureData.ao = { materialDep->aoGuid };
+            material->materialData.albedo = materialDep->albedo;
+            material->materialData.metallic = materialDep->metallic;
+            material->materialData.roughness = materialDep->roughness;
         }
     }
 }

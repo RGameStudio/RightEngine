@@ -583,6 +583,14 @@ AssetHandle EnvironmentMapLoader::FinishLoading(const xg::Guid& guid)
 
 AssetHandle EnvironmentMapLoader::_Load(const std::string& path, const xg::Guid& guid, const bool flipVertically)
 {
+    R_CORE_ASSERT(manager, "");
+
+    const auto asset = manager->GetAsset<EnvironmentContext>(path);
+    if (asset)
+    {
+        return { asset->guid };
+    }
+
     environmentContext = std::make_shared<EnvironmentContext>();
     loaderContext.path = path;
     environmentContext->name = GetTextureName(path);

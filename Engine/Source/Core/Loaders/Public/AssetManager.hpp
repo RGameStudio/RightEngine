@@ -48,6 +48,19 @@ namespace RightEngine
         }
 
         template<class T>
+        std::shared_ptr<T> GetAsset(std::string_view path)
+        {
+            R_CORE_ASSERT(!path.empty(), "");
+            R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
+            auto guidIt = guidCache.find(path.data());
+            if (guidIt == guidCache.end())
+            {
+                return nullptr;
+            }
+            return GetAsset<T>({ guidIt->second });
+        }
+
+        template<class T>
         std::shared_ptr<T> GetAsset(const AssetHandle& assetHandle)
         {
             R_CORE_ASSERT(assetHandle.guid.isValid(), "");
@@ -80,6 +93,7 @@ namespace RightEngine
             basePtr->type = type;
             basePtr->path = path;
             assetCache[basePtr->guid] = basePtr;
+            guidCache[path.data()] = basePtr->guid;
             return { basePtr->guid };
         }
 
@@ -94,6 +108,7 @@ namespace RightEngine
 
     private:
         std::unordered_map<xg::Guid, std::shared_ptr<AssetBase>> assetCache;
+        std::unordered_map<std::string, xg::Guid> guidCache;
         std::unordered_map<std::type_index, std::shared_ptr<AssetLoader>> loaders;
         std::mutex assetCacheMutex;
 

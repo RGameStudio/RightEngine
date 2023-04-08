@@ -173,10 +173,17 @@ AssetHandle TextureLoader::_Load(const std::string& path,
                                  const TextureLoaderOptions& options,
                                  const xg::Guid& guid) const
 {
+    R_CORE_ASSERT(manager, "");
+
+    const auto asset = manager->GetAsset<Texture>(path);
+    if (asset)
+    {
+        return { asset->guid };
+    }
+
     auto [data, descriptor] = LoadTextureData(path, options);
     descriptor.type = options.type;
     auto texture = Device::Get()->CreateTexture(descriptor, data);
     texture->SetSampler(Device::Get()->CreateSampler({}));
-    R_CORE_ASSERT(manager, "")
     return manager->CacheAsset(texture, path, AssetType::IMAGE, guid);
 }
