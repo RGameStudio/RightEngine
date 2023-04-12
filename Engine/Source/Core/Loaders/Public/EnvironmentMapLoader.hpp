@@ -43,7 +43,8 @@ namespace RightEngine
         AssetHandle FinishLoading(const xg::Guid& guid);
         AssetHandle _Load(const std::string& path, const xg::Guid& guid, bool flipVertically);
 
-        std::shared_ptr<EnvironmentContext> environmentContext;
-        EnvironmentMapLoaderContext loaderContext;
+        std::shared_ptr<EnvironmentContext> m_environmentContext;
+        EnvironmentMapLoaderContext m_loaderContext;
+        std::shared_ptr<Texture> m_lut;
     };
 }

@@ -125,7 +125,7 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
 {
     auto& assetManager = AssetManager::Get();
     auto loader = assetManager.GetLoader<TextureLoader>();
-    auto textureHandle = loader->Load(loaderContext.path, {});
+    auto textureHandle = loader->Load(m_loaderContext.path, {});
     const auto equirectMap = assetManager.GetAsset<Texture>(textureHandle);
 
     ShaderProgramDescriptor shaderProgramDescriptor;
@@ -245,8 +245,8 @@ void EnvironmentMapLoader::ComputeEnvironmentMap()
         environmentCubemap->CopyFrom(colorAttachment, src, dst);
     }
     
-    environmentContext->envMap = environmentCubemap;
-    environmentContext->equirectangularTexture = equirectMap;
+    m_environmentContext->envMap = environmentCubemap;
+    m_environmentContext->equirectangularTexture = equirectMap;
 }
 
 void EnvironmentMapLoader::ComputeIrradianceMap()
@@ -319,7 +319,7 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
     bufferDescriptor.memoryType = MemoryType::CPU_GPU;
     const auto buffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
     rendererState->SetVertexBuffer(buffer, 0);
-    rendererState->SetTexture(environmentContext->envMap, 1);
+    rendererState->SetTexture(m_environmentContext->envMap, 1);
 
     SamplerDescriptor samplerDescriptor{};
     const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
@@ -361,8 +361,8 @@ void EnvironmentMapLoader::ComputeIrradianceMap()
     }
 
 
-    environmentContext->irradianceMap = irradianceCubemap;
-    R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", loaderContext.path);
+    m_environmentContext->irradianceMap = irradianceCubemap;
+    R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", m_loaderContext.path);
 }
 
 void EnvironmentMapLoader::ComputeRadianceMap()
@@ -442,7 +442,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
     const auto roughnessBuffer = Device::Get()->CreateBuffer(bufferDescriptor, nullptr);
     
     rendererState->SetVertexBuffer(buffer, 0);
-    rendererState->SetTexture(environmentContext->envMap, 1);
+    rendererState->SetTexture(m_environmentContext->envMap, 1);
     rendererState->SetFragmentBuffer(roughnessBuffer, 2);
 
     SamplerDescriptor samplerDescriptor{};
@@ -501,12 +501,21 @@ void EnvironmentMapLoader::ComputeRadianceMap()
         }
     }
     
-    environmentContext->prefilterMap = prefilterCubemap;
-    R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", loaderContext.path);
+    m_environmentContext->prefilterMap = prefilterCubemap;
+    R_CORE_TRACE("Finished computing irradiance map for texture \"{0}\"", m_loaderContext.path);
 }
 
 void EnvironmentMapLoader::ComputeLUT()
 {
+    static bool computed = false;
+
+    if (computed)
+    {
+        m_environmentContext->brdfLut = m_lut;
+        return;
+    }
+    computed = true;
+
     ShaderProgramDescriptor shaderProgramDescriptor;
     ShaderDescriptor vertexShader;
     vertexShader.path = "/Engine/Shaders/Utils/brdf.vert";
@@ -571,14 +580,15 @@ void EnvironmentMapLoader::ComputeLUT()
     renderer.Draw(vertexBuffer);
     renderer.EndFrame();
     
-    environmentContext->brdfLut = colorAttachment;
-    R_CORE_TRACE("Finished computing BRDF map for texture \"{0}\"", loaderContext.path);
+    m_environmentContext->brdfLut = colorAttachment;
+    m_lut = colorAttachment;
+    R_CORE_TRACE("Finished computing BRDF map for texture \"{0}\"", m_loaderContext.path);
 }
 
 AssetHandle EnvironmentMapLoader::FinishLoading(const xg::Guid& guid)
 {
     R_CORE_ASSERT(manager, "")
-    return manager->CacheAsset(environmentContext, loaderContext.path, AssetType::ENVIRONMENT_MAP, guid);
+    return manager->CacheAsset(m_environmentContext, m_loaderContext.path, AssetType::ENVIRONMENT_MAP, guid);
 }
 
 AssetHandle EnvironmentMapLoader::_Load(const std::string& path, const xg::Guid& guid, const bool flipVertically)
@@ -591,9 +601,9 @@ AssetHandle EnvironmentMapLoader::_Load(const std::string& path, const xg::Guid&
         return { asset->guid };
     }
 
-    environmentContext = std::make_shared<EnvironmentContext>();
-    loaderContext.path = path;
-    environmentContext->name = GetTextureName(path);
+    m_environmentContext = std::make_shared<EnvironmentContext>();
+    m_loaderContext.path = path;
+    m_environmentContext->name = GetTextureName(path);
     ComputeEnvironmentMap();
     ComputeIrradianceMap();
     ComputeRadianceMap();
