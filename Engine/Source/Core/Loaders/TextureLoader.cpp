@@ -158,7 +158,7 @@ void TextureLoader::LoadAsync(AssetHandle& handle,
                               const std::string& path,
                               const TextureLoaderOptions& options) const
 {
-    Instance().Service<ThreadService>()->AddBackgroundTask([=, &handle]()
+    Instance().Service<ThreadService>().AddBackgroundTask([=, &handle]()
         {
             handle = _Load(path, options, xg::Guid());
         });

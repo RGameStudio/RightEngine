@@ -4,6 +4,7 @@
 #include "RendererCommand.hpp"
 #include "AssetManager.hpp"
 #include "Application.hpp"
+#include "ThreadService.hpp"
 
 using namespace RightEngine;
 
@@ -85,67 +86,81 @@ void SceneRenderer::Init()
 
 void SceneRenderer::CreateShaders()
 {
+    auto& ts = Instance().Service<ThreadService>();
+    std::vector<tf::Future<void>> shaderLoadingTasks;
+
     //PBR
-    {
-        ShaderProgramDescriptor shaderProgramDescriptor;
-        ShaderDescriptor vertexShader;
-        vertexShader.path = "/Engine/Shaders/pbr.vert";
-        vertexShader.type = ShaderType::VERTEX;
-        ShaderDescriptor fragmentShader;
-        fragmentShader.path = "/Engine/Shaders/pbr.frag";
-        fragmentShader.type = ShaderType::FRAGMENT;
-        shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
-        VertexBufferLayout layout;
-        layout.Push<glm::vec3>();
-        layout.Push<glm::vec3>();
-        layout.Push<glm::vec2>();
-        layout.Push<glm::vec3>();
-        layout.Push<glm::vec3>();
-        shaderProgramDescriptor.layout = layout;
-        shaderProgramDescriptor.reflection.textures = { 3, 4, 5, 6, 7, 8, 9, 10 };
-        shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
-        shaderProgramDescriptor.reflection.buffers[{ 1, ShaderType::VERTEX }] = BufferType::UNIFORM;
-        shaderProgramDescriptor.reflection.buffers[{ 2, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
-        shaderProgramDescriptor.reflection.buffers[{ 11, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
-        shaderProgramDescriptor.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
-        pbrShader = Device::Get()->CreateShader(shaderProgramDescriptor);
-    }
+    shaderLoadingTasks.emplace_back(ts.AddBackgroundTask([=]()
+        {
+            ShaderProgramDescriptor shaderProgramDescriptor;
+		    ShaderDescriptor vertexShader;
+		    vertexShader.path = "/Engine/Shaders/pbr.vert";
+		    vertexShader.type = ShaderType::VERTEX;
+		    ShaderDescriptor fragmentShader;
+		    fragmentShader.path = "/Engine/Shaders/pbr.frag";
+		    fragmentShader.type = ShaderType::FRAGMENT;
+		    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+		    VertexBufferLayout layout;
+		    layout.Push<glm::vec3>();
+		    layout.Push<glm::vec3>();
+		    layout.Push<glm::vec2>();
+		    layout.Push<glm::vec3>();
+		    layout.Push<glm::vec3>();
+		    shaderProgramDescriptor.layout = layout;
+		    shaderProgramDescriptor.reflection.textures = { 3, 4, 5, 6, 7, 8, 9, 10 };
+		    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.buffers[{ 1, ShaderType::VERTEX }] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.buffers[{ 2, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.buffers[{ 11, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
+		    pbrShader = Device::Get()->CreateShader(shaderProgramDescriptor);
+        }));
 
     //Skybox
-    {
-        ShaderProgramDescriptor skyboxShaderDesc{};
-        ShaderDescriptor vertexShader;
-        vertexShader.path = "/Engine/Shaders/skybox.vert";
-        vertexShader.type = ShaderType::VERTEX;
-        ShaderDescriptor fragmentShader;
-        fragmentShader.path = "/Engine/Shaders/skybox.frag";
-        fragmentShader.type = ShaderType::FRAGMENT;
-        skyboxShaderDesc.shaders = { vertexShader, fragmentShader };
-        VertexBufferLayout skyboxLayout;
-        skyboxLayout.Push<glm::vec3>();
-        skyboxShaderDesc.layout = skyboxLayout;
-        skyboxShaderDesc.reflection.textures = { 3 };
-        skyboxShaderDesc.reflection.buffers[{ 1, ShaderType::VERTEX }] = BufferType::UNIFORM;
-        skyboxShader = Device::Get()->CreateShader(skyboxShaderDesc);
-    }
+    shaderLoadingTasks.emplace_back(ts.AddBackgroundTask([=]()
+        {
+            ShaderProgramDescriptor skyboxShaderDesc{};
+		    ShaderDescriptor vertexShader;
+		    vertexShader.path = "/Engine/Shaders/skybox.vert";
+		    vertexShader.type = ShaderType::VERTEX;
+		    ShaderDescriptor fragmentShader;
+		    fragmentShader.path = "/Engine/Shaders/skybox.frag";
+		    fragmentShader.type = ShaderType::FRAGMENT;
+		    skyboxShaderDesc.shaders = { vertexShader, fragmentShader };
+		    VertexBufferLayout skyboxLayout;
+		    skyboxLayout.Push<glm::vec3>();
+		    skyboxShaderDesc.layout = skyboxLayout;
+		    skyboxShaderDesc.reflection.textures = { 3 };
+		    skyboxShaderDesc.reflection.buffers[{ 1, ShaderType::VERTEX }] = BufferType::UNIFORM;
+		    skyboxShader = Device::Get()->CreateShader(skyboxShaderDesc);
+        }));
 
     //Postprocess
+    shaderLoadingTasks.emplace_back(ts.AddBackgroundTask([=]()
+        {
+            ShaderProgramDescriptor postprocessShaderDesc{};
+		    ShaderDescriptor vertexShader;
+		    vertexShader.path = "/Engine/Shaders/postprocess.vert";
+		    vertexShader.type = ShaderType::VERTEX;
+		    ShaderDescriptor fragmentShader;
+		    fragmentShader.path = "/Engine/Shaders/postprocess.frag";
+		    fragmentShader.type = ShaderType::FRAGMENT;
+		    postprocessShaderDesc.shaders = { vertexShader, fragmentShader };
+		    VertexBufferLayout postprocessLayout;
+		    postprocessLayout.Push<glm::vec2>();
+		    postprocessLayout.Push<glm::vec2>();
+		    postprocessShaderDesc.layout = postprocessLayout;
+		    postprocessShaderDesc.reflection.textures = { 3 };
+		    postprocessShaderDesc.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
+		    postprocessShader = Device::Get()->CreateShader(postprocessShaderDesc);
+        }));
+
+    for (auto& task : shaderLoadingTasks)
     {
-        ShaderProgramDescriptor postprocessShaderDesc{};
-        ShaderDescriptor vertexShader;
-        vertexShader.path = "/Engine/Shaders/postprocess.vert";
-        vertexShader.type = ShaderType::VERTEX;
-        ShaderDescriptor fragmentShader;
-        fragmentShader.path = "/Engine/Shaders/postprocess.frag";
-        fragmentShader.type = ShaderType::FRAGMENT;
-        postprocessShaderDesc.shaders = { vertexShader, fragmentShader };
-        VertexBufferLayout postprocessLayout;
-        postprocessLayout.Push<glm::vec2>();
-        postprocessLayout.Push<glm::vec2>();
-        postprocessShaderDesc.layout = postprocessLayout;
-        postprocessShaderDesc.reflection.textures = { 3 };
-        postprocessShaderDesc.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
-        postprocessShader = Device::Get()->CreateShader(postprocessShaderDesc);
+	    if (task.valid())
+	    {
+            task.wait();
+	    }
     }
 }
 

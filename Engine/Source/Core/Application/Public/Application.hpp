@@ -26,7 +26,7 @@ namespace RightEngine
         void RegisterService();
 
         template<class T>
-        std::shared_ptr<T> Service();
+        T& Service();
 
         const std::shared_ptr<Window>& GetWindow() const;
 
@@ -66,7 +66,7 @@ namespace RightEngine
     }
 
     template <class T>
-    std::shared_ptr<T> Application::Service()
+    T& Application::Service()
     {
         R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<IService, T>), "");
         const auto typeIndex = std::type_index(typeid(T));
@@ -75,8 +75,9 @@ namespace RightEngine
         {
             static std::shared_ptr<T> empty;
             R_CORE_ASSERT(false, "");
-            return empty;
+            return *empty;
         }
-        return std::static_pointer_cast<T>(serviceIt->second);
+        auto* s = static_cast<T*>(serviceIt->second.get());
+        return *s;
     }
 }

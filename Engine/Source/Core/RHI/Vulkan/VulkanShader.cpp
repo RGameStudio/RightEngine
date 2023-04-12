@@ -56,7 +56,6 @@ VulkanShader::VulkanShader(const std::shared_ptr<Device>& device, const ShaderPr
 
     const auto vertexShaderPath = vertexShader.path;
     const auto fragmentShaderPath = fragmentShader.path;
-    glslang_initialize_process();
     ShaderProgramSource source = ParseShaders(vertexShaderPath, fragmentShaderPath);
     const auto vertSpirv = CompileShader(GLSLANG_STAGE_VERTEX, source.vertexSource.c_str(), vertexShaderPath.c_str());
     const auto fragSpirv = CompileShader(GLSLANG_STAGE_FRAGMENT, source.fragmentSource.c_str(), fragmentShaderPath.c_str());

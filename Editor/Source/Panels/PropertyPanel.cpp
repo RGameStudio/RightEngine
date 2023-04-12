@@ -7,6 +7,8 @@
 #include "Filesystem.hpp"
 #include "EditorCore.hpp"
 #include "TextureLoader.hpp"
+#include "Application.hpp"
+#include "ThreadService.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <filesystem>
@@ -179,9 +181,13 @@ namespace editor
 
 	void PropertyPanel::Init()
 	{
-		editorDefaultTexture = AssetManager::Get().GetLoader<TextureLoader>()->Load(
-			"/Textures/editor_default_texture.png");
-		AssetManager::Get().GetAsset<Texture>(editorDefaultTexture)->SetSampler(Device::Get()->CreateSampler({}));
+		auto& ts = Instance().Service<ThreadService>();
+		ts.AddBackgroundTask([=]()
+			{
+				editorDefaultTexture = AssetManager::Get().GetLoader<TextureLoader>()->Load(
+					"/Textures/editor_default_texture.png");
+				AssetManager::Get().GetAsset<Texture>(editorDefaultTexture)->SetSampler(Device::Get()->CreateSampler({}));
+			});
 	}
 
 	void PropertyPanel::SetScene(const std::shared_ptr<Scene>& aScene)
