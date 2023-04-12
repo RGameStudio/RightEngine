@@ -3,6 +3,8 @@
 #include "Path.hpp"
 #include "Assert.hpp"
 #include "AssetManager.hpp"
+#include "Application.hpp"
+#include "ThreadService.hpp"
 #include <stb_image.h>
 #include <stb_image_write.h>
 #include <fstream>
@@ -137,8 +139,8 @@ std::pair<std::vector<uint8_t>, TextureDescriptor>TextureLoader::LoadTextureData
         R_CORE_ASSERT(false, "");
     }
 
-    std::vector<uint8_t> data;
     const size_t textureSize = descriptor.GetTextureSize();
+    std::vector<uint8_t> data;
     data.resize(textureSize);
     std::memcpy(data.data(), buffer, textureSize);
 
@@ -156,10 +158,10 @@ void TextureLoader::LoadAsync(AssetHandle& handle,
                               const std::string& path,
                               const TextureLoaderOptions& options) const
 {
-    //taskGroup.run([&, path = std::move(path), options = std::move(options)]()
-    //{
-        handle = _Load(path, options, xg::Guid());
-    //});
+    Instance().Service<ThreadService>()->AddBackgroundTask([=, &handle]()
+        {
+            handle = _Load(path, options, xg::Guid());
+        });
 }
 
 AssetHandle TextureLoader::LoadWithGUID(const std::string& path,

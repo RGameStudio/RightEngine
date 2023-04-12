@@ -3,6 +3,7 @@
 #include "EditorCore.hpp"
 #include "ImGuiLayer.hpp"
 #include "AssetManager.hpp"
+#include "TextureLoader.hpp"
 #include <filesystem>
 #include <imgui.h>
 

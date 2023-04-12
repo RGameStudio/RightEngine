@@ -1,15 +1,14 @@
 #pragma once
 
 #include "Texture.hpp"
-#include "TextureLoader.hpp"
 #include "MeshLoader.hpp"
-#include "EnvironmentMapLoader.hpp"
 #include "Shader.hpp"
 #include "AssetLoader.hpp"
 #include <string>
 #include <memory>
 #include <unordered_map>
 #include <typeindex>
+#include <shared_mutex>
 
 namespace RightEngine
 {
@@ -63,6 +62,7 @@ namespace RightEngine
         template<class T>
         std::shared_ptr<T> GetAsset(const AssetHandle& assetHandle)
         {
+            std::shared_lock lock(m_assetCacheMutex);
             R_CORE_ASSERT(assetHandle.guid.isValid(), "");
             R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
             auto assetIt = assetCache.find(assetHandle.guid);
@@ -78,7 +78,7 @@ namespace RightEngine
         template<class T>
         AssetHandle CacheAsset(const std::shared_ptr<T>& ptr, std::string_view path, AssetType type, const xg::Guid& guid = {})
         {
-            std::lock_guard<std::mutex> lock(assetCacheMutex);
+            std::lock_guard lock(m_assetCacheMutex);
             R_CORE_ASSERT(static_cast<bool>(std::is_base_of_v<AssetBase, T>), "");
             auto basePtr = std::dynamic_pointer_cast<AssetBase>(ptr);
             R_CORE_ASSERT(basePtr != nullptr, "");
@@ -110,7 +110,7 @@ namespace RightEngine
         std::unordered_map<xg::Guid, std::shared_ptr<AssetBase>> assetCache;
         std::unordered_map<std::string, xg::Guid> guidCache;
         std::unordered_map<std::type_index, std::shared_ptr<AssetLoader>> loaders;
-        std::mutex assetCacheMutex;
+        std::shared_mutex m_assetCacheMutex;
 
         mutable AssetHandle defaultTexture;
         mutable AssetHandle defaultMaterial;

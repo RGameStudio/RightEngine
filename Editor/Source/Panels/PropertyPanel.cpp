@@ -6,6 +6,7 @@
 #include "ImGuiLayer.hpp"
 #include "Filesystem.hpp"
 #include "EditorCore.hpp"
+#include "TextureLoader.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <filesystem>

@@ -5,10 +5,10 @@
 #include "MaterialLoader.hpp"
 #include "Timer.hpp"
 #include "Application.hpp"
+#include "ThreadService.hpp"
+#include "TextureLoader.hpp"
 #include <taskflow/taskflow.hpp>
 #include <fstream>
-
-#include "ThreadService.hpp"
 
 using namespace RightEngine;
 

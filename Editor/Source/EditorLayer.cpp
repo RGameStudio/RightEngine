@@ -23,6 +23,8 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+#include "Timer.hpp"
+
 using namespace RightEngine;
 using namespace editor;
 
@@ -145,6 +147,7 @@ std::shared_ptr<RightEngine::Scene> EditorLayer::LoadScene(const fs::path& path)
 
 void EditorLayer::OnAttach()
 {
+    RightEngine::Timer timer;
     sceneData.propertyPanel.Init();
     sceneData.renderer = std::make_shared<SceneRenderer>();
     sceneData.renderer->Init();
@@ -163,6 +166,7 @@ void EditorLayer::OnAttach()
                                           });
 
     LoadDefaultScene();
+    R_INFO("[EditorLayer] Layer was successfully attached for {}s", timer.TimeInSeconds());
 }
 
 void EditorLayer::OnUpdate(float ts)

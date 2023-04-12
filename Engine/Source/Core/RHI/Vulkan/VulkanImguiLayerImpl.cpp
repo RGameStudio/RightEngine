@@ -15,9 +15,14 @@
 #include <backends/imgui_impl_glfw.h>
 #include <ImGuizmo.h>
 #include <vulkan/vulkan.h>
-#include <algorithm>
 
 using namespace RightEngine;
+
+const ImVec4 C_UI_TEXT_COLOR = ImColor(255, 255, 255);
+const ImVec4 C_UI_WINDOW_BG_COLOR = ImColor(20, 20, 20);
+const ImVec4 C_UI_ELEMENT_BG_COLOR = ImColor(50, 50, 50);
+const ImVec4 C_UI_ELEMENT_HOVER_COLOR = ImColor(100, 100, 100);
+const ImVec4 C_UI_ELEMENT_ACTIVE_COLOR = ImColor(130, 130, 130);
 
 void VulkanImguiLayerImpl::OnAttach(const std::shared_ptr<GraphicsPipeline>& pipeline)
 {
@@ -60,6 +65,23 @@ void VulkanImguiLayerImpl::OnAttach(const std::shared_ptr<GraphicsPipeline>& pip
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_Text] = C_UI_TEXT_COLOR;
+    style.Colors[ImGuiCol_WindowBg] = C_UI_WINDOW_BG_COLOR;
+    style.Colors[ImGuiCol_ChildBg] = C_UI_WINDOW_BG_COLOR;
+    style.Colors[ImGuiCol_PopupBg] = C_UI_WINDOW_BG_COLOR;
+    style.Colors[ImGuiCol_Button] = C_UI_ELEMENT_BG_COLOR;
+    style.Colors[ImGuiCol_ButtonHovered] = C_UI_ELEMENT_HOVER_COLOR;
+    style.Colors[ImGuiCol_ButtonActive] = C_UI_ELEMENT_ACTIVE_COLOR;
+    style.Colors[ImGuiCol_FrameBg] = C_UI_ELEMENT_BG_COLOR;
+    style.Colors[ImGuiCol_FrameBgHovered] = C_UI_ELEMENT_HOVER_COLOR;
+    style.Colors[ImGuiCol_FrameBgActive] = C_UI_ELEMENT_ACTIVE_COLOR;
+    style.Colors[ImGuiCol_Header] = C_UI_ELEMENT_BG_COLOR;
+    style.Colors[ImGuiCol_HeaderHovered] = C_UI_ELEMENT_HOVER_COLOR;
+    style.Colors[ImGuiCol_HeaderActive] = C_UI_ELEMENT_ACTIVE_COLOR;
+    style.FrameRounding = 0.f;
+    style.FrameBorderSize = 0.5f;
 
     ImGui::LoadIniSettingsFromDisk(io.IniFilename);
 

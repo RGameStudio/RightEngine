@@ -9,7 +9,7 @@ namespace RightEngine
 {
     struct SceneRendererSettings
     {
-        float gamma{ 1.7f };
+        float gamma{ 2.2f };
     };
 
     enum class PassType

@@ -9,6 +9,7 @@
 #include "Filesystem.hpp"
 #include "MaterialLoader.hpp"
 #include "ThreadService.hpp"
+#include "TextureLoader.hpp"
 #include <memory>
 
 namespace RightEngine

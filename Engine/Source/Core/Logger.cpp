@@ -13,9 +13,9 @@ namespace RightEngine
         if (!bIsInitialized)
         {
             spdlog::set_pattern("%^[%T] %n: %v%$");
-            coreLogger = spdlog::stdout_color_mt("RightEngine");
+            coreLogger = spdlog::stdout_color_mt("Engine");
             coreLogger->set_level(spdlog::level::trace);
-            clientLogger = spdlog::stderr_color_mt("APP");
+            clientLogger = spdlog::stderr_color_mt("Editor");
             clientLogger->set_level(spdlog::level::trace);
             bIsInitialized = true;
             R_CORE_INFO("Successfully initialized logging system!");

@@ -160,7 +160,7 @@ void SceneRenderer::CreateOffscreenPasses()
     //PBR
     {
         TextureDescriptor colorAttachmentDesc{};
-        colorAttachmentDesc.format = Format::BGRA8_SRGB;
+        colorAttachmentDesc.format = Format::BGRA8_UNORM;
         colorAttachmentDesc.type = TextureType::TEXTURE_2D;
         colorAttachmentDesc.width = viewport.x;
         colorAttachmentDesc.height = viewport.y;
@@ -233,7 +233,7 @@ void SceneRenderer::CreateOffscreenPasses()
         renderPassDescriptor.offscreen = true;
 
         TextureDescriptor colorAttachmentDesc{};
-        colorAttachmentDesc.format = Format::BGRA8_SRGB;
+        colorAttachmentDesc.format = Format::BGRA8_UNORM;
         colorAttachmentDesc.type = TextureType::TEXTURE_2D;
         colorAttachmentDesc.width = viewport.x;
         colorAttachmentDesc.height = viewport.y;
@@ -266,7 +266,7 @@ void SceneRenderer::CreateOnscreenPasses()
     // Present
     {
         TextureDescriptor presentAttachmentDesc{};
-        presentAttachmentDesc.format = Format::BGRA8_SRGB;
+        presentAttachmentDesc.format = Format::BGRA8_UNORM;
         presentAttachmentDesc.type = TextureType::TEXTURE_2D;
         presentAttachmentDesc.width = windowSize.x;
         presentAttachmentDesc.height = windowSize.y;

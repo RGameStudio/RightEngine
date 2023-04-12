@@ -1,5 +1,6 @@
 #include "AssetManager.hpp"
 #include "MaterialLoader.hpp"
+#include "TextureLoader.hpp"
 
 using namespace RightEngine;
 
