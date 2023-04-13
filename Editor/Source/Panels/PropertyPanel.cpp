@@ -132,30 +132,40 @@ namespace
 		{
 			ImGuiLayer::Image(assetManager.GetAsset<Texture>(textureHandle), ImVec2(64, 64), ImVec2(0, 1),
 			                  ImVec2(1, 0));
-			if (ImGui::IsItemClicked(1))
-			{
-				textureHandle = {};
-			}
 		}
 		else
 		{
 			ImGuiLayer::Image(assetManager.GetAsset<Texture>(editorDefaultTexture), ImVec2(64, 64));
 		}
 
-		const auto filename = OpenFileDialogOnItemClick("Choose texture", {".png", ".jpg"}, texturesDir);
-		if (!filename.empty())
+		if (ImGui::BeginDragDropTarget())
 		{
-			const auto id = String::Split(filename, ".").front();
-
-			if (textures.find(id) == textures.end())
+			const auto payload = ImGui::AcceptDragDropPayload(editor::C_CONTENT_BROWSER_DND_NAME);
+			if (!payload)
 			{
-				const auto newTextureHandle = AssetManager::Get().GetLoader<TextureLoader>()->Load(
-					texturesDir + filename);
-				textures[id] = newTextureHandle;
+				ImGui::EndDragDropTarget();
+				return;
 			}
-
-			textureHandle = textures[id];
+			static char pathBuff[256]{};
+			memset(pathBuff, 0, 256);
+			memcpy(pathBuff, payload->Data, payload->DataSize);
+			fs::path path = pathBuff;
+			if (!path.has_extension())
+			{
+				ImGui::EndDragDropTarget();
+				return;
+			}
+			if (path.extension() == ".png" || path.extension() == ".jpg")
+			{
+				auto& ts = Instance().Service<ThreadService>();
+				ts.AddBackgroundTask([&textureHandle, &assetManager, path = std::move(path)]()
+					{
+						textureHandle = assetManager.GetLoader<TextureLoader>()->Load(path.generic_string());
+					});
+			}
+			ImGui::EndDragDropTarget();
 		}
+		
 	}
 
 	std::string LightTypeToStr(LightType type)
@@ -359,6 +369,18 @@ namespace editor
 
 					ImGui::TableNextColumn();
 					DrawMaterialEditorTab("Normal", true, material->textureData.normal, textures, component);
+					ImGui::TableNextColumn();
+
+					ImGui::TableNextColumn();
+					DrawMaterialEditorTab("Metallic", true, material->textureData.metallic, textures, component);
+					ImGui::TableNextColumn();
+
+					ImGui::TableNextColumn();
+					DrawMaterialEditorTab("Roughness", true, material->textureData.roughness, textures, component);
+					ImGui::TableNextColumn();
+
+					ImGui::TableNextColumn();
+					DrawMaterialEditorTab("AO", true, material->textureData.ao, textures, component);
 					ImGui::TableNextColumn();
 
 
