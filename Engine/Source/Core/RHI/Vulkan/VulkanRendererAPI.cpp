@@ -183,18 +183,9 @@ void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
                      vkCmdEndRenderPass(VK_CMD(buffer)->GetBuffer());
                  });
 
-    cmd->Execute();
-
-    if (vkEndCommandBuffer(vkCmd->GetBuffer()) != VK_SUCCESS)
-    {
-        R_CORE_ASSERT(false, "failed to record command buffer!");
-    }
-
     // TODO: Move all synchronisation code to command buffer
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
-    VkCommandBuffer cmdBuffers[] = {vkCmd->GetBuffer()};
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+    VkCommandBuffer cmdBuffers[] = { vkCmd->GetBuffer() };
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -206,10 +197,7 @@ void VulkanRendererAPI::EndFrame(const std::shared_ptr<CommandBuffer>& cmd,
     submitInfo.signalSemaphoreCount = 0;
     submitInfo.pSignalSemaphores = nullptr;
 
-    if (vkQueueSubmit(VK_DEVICE()->GetQueue(QueueType::GRAPHICS), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
-    {
-        R_CORE_ASSERT(false, "failed to submit draw command buffer!");
-    }
+    VulkanUtils::EndCommandBuffer(VK_DEVICE(), vkCmd, submitInfo, inFlightFences[currentFrame]);
 
     vkWaitForFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     vkResetFences(VK_DEVICE()->GetDevice(), 1, &inFlightFences[currentFrame]);
