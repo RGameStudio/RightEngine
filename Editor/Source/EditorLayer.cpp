@@ -17,13 +17,13 @@
 #include "ImGuiLayer.hpp"
 #include "ThreadService.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
+#include "Timer.hpp"
+#include "Service/SelectionService.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <ImGuizmo.h>
-
-#include "Timer.hpp"
 
 using namespace RightEngine;
 using namespace editor;
@@ -44,12 +44,10 @@ namespace
     {
         ImVec2 viewportSize{ width, height };
         ImVec2 newViewportSize{ 0, 0 };
-        PropertyPanel propertyPanel;
         std::shared_ptr<ImGuiLayer> imGuiLayer;
         std::shared_ptr<SceneRenderer> renderer;
         SceneRendererSettings rendererSettings;
         bool isViewportHovered{ false };
-        std::shared_ptr<Entity> selectedEntity;
         ImGuizmo::OPERATION gizmoType{ ImGuizmo::TRANSLATE };
         std::filesystem::path scenePath;
         bool showDemoWindow{ false };
@@ -59,6 +57,7 @@ namespace
 
     void ImGuiAddTreeNodeChildren(const std::shared_ptr<Entity>& node, const std::shared_ptr<Scene>& scene)
     {
+        auto& ss = Instance().Service<SelectionService>();
         for (const auto& entity: node->GetChildren())
         {
             const auto& tag = entity->GetComponent<TagComponent>();
@@ -66,8 +65,7 @@ namespace
             bool node_open = ImGui::TreeNodeEx((char*) tag.guid.str().c_str(), node_flags, "%s", tag.name.c_str());
             if (ImGui::IsItemClicked())
             {
-                sceneData.propertyPanel.SetSelectedEntity(entity);
-                sceneData.selectedEntity = entity;
+                ss.Entity(entity);
             }
 
             bool destroyEntity = false;
@@ -97,8 +95,7 @@ namespace
 
                 scene->DestroyEntity(entity);
                 parentNode->RemoveChild(entity);
-                sceneData.propertyPanel.SetSelectedEntity(nullptr);
-                sceneData.selectedEntity = nullptr;
+                ss.Entity(nullptr);
                 return;
             }
         }
@@ -116,7 +113,7 @@ void EditorLayer::OpenScene(const fs::path& path)
 void EditorLayer::Scene(const std::shared_ptr<RightEngine::Scene>& scene)
 {
     m_newScene = scene;
-    sceneData.propertyPanel.SetScene(scene);
+    m_propertyPanel.SetScene(scene);
 }
 
 void EditorLayer::NewScene()
@@ -148,7 +145,7 @@ std::shared_ptr<RightEngine::Scene> EditorLayer::LoadScene(const fs::path& path)
 void EditorLayer::OnAttach()
 {
     RightEngine::Timer timer;
-    sceneData.propertyPanel.Init();
+	m_propertyPanel.Init();
     sceneData.renderer = std::make_shared<SceneRenderer>();
     sceneData.renderer->Init();
 
@@ -164,6 +161,16 @@ void EditorLayer::OnAttach()
                                               OnImGuiRender();
                                               sceneData.imGuiLayer->End(cmd);
                                           });
+
+    auto& ss = Instance().Service<SelectionService>();
+    ss.SelectEntityCallback([=](std::shared_ptr<Entity> entity)
+        {
+            m_propertyPanel.SetSelectedEntity(entity);
+        });
+    ss.DeselectEntityCallback([=]()
+        {
+            m_propertyPanel.SetSelectedEntity(nullptr);
+        });
 
     LoadDefaultScene();
     R_INFO("[EditorLayer] Layer was successfully attached for {}s", timer.TimeInSeconds());
@@ -434,7 +441,9 @@ void EditorLayer::OnImGuiRender()
         ImGui::EndDragDropTarget();
     }
 
-    if (sceneData.selectedEntity)
+    auto& ss = Instance().Service<SelectionService>();
+    auto selectedEntity = ss.Entity();
+    if (selectedEntity)
     {
         if (sceneData.isViewportHovered)
         {
@@ -470,7 +479,7 @@ void EditorLayer::OnImGuiRender()
         glm::mat4 cameraView = camera.GetViewMatrix(cameraPos);
         glm::mat4 cameraProjection = camera.GetProjectionMatrix();
 
-        auto& entityTransformComponent = sceneData.selectedEntity->GetComponent<TransformComponent>();
+        auto& entityTransformComponent = selectedEntity->GetComponent<TransformComponent>();
         glm::mat4 entityTransform = entityTransformComponent.GetWorldTransformMatrix();
 
         ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
@@ -491,7 +500,7 @@ void EditorLayer::OnImGuiRender()
 
     ImGui::End();
 
-    sceneData.propertyPanel.OnImGuiRender();
+    m_propertyPanel.OnImGuiRender();
 
     ImGui::Begin("Renderer");
     ImGui::DragFloat("Gamma", &sceneData.rendererSettings.gamma, 0.1, 1.0, 3.2);

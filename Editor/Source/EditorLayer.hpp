@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core.hpp"
-#include "Texture.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
+#include "Panels/PropertyPanel.hpp"
 
 namespace editor
 {
@@ -28,6 +28,7 @@ namespace editor
         std::shared_ptr<RightEngine::Scene> m_newScene;
 
         ContentBrowserPanel m_contentBrowser;
+        PropertyPanel m_propertyPanel;
 
         const std::string C_DEFAULT_SCENE_PATH = G_ASSET_DIR + "/Scenes/Scene.scene";
     };

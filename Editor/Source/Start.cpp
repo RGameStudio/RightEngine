@@ -1,12 +1,18 @@
 #include "EntryPoint.hpp"
 #include "EditorLayer.hpp"
+#include "Service/SelectionService.hpp"
 
 static std::shared_ptr<editor::EditorLayer> layer;
 
 void GameApplication::OnStart()
 {
+    auto& app = RightEngine::Instance();
+
+    app.RegisterService<editor::SelectionService>();
+
     layer = std::make_shared<editor::EditorLayer>();
-    RightEngine::Application::Get().PushLayer(layer);
+    app.PushLayer(layer);
+
 }
 
 void GameApplication::OnUpdate()
