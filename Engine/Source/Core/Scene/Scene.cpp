@@ -42,7 +42,8 @@ std::shared_ptr<Entity> Scene::CreateEntity(const std::string& name, bool addToR
 {
     std::shared_ptr<Entity> entity = std::make_shared<Entity>(registry.create(), shared_from_this());
     entity->AddComponent<TransformComponent>();
-    entity->AddComponent<TagComponent>(name);
+    auto& tag = entity->AddComponent<TagComponent>(name);
+    tag.colorId = colorId++;
 
     if (addToRoot)
     {

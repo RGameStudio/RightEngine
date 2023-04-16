@@ -8,7 +8,7 @@
 using namespace RightEngine;
 namespace
 {
-    void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layerCount, int mipmaps)
+    void SwitchImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layerCount, int mipmaps)
     {
         CommandBufferDescriptor commandBufferDescriptor;
         commandBufferDescriptor.type = CommandBufferType::GRAPHICS;
@@ -63,6 +63,43 @@ namespace
                                            &region
                                    );
                                });
+
+        VulkanUtils::EndCommandBuffer(VK_DEVICE(), commandBuffer);
+    }
+
+    void CopyImageToBuffer(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+    {
+        CommandBufferDescriptor commandBufferDescriptor;
+        commandBufferDescriptor.type = CommandBufferType::GRAPHICS;
+        auto commandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(
+            Device::Get()->CreateCommandBuffer(commandBufferDescriptor));
+
+        VulkanUtils::BeginCommandBuffer(commandBuffer, true);
+
+        VkBufferImageCopy region{};
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+
+        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.baseArrayLayer = 0;
+        region.imageSubresource.layerCount = 1;
+
+        region.imageOffset = { 0, 0, 0 };
+        region.imageExtent = { width, height, 1 };
+
+        commandBuffer->Enqueue([=](auto cmdBuffer)
+            {
+                vkCmdCopyImageToBuffer(
+                    VK_CMD(cmdBuffer)->GetBuffer(),
+                    image,
+                    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                    buffer,
+                    1,
+                    &region
+                );
+            });
 
         VulkanUtils::EndCommandBuffer(VK_DEVICE(), commandBuffer);
     }
@@ -146,7 +183,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
 
     if (!IsDepthTexture(specification.format))
     {
-        TransitionImageLayout(textureImage,
+			ChangeImageLayout(textureImage,
                               VK_IMAGE_LAYOUT_UNDEFINED,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               specification.type == TextureType::CUBEMAP ? 6 : 1,
@@ -160,7 +197,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
 
             stagingBuffer.reset();
         }
-        TransitionImageLayout(textureImage,
+        ChangeImageLayout(textureImage,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                               specification.type == TextureType::CUBEMAP ? 6 : 1,
@@ -200,7 +237,7 @@ VulkanTexture::~VulkanTexture()
 
 void VulkanTexture::ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layers, int mipmaps)
 {
-    TransitionImageLayout(image, oldLayout, newLayout, layers, mipmaps);
+    SwitchImageLayout(image, oldLayout, newLayout, layers, mipmaps);
 }
 
 void VulkanTexture::CopyFrom(const std::shared_ptr<Texture>& texture,
@@ -276,6 +313,31 @@ void VulkanTexture::CopyFrom(const std::shared_ptr<Texture>& texture,
                                srcSubRange);
 
     VulkanUtils::EndCommandBuffer(VK_DEVICE(), copyCmdBuffer);
+}
+
+std::shared_ptr<Buffer> VulkanTexture::Data()
+{
+    BufferDescriptor bufferDesc;
+    bufferDesc.size = specification.GetTextureSize();
+    bufferDesc.type = BufferType::TRANSFER_DST;
+    bufferDesc.memoryType = MemoryType::CPU_ONLY;
+    auto buffer = VK_DEVICE()->CreateBuffer(bufferDesc, nullptr);
+
+    ChangeImageLayout(textureImage,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        specification.type == TextureType::CUBEMAP ? 6 : 1,
+        specification.mipLevels);
+    CopyImageToBuffer(std::static_pointer_cast<VulkanBuffer>(buffer)->GetBuffer(),
+        textureImage,
+        specification.width,
+        specification.height);
+    ChangeImageLayout(textureImage,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        specification.type == TextureType::CUBEMAP ? 6 : 1,
+        specification.mipLevels);
+    return buffer;
 }
 
 bool VulkanTexture::ValidateSampler(const std::shared_ptr<Sampler>& sampler) const

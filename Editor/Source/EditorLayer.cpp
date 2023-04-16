@@ -116,6 +116,12 @@ void EditorLayer::Scene(const std::shared_ptr<RightEngine::Scene>& scene)
     m_propertyPanel.SetScene(scene);
 }
 
+void EditorLayer::AddCommand(EditorCommand&& command)
+{
+    std::lock_guard l(m_editorCommandMutex);
+    m_editorCommands.emplace_back(std::move(command));
+}
+
 void EditorLayer::NewScene()
 {
     Scene(Scene::Create());
@@ -277,6 +283,18 @@ void EditorLayer::OnUpdate(float ts)
     }
 
     sceneData.renderer->EndScene();
+
+
+    std::vector<EditorCommand> queue;
+    {
+        std::lock_guard l(m_editorCommandMutex);
+        queue = std::move(m_editorCommands);
+    }
+
+    for (auto&& command : queue)
+    {
+        command();
+    }
 }
 
 void EditorLayer::OnImGuiRender()
@@ -408,6 +426,29 @@ void EditorLayer::OnImGuiRender()
     ImGui::End();
 
     ImGui::Begin("Viewport");
+    if (sceneData.isViewportHovered && ImGui::IsMouseClicked(0))
+    {
+        auto pos = ImGui::GetMousePos();
+        auto rectPos = ImGui::GetWindowPos();
+        glm::vec2 pickPos = { pos.x - rectPos.x, pos.y - rectPos.y };
+        AddCommand([this, pickPos]()
+            {
+                auto id = sceneData.renderer->Pick(m_scene, pickPos);
+				const auto entities = m_scene->GetRootNode()->GetAllChildren();
+                std::shared_ptr<Entity> selectedEntity;
+				for (const auto& entity : entities)
+				{
+                    auto& tag = entity->GetComponent<TagComponent>();
+                    if (tag.colorId == id)
+                    {
+                        selectedEntity = entity;
+                        break;
+                    }
+				}
+                auto& ss = Instance().Service<SelectionService>();
+                ss.Entity(selectedEntity);
+            });
+    }
     sceneData.isViewportHovered = ImGui::IsWindowHovered();
     const auto attachment = sceneData.renderer->GetFinalImage();
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();

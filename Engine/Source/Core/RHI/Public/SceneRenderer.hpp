@@ -64,6 +64,8 @@ namespace RightEngine
         void SetUIPassCallback(std::function<void(const std::shared_ptr<CommandBuffer>&)>&& callback)
         { uiPassCallback = callback; }
 
+        uint32_t Pick(const std::shared_ptr<Scene>& scene, const glm::vec2& pos);
+
         const std::shared_ptr<GraphicsPipeline>& GetPass(PassType type) const;
         const std::shared_ptr<Texture>& GetFinalImage() const;
 
@@ -100,11 +102,13 @@ namespace RightEngine
         std::shared_ptr<GraphicsPipeline> postprocessPipeline;
         std::shared_ptr<GraphicsPipeline> uiPipeline;
         std::shared_ptr<GraphicsPipeline> presentPipeline;
+        std::shared_ptr<GraphicsPipeline> m_pickingPipeline;
 
         // TODO: Move shaders to ShaderLibrary
         std::shared_ptr<Shader> pbrShader;
         std::shared_ptr<Shader> skyboxShader;
         std::shared_ptr<Shader> postprocessShader;
+        std::shared_ptr<Shader> m_pickingShader;
 
         struct DrawCommand
         {
@@ -131,8 +135,13 @@ namespace RightEngine
             glm::mat4 transform;
         } transformDataUB;
 
+        struct UBColorId
+        {
+            glm::vec4 color;
+        } colorIdUB;
+
         // Per frame data
-        std::vector<DrawCommand> drawList;
+        std::vector<DrawCommand> m_drawList;
         EnvironmentContext sceneEnvironment;
         CameraData camera;
     };

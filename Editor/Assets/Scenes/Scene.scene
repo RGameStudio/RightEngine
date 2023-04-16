@@ -2,6 +2,22 @@ Scene: Scene
 Entities:
   - Entity:
       Tag component:
+        GUID: caaddac2-d076-447f-8b16-aed90195471a
+        Name: New entity
+      Transform component:
+        Position: [0, 0, 0]
+        Rotation: [0, 0, 0]
+        Scale: [1, 1, 1]
+  - Entity:
+      Tag component:
+        GUID: 7ff6a1ff-4442-4db1-8622-f88a7b9eba78
+        Name: New entity
+      Transform component:
+        Position: [0, 0, 0]
+        Rotation: [0, 0, 0]
+        Scale: [1, 1, 1]
+  - Entity:
+      Tag component:
         GUID: 99175e6b-a468-4bac-b189-1d7149c8e451
         Name: New entity
       Transform component:
@@ -29,13 +45,13 @@ Entities:
         GUID: 8c649a94-9e7a-496e-b74c-75fbfca792d3
         Name: Editor camera
       Transform component:
-        Position: [3.38447404, 2.57836747, 6.6092186]
-        Rotation: [-13.665946, 0.052360259, 0]
+        Position: [9.22762299, 1.73599494, 4.55628109]
+        Rotation: [-14.8222275, 0.0349070169, 0]
         Scale: [1, 1, 1]
       Camera component:
-        Front: [0.453352332, 0.0523363389, -0.889793575]
+        Front: [-0.632334471, 0.0348999277, -0.773909032]
         World up: [0, 1, 0]
-        Up: [-0.0237593632, 0.99862957, 0.0466324463]
+        Up: [0.022081878, 0.999390841, 0.0270258319]
         Z near: 0.100000001
         Z far: 500
         Aspect ratio: 1.77777779
@@ -49,7 +65,7 @@ Entities:
         GUID: f8e295da-ca9f-4336-811c-e218bff84f68
         Name: Backpack
       Transform component:
-        Position: [6.47242737, 2.06236887, 0]
+        Position: [6.47242737, 2.06236887, 0.153249323]
         Rotation: [0, 0, 0]
         Scale: [1, 1, 1]
       Mesh component:
@@ -66,7 +82,7 @@ Entities:
         Scale: [1, 1, 1]
       Skybox component:
         Type: 0
-        Skybox GUID: 6bd28ad7-f94e-4940-aaf0-305841df2705
+        Skybox GUID: d557520b-5bc8-4cd3-ba4e-2d42b73e203a
   - Entity:
       Tag component:
         GUID: 33e3e603-7c84-4cdd-8983-e553796b95a0
@@ -81,6 +97,18 @@ Entities:
         Intensity: 0
         Outer Radius: 50
         Inner Radius: 20
+  - Entity:
+      Tag component:
+        GUID: 44b9a0da-fa7b-4eb0-9b35-551acdf96fc5
+        Name: Tree
+      Transform component:
+        Position: [0, 0, 0]
+        Rotation: [0, 0, 0]
+        Scale: [1, 1, 1]
+      Mesh component:
+        Mesh GUID: 4fe5dd0d-541d-49e3-803f-772943ece8d0
+        Material GUID: b0355bc7-6786-4767-97e9-5bc0756c7e6e
+        Is visible: true
 Assets:
   - Asset:
       GUID: 705ceb03-2389-443a-8742-11097ce26989
@@ -117,10 +145,44 @@ Assets:
       Path: /Textures/backpack_roughness.jpg
       Type: 1
   - Asset:
+      GUID: d557520b-5bc8-4cd3-ba4e-2d42b73e203a
+      Path: /Textures/env_forest.hdr
+      Type: 3
+  - Asset:
       GUID: 7d26edee-45bb-4d86-a54a-1f00f30fa3dc
       Path: /Textures/backpack_ao.jpg
       Type: 1
   - Asset:
-      GUID: 6bd28ad7-f94e-4940-aaf0-305841df2705
-      Path: /Textures/env_circus.hdr
-      Type: 3
+      GUID: 4fe5dd0d-541d-49e3-803f-772943ece8d0
+      Path: /Models/default_cube.fbx
+      Type: 2
+  - Asset:
+      GUID: 744cc1ed-eda6-4d43-b32c-80c7721fe22f
+      Path: /Textures/albedo.png
+      Type: 1
+  - Asset:
+      GUID: 92895ba7-51a3-4152-ac9c-6ca5c2c5815a
+      Path: /Textures/editor_default_image.png
+      Type: 1
+  - Asset:
+      GUID: 7ddc0f29-aa1a-4f2f-96c6-ecc7aec1cba2
+      Path: /Textures/roughness.png
+      Type: 1
+  - Asset:
+      GUID: 71fa5484-c355-4285-af52-8b63ea472599
+      Path: /Textures/metallic.png
+      Type: 1
+  - Asset:
+      GUID: b0355bc7-6786-4767-97e9-5bc0756c7e6e
+      Path: b0355bc7-6786-4767-97e9-5bc0756c7e6e
+      Type: 5
+      Texture Data:
+        Albedo GUID: 744cc1ed-eda6-4d43-b32c-80c7721fe22f
+        Normal GUID: 92895ba7-51a3-4152-ac9c-6ca5c2c5815a
+        Roughness GUID: 7ddc0f29-aa1a-4f2f-96c6-ecc7aec1cba2
+        Metallic GUID: 71fa5484-c355-4285-af52-8b63ea472599
+        AO GUID: 92895ba7-51a3-4152-ac9c-6ca5c2c5815a
+      Material Data:
+        Albedo: [1, 1, 1, 1]
+        Roughness: 1
+        Metallic: 0

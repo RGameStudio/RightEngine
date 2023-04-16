@@ -30,6 +30,12 @@ namespace editor
         ContentBrowserPanel m_contentBrowser;
         PropertyPanel m_propertyPanel;
 
+        using EditorCommand = std::function<void()>;
+        std::vector<EditorCommand> m_editorCommands;
+        std::recursive_mutex m_editorCommandMutex;
+
+        void AddCommand(EditorCommand&& command);
+
         const std::string C_DEFAULT_SCENE_PATH = G_ASSET_DIR + "/Scenes/Scene.scene";
     };
 }

@@ -19,6 +19,7 @@ namespace RightEngine
 
         std::string name;
         xg::Guid guid{ xg::newGuid() };
+        uint32_t colorId;
     };
 
     // TODO: Add dirty flag, so we can recalculate transform only when needed

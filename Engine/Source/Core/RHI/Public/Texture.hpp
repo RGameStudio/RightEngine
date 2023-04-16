@@ -43,6 +43,8 @@ namespace RightEngine
 
         virtual void* GetNativeHandle() const = 0;
 
+        virtual std::shared_ptr<Buffer> Data() = 0;
+
     protected:
         Texture(const std::shared_ptr<Device>& device,
                 const TextureDescriptor& aSpecification,

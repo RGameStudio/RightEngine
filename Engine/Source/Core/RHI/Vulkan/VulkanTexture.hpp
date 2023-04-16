@@ -19,6 +19,8 @@ namespace RightEngine
 
         virtual void CopyFrom(const std::shared_ptr<Texture>& texture, const TextureCopy& srcCopy, const TextureCopy& dstCopy) override;
 
+        virtual std::shared_ptr<Buffer> Data() override;
+
         VkImageView GetImageView() const
         { return textureImageView; }
 

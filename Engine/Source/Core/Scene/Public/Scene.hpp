@@ -33,6 +33,7 @@ namespace RightEngine
         std::string name{ "Scene" };
         entt::registry registry;
         std::mutex m_mutex;
+        std::atomic_uint32_t colorId = 0;
 
     private:
         friend class Entity;

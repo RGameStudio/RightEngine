@@ -5,6 +5,7 @@
 #include "AssetManager.hpp"
 #include "Application.hpp"
 #include "ThreadService.hpp"
+#include <stb_image_write.h>
 
 using namespace RightEngine;
 
@@ -68,6 +69,57 @@ namespace
     {
         return AssetManager::Get().GetAsset<Texture>(handle);
     }
+
+    glm::vec4 IdToColor(uint32_t id)
+    {
+        uint32_t r = (id & 0x000000FF) >> 0;
+        uint32_t g = (id & 0x0000FF00) >> 8;
+        uint32_t b = (id & 0x00FF0000) >> 16;
+        return glm::vec4(r, g, b, 255.0f);
+    }
+
+    struct Pixel
+    {
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        uint8_t a;
+
+        bool Empty() const
+        {
+            return r == 0 && g == 0 && b == 0;
+        }
+    };
+
+    uint32_t ColorToId(Pixel pixel)
+    {
+        uint32_t id = pixel.b + pixel.g * 256 + pixel.r * 256 * 256;
+        return id;
+    }
+
+    void SaveTexture(const std::shared_ptr<Texture>& texture)
+    {
+        auto buffer = texture->Data();
+        auto& desc = texture->GetSpecification();
+        auto ptr = buffer->Map();
+
+        struct Pixel
+        {
+            uint8_t r;
+            uint8_t g;
+            uint8_t b;
+            uint8_t a;
+
+            bool Empty() const
+            {
+                return r == 0 && g == 0 && b == 0;
+            }
+        };
+        std::vector<Pixel> pickData(buffer->GetDescriptor().size / sizeof(Pixel));
+        memcpy(pickData.data(), ptr, buffer->GetDescriptor().size);
+        buffer->UnMap();
+        stbi_write_bmp("image.bmp", desc.width, desc.height, desc.componentAmount, pickData.data());
+    }
 }
 
 void SceneRenderer::Init()
@@ -87,19 +139,20 @@ void SceneRenderer::Init()
 void SceneRenderer::CreateShaders()
 {
     auto& ts = Instance().Service<ThreadService>();
-    std::vector<tf::Future<void>> shaderLoadingTasks;
+
+    tf::Taskflow taskflow;
 
     //PBR
-    shaderLoadingTasks.emplace_back(ts.AddBackgroundTask([=]()
-        {
-            ShaderProgramDescriptor shaderProgramDescriptor;
+    taskflow.emplace([=]()
+	    {
+		    ShaderProgramDescriptor shaderProgramDescriptor;
 		    ShaderDescriptor vertexShader;
 		    vertexShader.path = "/Engine/Shaders/pbr.vert";
 		    vertexShader.type = ShaderType::VERTEX;
 		    ShaderDescriptor fragmentShader;
 		    fragmentShader.path = "/Engine/Shaders/pbr.frag";
 		    fragmentShader.type = ShaderType::FRAGMENT;
-		    shaderProgramDescriptor.shaders = { vertexShader, fragmentShader };
+		    shaderProgramDescriptor.shaders = {vertexShader, fragmentShader};
 		    VertexBufferLayout layout;
 		    layout.Push<glm::vec3>();
 		    layout.Push<glm::vec3>();
@@ -107,17 +160,18 @@ void SceneRenderer::CreateShaders()
 		    layout.Push<glm::vec3>();
 		    layout.Push<glm::vec3>();
 		    shaderProgramDescriptor.layout = layout;
-		    shaderProgramDescriptor.reflection.textures = { 3, 4, 5, 6, 7, 8, 9, 10 };
-		    shaderProgramDescriptor.reflection.buffers[{ 0, ShaderType::VERTEX }] = BufferType::UNIFORM;
-		    shaderProgramDescriptor.reflection.buffers[{ 1, ShaderType::VERTEX }] = BufferType::UNIFORM;
-		    shaderProgramDescriptor.reflection.buffers[{ 2, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
-		    shaderProgramDescriptor.reflection.buffers[{ 11, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
-		    shaderProgramDescriptor.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.textures = {3, 4, 5, 6, 7, 8, 9, 10};
+		    shaderProgramDescriptor.reflection.buffers[{0, ShaderType::VERTEX}] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.buffers[{1, ShaderType::VERTEX}] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.buffers[{2, ShaderType::FRAGMENT}] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.buffers[{11, ShaderType::FRAGMENT}] = BufferType::UNIFORM;
+		    shaderProgramDescriptor.reflection.buffers[{12, ShaderType::FRAGMENT}] = BufferType::UNIFORM;
 		    pbrShader = Device::Get()->CreateShader(shaderProgramDescriptor);
-        }));
+	    }
+    );
 
     //Skybox
-    shaderLoadingTasks.emplace_back(ts.AddBackgroundTask([=]()
+    taskflow.emplace([=]()
         {
             ShaderProgramDescriptor skyboxShaderDesc{};
 		    ShaderDescriptor vertexShader;
@@ -133,10 +187,11 @@ void SceneRenderer::CreateShaders()
 		    skyboxShaderDesc.reflection.textures = { 3 };
 		    skyboxShaderDesc.reflection.buffers[{ 1, ShaderType::VERTEX }] = BufferType::UNIFORM;
 		    skyboxShader = Device::Get()->CreateShader(skyboxShaderDesc);
-        }));
+        }
+	);
 
     //Postprocess
-    shaderLoadingTasks.emplace_back(ts.AddBackgroundTask([=]()
+    taskflow.emplace([=]()
         {
             ShaderProgramDescriptor postprocessShaderDesc{};
 		    ShaderDescriptor vertexShader;
@@ -153,15 +208,35 @@ void SceneRenderer::CreateShaders()
 		    postprocessShaderDesc.reflection.textures = { 3 };
 		    postprocessShaderDesc.reflection.buffers[{ 12, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
 		    postprocessShader = Device::Get()->CreateShader(postprocessShaderDesc);
-        }));
+        }
+	);
 
-    for (auto& task : shaderLoadingTasks)
-    {
-	    if (task.valid())
-	    {
-            task.wait();
-	    }
-    }
+    //Picking
+    taskflow.emplace([=]()
+        {
+            ShaderProgramDescriptor shaderDesc{};
+		    ShaderDescriptor vertexShader;
+		    vertexShader.path = "/Engine/Shaders/Utils/picking.vert";
+		    vertexShader.type = ShaderType::VERTEX;
+		    ShaderDescriptor fragmentShader;
+		    fragmentShader.path = "/Engine/Shaders/Utils/picking.frag";
+		    fragmentShader.type = ShaderType::FRAGMENT;
+            shaderDesc.shaders = { vertexShader, fragmentShader };
+		    VertexBufferLayout layout;
+            layout.Push<glm::vec3>();
+            layout.Push<glm::vec3>();
+            layout.Push<glm::vec2>();
+            layout.Push<glm::vec3>();
+            layout.Push<glm::vec3>();
+            shaderDesc.layout = layout;
+            shaderDesc.reflection.buffers[{0, ShaderType::VERTEX}] = BufferType::UNIFORM;
+            shaderDesc.reflection.buffers[{1, ShaderType::VERTEX}] = BufferType::UNIFORM;
+            shaderDesc.reflection.buffers[{ 13, ShaderType::FRAGMENT }] = BufferType::UNIFORM;
+		    m_pickingShader = Device::Get()->CreateShader(shaderDesc);
+        }
+	);
+
+    ts.AddBackgroundTaskflow(std::move(taskflow)).wait();
 }
 
 void SceneRenderer::CreatePasses()
@@ -274,6 +349,42 @@ void SceneRenderer::CreateOffscreenPasses()
         renderPassDescriptor.depthStencilAttachment = { depth };
         postprocessPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
     }
+
+    //Picking
+    {
+        TextureDescriptor colorAttachmentDesc{};
+        colorAttachmentDesc.format = Format::BGRA8_UNORM;
+        colorAttachmentDesc.type = TextureType::TEXTURE_2D;
+        colorAttachmentDesc.width = viewport.x;
+        colorAttachmentDesc.height = viewport.y;
+        colorAttachmentDesc.componentAmount = 4;
+        const auto colorAttachment = Device::Get()->CreateTexture(colorAttachmentDesc, {});
+        colorAttachment->SetSampler(defaultSampler);
+        TextureDescriptor depthAttachmentDesc{};
+        depthAttachmentDesc.format = Format::D32_SFLOAT_S8_UINT;
+        depthAttachmentDesc.type = TextureType::TEXTURE_2D;
+        depthAttachmentDesc.width = viewport.x;
+        depthAttachmentDesc.height = viewport.y;
+        const auto depthAttachment = Device::Get()->CreateTexture(depthAttachmentDesc, {});
+
+        GraphicsPipelineDescriptor pipelineDescriptor{};
+        pipelineDescriptor.shader = m_pickingShader;
+
+        RenderPassDescriptor renderPassDescriptor{};
+        renderPassDescriptor.extent = viewport;
+        renderPassDescriptor.offscreen = true;
+        renderPassDescriptor.name = "Picking";
+        AttachmentDescriptor depth{};
+        depth.loadOperation = AttachmentLoadOperation::CLEAR;
+        depth.texture = depthAttachment;
+        AttachmentDescriptor color{};
+        color.texture = colorAttachment;
+        color.loadOperation = AttachmentLoadOperation::CLEAR;
+        color.storeOperation = AttachmentStoreOperation::STORE;
+        renderPassDescriptor.colorAttachments = { color };
+        renderPassDescriptor.depthStencilAttachment = { depth };
+        m_pickingPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
+    }
 }
 
 void SceneRenderer::CreateOnscreenPasses()
@@ -328,7 +439,7 @@ void SceneRenderer::CreateBuffers()
     const size_t maxEntitiesAmount = 512;
     const size_t transformBufferSize = maxEntitiesAmount * sizeof(UBTransformData);
     const size_t materialDataBufferSize = maxEntitiesAmount * sizeof(MaterialData);
-    drawList.reserve(maxEntitiesAmount);
+    m_drawList.reserve(maxEntitiesAmount);
 
     uniformBufferSet = std::make_shared<UniformBufferSet>(1);
     uniformBufferSet->Create(65536, 0);
@@ -336,6 +447,7 @@ void SceneRenderer::CreateBuffers()
     uniformBufferSet->Create(65536, 2);
     uniformBufferSet->Create(sizeof(UBLightData), 11);
     uniformBufferSet->Create(sizeof(SceneRendererSettings), 12);
+    uniformBufferSet->Create(65536, 13);
 
     {
         BufferDescriptor bufferDescriptor{};
@@ -375,7 +487,7 @@ void SceneRenderer::SubmitMesh(const std::shared_ptr<Mesh>& mesh, const std::sha
     dc.material = material;
     dc.transform = transform;
 
-    drawList.emplace_back(dc);
+    m_drawList.emplace_back(dc);
 }
 
 void SceneRenderer::BeginScene(const CameraData& cameraData,
@@ -423,9 +535,9 @@ void SceneRenderer::PBRPass()
 
     uint32_t transformBufferOffset = 0;
     uint32_t materialBufferOffset = 0;
-    for (int i = 0; i < drawList.size(); i++)
+    for (int i = 0; i < m_drawList.size(); i++)
     {
-        auto& dc = drawList[i];
+        auto& dc = m_drawList[i];
         const size_t transformDataSize = Device::Get()->GetAlignedGPUDataSize(sizeof(UBTransformData));
         const size_t materialDataSize = Device::Get()->GetAlignedGPUDataSize(sizeof(MaterialData));
         transformBuffer->SetData(&dc.transform, transformDataSize, transformBufferOffset);
@@ -515,13 +627,101 @@ void SceneRenderer::Present()
 
 void SceneRenderer::Clear()
 {
-    drawList.clear();
+    m_drawList.clear();
 }
 
 void SceneRenderer::Resize(int x, int y)
 {
     viewport = { x, y };
     CreateOffscreenPasses();
+}
+
+uint32_t SceneRenderer::Pick(const std::shared_ptr<Scene>& scene, const glm::vec2& pos)
+{
+    CameraData cameraData{};
+    for (const auto eCamera : scene->GetRegistry().view<CameraComponent>())
+    {
+        auto& camera = scene->GetRegistry().get<CameraComponent>(eCamera);
+        auto& transform = scene->GetRegistry().get<TransformComponent>(eCamera);
+        if (camera.isPrimary)
+        {
+            cameraData.position = transform.GetWorldPosition();
+            cameraData.view = camera.GetViewMatrix(cameraData.position);
+            cameraData.projection = camera.GetProjectionMatrix();
+            break;
+        }
+    }
+
+    auto& am = AssetManager::Get();
+    std::vector<DrawCommand> drawList;
+    std::vector<UBColorId> colorIds;
+    for (const auto eMesh : scene->GetRegistry().view<MeshComponent>())
+    {
+        auto& transform = scene->GetRegistry().get<TransformComponent>(eMesh);
+        auto& mc = scene->GetRegistry().get<MeshComponent>(eMesh);
+        auto material = am.GetAsset<Material>(mc.material);
+        for (const auto& mesh : am.GetAsset<MeshNode>(mc.mesh)->meshes)
+        {
+            auto& dc = drawList.emplace_back();
+            dc.material = material;
+            dc.mesh = mesh;
+            dc.transform = transform.GetWorldTransformMatrix();
+        }
+        auto& tag = scene->GetRegistry().get<TagComponent>(eMesh);
+        colorIds.emplace_back().color = IdToColor(tag.colorId) / 255.0f;
+    }
+
+    UBCameraData ubCameraData;
+    ubCameraData.position = glm::vec4(cameraData.position, 1.0);
+    auto projection = cameraData.projection;
+    projection[1][1] *= -1;
+    ubCameraData.viewProjection = projection * cameraData.view;
+
+    uniformBufferSet->Get(1)->SetData(&ubCameraData, sizeof(ubCameraData));
+
+    renderer.SetPipeline(m_pickingPipeline);
+    renderer.BeginFrame();
+    std::vector<std::shared_ptr<RendererState>> rendererStates(512);
+
+    auto& transformBuffer = uniformBufferSet->Get(0);
+    auto& cameraBuffer = uniformBufferSet->Get(1);
+    auto& colorIdBuffer = uniformBufferSet->Get(13);
+
+    uint32_t transformBufferOffset = 0;
+    uint32_t colorIdOffset = 0;
+    const size_t transformDataSize = Device::Get()->GetAlignedGPUDataSize(sizeof(UBTransformData));
+    const size_t colorIdDataSize = Device::Get()->GetAlignedGPUDataSize(sizeof(UBColorId));
+    for (int i = 0; i < drawList.size(); i++)
+    {
+        auto& dc = drawList[i];
+        transformBuffer->SetData(&dc.transform, transformDataSize, transformBufferOffset);
+        colorIdBuffer->SetData(&colorIds[i], colorIdDataSize, colorIdOffset);
+
+        auto& rs = rendererStates[i];
+        rs = RendererCommand::CreateRendererState();
+        rs->SetVertexBuffer(transformBuffer, 0, transformBufferOffset, sizeof(UBTransformData));
+        rs->SetVertexBuffer(cameraBuffer, 1);
+        rs->SetFragmentBuffer(colorIdBuffer, 13, colorIdOffset, sizeof(MaterialData));
+
+        rs->OnUpdate(renderer.GetActivePipeline());
+        renderer.EncodeState(rs);
+        renderer.Draw(dc.mesh);
+
+        transformBufferOffset += transformDataSize;
+        colorIdOffset += colorIdDataSize;
+    }
+    renderer.EndFrame();
+
+    auto& texture = m_pickingPipeline->GetRenderPassDescriptor().colorAttachments[0].texture;
+    auto buffer = texture->Data();
+    auto ptr = buffer->Map();
+    std::vector<Pixel> pickData(buffer->GetDescriptor().size / sizeof(Pixel));
+    memcpy(pickData.data(), ptr, buffer->GetDescriptor().size);
+    buffer->UnMap();
+
+    auto pickedPixel = pickData[texture->GetSpecification().width * pos.y + pos.x];
+    uint32_t id = ColorToId(pickedPixel);
+    return ColorToId(pickedPixel);
 }
 
 const std::shared_ptr<GraphicsPipeline>& SceneRenderer::GetPass(PassType type) const

@@ -42,6 +42,8 @@ namespace RightEngine
                 case Format::RGB8_SRGB:
                 case Format::RGBA8_SRGB:
                     return sizeof(uint8_t) * componentAmount;
+				case Format::BGRA8_UNORM:
+                    return sizeof(float) * componentAmount;
                 default:
                 R_CORE_ASSERT(false, "");
                     return 0;

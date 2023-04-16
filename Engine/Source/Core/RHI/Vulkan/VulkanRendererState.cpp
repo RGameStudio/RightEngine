@@ -118,7 +118,17 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
             return;
         }
 
-        std::array<VkDescriptorPoolSize, 2> poolSizes = { bufferPoolSize, texturePoolSize };
+        std::vector<VkDescriptorPoolSize> poolSizes;
+        if (bufferPoolSize.descriptorCount > 0)
+        {
+            poolSizes.push_back(bufferPoolSize);
+        }
+        else if (texturePoolSize.descriptorCount > 0)
+        {
+            poolSizes.push_back(texturePoolSize);
+        }
+
+        R_CORE_ASSERT(!poolSizes.empty(), "");
 
         VkDescriptorPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
