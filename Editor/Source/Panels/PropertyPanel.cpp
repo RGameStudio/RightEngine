@@ -138,6 +138,12 @@ namespace
 			ImGuiLayer::Image(assetManager.GetAsset<Texture>(editorDefaultTexture), ImVec2(64, 64));
 		}
 
+		if (ImGui::IsItemClicked(1))
+		{
+			textureHandle = AssetManager::Get().GetDefaultTexture();
+			return;
+		}
+
 		if (ImGui::BeginDragDropTarget())
 		{
 			const auto payload = ImGui::AcceptDragDropPayload(editor::C_CONTENT_BROWSER_DND_NAME);
@@ -374,10 +380,12 @@ namespace editor
 					ImGui::TableNextColumn();
 					DrawMaterialEditorTab("Metallic", true, material->textureData.metallic, textures, component);
 					ImGui::TableNextColumn();
+					ImGui::DragFloat("Metallic", &material->materialData.metallic, 0.01f, 0, 1);
 
 					ImGui::TableNextColumn();
 					DrawMaterialEditorTab("Roughness", true, material->textureData.roughness, textures, component);
 					ImGui::TableNextColumn();
+					ImGui::DragFloat("Roughness", &material->materialData.roughness, 0.01f, 0, 1);
 
 					ImGui::TableNextColumn();
 					DrawMaterialEditorTab("AO", true, material->textureData.ao, textures, component);

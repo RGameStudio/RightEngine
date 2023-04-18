@@ -109,10 +109,10 @@ void main()
     float roughness;
     float ao;
 
-    albedo = texture(u_Albedo, Output.UV).rgb;
+    albedo = texture(u_Albedo, Output.UV).rgb * u_AlbedoV.rgb;
     N = getNormalFromMap();
-    metallic = texture(u_Metallic, Output.UV).r;
-    roughness = texture(u_Rougness, Output.UV).r;
+    metallic = texture(u_Metallic, Output.UV).r * u_MetallicV;
+    roughness = texture(u_Rougness, Output.UV).r * u_RoughnessV;
     ao = texture(u_AO, Output.UV).r;
 
     vec3 V = normalize(Output.CameraPosition.xyz - Output.WorldPos);
