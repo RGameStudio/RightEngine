@@ -547,6 +547,12 @@ void EditorLayer::OnImGuiRender()
     ImGui::DragFloat("Gamma", &sceneData.rendererSettings.gamma, 0.1, 1.0, 3.2);
     ImGui::Separator();
     ImGui::Text("Frame time %.2f ms", Input::frameTime);
+
+    for (const auto& pass : sceneData.renderer->GetPassInfo())
+    {
+        ImGui::Text("%s: %.2fms", pass.m_name.c_str(), pass.m_time);
+    }
+
     ImGui::End();
 
     m_contentBrowser.OnImGuiRender();

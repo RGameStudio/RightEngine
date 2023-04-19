@@ -39,6 +39,12 @@ namespace RightEngine
         glm::mat4 projection;
     };
 
+    struct PassInfo
+    {
+        std::string m_name;
+        double m_time;
+    };
+
     class SceneRenderer
     {
     public:
@@ -68,6 +74,8 @@ namespace RightEngine
 
         const std::shared_ptr<GraphicsPipeline>& GetPass(PassType type) const;
         const std::shared_ptr<Texture>& GetFinalImage() const;
+
+        const std::vector<PassInfo> GetPassInfo() const { return m_passInfo; }
 
     private:
         void CreateShaders();
@@ -144,5 +152,6 @@ namespace RightEngine
         std::vector<DrawCommand> m_drawList;
         EnvironmentContext sceneEnvironment;
         CameraData camera;
+        std::vector<PassInfo> m_passInfo;
     };
 }

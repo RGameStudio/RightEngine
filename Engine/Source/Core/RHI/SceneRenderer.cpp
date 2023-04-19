@@ -5,6 +5,7 @@
 #include "AssetManager.hpp"
 #include "Application.hpp"
 #include "ThreadService.hpp"
+#include "Timer.hpp"
 #include <stb_image_write.h>
 
 using namespace RightEngine;
@@ -513,13 +514,28 @@ void SceneRenderer::BeginScene(const CameraData& cameraData,
 
 void SceneRenderer::EndScene()
 {
+	Timer timer;
+    std::vector<PassInfo> passInfo;
     PBRPass();
-    SkyboxPass();
-    PostprocessPass();
+    passInfo.push_back({ "PBR", timer.TimeInMilliseconds() });
 
+    timer.Start();
+    SkyboxPass();
+    passInfo.push_back({ "Skybox", timer.TimeInMilliseconds() });
+
+    timer.Start();
+    PostprocessPass();
+    passInfo.push_back({ "Postprocess", timer.TimeInMilliseconds() });
+
+    timer.Start();
     UIPass();
+    passInfo.push_back({ "UI", timer.TimeInMilliseconds() });
+
+    timer.Start();
     Present();
+    passInfo.push_back({ "Present", timer.TimeInMilliseconds() });
     Clear();
+    m_passInfo = std::move(passInfo);
 }
 
 void SceneRenderer::PBRPass()
