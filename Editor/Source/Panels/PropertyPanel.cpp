@@ -380,12 +380,12 @@ namespace editor
 					ImGui::TableNextColumn();
 					DrawMaterialEditorTab("Metallic", true, material->textureData.metallic, textures, component);
 					ImGui::TableNextColumn();
-					ImGui::DragFloat("Metallic", &material->materialData.metallic, 0.01f, 0, 1);
+					ImGui::SliderFloat("Metallic", &material->materialData.metallic,0, 1);
 
 					ImGui::TableNextColumn();
 					DrawMaterialEditorTab("Roughness", true, material->textureData.roughness, textures, component);
 					ImGui::TableNextColumn();
-					ImGui::DragFloat("Roughness", &material->materialData.roughness, 0.01f, 0, 1);
+					ImGui::SliderFloat("Roughness", &material->materialData.roughness,0, 1);
 
 					ImGui::TableNextColumn();
 					DrawMaterialEditorTab("AO", true, material->textureData.ao, textures, component);

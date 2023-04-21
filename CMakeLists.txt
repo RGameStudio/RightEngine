@@ -116,6 +116,8 @@ set(TF_BUILD_TESTS OFF CACHE BOOL "Enables builds of tests")
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "Enables builds of examples")
 add_subdirectory(Lib/taskflow)
 
+add_subdirectory(Lib/simdjson)
+
 set(THIRD_PARTY_LIB
         glfw
         stb_image
@@ -136,6 +138,7 @@ set(THIRD_PARTY_LIB
         ImGuizmo
         yaml-cpp
         Taskflow
+        simdjson
         )
 
 set(THIRD_PARTY_PROJECT_DIR_NAME "Lib")
@@ -169,6 +172,7 @@ set_target_properties(hash-library PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_N
 set_target_properties(spdlog PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(uninstall PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(Taskflow PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+set_target_properties(simdjson PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 
 add_subdirectory(Editor)
 add_subdirectory(Engine)

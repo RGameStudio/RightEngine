@@ -2,6 +2,14 @@ Scene: Scene
 Entities:
   - Entity:
       Tag component:
+        GUID: c809816c-0608-4d98-a755-7a1dbc3c90d5
+        Name: New entity
+      Transform component:
+        Position: [0, 0, 0]
+        Rotation: [0, 0, 0]
+        Scale: [1, 1, 1]
+  - Entity:
+      Tag component:
         GUID: 52bd6d00-0225-4045-80e3-10332dd1295c
         Name: New entity
       Transform component:
@@ -53,13 +61,13 @@ Entities:
         GUID: 8c649a94-9e7a-496e-b74c-75fbfca792d3
         Name: Editor camera
       Transform component:
-        Position: [5.84468365, 3.34623361, 10.9564095]
-        Rotation: [-27.0046234, -0.231255487, 0]
+        Position: [12.4028254, 3.62950134, 6.85296726]
+        Rotation: [-27.3449631, -0.104718991, 0]
         Scale: [1, 1, 1]
       Camera component:
-        Front: [-0.288662881, -0.229199767, -0.929591954]
+        Front: [-0.595060527, -0.104527704, -0.796854377]
         World up: [0, 1, 0]
-        Up: [-0.0679708943, 0.973379433, -0.218889222]
+        Up: [-0.0625429228, 0.994521976, -0.0837521553]
         Z near: 0.100000001
         Z far: 500
         Aspect ratio: 1.77777779
@@ -73,7 +81,7 @@ Entities:
         GUID: f8e295da-ca9f-4336-811c-e218bff84f68
         Name: Backpack
       Transform component:
-        Position: [6.47242737, 2.06236887, 0.153249323]
+        Position: [9.72832298, 3.01698804, 0.15324989]
         Rotation: [0, 0, 0]
         Scale: [1, 1, 1]
       Mesh component:
@@ -112,7 +120,7 @@ Entities:
       Transform component:
         Position: [0, 0, 0]
         Rotation: [0, 0, 0]
-        Scale: [1, 1, 1]
+        Scale: [50, 0.100000001, 50]
       Mesh component:
         Mesh GUID: 4fe5dd0d-541d-49e3-803f-772943ece8d0
         Material GUID: b0355bc7-6786-4767-97e9-5bc0756c7e6e
