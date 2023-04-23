@@ -12,9 +12,8 @@ VulkanBuffer::VulkanBuffer(std::shared_ptr<Device> device, const BufferDescripto
 {
     if (bufferDescriptor.type == BufferType::CONSTANT)
     {
-        R_CORE_ASSERT(bufferDescriptor.size < 128, "");
+        R_CORE_ASSERT(bufferDescriptor.size <= 128, "");
         bufferData = new uint8_t[bufferDescriptor.size];
-        return;
     }
     else
     {

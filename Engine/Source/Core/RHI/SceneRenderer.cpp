@@ -6,7 +6,10 @@
 #include "Application.hpp"
 #include "ThreadService.hpp"
 #include "Timer.hpp"
+#include "RHIHelpers.hpp"
 #include <stb_image_write.h>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 using namespace RightEngine;
 
@@ -121,6 +124,9 @@ namespace
         buffer->UnMap();
         stbi_write_bmp("image.bmp", desc.width, desc.height, desc.componentAmount, pickData.data());
     }
+
+    constexpr const int C_SHADOWMAP_WIDTH = 1024;
+    constexpr const int C_SHADOWMAP_HEIGHT = 1024;
 }
 
 void SceneRenderer::Init()
@@ -236,6 +242,25 @@ void SceneRenderer::CreateShaders()
 		    m_pickingShader = Device::Get()->CreateShader(shaderDesc);
         }
 	);
+
+    //Shadow
+    taskflow.emplace([=]()
+        {
+            ShaderProgramDescriptor desc{};
+			ShaderDescriptor vertex = helpers::CreateShaderDescriptor("/Engine/Shaders/shadow.vert", ShaderType::VERTEX);
+            ShaderDescriptor fragment = helpers::CreateShaderDescriptor("/Engine/Shaders/shadow.frag", ShaderType::FRAGMENT);
+            desc.shaders = { vertex, fragment };
+            VertexBufferLayout layout;
+            layout.Push<glm::vec3>();
+            layout.Push<glm::vec3>();
+            layout.Push<glm::vec2>();
+            layout.Push<glm::vec3>();
+            layout.Push<glm::vec3>();
+            desc.layout = layout;
+            desc.reflection.buffers[{0, ShaderType::VERTEX}] = BufferType::UNIFORM;
+            desc.reflection.buffers[{ C_CONSTANT_BUFFER_SLOT, ShaderType::VERTEX}] = BufferType::CONSTANT;
+            m_shadowShader = Device::Get()->CreateShader(desc);
+        });
 
     ts.AddBackgroundTaskflow(std::move(taskflow)).wait();
 }
@@ -386,6 +411,19 @@ void SceneRenderer::CreateOffscreenPasses()
         renderPassDescriptor.depthStencilAttachment = { depth };
         m_pickingPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDescriptor, renderPassDescriptor);
     }
+
+    //Shadow
+    {
+        TextureDescriptor depthDesc = helpers::CreateTextureDescriptor(C_SHADOWMAP_WIDTH, C_SHADOWMAP_HEIGHT, TextureType::TEXTURE_2D, Format::D32_SFLOAT_S8_UINT);
+        const auto depth = Device::Get()->CreateTexture(depthDesc, {});
+
+        GraphicsPipelineDescriptor pipelineDesc;
+        pipelineDesc.shader = m_shadowShader;
+
+        AttachmentDescriptor depthAttachment = helpers::CreateAttachmentDescriptor(depth);
+        RenderPassDescriptor renderPassDecs = helpers::CreateRenderPassDescriptor({ C_SHADOWMAP_WIDTH, C_SHADOWMAP_HEIGHT }, {}, depthAttachment);
+        m_shadowPipeline = Device::Get()->CreateGraphicsPipeline(pipelineDesc, renderPassDecs);
+    }
 }
 
 void SceneRenderer::CreateOnscreenPasses()
@@ -516,6 +554,12 @@ void SceneRenderer::EndScene()
 {
 	Timer timer;
     std::vector<PassInfo> passInfo;
+
+    timer.Start();
+    ShadowPass();
+    passInfo.push_back({ "Shadow", timer.TimeInMilliseconds() });
+
+    timer.Start();
     PBRPass();
     passInfo.push_back({ "PBR", timer.TimeInMilliseconds() });
 
@@ -536,6 +580,66 @@ void SceneRenderer::EndScene()
     passInfo.push_back({ "Present", timer.TimeInMilliseconds() });
     Clear();
     m_passInfo = std::move(passInfo);
+}
+
+void SceneRenderer::ShadowPass()
+{
+    renderer.SetPipeline(m_shadowPipeline);
+    renderer.BeginFrame();
+    std::vector<std::shared_ptr<RendererState>> rendererStates(512);
+    auto& transformBuffer = uniformBufferSet->Get(0);
+
+    struct ConstantBuffer
+    {
+        glm::mat4 lightSpaceMatrix;
+        glm::mat4 dummy1;
+    } constantBuffer;
+
+    std::vector<std::shared_ptr<Buffer>> lightBuffers;
+
+    for (int lightIdx = 0; lightIdx < lightDataUB.lightsAmount; lightIdx++)
+    {
+        const auto& light = lightDataUB.light[lightIdx];
+        if (light.type != 0)
+        {
+            continue;
+        }
+    	CameraComponent camera;
+        camera.Rotate(light.rotation);
+
+        const auto lightProj = camera.GetProjectionMatrix();
+        const auto lightView = camera.GetViewMatrix(light.position);
+
+        constantBuffer.lightSpaceMatrix = lightProj * lightView;
+        constantBuffer.dummy1 = glm::mat4();
+
+        BufferDescriptor desc{};
+        desc.memoryType = MemoryType::CPU_GPU;
+        desc.size = 128;
+        desc.type = BufferType::CONSTANT;
+        lightBuffers.push_back(Device::Get()->CreateBuffer(desc, &constantBuffer));
+
+        uint32_t transformBufferOffset = 0;
+        for (int i = 0; i < m_drawList.size(); i++)
+        {
+            auto& dc = m_drawList[i];
+            const size_t transformDataSize = Device::Get()->GetAlignedGPUDataSize(sizeof(UBTransformData));
+            transformBuffer->SetData(&dc.transform, transformDataSize, transformBufferOffset);
+
+            auto& rs = rendererStates[i];
+            rs = RendererCommand::CreateRendererState();
+            rs->SetVertexBuffer(transformBuffer, 0, transformBufferOffset, sizeof(UBTransformData));
+            rs->SetVertexBuffer(lightBuffers.back(), C_CONSTANT_BUFFER_SLOT, 0, 128);
+
+            rs->OnUpdate(renderer.GetActivePipeline());
+            renderer.EncodeState(rs);
+            renderer.Draw(dc.mesh);
+
+            transformBufferOffset += transformDataSize;
+        }
+    }
+
+    renderer.EndFrame();
 }
 
 void SceneRenderer::PBRPass()

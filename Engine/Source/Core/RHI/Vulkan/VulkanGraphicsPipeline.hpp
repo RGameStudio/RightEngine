@@ -31,6 +31,9 @@ namespace RightEngine
         VkFramebuffer GetFramebuffer() const
         { return framebuffer; }
 
+        const std::vector<VkClearValue>& ClearValue() const
+        { return m_clearValues; }
+
     private:
         VkPipeline graphicsPipeline{ VK_NULL_HANDLE };
         VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
@@ -38,6 +41,7 @@ namespace RightEngine
         VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
         std::vector<VkPushConstantRange> pushConstants;
         VkFramebuffer framebuffer{ VK_NULL_HANDLE };
+        std::vector<VkClearValue> m_clearValues;
 
         void Init(const GraphicsPipelineDescriptor& descriptorconst,
                   const RenderPassDescriptor& renderPassDescriptor);

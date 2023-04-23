@@ -32,6 +32,10 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
             {
                 if (!bufferPtr.expired())
                 {
+                    if (bufferPtr.lock()->GetDescriptor().type == BufferType::CONSTANT)
+                    {
+                        continue;
+                    }
                     const auto buffer = bufferPtr.lock();
                     VkDescriptorBufferInfo bufferInfo{};
                     bufferInfo.buffer = std::static_pointer_cast<VulkanBuffer>(buffer)->GetBuffer();

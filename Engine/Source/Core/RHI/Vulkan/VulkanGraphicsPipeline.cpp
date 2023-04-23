@@ -45,27 +45,6 @@ namespace
         return writeDescriptorSet;
     }
 
-    void GetPushConstants(std::vector<VkPushConstantRange>& ranges,
-                          const std::unordered_map<int, std::shared_ptr<Buffer>>& buffers,
-                          VkShaderStageFlags stage)
-    {
-        uint32_t offset = 0;
-        for (const auto& [slot, buffer] : buffers)
-        {
-            if (buffer->GetDescriptor().type == BufferType::CONSTANT)
-            {
-                VkPushConstantRange range;
-                range.offset = offset;
-                R_CORE_ASSERT(range.offset < 128, "");
-                range.size = buffer->GetDescriptor().size;
-                R_CORE_ASSERT(range.size < MAX_PUSH_CONSTANT_SIZE, "");
-                range.stageFlags = stage;
-                ranges.emplace_back(range);
-                offset += range.size;
-            }
-        }
-    }
-
     void ResizeAttachment(AttachmentDescriptor& attachment, int x, int y)
     {
         TextureDescriptor descriptor{};
@@ -85,6 +64,17 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const GraphicsPipelineDescriptor&
                                                const RenderPassDescriptor& renderPassDescriptor) : GraphicsPipeline(descriptor, renderPassDescriptor)
 {
     Init(descriptor, renderPassDescriptor);
+    for (const auto& attachment : renderPassDescriptor.colorAttachments)
+    {
+        glm::vec4 color = attachment.clearValue.color;
+        VkClearValue clearValue;
+        clearValue.color = { color.r, color.g, color.b, color.a };
+        m_clearValues.push_back(clearValue);
+    }
+    VkClearValue clearValue;
+    clearValue.depthStencil = { renderPassDescriptor.depthStencilAttachment.clearValue.depth,
+                                renderPassDescriptor.depthStencilAttachment.clearValue.stencil };
+    m_clearValues.push_back(clearValue);
 }
 
 void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
@@ -216,6 +206,20 @@ void VulkanGraphicsPipeline::Init(const GraphicsPipelineDescriptor& descriptor,
         pipelineLayoutInfo.setLayoutCount = 0;
         pipelineLayoutInfo.pSetLayouts = VK_NULL_HANDLE;
     }
+
+    for (const auto& [ref, type] : shader->GetShaderProgramDescriptor().reflection.buffers)
+    {
+        if (type == BufferType::CONSTANT)
+        {
+            R_CORE_ASSERT(pushConstants.empty(), "");
+            VkPushConstantRange range;
+            range.offset = 0;
+            range.size = MAX_PUSH_CONSTANT_SIZE;
+            range.stageFlags = VulkanConverters::ShaderStage(ref.stage);
+            pushConstants.emplace_back(range);
+        }
+    }
+
     if (pushConstants.empty())
     {
         pipelineLayoutInfo.pushConstantRangeCount = 0;

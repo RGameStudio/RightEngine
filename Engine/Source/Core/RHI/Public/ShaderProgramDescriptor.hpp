@@ -2,6 +2,7 @@
 
 #include "VertexBufferLayout.hpp"
 #include "Utils.hpp"
+#include "BufferDescriptor.hpp"
 #include <string>
 
 namespace RightEngine
@@ -13,6 +14,8 @@ namespace RightEngine
         FRAGMENT
     };
     typedef ShaderType ShaderStage;
+
+    constexpr const int C_CONSTANT_BUFFER_SLOT = -1;
 
     struct BufferRef
     {
@@ -39,7 +42,8 @@ namespace RightEngine
 
     struct ShaderReflection
     {
-        std::unordered_map<BufferRef, BufferType, BufferRefHash> buffers;
+        using BufferMap = std::unordered_map<BufferRef, BufferType, BufferRefHash>;
+        BufferMap buffers;
         std::vector<int> textures;
     };
 

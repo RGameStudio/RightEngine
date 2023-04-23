@@ -10,8 +10,8 @@ namespace
         const auto bufferIt = buffers.find({ slot, stage });
         if (bufferIt == buffers.end())
         {
-//            R_CORE_ASSERT(false, "");
-            return nullptr;
+            static std::shared_ptr<Buffer> empty;
+            return empty;
         }
 
         return bufferIt->second;
@@ -23,8 +23,8 @@ const std::shared_ptr<Texture>& RendererState::GetTexture(int slot)
     const auto textureIt = textures.find({ slot });
     if (textureIt == textures.end())
     {
-//        R_CORE_ASSERT(false, "");
-        return nullptr;
+        static std::shared_ptr<Texture> empty;
+        return empty;
     }
     return textureIt->second;
 }

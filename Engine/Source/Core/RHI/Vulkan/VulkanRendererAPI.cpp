@@ -10,6 +10,7 @@
 #include "CommandBufferDescriptor.hpp"
 #include "VulkanUtils.hpp"
 #include "ThreadService.hpp"
+#include "VulkanGraphicsPipeline.hpp"
 #include <glslang/Include/glslang_c_interface.h>
 #include <vk-tools/VulkanTools.h>
 
@@ -128,21 +129,9 @@ void VulkanRendererAPI::BeginFrame(const std::shared_ptr<CommandBuffer>& cmd,
     renderPassInfo->renderArea.offset = {0, 0};
     renderPassInfo->renderArea.extent = VulkanConverters::Extent(vkPipeline->GetRenderPassDescriptor().extent);
 
-    static std::vector<VkClearValue> clearValues = {};
-    for (const auto& attachment : vkPipeline->GetRenderPassDescriptor().colorAttachments)
-    {
-        glm::vec4 color = attachment.clearValue.color;
-        VkClearValue clearValue;
-        clearValue.color = { color.r, color.g, color.b, color.a };
-        clearValues.push_back(clearValue);
-    }
-    VkClearValue clearValue;
-    clearValue.depthStencil = { vkPipeline->GetRenderPassDescriptor().depthStencilAttachment.clearValue.depth,
-                                vkPipeline->GetRenderPassDescriptor().depthStencilAttachment.clearValue.stencil };
-    clearValues.push_back(clearValue);
-
-    renderPassInfo->clearValueCount = clearValues.size();
-    renderPassInfo->pClearValues = clearValues.data();
+    const auto& clearValue = vkPipeline->ClearValue();
+    renderPassInfo->clearValueCount = clearValue.size();
+    renderPassInfo->pClearValues = clearValue.data();
 
     VkPipeline nativePipeline = vkPipeline->GetPipeline();
 
@@ -358,6 +347,19 @@ void VulkanRendererAPI::EncodeState(const std::shared_ptr<CommandBuffer>& cmd,
     if (!vkState->GetDescriptorSet())
     {
         return;
+    }
+    if (auto cbuffer = state->GetVertexBuffer(C_CONSTANT_BUFFER_SLOT))
+    {
+        cmd->Enqueue([=](auto buffer)
+            {
+                auto layout = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline)->GetPipelineLayout();
+                vkCmdPushConstants(VK_CMD(buffer)->GetBuffer(), 
+                    layout,
+                VK_SHADER_STAGE_VERTEX_BIT, 
+                0, 
+                cbuffer->GetDescriptor().size, 
+                cbuffer->Map());
+            });
     }
     auto vkPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
     cmd->Enqueue([=](auto buffer)

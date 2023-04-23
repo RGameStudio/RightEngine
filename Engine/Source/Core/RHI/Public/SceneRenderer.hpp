@@ -85,6 +85,7 @@ namespace RightEngine
         void CreateBuffers();
 
         // Passes
+        void ShadowPass();
         void PBRPass();
         void SkyboxPass();
         void PostprocessPass();
@@ -111,12 +112,14 @@ namespace RightEngine
         std::shared_ptr<GraphicsPipeline> uiPipeline;
         std::shared_ptr<GraphicsPipeline> presentPipeline;
         std::shared_ptr<GraphicsPipeline> m_pickingPipeline;
+        std::shared_ptr<GraphicsPipeline> m_shadowPipeline;
 
         // TODO: Move shaders to ShaderLibrary
         std::shared_ptr<Shader> pbrShader;
         std::shared_ptr<Shader> skyboxShader;
         std::shared_ptr<Shader> postprocessShader;
         std::shared_ptr<Shader> m_pickingShader;
+        std::shared_ptr<Shader> m_shadowShader;
 
         struct DrawCommand
         {
