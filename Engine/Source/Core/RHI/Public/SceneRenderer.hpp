@@ -14,6 +14,7 @@ namespace RightEngine
 
     enum class PassType
     {
+        SHADOW,
         PBR,
         SKYBOX,
         POSTPROCESS,
@@ -30,6 +31,7 @@ namespace RightEngine
         int type;
         float radiusInner;
         float radiusOuter;
+        glm::mat4 lightSpace;
     };
 
     struct CameraData

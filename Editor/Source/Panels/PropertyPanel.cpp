@@ -474,9 +474,9 @@ namespace editor
 
 				ImGui::Separator();
 
-				ImGui::SliderFloat("Intensity", &component.intensity, 0.0f, 10000.0f);
-				ImGui::SliderFloat("Outer radius", &component.outerRadius, 0.0f, 1000.0f);
-				ImGui::SliderFloat("Inner radius", &component.innerRadius, 0.0f, 1000.0f);
+				ImGui::SliderFloat("Intensity", &component.intensity, 0.0f, 100.0f);
+				ImGui::SliderFloat("Outer radius", &component.outerRadius, 0.0f, 200.0f);
+				ImGui::SliderFloat("Inner radius", &component.innerRadius, 0.0f, 200.0f);
 			});
 		}
 		ImGui::End();

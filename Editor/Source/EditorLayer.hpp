@@ -3,6 +3,7 @@
 #include "Core.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
 #include "Panels/PropertyPanel.hpp"
+#include "Panels/RenderDebugPanel.hpp"
 
 namespace editor
 {
@@ -29,6 +30,7 @@ namespace editor
 
         ContentBrowserPanel m_contentBrowser;
         PropertyPanel m_propertyPanel;
+        RenderDebugPanel m_renderDebugPanel;
 
         using EditorCommand = std::function<void()>;
         std::vector<EditorCommand> m_editorCommands;

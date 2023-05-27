@@ -72,6 +72,8 @@ namespace RightEngine
                     return VK_FORMAT_R8_SRGB;
                 case Format::RGB8_SRGB:
                     return VK_FORMAT_R8G8B8_SRGB;
+				case Format::D32_SFLOAT:
+                    return VK_FORMAT_D32_SFLOAT;
                 default:
                     R_CORE_ASSERT(false, "");
             }
@@ -229,6 +231,21 @@ namespace RightEngine
                 default:
                     R_CORE_ASSERT(false, "");
             }
+        }
+
+        inline static VkSamplerAddressMode AddressMode(AddressMode mode)
+        {
+	        switch (mode)
+	        {
+	        case AddressMode::Repeat: 
+                return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	        case AddressMode::ClampToEdge: 
+                return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	        case AddressMode::ClampToBorder:
+                return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+	        default: 
+                R_CORE_ASSERT(false, "");
+	        }
         }
     };
 }

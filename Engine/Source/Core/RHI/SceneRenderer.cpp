@@ -167,7 +167,7 @@ void SceneRenderer::CreateShaders()
 		    layout.Push<glm::vec3>();
 		    layout.Push<glm::vec3>();
 		    shaderProgramDescriptor.layout = layout;
-		    shaderProgramDescriptor.reflection.textures = {3, 4, 5, 6, 7, 8, 9, 10};
+		    shaderProgramDescriptor.reflection.textures = {3, 4, 5, 6, 7, 8, 9, 10, 13};
 		    shaderProgramDescriptor.reflection.buffers[{0, ShaderType::VERTEX}] = BufferType::UNIFORM;
 		    shaderProgramDescriptor.reflection.buffers[{1, ShaderType::VERTEX}] = BufferType::UNIFORM;
 		    shaderProgramDescriptor.reflection.buffers[{2, ShaderType::FRAGMENT}] = BufferType::UNIFORM;
@@ -414,11 +414,17 @@ void SceneRenderer::CreateOffscreenPasses()
 
     //Shadow
     {
-        TextureDescriptor depthDesc = helpers::CreateTextureDescriptor(C_SHADOWMAP_WIDTH, C_SHADOWMAP_HEIGHT, TextureType::TEXTURE_2D, Format::D32_SFLOAT_S8_UINT);
+        TextureDescriptor depthDesc = helpers::CreateTextureDescriptor(C_SHADOWMAP_WIDTH, C_SHADOWMAP_HEIGHT, TextureType::TEXTURE_2D, Format::D32_SFLOAT);
         const auto depth = Device::Get()->CreateTexture(depthDesc, {});
+        SamplerDescriptor samplerDesc;
+        samplerDesc.addressModeU = AddressMode::ClampToEdge;
+        samplerDesc.addressModeV = AddressMode::ClampToEdge;
+        samplerDesc.addressModeW = AddressMode::ClampToEdge;
+        depth->SetSampler(Device::Get()->CreateSampler(samplerDesc));
 
         GraphicsPipelineDescriptor pipelineDesc;
         pipelineDesc.shader = m_shadowShader;
+        pipelineDesc.cullMode = CullMode::FRONT;
 
         AttachmentDescriptor depthAttachment = helpers::CreateAttachmentDescriptor(depth);
         RenderPassDescriptor renderPassDecs = helpers::CreateRenderPassDescriptor({ C_SHADOWMAP_WIDTH, C_SHADOWMAP_HEIGHT }, {}, depthAttachment);
@@ -604,13 +610,8 @@ void SceneRenderer::ShadowPass()
         {
             continue;
         }
-    	CameraComponent camera;
-        camera.Rotate(light.rotation);
 
-        const auto lightProj = camera.GetProjectionMatrix();
-        const auto lightView = camera.GetViewMatrix(light.position);
-
-        constantBuffer.lightSpaceMatrix = lightProj * lightView;
+        constantBuffer.lightSpaceMatrix = light.lightSpace;
         constantBuffer.dummy1 = glm::mat4();
 
         BufferDescriptor desc{};
@@ -678,6 +679,7 @@ void SceneRenderer::PBRPass()
         rs->SetTexture(sceneEnvironment.irradianceMap, 8);
         rs->SetTexture(sceneEnvironment.prefilterMap, 9);
         rs->SetTexture(sceneEnvironment.brdfLut, 10);
+        rs->SetTexture(m_shadowPipeline->GetRenderPassDescriptor().depthStencilAttachment.texture, 13);
 
         rs->OnUpdate(renderer.GetActivePipeline());
         renderer.EncodeState(rs);
@@ -848,6 +850,8 @@ const std::shared_ptr<GraphicsPipeline>& SceneRenderer::GetPass(PassType type) c
 {
     switch (type)
     {
+		case PassType::SHADOW:
+			return m_shadowPipeline;
         case PassType::UI:
             return uiPipeline;
         case PassType::PBR:

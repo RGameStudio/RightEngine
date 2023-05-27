@@ -300,7 +300,14 @@ void VulkanGraphicsPipeline::CreateRenderPass(const RenderPassDescriptor& render
     }
 
     VkAttachmentDescription depthAttachment{};
-    depthAttachment.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
+    if (renderPassDescriptor.depthStencilAttachment.texture)
+    {
+        depthAttachment.format = VulkanConverters::Format(renderPassDescriptor.depthStencilAttachment.texture->GetSpecification().format);
+    }
+    else
+    {
+        depthAttachment.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
+    }
     depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     depthAttachment.loadOp = VulkanConverters::LoadOperation(renderPassDescriptor.depthStencilAttachment.loadOperation);
     depthAttachment.storeOp = VulkanConverters::StoreOperation(renderPassDescriptor.depthStencilAttachment.storeOperation);
@@ -308,13 +315,13 @@ void VulkanGraphicsPipeline::CreateRenderPass(const RenderPassDescriptor& render
     depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     if (depthAttachment.loadOp == VK_ATTACHMENT_LOAD_OP_LOAD)
     {
-        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     }
     else
     {
         depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     }
-    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     std::vector<VkAttachmentReference> colorAttachmentRefs;
 

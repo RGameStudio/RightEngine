@@ -76,7 +76,14 @@ void VulkanRendererState::OnUpdate(const std::shared_ptr<GraphicsPipeline>& pipe
                 {
                     const auto texture = std::static_pointer_cast<VulkanTexture>(texturePtr.lock());
                     VkDescriptorImageInfo imageInfo{};
-                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    if (texture->GetSpecification().format == Format::D32_SFLOAT_S8_UINT)
+                    {
+                        imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+                    }
+                    else
+                    {
+                        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    }
                     imageInfo.imageView = texture->GetImageView();
                     imageInfo.sampler = std::static_pointer_cast<VulkanSampler>(texture->GetSampler())->GetSampler();
 

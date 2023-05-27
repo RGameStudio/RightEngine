@@ -27,7 +27,13 @@ namespace RightEngine
         VkImage GetImage() const
         { return textureImage; }
 
-        static void ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layers, int mipmaps);
+        static void ChangeImageLayout(VkImage image, 
+            VkImageLayout oldLayout, 
+            VkImageLayout newLayout,
+            Format format,
+            int layers, 
+            int mipmaps, 
+            bool isDepth = false);
 
     protected:
         void Init(const std::shared_ptr<VulkanDevice>& device, const std::vector<uint8_t>& data);

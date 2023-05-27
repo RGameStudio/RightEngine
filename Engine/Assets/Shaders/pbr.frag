@@ -27,6 +27,7 @@ layout(binding = 7) uniform sampler2D u_AO;
 layout(binding = 8) uniform samplerCube u_IrradianceMap;
 layout(binding = 9) uniform samplerCube u_PrefilterMap;
 layout(binding = 10) uniform sampler2D u_BRDFLUT;
+layout(binding = 13) uniform sampler2D u_ShadowMap;
 
 struct Light
 {
@@ -37,6 +38,7 @@ struct Light
     int type;
     float radiusInner;
     float radiusOuter;
+    mat4 lightSpace;
 };
 
 layout(binding = 11) uniform LightBuffer
@@ -53,6 +55,60 @@ vec3 getNormalFromMap()
     vec3 tangentNormal = texture(u_Normal, Output.UV).xyz;
     tangentNormal = tangentNormal * 2.0 - 1.0;
     return normalize(Output.TBN * tangentNormal);
+}
+
+float CalculateDirectionalShadow(vec4 fragPosLightSpace, vec4 lightPos, vec3 fragPos)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(u_ShadowMap, projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // calculate bias (based on depth map resolution and slope)
+    vec3 normal = normalize(Output.Normal);
+    vec3 lightDir = normalize(vec3(lightPos) - fragPos);
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+    // check whether current frag pos is in shadow
+    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    // PCF
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(u_ShadowMap, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(u_ShadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+        }    
+    }
+    shadow /= 9.0;
+    
+    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+        
+    return shadow;
+}
+
+float CalculateDirectionalShadow1(vec4 fragPosLightSpace, vec4 lightPos, vec3 fragPos)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    float shadow = 0.0;
+	if (projCoords.z > -1.0 && projCoords.z < 1.0) 
+	{
+		float dist = texture(u_ShadowMap, projCoords.st).r;
+		if (dist < projCoords.z) 
+		{
+			shadow = 1;
+		}
+	}
+	return shadow;
 }
 
 // ----------------------------------------------------------------------------
@@ -100,6 +156,12 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
+
+const mat4 bias = mat4( 
+  0.5, 0.0, 0.0, 0.0,
+  0.0, 0.5, 0.0, 0.0,
+  0.0, 0.0, 1.0, 0.0,
+  0.5, 0.5, 0.0, 1.0 );
 
 void main()
 {
@@ -167,7 +229,16 @@ void main()
         float NdotL = max(dot(N, L), 0.0);
 
         // add to outgoing radiance Lo
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        float shadowScale = 1.0f;
+        if (u_Light[i].type == 0)
+        {
+            vec4 lightSpaceFragPos = u_Light[i].lightSpace * vec4(Output.WorldPos, 1.0);
+            //lightSpaceFragPos /= lightSpaceFragPos.w;
+            //lightSpaceFragPos.y = -lightSpaceFragPos.y;
+            //lightSpaceFragPos.xy = lightSpaceFragPos.xy * 0.5 + 0.5;
+            shadowScale = CalculateDirectionalShadow(lightSpaceFragPos, u_Light[i].position, Output.WorldPos);
+        }
+        Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * (1 - shadowScale);// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
@@ -187,8 +258,13 @@ void main()
 
     vec3 ambient = (kD * diffuse + specular) * ao;
 
+    vec4 lightSpaceFragPos = u_Light[0].lightSpace * vec4(Output.WorldPos, 1.0);
+    lightSpaceFragPos.xyz /= lightSpaceFragPos.w;
+    //lightSpaceFragPos.y = -lightSpaceFragPos.y;
+    lightSpaceFragPos = lightSpaceFragPos * 0.5 + 0.5;
+
     vec3 color = ambient + Lo;
 
-    aAlbedo = vec4(color, 1.0);
+    aAlbedo = vec4(color.xyz, 1.0);
 //    aNormal = vec4(N, 1.0);
 }

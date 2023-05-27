@@ -117,7 +117,7 @@ namespace RightEngine
         glm::vec3 up;
         float zNear{ 0.1f };
         float zFar{ 500.0f };
-        float aspectRatio{ 16.0f / 9.0f };
+        float aspectRatio{ 16.0f/9.0f };
         float fov{ 50.0f };
         float movementSpeed{ 40.0f };
         float sensitivity{ 0.25f };

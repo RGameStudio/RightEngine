@@ -8,28 +8,6 @@
 using namespace RightEngine;
 namespace
 {
-    void SwitchImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layerCount, int mipmaps)
-    {
-        CommandBufferDescriptor commandBufferDescriptor;
-        commandBufferDescriptor.type = CommandBufferType::GRAPHICS;
-        auto commandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(
-                Device::Get()->CreateCommandBuffer(commandBufferDescriptor));
-
-        VulkanUtils::BeginCommandBuffer(commandBuffer, true);
-        VkImageSubresourceRange srcSubRange = {};
-        srcSubRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        srcSubRange.baseMipLevel = 0;
-        srcSubRange.levelCount = mipmaps;
-        srcSubRange.layerCount =  layerCount;
-        vks::tools::setImageLayout(commandBuffer->GetBuffer(),
-                                   image,
-                                   oldLayout,
-                                   newLayout,
-                                   srcSubRange);
-
-        VulkanUtils::EndCommandBuffer(VK_DEVICE(), commandBuffer);
-    }
-
     void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
     {
         CommandBufferDescriptor commandBufferDescriptor;
@@ -106,7 +84,7 @@ namespace
 
     bool IsDepthTexture(Format format)
     {
-        if (format == Format::D24_UNORM_S8_UINT || format == Format::D32_SFLOAT_S8_UINT)
+        if (format == Format::D24_UNORM_S8_UINT || format == Format::D32_SFLOAT_S8_UINT || format == Format::D32_SFLOAT)
         {
             return true;
         }
@@ -150,7 +128,7 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     if (IsDepthTexture(specification.format))
     {
-        imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     }
     else
     {
@@ -183,11 +161,12 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
 
     if (!IsDepthTexture(specification.format))
     {
-			ChangeImageLayout(textureImage,
-                              VK_IMAGE_LAYOUT_UNDEFINED,
-                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                              specification.type == TextureType::CUBEMAP ? 6 : 1,
-                              specification.mipLevels);
+		ChangeImageLayout(textureImage,
+                          VK_IMAGE_LAYOUT_UNDEFINED,
+                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                          specification.format,
+                          specification.type == TextureType::CUBEMAP ? 6 : 1,
+                          specification.mipLevels);
         if (!data.empty())
         {
             CopyBufferToImage(std::static_pointer_cast<VulkanBuffer>(stagingBuffer)->GetBuffer(),
@@ -200,8 +179,18 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
         ChangeImageLayout(textureImage,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                              specification.format,
                               specification.type == TextureType::CUBEMAP ? 6 : 1,
                               specification.mipLevels);
+    }
+    else
+    {
+        ChangeImageLayout(textureImage,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, specification.format,
+            specification.type == TextureType::CUBEMAP ? 6 : 1,
+            specification.mipLevels,
+            true);
     }
 
     VkImageViewCreateInfo viewInfo{};
@@ -211,7 +200,19 @@ void VulkanTexture::Init(const std::shared_ptr<VulkanDevice>& device,
     viewInfo.format = VulkanConverters::Format(specification.format);
     if (IsDepthTexture(specification.format))
     {
-        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+	    switch (specification.format)
+	    {
+			case Format::D32_SFLOAT_S8_UINT:
+			{
+				viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+                break;
+			}
+			case Format::D32_SFLOAT:
+			{
+                viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+                break;
+			}
+	    }
     }
     else
     {
@@ -235,9 +236,53 @@ VulkanTexture::~VulkanTexture()
     vmaFreeMemory(VK_DEVICE()->GetAllocator(), allocation);
 }
 
-void VulkanTexture::ChangeImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, int layers, int mipmaps)
+void VulkanTexture::ChangeImageLayout(VkImage image, 
+    VkImageLayout oldLayout, 
+    VkImageLayout newLayout,
+    Format format,
+    int layers, 
+    int mipmaps, 
+    bool isDepth)
 {
-    SwitchImageLayout(image, oldLayout, newLayout, layers, mipmaps);
+    CommandBufferDescriptor commandBufferDescriptor;
+    commandBufferDescriptor.type = CommandBufferType::GRAPHICS;
+    auto commandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(
+        Device::Get()->CreateCommandBuffer(commandBufferDescriptor));
+
+    VulkanUtils::BeginCommandBuffer(commandBuffer, true);
+    VkImageSubresourceRange srcSubRange = {};
+    if (isDepth)
+    {
+        switch (format)
+        {
+        case Format::D32_SFLOAT_S8_UINT:
+        {
+            srcSubRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+            break;
+        }
+        case Format::D32_SFLOAT:
+        {
+            srcSubRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+            break;
+        }
+        default:
+            R_CORE_ASSERT(false, "");
+        }
+    }
+    else
+    {
+        srcSubRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    }
+    srcSubRange.baseMipLevel = 0;
+    srcSubRange.levelCount = mipmaps;
+    srcSubRange.layerCount = layers;
+    vks::tools::setImageLayout(commandBuffer->GetBuffer(),
+        image,
+        oldLayout,
+        newLayout,
+        srcSubRange);
+
+    VulkanUtils::EndCommandBuffer(VK_DEVICE(), commandBuffer);
 }
 
 void VulkanTexture::CopyFrom(const std::shared_ptr<Texture>& texture,
@@ -326,6 +371,7 @@ std::shared_ptr<Buffer> VulkanTexture::Data()
     ChangeImageLayout(textureImage,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        specification.format,
         specification.type == TextureType::CUBEMAP ? 6 : 1,
         specification.mipLevels);
     CopyImageToBuffer(std::static_pointer_cast<VulkanBuffer>(buffer)->GetBuffer(),
@@ -335,6 +381,7 @@ std::shared_ptr<Buffer> VulkanTexture::Data()
     ChangeImageLayout(textureImage,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        specification.format,
         specification.type == TextureType::CUBEMAP ? 6 : 1,
         specification.mipLevels);
     return buffer;

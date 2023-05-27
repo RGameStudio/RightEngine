@@ -30,7 +30,7 @@ layout(location = 0) out VertexOutput Output;
 void main()
 {
     Output.UV = aUv;
-    Output.Normal = mat3(u_Transform) * aNormal;
+    Output.Normal = transpose(inverse(mat3(u_Transform))) * aNormal;
     Output.WorldPos = vec3(u_Transform * vec4(aPosition, 1.0));
 
     vec3 T = normalize(vec3(u_Transform * vec4(aTangent,   0.0)));

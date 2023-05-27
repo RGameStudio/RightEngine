@@ -40,6 +40,14 @@ namespace
     const uint32_t width = 1280;
     const uint32_t height = 720;
 
+    struct LightOrtho
+    {
+        float nearPlane = 1.0f;
+        float farPlane = 7.5f;
+        float left = -10.0f, bottom = -10.0f;
+        float right = 10.0f, top = 10.0f;
+    };
+
     struct LayerSceneData
     {
         ImVec2 viewportSize{ width, height };
@@ -51,6 +59,8 @@ namespace
         ImGuizmo::OPERATION gizmoType{ ImGuizmo::TRANSLATE };
         std::filesystem::path scenePath;
         bool showDemoWindow{ false };
+        bool showRenderDebug{ false };
+        LightOrtho lightOrtho;
     };
 
     LayerSceneData sceneData;
@@ -246,6 +256,17 @@ void EditorLayer::OnUpdate(float ts)
         shaderLight.intensity = light.intensity;
         shaderLight.radiusInner = light.innerRadius;
         shaderLight.radiusOuter = light.outerRadius;
+        shaderLight.rotation = glm::vec4(transform.rotation, 1);
+
+        CameraComponent camera;
+        camera.Rotate(shaderLight.rotation);
+        float near_plane = sceneData.lightOrtho.nearPlane, far_plane = sceneData.lightOrtho.farPlane;
+        auto lightProj = glm::ortho(sceneData.lightOrtho.left, sceneData.lightOrtho.right, sceneData.lightOrtho.bottom, sceneData.lightOrtho.top, near_plane, far_plane);
+        lightProj[1][1] *= -1;
+        // const auto lightView = camera.GetViewMatrix(shaderLight.position);
+        const auto lightView = glm::lookAt(glm::vec3(shaderLight.position),glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        shaderLight.lightSpace = lightProj * lightView;
+
         lightData.emplace_back(shaderLight);
     }
 
@@ -391,6 +412,11 @@ void EditorLayer::OnImGuiRender()
             if (ImGui::MenuItem("ImGui Demo window"))
             {
                 sceneData.showDemoWindow = !sceneData.showDemoWindow;
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Render debug"))
+            {
+                sceneData.showRenderDebug = !sceneData.showRenderDebug;
             }
             ImGui::EndMenu();
         }
@@ -548,6 +574,13 @@ void EditorLayer::OnImGuiRender()
     ImGui::Separator();
     ImGui::Text("Frame time %.2f ms", Input::frameTime);
 
+    ImGui::SliderFloat("left", &sceneData.lightOrtho.left, -20, 20);
+    ImGui::SliderFloat("right", &sceneData.lightOrtho.right, -20, 20);
+    ImGui::SliderFloat("top", &sceneData.lightOrtho.top, -20, 20);
+    ImGui::SliderFloat("bottom", &sceneData.lightOrtho.bottom, -20, 20);
+    ImGui::SliderFloat("near", &sceneData.lightOrtho.nearPlane, 1.0, 20);
+    ImGui::SliderFloat("far", &sceneData.lightOrtho.farPlane, 1.0, 40);
+
     for (const auto& pass : sceneData.renderer->GetPassInfo())
     {
         ImGui::Text("%s: %.2fms", pass.m_name.c_str(), pass.m_time);
@@ -556,6 +589,12 @@ void EditorLayer::OnImGuiRender()
     ImGui::End();
 
     m_contentBrowser.OnImGuiRender();
+
+    if (sceneData.showRenderDebug)
+    {
+        m_renderDebugPanel.Renderer(sceneData.renderer);
+        m_renderDebugPanel.OnImGuiRender();
+    }
 
     ImGui::End();
 }
