@@ -24,5 +24,7 @@ namespace RightEngine
         AddressMode addressModeV = AddressMode::Repeat;
         AddressMode addressModeW = AddressMode::Repeat;
         bool isMipMapped;
+        float minLod = 0.0f;
+        float maxLod = 1.0f;
     };
 }

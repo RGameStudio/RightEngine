@@ -420,6 +420,7 @@ void SceneRenderer::CreateOffscreenPasses()
         samplerDesc.addressModeU = AddressMode::ClampToEdge;
         samplerDesc.addressModeV = AddressMode::ClampToEdge;
         samplerDesc.addressModeW = AddressMode::ClampToEdge;
+        samplerDesc.maxLod = 9.0f;
         depth->SetSampler(Device::Get()->CreateSampler(samplerDesc));
 
         GraphicsPipelineDescriptor pipelineDesc;
@@ -869,5 +870,5 @@ const std::shared_ptr<GraphicsPipeline>& SceneRenderer::GetPass(PassType type) c
 
 const std::shared_ptr<Texture>& SceneRenderer::GetFinalImage() const
 {
-    return postprocessPipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
+    return pbrPipeline->GetRenderPassDescriptor().colorAttachments.front().texture;
 }

@@ -46,7 +46,7 @@ namespace
             };
     std::shared_ptr<MeshComponent> cube;
     const auto projectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-    const uint32_t maxMipLevels = 5;
+    const uint32_t maxMipLevels = 8;
 
     std::string GetTextureName(const std::string& path)
     {
@@ -446,6 +446,7 @@ void EnvironmentMapLoader::ComputeRadianceMap()
     rendererState->SetFragmentBuffer(roughnessBuffer, 2);
 
     SamplerDescriptor samplerDescriptor{};
+    samplerDescriptor.maxLod = 9.0f;
     const auto sampler = Device::Get()->CreateSampler(samplerDescriptor);
     TextureDescriptor prefilterCubemapDesc;
     prefilterCubemapDesc.type = TextureType::CUBEMAP;

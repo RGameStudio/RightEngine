@@ -269,6 +269,7 @@ namespace editor
 			{
 				DisplayAddComponentEntry<MeshComponent>("Mesh");
 				DisplayAddComponentEntry<CameraComponent>("Camera");
+				DisplayAddComponentEntry<LightComponent>("Light");
 
 				ImGui::EndPopup();
 			}
@@ -339,31 +340,36 @@ namespace editor
 			{
 				auto& assetManager = AssetManager::Get();
 				ImGui::LabelText("Mesh GUID", "%s", component.mesh.guid.str().c_str());
+				if (ImGui::BeginDragDropTarget())
+				{
+					const auto payload = ImGui::AcceptDragDropPayload(C_CONTENT_BROWSER_DND_NAME);
+					if (!payload)
+					{
+						ImGui::EndDragDropTarget();
+						return;
+					}
+					static char pathBuff[256]{};
+					memset(pathBuff, 0, 256);
+					memcpy(pathBuff, payload->Data, payload->DataSize);
+					fs::path path = pathBuff;
+					if (!path.has_extension())
+					{
+						ImGui::EndDragDropTarget();
+						return;
+					}
+					if (path.extension() == ".obj" || path.extension() == ".gltf" || path.extension() == ".fbx")
+					{
+						component.mesh = assetManager.GetLoader<MeshLoader>()->Load(path.generic_string());
+					}
+					ImGui::EndDragDropTarget();
+				}
 				ImGui::Separator();
+
 				bool isVisible = component.isVisible;
 				ImGui::Checkbox("Is visible", &isVisible);
 				component.isVisible = isVisible;
 				ImGui::Separator();
 
-				if (ImGui::Button("Open"))
-				{
-					const auto filepath = Filesystem::OpenFileDialog().string();
-					if (!filepath.empty())
-					{
-						const auto filename = CopyFileToAssetDirectory(filepath, modelsDir);
-						const auto id = String::Split(filename, ".").front();
-						if (meshes.find(id) == meshes.end())
-						{
-							const auto meshHandle = AssetManager::Get().GetLoader<MeshLoader>()->Load(
-								modelsDir + filename);
-							meshes[id] = meshHandle;
-						}
-
-						component.mesh = meshes[id];
-					}
-				}
-
-				ImGui::Separator();
 				if (ImGui::BeginTable("split", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
 				{
 					auto& materialRef = component.material;

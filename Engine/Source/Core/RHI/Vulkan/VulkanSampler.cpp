@@ -26,8 +26,8 @@ VulkanSampler::VulkanSampler(const std::shared_ptr<Device>& device,
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     samplerInfo.mipLodBias = 0.0f;
-    samplerInfo.minLod = 0.0f;
-    samplerInfo.maxLod = 0.0f;
+    samplerInfo.minLod = descriptor.minLod;
+    samplerInfo.maxLod = descriptor.maxLod;
 
     if (vkCreateSampler(vkDevice->GetDevice(), &samplerInfo, nullptr, &sampler) != VK_SUCCESS)
     {

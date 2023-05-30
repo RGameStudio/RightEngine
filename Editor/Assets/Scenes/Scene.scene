@@ -2,7 +2,7 @@ Scene: Scene
 Entities:
   - Entity:
       Tag component:
-        GUID: 2dbfa570-a727-4eb4-8f18-55acb712ac7c
+        GUID: e8a51228-2dfa-4156-8e73-e8de54aa6667
         Name: New entity
       Transform component:
         Position: [0, 0, 0]
@@ -10,40 +10,30 @@ Entities:
         Scale: [1, 1, 1]
   - Entity:
       Tag component:
-        GUID: 46a145af-8df1-405b-bf25-76093b21dc25
-        Name: Cube
+        GUID: 17aa88bd-07f5-4e61-add3-0f00bbd6d434
+        Name: Light
       Transform component:
-        Position: [2, 0.5, -4]
+        Position: [-0.200000003, 0.5, 0]
         Rotation: [0, 0, 0]
-        Scale: [1.5, 1.5, 1]
-      Mesh component:
-        Mesh GUID: 00054816-2d24-43dc-bdc9-82a91cc1fd30
-        Material GUID: 24c7cbc4-5243-458d-bcb4-87825316f6a9
-        Is visible: true
+        Scale: [1, 1, 1]
+      Light component:
+        Type: 0
+        Color: [1, 1, 1]
+        Intensity: 45.8330002
+        Outer Radius: 50
+        Inner Radius: 20
   - Entity:
       Tag component:
-        GUID: e08aed1a-5549-4488-b74b-3088c8a5eac2
-        Name: Cube with tex
+        GUID: 8c649a94-9e7a-496e-b74c-75fbfca792d3
+        Name: Editor camera
       Transform component:
-        Position: [0, 0.5, 0]
-        Rotation: [0, 0, 0]
-        Scale: [1.5, 1.5, 1]
-      Mesh component:
-        Mesh GUID: ca7b8d03-b0fc-4779-9536-88d7388293ed
-        Material GUID: 55680ce4-2d1f-45e6-b5ad-05bfa4bd14aa
-        Is visible: true
-  - Entity:
-      Tag component:
-        GUID: c14c93d0-51da-4c2d-bd5e-cb2e2f24eb88
-        Name: Light view
-      Transform component:
-        Position: [14.9200287, 14.1264286, -8.28799057]
-        Rotation: [-3.84845424, -0.6545012, 0]
+        Position: [0.0146041214, 0.195753261, 3.84288383]
+        Rotation: [-51.6358223, -0.226891845, 0]
         Scale: [1, 1, 1]
       Camera component:
-        Front: [-0.603267729, -0.608763635, 0.515242696]
+        Front: [0.194013387, -0.22495012, -0.954859257]
         World up: [0, 1, 0]
-        Up: [-0.462906152, 0.79335165, 0.395361781]
+        Up: [0.0447913259, 0.97437036, -0.220445693]
         Z near: 0.100000001
         Z far: 500
         Aspect ratio: 1.77777779
@@ -54,26 +44,6 @@ Entities:
         Primary: true
   - Entity:
       Tag component:
-        GUID: 8c649a94-9e7a-496e-b74c-75fbfca792d3
-        Name: Editor camera
-      Transform component:
-        Position: [11.3140726, 6.35225773, 10.7537918]
-        Rotation: [-39.5799599, -0.279251993, 0]
-        Scale: [1, 1, 1]
-      Camera component:
-        Front: [-0.293288559, -0.275636703, -0.915426791]
-        World up: [0, 1, 0]
-        Up: [-0.0840989351, 0.961261868, -0.262493759]
-        Z near: 0.100000001
-        Z far: 500
-        Aspect ratio: 1.77777779
-        FOV: 50
-        Movement speed: 40
-        Sensitivity: 0.25
-        Active: false
-        Primary: false
-  - Entity:
-      Tag component:
         GUID: 5dff40fc-758b-4c0f-b54b-875a16fe3fb1
         Name: Skybox
       Transform component:
@@ -82,109 +52,111 @@ Entities:
         Scale: [1, 1, 1]
       Skybox component:
         Type: 0
-        Skybox GUID: 61660e30-f0a8-42aa-9db8-d5eebfb26f4a
+        Skybox GUID: 21f577ca-04dd-466a-bff8-e2e476ded52a
   - Entity:
       Tag component:
-        GUID: 33e3e603-7c84-4cdd-8983-e553796b95a0
-        Name: Light
+        GUID: f93c341c-9c2b-49ba-98a5-a21ae0964ab9
+        Name: Sphere
       Transform component:
-        Position: [4.69999981, 2, 2.4000001]
+        Position: [0.0711093545, -1.10515237, 0]
         Rotation: [0, 0, 0]
-        Scale: [1, 1, 1.00000012]
-      Light component:
-        Type: 0
-        Color: [0.980392158, 0.956862748, 0.274509817]
-        Intensity: 2.43099999
-        Outer Radius: 50
-        Inner Radius: 20
-  - Entity:
-      Tag component:
-        GUID: 44b9a0da-fa7b-4eb0-9b35-551acdf96fc5
-        Name: Tree
-      Transform component:
-        Position: [6.06478977, 0, 0]
-        Rotation: [0, 0, 0]
-        Scale: [54.4000015, 1, 73.9000015]
+        Scale: [1, 1, 1]
       Mesh component:
-        Mesh GUID: 4fe5dd0d-541d-49e3-803f-772943ece8d0
-        Material GUID: b0355bc7-6786-4767-97e9-5bc0756c7e6e
+        Mesh GUID: eb960e1a-de74-4c55-8ee8-7b2eb4e4f08f
+        Material GUID: 0d3aba7e-f4ff-4554-9fa9-e6ea34b10ce5
+        Is visible: true
+  - Entity:
+      Tag component:
+        GUID: c130f903-27aa-44f2-acd3-73ca77e70c25
+        Name: Sphere1
+      Transform component:
+        Position: [2.83852649, -1.1298238, 0]
+        Rotation: [0, 0, 0]
+        Scale: [1, 1, 1]
+      Mesh component:
+        Mesh GUID: 39fa050e-f9e2-4b8f-8788-a740e9bd964b
+        Material GUID: 55b2711a-1053-4389-983b-560a6164d571
+        Is visible: true
+  - Entity:
+      Tag component:
+        GUID: 3186dd6e-6184-4dfa-8c6f-dac937834ee4
+        Name: Floor
+      Transform component:
+        Position: [0, -3.0999999, 0]
+        Rotation: [0, 0, 0]
+        Scale: [50, 1, 50]
+      Mesh component:
+        Mesh GUID: 85f602b7-1e1b-4656-a790-45d423ee5b2f
+        Material GUID: b717f192-a7bf-470d-b362-7a786736dfc0
         Is visible: true
 Assets:
   - Asset:
-      GUID: 00054816-2d24-43dc-bdc9-82a91cc1fd30
-      Path: /Models/default_cube.fbx
-      Type: 2
+      GUID: 4dc6bb84-3bfb-4d37-a114-237a09da56ad
+      Path: /Textures/editor_default_image.png
+      Type: 1
   - Asset:
-      GUID: 61660e30-f0a8-42aa-9db8-d5eebfb26f4a
-      Path: /Textures/env_black.hdr
+      GUID: 21f577ca-04dd-466a-bff8-e2e476ded52a
+      Path: /Textures/env_field.hdr
       Type: 3
   - Asset:
-      GUID: 8d8cabcb-5a5e-463b-a2f0-2d9dcebd99df
+      GUID: eb960e1a-de74-4c55-8ee8-7b2eb4e4f08f
+      Path: /Models/sphere.gltf
+      Type: 2
+  - Asset:
+      GUID: 8312fb18-8487-47b4-bbbf-32ceaaf78c7b
       Path: /Textures/editor_default_image.png
       Type: 1
   - Asset:
-      GUID: 55680ce4-2d1f-45e6-b5ad-05bfa4bd14aa
-      Path: 55680ce4-2d1f-45e6-b5ad-05bfa4bd14aa
+      GUID: 0d3aba7e-f4ff-4554-9fa9-e6ea34b10ce5
+      Path: 0d3aba7e-f4ff-4554-9fa9-e6ea34b10ce5
       Type: 5
       Texture Data:
-        Albedo GUID: 65b3e4eb-0128-4e2c-b345-c98cf5647549
-        Normal GUID: 3b6d5aa6-9a0d-4824-b72c-fcb5913dbf91
-        Roughness GUID: 3b6d5aa6-9a0d-4824-b72c-fcb5913dbf91
-        Metallic GUID: 3b6d5aa6-9a0d-4824-b72c-fcb5913dbf91
-        AO GUID: 3b6d5aa6-9a0d-4824-b72c-fcb5913dbf91
+        Albedo GUID: 8312fb18-8487-47b4-bbbf-32ceaaf78c7b
+        Normal GUID: 8312fb18-8487-47b4-bbbf-32ceaaf78c7b
+        Roughness GUID: 8312fb18-8487-47b4-bbbf-32ceaaf78c7b
+        Metallic GUID: 8312fb18-8487-47b4-bbbf-32ceaaf78c7b
+        AO GUID: 8312fb18-8487-47b4-bbbf-32ceaaf78c7b
       Material Data:
         Albedo: [1, 1, 1, 1]
-        Roughness: 1
-        Metallic: 0
+        Roughness: 0
+        Metallic: 1
   - Asset:
-      GUID: 3b6d5aa6-9a0d-4824-b72c-fcb5913dbf91
-      Path: /Textures/editor_default_image.png
-      Type: 1
+      GUID: 39fa050e-f9e2-4b8f-8788-a740e9bd964b
+      Path: /Models/untitled.fbx
+      Type: 2
   - Asset:
-      GUID: 24c7cbc4-5243-458d-bcb4-87825316f6a9
-      Path: 24c7cbc4-5243-458d-bcb4-87825316f6a9
+      GUID: 55b2711a-1053-4389-983b-560a6164d571
+      Path: 55b2711a-1053-4389-983b-560a6164d571
       Type: 5
       Texture Data:
-        Albedo GUID: 8d8cabcb-5a5e-463b-a2f0-2d9dcebd99df
-        Normal GUID: 8d8cabcb-5a5e-463b-a2f0-2d9dcebd99df
-        Roughness GUID: 8d8cabcb-5a5e-463b-a2f0-2d9dcebd99df
-        Metallic GUID: 8d8cabcb-5a5e-463b-a2f0-2d9dcebd99df
-        AO GUID: 8d8cabcb-5a5e-463b-a2f0-2d9dcebd99df
+        Albedo GUID: 4dc6bb84-3bfb-4d37-a114-237a09da56ad
+        Normal GUID: 4dc6bb84-3bfb-4d37-a114-237a09da56ad
+        Roughness GUID: 4dc6bb84-3bfb-4d37-a114-237a09da56ad
+        Metallic GUID: 4dc6bb84-3bfb-4d37-a114-237a09da56ad
+        AO GUID: 4dc6bb84-3bfb-4d37-a114-237a09da56ad
       Material Data:
-        Albedo: [1, 1, 1, 1]
-        Roughness: 1
-        Metallic: 0
+        Albedo: [0.868327379, 0.579988241, 0.0154506667, 1]
+        Roughness: 0.128000006
+        Metallic: 1
   - Asset:
-      GUID: 65b3e4eb-0128-4e2c-b345-c98cf5647549
-      Path: /Textures/backpack_albedo.jpg
-      Type: 1
-  - Asset:
-      GUID: b0355bc7-6786-4767-97e9-5bc0756c7e6e
-      Path: b0355bc7-6786-4767-97e9-5bc0756c7e6e
-      Type: 5
-      Texture Data:
-        Albedo GUID: ce3d14a7-c438-4fe3-8f4d-aaa8fed00e4a
-        Normal GUID: 92895ba7-51a3-4152-ac9c-6ca5c2c5815a
-        Roughness GUID: ce3d14a7-c438-4fe3-8f4d-aaa8fed00e4a
-        Metallic GUID: ce3d14a7-c438-4fe3-8f4d-aaa8fed00e4a
-        AO GUID: 92895ba7-51a3-4152-ac9c-6ca5c2c5815a
-      Material Data:
-        Albedo: [1, 1, 1, 1]
-        Roughness: 1
-        Metallic: 0
-  - Asset:
-      GUID: ca7b8d03-b0fc-4779-9536-88d7388293ed
+      GUID: 85f602b7-1e1b-4656-a790-45d423ee5b2f
       Path: /Models/default_cube.fbx
       Type: 2
   - Asset:
-      GUID: 4fe5dd0d-541d-49e3-803f-772943ece8d0
-      Path: /Models/default_cube.fbx
-      Type: 2
-  - Asset:
-      GUID: ce3d14a7-c438-4fe3-8f4d-aaa8fed00e4a
+      GUID: 183a0b61-49fd-42f5-b11e-454233f42f28
       Path: /Textures/editor_default_image.png
       Type: 1
   - Asset:
-      GUID: 92895ba7-51a3-4152-ac9c-6ca5c2c5815a
-      Path: /Textures/editor_default_image.png
-      Type: 1
+      GUID: b717f192-a7bf-470d-b362-7a786736dfc0
+      Path: b717f192-a7bf-470d-b362-7a786736dfc0
+      Type: 5
+      Texture Data:
+        Albedo GUID: 183a0b61-49fd-42f5-b11e-454233f42f28
+        Normal GUID: 183a0b61-49fd-42f5-b11e-454233f42f28
+        Roughness GUID: 183a0b61-49fd-42f5-b11e-454233f42f28
+        Metallic GUID: 183a0b61-49fd-42f5-b11e-454233f42f28
+        AO GUID: 183a0b61-49fd-42f5-b11e-454233f42f28
+      Material Data:
+        Albedo: [1, 1, 1, 1]
+        Roughness: 1
+        Metallic: 0
