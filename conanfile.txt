@@ -1,0 +1,9 @@
+[requires]
+fmt/10.0.0
+glm/cci.20230113
+spdlog/1.12.0
+taskflow/3.6.0
+
+[generators]
+CMakeDeps
+CMakeToolchain

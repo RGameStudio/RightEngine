@@ -166,7 +166,6 @@ void EditorLayer::OnAttach()
 {
     auto compiler = rhi::ShaderCompiler::Create();
     compiler->Compile(Path::Absolute("/Engine/Shaders/test.glsl"));
-    __debugbreak();
 
     RightEngine::Timer timer;
 	m_propertyPanel.Init();
