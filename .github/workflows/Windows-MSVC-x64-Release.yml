@@ -42,7 +42,7 @@ jobs:
       run: pip install conan
 
     - name: Prepare conan environment
-      run: bat ./prepare_env.bat
+      run: python Scripts/prepare_env.py
 
     - name: Prepare conan packages
       run: conan install . --output-folder=.build/lib --build=missing --profile=win-64 -s build_type=${{env.BUILD_TYPE}}
