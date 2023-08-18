@@ -36,8 +36,6 @@ include_directories(Lib/easyargs/include)
 include_directories(Lib/stb_image/Public)
 include_directories(Lib/imgui)
 include_directories(Lib/entt/include)
-include_directories(Lib/assimp/include)
-include_directories(${CMAKE_BINARY_DIR}/Lib/assimp/include)
 include_directories(Lib/vk-tools/)
 include_directories(Lib/VulkanMemoryAllocator/include)
 include_directories(Lib/crossguid/include)
@@ -62,11 +60,6 @@ set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "Build as shared library")
 #set(YAML_CPP_FORMAT_SOURCE OFF CACHE BOOL "Format source")
 add_subdirectory(Lib/yaml-cpp)
 
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build the assimp viewing tools")
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build the assimp tests")
-set(ASSIMP_INSTALL OFF CACHE BOOL "Install assimp as separate lib")
-add_subdirectory(Lib/assimp)
-
 set(CROSSGUID_TESTS OFF CACHE BOOL "Build test runner")
 add_subdirectory(Lib/crossguid)
 
@@ -75,7 +68,6 @@ add_subdirectory(Lib/EASTL)
 set(THIRD_PARTY_LIB
         stb_image
         imgui
-        assimp
         crossguid
         easyargs
         ImGuizmo
@@ -87,9 +79,6 @@ set(CUSTOM_TARGET_DIR_NAME "Custom")
 
 set_target_properties(stb_image PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(imgui PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(assimp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(zlibstatic PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(ImGuizmo PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(yaml-cpp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(yaml-cpp-parse PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
