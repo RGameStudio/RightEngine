@@ -30,10 +30,8 @@ endif()
 message(STATUS "Vulkan include directory: " ${Vulkan_INCLUDE_DIR})
 message(STATUS "Vulkan library directory: " ${Vulkan_LIBRARY})
 
-include_directories(before system Lib/glslang/)
 include_directories(${Vulkan_INCLUDE_DIR})
 include_directories(Lib/easyargs/include)
-include_directories(Lib/stb_image/Public)
 include_directories(Lib/imgui)
 include_directories(Lib/entt/include)
 include_directories(Lib/vk-tools/)
@@ -45,9 +43,7 @@ include_directories(Lib/yaml-cpp/include)
 include_directories(Lib/EASTL/include)
 
 add_subdirectory(Lib/easyargs)
-add_subdirectory(Lib/stb_image)
 add_subdirectory(Lib/imgui)
-add_subdirectory(Lib/glslang)
 add_subdirectory(Lib/vk-tools/)
 add_subdirectory(Lib/VulkanMemoryAllocator)
 add_subdirectory(Lib/hash-library)
@@ -66,7 +62,6 @@ add_subdirectory(Lib/crossguid)
 add_subdirectory(Lib/EASTL)
 
 set(THIRD_PARTY_LIB
-        stb_image
         imgui
         crossguid
         easyargs
@@ -77,7 +72,6 @@ set(THIRD_PARTY_LIB
 set(THIRD_PARTY_PROJECT_DIR_NAME "Lib")
 set(CUSTOM_TARGET_DIR_NAME "Custom")
 
-set_target_properties(stb_image PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(imgui PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(ImGuizmo PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(yaml-cpp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})

@@ -12,9 +12,16 @@ file(GLOB_RECURSE SOURCE_FILES
 find_package(taskflow REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
+find_package(stb REQUIRED)
 
 add_library(Engine STATIC ${SOURCE_FILES})
-target_link_libraries(Engine PUBLIC RHI ${THIRD_PARTY_LIB} assimp::assimp glfw Taskflow::Taskflow)
+target_link_libraries(Engine PUBLIC 
+                            RHI 
+                            ${THIRD_PARTY_LIB} 
+                            assimp::assimp 
+                            glfw 
+                            Taskflow::Taskflow
+                            stb::stb)
 
 set(ENGINE_INCLUDE_DIR
     ${CMAKE_SOURCE_DIR}/Engine/Source/Public

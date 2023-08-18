@@ -8,13 +8,13 @@ file(GLOB_RECURSE SOURCE_FILES
         )
 
 find_package(glm REQUIRED)
+find_package(glslang REQUIRED)
 
 add_library(RHI SHARED ${SOURCE_FILES})
 target_link_libraries(RHI PUBLIC 
                             Core 
-                            glslang
-                            SPIRV
-                            glslang-default-resource-limits
+                            glslang::glslang
+                            glslang::SPIRV
                             glm::glm
                             ${Vulkan_LIBRARY} 
                             VulkanMemoryAllocator
