@@ -33,7 +33,6 @@ message(STATUS "Vulkan library directory: " ${Vulkan_LIBRARY})
 include_directories(before system Lib/glslang/)
 include_directories(${Vulkan_INCLUDE_DIR})
 include_directories(Lib/easyargs/include)
-include_directories(Lib/glfw/include)
 include_directories(Lib/stb_image/Public)
 include_directories(Lib/imgui)
 include_directories(Lib/entt/include)
@@ -63,9 +62,6 @@ set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "Build as shared library")
 #set(YAML_CPP_FORMAT_SOURCE OFF CACHE BOOL "Format source")
 add_subdirectory(Lib/yaml-cpp)
 
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs")
-add_subdirectory(Lib/glfw)
-
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build the assimp viewing tools")
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build the assimp tests")
 set(ASSIMP_INSTALL OFF CACHE BOOL "Install assimp as separate lib")
@@ -77,7 +73,6 @@ add_subdirectory(Lib/crossguid)
 add_subdirectory(Lib/EASTL)
 
 set(THIRD_PARTY_LIB
-        glfw
         stb_image
         imgui
         assimp
@@ -90,7 +85,6 @@ set(THIRD_PARTY_LIB
 set(THIRD_PARTY_PROJECT_DIR_NAME "Lib")
 set(CUSTOM_TARGET_DIR_NAME "Custom")
 
-set_target_properties(glfw PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(stb_image PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(imgui PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(assimp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})

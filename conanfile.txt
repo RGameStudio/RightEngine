@@ -1,5 +1,6 @@
 [requires]
 fmt/10.0.0
+glfw/3.3.8
 glm/cci.20230113
 spdlog/1.12.0
 taskflow/3.6.0

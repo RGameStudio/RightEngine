@@ -1,9 +1,6 @@
 [submodule "Lib/easyargs"]
 	path = Lib/easyargs
 	url = https://github.com/rbetik12/easyargs.git
-[submodule "Lib/glfw"]
-	path = Lib/glfw
-	url = git@github.com:glfw/glfw.git
 [submodule "Lib/imgui"]
 	path = Lib/imgui
 	url = git@github.com:rbetik12/imgui.git
