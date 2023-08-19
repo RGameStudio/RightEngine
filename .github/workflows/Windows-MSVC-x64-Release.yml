@@ -24,6 +24,15 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.4
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Check conan cache
+      id: cache-conan
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.conan2
+          ~/.conan
+        key: ${{ runner.os }}-conan-cache
     
     - name: Check git submodules
       # Initialize and download (if needed) engine dependencies
@@ -41,13 +50,6 @@ jobs:
 
     - name: Prepare conan environment
       run: python Scripts/prepare_env.py
-
-    - name: Check conan cache
-      id: cache-conan
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.CONAN_USER_HOME }}
-        key: ${{ runner.os }}-conan-cache
 
     - name: Prepare conan packages and Visual Studio solution
       run: python Scripts/generate_solution.py ${{env.BUILD_TYPE}}
