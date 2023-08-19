@@ -32,22 +32,18 @@ message(STATUS "Vulkan library directory: " ${Vulkan_LIBRARY})
 
 include_directories(${Vulkan_INCLUDE_DIR})
 include_directories(Lib/easyargs/include)
-include_directories(Lib/imgui)
 include_directories(Lib/entt/include)
 include_directories(Lib/vk-tools/)
 include_directories(Lib/VulkanMemoryAllocator/include)
 include_directories(Lib/crossguid/include)
 include_directories(Lib/hash-library)
-include_directories(Lib/ImGuizmo)
 include_directories(Lib/yaml-cpp/include)
 include_directories(Lib/EASTL/include)
 
 add_subdirectory(Lib/easyargs)
-add_subdirectory(Lib/imgui)
 add_subdirectory(Lib/vk-tools/)
 add_subdirectory(Lib/VulkanMemoryAllocator)
 add_subdirectory(Lib/hash-library)
-add_subdirectory(Lib/ImGuizmo)
 
 #set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Enable yaml-cpp contrib in library")
 #set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Enable parse tools")
@@ -62,18 +58,14 @@ add_subdirectory(Lib/crossguid)
 add_subdirectory(Lib/EASTL)
 
 set(THIRD_PARTY_LIB
-        imgui
         crossguid
         easyargs
-        ImGuizmo
         yaml-cpp
         )
 
 set(THIRD_PARTY_PROJECT_DIR_NAME "Lib")
 set(CUSTOM_TARGET_DIR_NAME "Custom")
 
-set_target_properties(imgui PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(ImGuizmo PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(yaml-cpp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(yaml-cpp-parse PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(yaml-cpp-read PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})

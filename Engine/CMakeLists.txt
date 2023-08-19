@@ -13,6 +13,8 @@ find_package(taskflow REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 find_package(stb REQUIRED)
+find_package(imgui REQUIRED)
+find_package(imguizmo REQUIRED)
 
 add_library(Engine STATIC ${SOURCE_FILES})
 target_link_libraries(Engine PUBLIC 
@@ -21,7 +23,9 @@ target_link_libraries(Engine PUBLIC
                             assimp::assimp 
                             glfw 
                             Taskflow::Taskflow
-                            stb::stb)
+                            stb::stb
+                            imgui::imgui
+                            imguizmo::imguizmo)
 
 set(ENGINE_INCLUDE_DIR
     ${CMAKE_SOURCE_DIR}/Engine/Source/Public

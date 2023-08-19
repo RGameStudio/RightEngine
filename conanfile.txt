@@ -7,6 +7,8 @@ glslang/11.7.0
 spdlog/1.12.0
 stb/cci.20220909
 taskflow/3.6.0
+imgui/cci.20230105+1.89.2.docking
+imguizmo/1.83.1
 
 [generators]
 CMakeDeps

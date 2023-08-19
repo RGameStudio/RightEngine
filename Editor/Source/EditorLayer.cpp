@@ -446,7 +446,7 @@ void EditorLayer::OnImGuiRender()
         ImGui::PopStyleVar();
     }
 
-    if (ImGui::BeginPopupContextWindow(nullptr, 1, false))
+    if (ImGui::BeginPopupContextWindow(nullptr, 1))
     {
         if (ImGui::MenuItem("Create Empty Entity"))
         {
