@@ -7,6 +7,3 @@
 [submodule "Lib/yaml-cpp"]
 	path = Lib/yaml-cpp
 	url = git@github.com:rbetik12/yaml-cpp.git
-[submodule "Lib/EASTL"]
-	path = Lib/EASTL
-	url = git@github.com:rbetik12/EASTL.git

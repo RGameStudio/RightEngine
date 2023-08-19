@@ -9,9 +9,10 @@ file(GLOB_RECURSE SOURCE_FILES
 
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(EASTL REQUIRED)
 
 add_library(Core SHARED ${SOURCE_FILES})
-target_link_libraries(Core PUBLIC EASTL spdlog::spdlog fmt::fmt)
+target_link_libraries(Core PUBLIC EASTL::EASTL spdlog::spdlog fmt::fmt)
 target_compile_definitions(Core PRIVATE CORE_EXPORT)
 target_precompile_headers(Core PRIVATE "${CMAKE_SOURCE_DIR}/Core/Source/PCH.hpp")
 

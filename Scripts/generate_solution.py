@@ -40,7 +40,27 @@ if not check_lib_version("imguizmo", "1.83.1"):
     sub.run("conan create Scripts/lib/imguizmo/all -s build_type=Debug --version 1.83.1")
     sub.run("conan create Scripts/lib/imguizmo/all -s build_type=Release --version 1.83.1")
 
+#Generate solution and copy all prebuilt binaries to binary folder
+
+def copy_dll_files(source_dir, destination_dir):
+    if not os.path.exists(destination_dir):
+        os.makedirs(destination_dir)
+
+    for root, _, files in os.walk(source_dir):
+        for filename in files:
+            if filename.lower().endswith(".dll"):
+                source_path = os.path.join(root, filename)
+                destination_path = os.path.join(destination_dir, filename)
+
+                try:
+                    shutil.copy2(source_path, destination_path)
+                    print(f"Copied '{filename}' to '{destination_dir}'.")
+                except Exception as e:
+                    print(f"Error copying '{filename}': {e}")
+
+
 print(f"Generating solution...")
-sub.run(f"conan install . --output-folder=.build/lib --build=missing --profile=win-64 -s build_type={build_type}")
+sub.run(f"conan install . --deployer=dll_deployer --output-folder=.build/lib --build=missing --profile=win-64 -s build_type={build_type}")
+copy_dll_files(".build/lib/dll", f".build/Win/.bin/{build_type}")
 sub.run(f"cmake -B .build/Win -DCMAKE_BUILD_TYPE={build_type} --preset conan-default .")
 print("Solution was successfully generated!")

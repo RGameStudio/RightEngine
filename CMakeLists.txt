@@ -38,7 +38,6 @@ include_directories(Lib/VulkanMemoryAllocator/include)
 include_directories(Lib/crossguid/include)
 include_directories(Lib/hash-library)
 include_directories(Lib/yaml-cpp/include)
-include_directories(Lib/EASTL/include)
 
 add_subdirectory(Lib/easyargs)
 add_subdirectory(Lib/vk-tools/)
@@ -55,7 +54,6 @@ add_subdirectory(Lib/yaml-cpp)
 set(CROSSGUID_TESTS OFF CACHE BOOL "Build test runner")
 add_subdirectory(Lib/crossguid)
 
-add_subdirectory(Lib/EASTL)
 
 set(THIRD_PARTY_LIB
         crossguid
@@ -74,7 +72,6 @@ set_target_properties(crossguid PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME
 set_target_properties(easyargs PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(hash-library PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(uninstall PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(EASTL PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(vk-tools PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 set_target_properties(VulkanMemoryAllocator PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
 
