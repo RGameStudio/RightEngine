@@ -14,7 +14,7 @@ if (build_type not in "Debug" and build_type not in "Release"):
 
 print(f"Started solution build for '{build_type}' configuration")
 try:
-    completed_process = sub.run(f"cmake --build .build/Win --config '{build_type}'", shell=True, check=True, text=True)
+    completed_process = sub.run(f"cmake --build .build/Win --config {build_type}", shell=True, check=True, text=True)
     
     if completed_process.returncode == 0:
         print("Solution was successfully built!")

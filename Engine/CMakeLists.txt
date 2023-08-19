@@ -15,6 +15,7 @@ find_package(assimp REQUIRED)
 find_package(stb REQUIRED)
 find_package(imgui REQUIRED)
 find_package(imguizmo REQUIRED)
+find_package(EnTT REQUIRED)
 
 add_library(Engine STATIC ${SOURCE_FILES})
 target_link_libraries(Engine PUBLIC 
@@ -25,7 +26,8 @@ target_link_libraries(Engine PUBLIC
                             Taskflow::Taskflow
                             stb::stb
                             imgui::imgui
-                            imguizmo::imguizmo)
+                            imguizmo::imguizmo
+                            EnTT::EnTT)
 
 set(ENGINE_INCLUDE_DIR
     ${CMAKE_SOURCE_DIR}/Engine/Source/Public
