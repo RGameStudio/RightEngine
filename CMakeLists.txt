@@ -2,9 +2,20 @@ cmake_minimum_required(VERSION 3.19)
 project(RightEngine)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/.bin)
 
-enable_testing()
-add_compile_definitions(R_ENABLE_ASSERTS)
+option(ENABLE_TRACY "Enable tracy profiling" ON)
+option(ENABLE_ASSERTS "Enable asserts" ON)
+
+if (ENABLE_ASSERTS)
+    add_compile_definitions(R_ENABLE_ASSERTS)
+endif()
+
+if (ENABLE_TRACY)
+    add_compile_definitions(R_ENABLE_TRACY)
+    add_compile_definitions(TRACY_ENABLE)
+endif()
+
 if (WIN32)
     add_compile_definitions(R_WIN32)
 elseif (APPLE)
@@ -12,167 +23,58 @@ elseif (APPLE)
 endif()
 
 if (MSVC)
-    add_compile_options("/MP")
+    add_compile_options(
+        /W4              # Warning level 4
+        /WX              # Enable warnings as errors
+        /wd4624            # Disable warning: 'derived class' : destructor was implicitly defined as deleted because a base class destructor is inaccessible or deleted
+        /wd4251            # Disable warning: class 'A' needs to have dll-interface to be used by clients of class 'B'
+        /wd4307            # Disable warning: '*': integral constant overflow
+        /wd4100            # Disable warning: '*' : unreferenced formal parameter
+        /wd4275            # Disable warning: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
+        /wd4661            # Disable warning: '*' : no suitable definition provided for explicit template instantiation request
+        /w44189            # Enable warning: '*' : local variable is initialized but not referenced
+        /w44263            # Enable warning: 'function': member function does not override any base class virtual member function
+        /w44264            # Enable warning: 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
+        /w44265            # Enable warning: 'class': class has virtual functions, but destructor is not virtual
+        /w44296            # Enable warning: 'operator': expression is always false
+        /w44464            # Enable warning: relative include path contains '..'
+        /w44555            # Enable warning: expression has no effect; expected expression with side-effect
+        /w45038            # Enable warning: data member 'member1' will be initialized after data member 'member2'
+        /w45204            # Enable warning: A class with virtual functions has non-virtual trivial destructor.
+        /w45233            # Enable warning: explicit lambda capture 'identifier' is not used
+        /w45245            # Enable warning: 'function': unreferenced function with internal linkage has been removed
+        /w45249            # Enable warning: 'bitfield' of type 'enumeration_name' has named enumerators with values that cannot be represented in the given bit field width of 'bitfield_width'    
+        /MP                # Enable parallel compilation
+        /Gy                # Enable function level linking
+        /Gw                # Optimize Global Data
+        /GR-               # Disable Run-Time Type Information
+        /bigobj            # Increase number of sections in object files
+        /Oi                # Enable intrinsics, irrelevant of optimization level
+        /fp:fast           # Enable fast floating point arithmetics by default
+        /permissive-       # Enable standard conformance mode to the compiler
+        /Zc:__cplusplus    # Enable reporting real C++ version by __cplusplus macro - necessary for some libraries
+        /Zc:lambda         # Enable updated lambda processor
+        /Zc:preprocessor   # Enable preprocessor conformance mode
+    )
+
+    add_link_options("/ignore:4099")
+    # disable warning LNK4075: ignoring '/INCREMENTAL' due to '/LTCG' specification
+    add_link_options("/ignore:4075")
+    # disable warning LNK4075: defaultlib conflicts with use of other libs; use /NODEFAULTLIB:library
+    add_link_options("/ignore:4098")
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(GLSL_ROOT_DIR ${CMAKE_SOURCE_DIR}/Engine/Source/Shaders)
-set(GLSL_SRC ${GLSL_ROOT_DIR}/Basic/basic.frag
-             ${GLSL_ROOT_DIR}/Basic/basic.vert
-             ${GLSL_ROOT_DIR}/Basic/pbr.frag
-             ${GLSL_ROOT_DIR}/Basic/pbr.vert
-             ${GLSL_ROOT_DIR}/Basic/hdr_to_cubemap.frag
-             ${GLSL_ROOT_DIR}/Basic/hdr_to_cubemap.vert
-             ${GLSL_ROOT_DIR}/Basic/skybox.frag
-             ${GLSL_ROOT_DIR}/Basic/skybox.vert
-             ${GLSL_ROOT_DIR}/Utils/envmap_to_cubemap.frag
-             ${GLSL_ROOT_DIR}/Utils/envmap_to_cubemap.vert
-        )
-
-if (WIN32)
-    set(Vulkan_LIBRARY $ENV{Vulkan_LIBRARY})
-    find_package(Vulkan REQUIRED FATAL_ERROR)
-elseif (APPLE)
-    find_package(Vulkan REQUIRED FATAL_ERROR)
-endif()
-
-message(STATUS "Vulkan include directory: " ${Vulkan_INCLUDE_DIR})
-message(STATUS "Vulkan library directory: " ${Vulkan_LIBRARY})
-
-include_directories(before system Lib/glslang/)
-include_directories(${Vulkan_INCLUDE_DIR})
-include_directories(Lib/Glad/include)
-include_directories(Lib/spdlog/include)
-include_directories(Lib/easyargs/include)
-include_directories(Lib/googletest/googletest/include)
-include_directories(Lib/glfw/include)
-include_directories(Lib/glm)
-include_directories(Lib/stb_image/Public)
-include_directories(Lib/imgui)
-include_directories(Lib/entt/include)
-include_directories(Lib/assimp/include)
-include_directories(${CMAKE_BINARY_DIR}/Lib/assimp/include)
-include_directories(Lib/vk-tools/)
-include_directories(Lib/VulkanMemoryAllocator/include)
-include_directories(Lib/crossguid/include)
-include_directories(Lib/hash-library)
-include_directories(Lib/ImGuizmo)
-include_directories(Lib/yaml-cpp/include)
-include_directories(Lib/taskflow)
-
-include_directories(Engine/Source/Public)
-include_directories(Engine/Source/Core/Public)
-include_directories(Engine/Source/Core/Event/Public)
-include_directories(Engine/Source/Core/Launch/Public)
-include_directories(Engine/Source/Core/Window/Public)
-include_directories(Engine/Source/Core/Application/Public)
-include_directories(Engine/Source/Core/RHI/Public)
-include_directories(Engine/Source/Core/Testing/Public)
-include_directories(Engine/Source/Core/Shader/Public)
-include_directories(Engine/Source/Core/Utils/Public)
-include_directories(Engine/Source/Core/Scene/Public)
-include_directories(Engine/Source/Core/UI/Public)
-include_directories(Engine/Source/Core/Loaders/Public)
-include_directories(Engine/Source/Core/Service/Public)
-
-add_subdirectory(Lib/spdlog)
-add_subdirectory(Lib/easyargs)
-add_subdirectory(Lib/glm)
-add_subdirectory(Lib/stb_image)
-add_subdirectory(Lib/imgui)
-add_subdirectory(Lib/glslang)
-add_subdirectory(Lib/vk-tools/)
-add_subdirectory(Lib/VulkanMemoryAllocator)
-add_subdirectory(Lib/hash-library)
-add_subdirectory(Lib/ImGuizmo)
-
-#set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Enable yaml-cpp contrib in library")
-#set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Enable parse tools")
-set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "Build as shared library")
-#set(YAML_CPP_INSTALL OFF CACHE BOOL "Enable generation of yaml-cpp install targets")
-#set(YAML_CPP_FORMAT_SOURCE OFF CACHE BOOL "Format source")
-add_subdirectory(Lib/yaml-cpp)
-
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs")
-add_subdirectory(Lib/glfw)
-
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build the assimp viewing tools")
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build the assimp tests")
-set(ASSIMP_INSTALL OFF CACHE BOOL "Install assimp as separate lib")
-add_subdirectory(Lib/assimp)
-
-set(CROSSGUID_TESTS OFF CACHE BOOL "Build test runner")
-add_subdirectory(Lib/crossguid)
-
-set(BUILD_GMOCK OFF CACHE BOOL "Builds the googlemock subproject")
-set(INSTALL_GTEST OFF CACHE BOOL "Enable installation of googletest.")
-add_subdirectory(Lib/googletest)
-
-set(TF_BUILD_BENCHMARKS OFF CACHE BOOL "Enables builds of benchmarks")
-set(TF_BUILD_CUDA OFF CACHE BOOL "Enables builds of cuda code")
-set(TF_BUILD_SYCL OFF CACHE BOOL "Enables builds of sycl code")
-set(TF_BUILD_TESTS OFF CACHE BOOL "Enables builds of tests")
-set(TF_BUILD_EXAMPLES OFF CACHE BOOL "Enables builds of examples")
-add_subdirectory(Lib/taskflow)
-
-add_subdirectory(Lib/simdjson)
-
-set(THIRD_PARTY_LIB
-        glfw
-        stb_image
-        imgui
-        assimp
-        glslang
-        MachineIndependent
-        GenericCodeGen
-        OGLCompiler
-        OSDependent
-        SPIRV
-        ${Vulkan_LIBRARY}
-        glslang-default-resource-limits
-        vk-tools
-        VulkanMemoryAllocator
-        crossguid
-        easyargs
-        ImGuizmo
-        yaml-cpp
-        Taskflow
-        simdjson
-        )
-
 set(THIRD_PARTY_PROJECT_DIR_NAME "Lib")
+set(ENGINE_PROJECT_DIR "Engine")
 set(CUSTOM_TARGET_DIR_NAME "Custom")
 
-set_target_properties(glfw PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(stb_image PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(imgui PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(assimp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(zlibstatic PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(glslang PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(MachineIndependent PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(GenericCodeGen PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(OGLCompiler PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(OSDependent PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(SPIRV PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(glslang-default-resource-limits PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(vk-tools PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(VulkanMemoryAllocator PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(ImGuizmo PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(yaml-cpp PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(yaml-cpp-parse PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(yaml-cpp-read PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(yaml-cpp-sandbox PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(crossguid PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(easyargs PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(gtest PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(gtest_main PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(hash-library PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(spdlog PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(uninstall PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(Taskflow PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
-set_target_properties(simdjson PROPERTIES FOLDER ${THIRD_PARTY_PROJECT_DIR_NAME})
+add_subdirectory(Src/Core)
+add_subdirectory(Src/RHI)
+add_subdirectory(Src/Engine)
+add_subdirectory(Src/EngineLauncher)
 
-add_subdirectory(Editor)
-add_subdirectory(Engine)
+set_target_properties(Core PROPERTIES FOLDER ${ENGINE_PROJECT_DIR})
+set_target_properties(RHI PROPERTIES FOLDER ${ENGINE_PROJECT_DIR})
+set_target_properties(Engine PROPERTIES FOLDER ${ENGINE_PROJECT_DIR})

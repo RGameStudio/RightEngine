@@ -1,0 +1,61 @@
+name: Windows-MSVC-x64-Release
+
+on:
+  push:
+    branches: [ '**' ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: SSH Agent
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Pull Git LFS resources
+      run: |
+        git lfs install 
+        git lfs pull
+
+    - name: Check conan cache
+      id: cache-conan
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.conan2
+          ~/.conan
+        key: ${{ runner.os }}-conan-cache
+
+    - name: Prepare Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.3.268.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+        vulkan-use-cache: true
+
+    - name: Prepare conan environment
+      run: python Scripts/prepare_env.py
+
+    - name: Prepare conan packages and Visual Studio solution
+      run: python Scripts/generate_solution.py ${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build .build/Win --config ${{env.BUILD_TYPE}} --parallel 4
+
+    - name: Prepare distribution package
+      run: python Scripts/ci/prepare_dist_dir.py ${{env.BUILD_TYPE}}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: win_x64_release
+        path: .dist
+      

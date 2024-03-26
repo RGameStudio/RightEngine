@@ -5,3 +5,6 @@
 /out
 /.vs
 /.build
+/.dist
+
+CMakeUserPresets.json
