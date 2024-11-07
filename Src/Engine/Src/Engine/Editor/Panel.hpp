@@ -8,7 +8,7 @@ namespace engine::editor
 class ENGINE_API Panel
 {
 public:
-	Panel(std::string_view name) : m_name(name)
+	Panel(std::string_view name, bool menuBar = false) : m_name(name), m_menuBar(menuBar)
 	{}
 
 	virtual ~Panel() = default;
@@ -25,6 +25,7 @@ protected:
 
 	std::string m_name;
 	bool		m_isHovered = false;
+	bool		m_menuBar = false;
 };
 
 } // engine::editor

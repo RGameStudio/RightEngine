@@ -10,8 +10,10 @@
 namespace engine
 {
 
-struct ENGINE_API TransformComponent : public ecs::Component
+struct ENGINE_API TransformComponent : public ecs::Component<TransformComponent>
 {
+    TransformComponent() = default;
+
     glm::quat m_rotation = glm::identity<glm::quat>();
     glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 m_scale = glm::vec3(1.0f, 1.0f, 1.0f);

@@ -7,8 +7,11 @@
 namespace engine
 {
 
-struct ENGINE_API SkyboxComponent : public ecs::Component
+struct ENGINE_API SkyboxComponent : public ecs::Component<SkyboxComponent>
 {
+    SkyboxComponent() = default;
+    ~SkyboxComponent() = default;
+
     RPtr<MaterialResource>  m_skyboxMaterial;
     RPtr<rhi::Texture>      m_irradianceTexture;
     RPtr<rhi::Texture>      m_prefilterTexture;

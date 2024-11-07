@@ -10,7 +10,7 @@ RTTR_REGISTRATION
     engine::registration::System<engine::SkyboxSystem>("engine::SkyboxSystem")
         .UpdateAfter<engine::RenderSystem>();
 
-    engine::registration::Component<engine::SkyboxComponent>(Component::Type::ENGINE, "engine::SkyboxComponent");
+    engine::registration::Component<engine::SkyboxComponent>(IComponent::Type::ENGINE, "engine::SkyboxComponent");
 }
 
 namespace
