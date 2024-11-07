@@ -6,8 +6,10 @@
 namespace engine::ecs
 {
 
-class ENGINE_API Component
+class ENGINE_API IComponent
 {
+    RTTR_DECLARE_ROOT()
+
 public:
     enum class Type : uint8_t
     {
@@ -29,6 +31,12 @@ public:
 private:
     bool m_modified = false;
     bool m_initialized = false;
+};
+
+template<typename T>
+class Component : public IComponent
+{
+    RTTR_DECLARE_ANCESTORS(IComponent)
 };
 
 } // engine::ecs

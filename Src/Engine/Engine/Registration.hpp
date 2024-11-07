@@ -31,6 +31,25 @@ namespace helpers
 
 } // helpers
 
+namespace meta
+{
+
+struct ENGINE_API IMeta
+{
+    virtual ~IMeta() = default;
+};
+
+inline constexpr uint64_t C_METAINFO_IS_STRING_LIKE_TAG = "C_METAINFO_IS_STRING_LIKE_TAG"_hash;
+
+#define DECLARE_META(Type) static constexpr uint64_t MetaId = core::hash::HashString("C_METAINFO_" #Type)
+
+struct NonSerializable : public IMeta
+{
+    DECLARE_META(NonSerializable);
+};
+
+} // meta
+
 template<typename T>
 class Service : public core::RTTRObject<T>
 {
@@ -186,12 +205,25 @@ public:
         }
     }
 
-    template <typename PropType, typename ClassType>
-    Class& Property(std::string_view name, PropType ClassType::* field)
+    Class& Meta(uint64_t key, rttr::variant value)
+    {
+        this->m_class
+        (
+            rttr::metadata(key, value)
+        );
+        return *this;
+    }
+
+    template <typename PropType, typename ClassType, typename... Meta>
+    Class& Property(std::string_view name, PropType ClassType::* field, Meta&&... meta)
     {
         static_assert(std::is_base_of_v<ClassType, T>);
 
-        this->m_class.property(name, field);
+        auto prop = this->m_class.property(name, field);
+        if constexpr (sizeof...(Meta) > 0)
+        {
+            prop(rttr::metadata(Meta::MetaId, std::forward<Meta>(meta)) ...);
+        }
         return *this;
     }
 };
@@ -244,27 +276,28 @@ public:
 };
 
 template<typename T>
-class Component : public Class<T>
+class Component : public Class<T, CtorType::AsRawPtr>
 {
+    using Base = Class<T, CtorType::AsRawPtr>;
 public:
-    Component(ecs::Component::Type type, std::string_view name) : Class<T>(name) {}
+    Component(ecs::IComponent::Type type, std::string_view name) : Base(name) {}
 
-    template <typename PropType, typename ClassType>
-    Component& property(std::string_view name, PropType ClassType::* field)
+    template <typename... Args>
+    Component& Property(std::string_view name, Args&&... args)
     {
-        Class<T>::property(name, field);
+        Base::Property(name, std::forward<Args>(args)...);
         return *this;
     }
 
     ~Component()
     {
-        Class<T>::m_class(
+        this->m_class(
             rttr::metadata(C_METADATA_KEY, std::move(m_meta))
         );
     }
 
 private:
-    engine::ecs::Component::MetaInfo m_meta;
+    engine::ecs::IComponent::MetaInfo m_meta;
 };
 
 class ENGINE_API CommandLineArg

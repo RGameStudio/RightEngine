@@ -11,7 +11,7 @@ RTTR_REGISTRATION
         .UpdateAfter<engine::RenderSystem>()
         .Domain(engine::Domain::UI);
 
-    engine::registration::Component<engine::SkyboxComponent>(Component::Type::ENGINE, "engine::SkyboxComponent");
+    engine::registration::Component<engine::SkyboxComponent>(IComponent::Type::ENGINE, "engine::SkyboxComponent");
 }
 
 namespace

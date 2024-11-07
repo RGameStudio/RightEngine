@@ -45,7 +45,7 @@ public:
     template<typename T>
     T*                  TryGetComponent(entt::entity e)
     {
-        static_assert(std::is_base_of_v<Component, T>, "Class must be a derived of engine::ecs::Component");
+        static_assert(std::is_base_of_v<IComponent, T>, "Class must be a derived of engine::ecs::Component");
         ENGINE_ASSERT(engine::registration::helpers::typeRegistered<T>());
         return m_registry.try_get<T>(e);
     }
@@ -89,7 +89,7 @@ public:
     template<typename T, typename... Args>
     T&                  AddComponent(entt::entity e, Args&&... args)
     {
-        static_assert(std::is_base_of_v<Component, T>, "Class must be a derived of engine::ecs::Component");
+        static_assert(std::is_base_of_v<IComponent, T>, "Class must be a derived of engine::ecs::Component");
         ENGINE_ASSERT(engine::registration::helpers::typeRegistered<T>());
         ENGINE_ASSERT(!TryGetComponent<T>(e));
 
@@ -99,7 +99,7 @@ public:
     template<typename T>
     bool                 RemoveComponent(entt::entity e)
     {
-        static_assert(std::is_base_of_v<Component, T>, "Class must be a derived of engine::ecs::Component");
+        static_assert(std::is_base_of_v<IComponent, T>, "Class must be a derived of engine::ecs::Component");
         ENGINE_ASSERT(TryGetComponent<T>(e));
         ENGINE_ASSERT(engine::registration::helpers::typeRegistered<T>());
 
@@ -114,6 +114,8 @@ public:
 
         return RemoveComponent<T>(it->second);
     }
+
+    const eastl::vector_map<entt::entity, EntityInfo>& EntitiesMap() { return m_entities; }
 
 private:
     friend class World;

@@ -45,13 +45,13 @@ struct LightBufferUB
     DirectionalLight m_directionalLight;
 };
 
-struct ENGINE_API DirectionalLightComponent : public ecs::Component
+struct ENGINE_API DirectionalLightComponent : public ecs::Component<DirectionalLightComponent>
 {
     glm::vec3   m_color = glm::vec3(1.0f);
     float       m_intensity = 1000.0f;
 };
 
-struct ENGINE_API MeshComponent : public ecs::Component
+struct ENGINE_API MeshComponent : public ecs::Component<MeshComponent>
 {
     std::shared_ptr<MaterialResource>    m_material;
     std::shared_ptr<MeshResource>        m_mesh;
@@ -66,7 +66,7 @@ public:
     virtual void Update(float dt) override;
 };
 
-struct ENGINE_API CameraComponent : public ecs::Component
+struct ENGINE_API CameraComponent : public ecs::Component<CameraComponent>
 {
     enum class Type : uint8_t
     {

@@ -28,7 +28,7 @@ namespace engine
 
 using namespace nlohmann;
 
-Project::Project(const io::fs::path& path)
+Project::Project(const io::fs::path& path) : m_path(path)
 {
     ENGINE_ASSERT(!path.empty());
     ENGINE_ASSERT(io::fs::exists(path));
