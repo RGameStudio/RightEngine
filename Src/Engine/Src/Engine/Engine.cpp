@@ -14,6 +14,12 @@
 #include <Engine/Service/Resource/MaterialResource.hpp>
 #include <Core/Profiling.hpp>
 
+struct Kek
+{
+    engine::io::fs::path m_path = "/kek/lol/kek.kek";
+    int kek1 = 2;
+};
+
 RTTR_REGISTRATION
 {
 using namespace engine::registration;
@@ -34,6 +40,10 @@ registration::enumeration<engine::Domain>("engine::Domain")(
         value("server", engine::Domain::SERVER_UI),
         value("server_no_ui", engine::Domain::SERVER_NO_UI)
     );
+
+Class<Kek>("Kek")
+.Property("path", &Kek::m_path)
+.Property("kek1", &Kek::kek1);
 }
 
 namespace
@@ -79,6 +89,9 @@ Engine::Engine(int argCount, char* argPtr[])
     resourceService.RegisterLoader<TextureLoader>();
     resourceService.RegisterLoader<MeshLoader>();
     resourceService.RegisterLoader<MaterialLoader>();
+    resourceService.RegisterLoader<SceneLoader>();
+
+    //resourceService.Load<SceneResource>("/Scenes/test.world");
 
     m_serviceManager->RegisterService<EditorService>();
 

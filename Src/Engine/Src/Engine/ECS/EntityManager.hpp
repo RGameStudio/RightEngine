@@ -30,7 +30,7 @@ public:
 
     void                Update();
 
-    uuids::uuid         CreateEntity(std::string_view name = "");
+    uuids::uuid         CreateEntity(std::string_view name = "", const uuids::uuid& uuid = {});
     void                RemoveEntity(const uuids::uuid& uuid);
     void                RemoveEntity(entt::entity e);
 
@@ -113,6 +113,9 @@ public:
 
 private:
     friend class World;
+    friend class SceneLoader;
+
+    void CreateEntityForce(std::string_view name = "", const uuids::uuid& uuid = {});
 
     entt::registry                                    m_registry;
     World*                                            m_world;

@@ -6,6 +6,7 @@
 #include <Engine/ECS/System.hpp>
 #include <Core/Hash.hpp>
 #include <Core/RTTRIntegration.hpp>
+#include <Core/TypesUtils.hpp>
 #include <argparse/argparse.hpp>
 #include <rttr/policy.h>
 
@@ -18,18 +19,51 @@ constexpr uint64_t C_PROJECT_SETTINGS_METADATA_KEY = core::hash::HashString("Pro
 namespace helpers
 {
 
-    template<typename T>
-    inline bool typeRegistered()
-    {
-        return rttr::type::get<T>().get_constructor().is_valid();
-    }
+template<typename T>
+inline bool typeRegistered()
+{
+    return rttr::type::get<T>().get_constructor().is_valid();
+}
 
-    inline bool typeRegistered(rttr::type type)
-    {
-        return type.get_constructor().is_valid();
-    }
+inline bool typeRegistered(rttr::type type)
+{
+    return type.get_constructor().is_valid();
+}
 
 } // helpers
+
+namespace details
+{
+
+template<typename T>
+static void RegisterDefaultConstructor()
+{
+    if constexpr (!std::is_array_v<T>)
+    {
+        if (const rttr::type t = rttr::type::get<T>(); t.get_constructors().empty())
+        {
+            typename rttr::registration::template class_<T> c(t.get_name());
+            c.constructor()(rttr::policy::ctor::as_object);
+        }
+    }
+
+    if constexpr (core::IsContainerType<T>)
+    {
+        using KeyType = typename core::GetKeyType<T>::type;
+        using ValueType = typename core::GetValueType<T>::type;
+
+        if constexpr (core::IsContainerType<KeyType>)
+        {
+            RegisterDefaultConstructor<KeyType>();
+        }
+        if constexpr (core::IsContainerType<ValueType>)
+        {
+            RegisterDefaultConstructor<ValueType>();
+        }
+    }
+}
+
+} // details
 
 namespace meta
 {
@@ -179,7 +213,7 @@ class ENGINE_API Class : public core::RTTRObject<T>
 public:
     explicit Class(std::string_view name) : core::RTTRObject<T>(name)
     {
-        ENGINE_ASSERT_WITH_MESSAGE(!helpers::typeRegistered<T>(), fmt::format("Type '{}' was already registered!", rttr::type::get<T>().get_name()));
+        ENGINE_ASSERT_WITH_MESSAGE(!helpers::typeRegistered<T>() || name == "std::filesystem::path", fmt::format("Type '{}' was already registered!", rttr::type::get<T>().get_name()));
 
         if constexpr (type == CtorType::AsObject)
         {
@@ -219,6 +253,8 @@ public:
     {
         static_assert(std::is_base_of_v<ClassType, T>);
 
+        details::RegisterDefaultConstructor<PropType>();
+
         auto prop = this->m_class.property(name, field);
         if constexpr (sizeof...(Meta) > 0)
         {
@@ -237,6 +273,21 @@ public:
     ResourceLoader(std::string_view name) : Class<T, CtorType::AsRawPtr>(name)
     {
         static_assert(std::is_base_of_v<Loader, T>, "Resource loader must be derived of Loader class");
+    }
+};
+
+template<typename T>
+class ENGINE_API Resource : public core::RTTRObject<T>
+{
+public:
+    Resource(std::string_view name) : core::RTTRObject<T>(name)
+    {
+        static_assert(std::is_base_of_v<Resource, T>, "Resource must be derived of Resource class");
+
+        if constexpr (std::is_constructible_v<T, io::fs::path>)
+        {
+            this->m_class.template constructor<io::fs::path>()(rttr::policy::ctor::as_std_shared_ptr);
+        }
     }
 };
 

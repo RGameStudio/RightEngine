@@ -7,7 +7,7 @@
 #include <Engine/System/RenderSystem.hpp>
 #include <Engine/System/TransformSystem.hpp>
 #include <Engine/System/SkyboxSystem.hpp>
-#include <Engine/Serialization/JsonSerializer.hpp>
+#include <Engine/Serialization/ToJson.hpp>
 #include <Core/Profiling.hpp>
 #include <nlohmann/json.hpp>
 
@@ -44,9 +44,12 @@ json SerializeComponent(entt::entity e, const std::unique_ptr<engine::ecs::Entit
 
 json SerializeComponents(entt::entity e, const std::unique_ptr<engine::ecs::EntityManager>& em)
 {
+    PROFILER_CPU_ZONE;
+
     json j = json::array();
 
     j.emplace_back(std::move(SerializeComponent<engine::TransformComponent>(e, em)));
+    j.emplace_back(std::move(SerializeComponent<engine::SkyboxComponent>(e, em)));
 
     return j;
 }
@@ -81,6 +84,11 @@ void WorldService::Update(float dt)
 void WorldService::PostUpdate(float dt)
 {
     PROFILER_CPU_ZONE;
+}
+
+void WorldService::LoadCurrentWorld(const io::fs::path& path)
+{
+
 }
 
 void WorldService::SaveCurrentWorld()

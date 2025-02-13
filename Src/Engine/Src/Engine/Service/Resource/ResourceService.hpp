@@ -4,6 +4,7 @@
 #include <Engine/Service/Resource/MaterialResource.hpp>
 #include <Engine/Service/Resource/MeshResource.hpp>
 #include <Engine/Service/Resource/TextureResource.hpp>
+#include <Engine/Service/Resource/SceneResource.hpp>
 #include <Engine/Service/IService.hpp>
 #include <Core/RTTRIntegration.hpp>
 
@@ -13,6 +14,7 @@ namespace engine
 class MaterialResource;
 class TextureResource;
 class MeshResource;
+class SceneResource;
 
 class ENGINE_API ResourceService : public Service<ResourceService>
 {
@@ -45,6 +47,11 @@ public:
 		if constexpr (std::is_same_v<T, TextureResource>)
 		{
 			return LoadOf<TextureResource, TextureLoader>(path);
+		}
+
+		if constexpr (std::is_same_v<T, SceneResource>)
+		{
+			return LoadOf<SceneResource, SceneLoader>(path);
 		}
 
 		ENGINE_ASSERT_WITH_MESSAGE(false, fmt::format("Unknown resource type: '{}'", rttr::type::get<T>().get_name()));

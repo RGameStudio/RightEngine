@@ -31,6 +31,8 @@ public:
     std::unique_ptr<SystemManager>& GetSystemManager() { return m_systemManager; }
     std::unique_ptr<EntityManager>& GetEntityManager() { return m_entityManager; }
 
+    friend class SceneLoader;
+
 private:
     std::unique_ptr<SystemManager>  m_systemManager;
     std::unique_ptr<EntityManager>  m_entityManager;

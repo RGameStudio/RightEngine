@@ -18,10 +18,12 @@ public:
 
     std::unique_ptr<ecs::World>& CurrentWorld() { return m_world; }
 
+    void LoadCurrentWorld(const io::fs::path& path);
     void SaveCurrentWorld();
 
 private:
-    std::unique_ptr<ecs::World>        m_world;
+    std::unique_ptr<ecs::World> m_world;
+    io::fs::path                m_worldPath;
 };
 
 } // engine

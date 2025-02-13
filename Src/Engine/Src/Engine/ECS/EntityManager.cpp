@@ -33,21 +33,21 @@ void EntityManager::Update()
     {
         const auto e = m_registry.create();
         m_uuidToEntity[info.m_uuid] = e;
-        m_entities[e] = std::move(info);
-
         AddComponent<TransformComponent>(info.m_uuid);
+
+        m_entities[e] = std::move(info);
     }
 
     m_pendingCreateEntities.clear();
     m_pendingDeleteEntities.clear();
 }
 
-uuids::uuid EntityManager::CreateEntity(std::string_view name)
+uuids::uuid EntityManager::CreateEntity(std::string_view name, const uuids::uuid& uuid)
 {
     std::lock_guard l(m_mutex);
 
     auto& info = m_pendingCreateEntities.emplace_back();
-    info.m_uuid = uuids::uuid_system_generator{}();
+    info.m_uuid = uuid.is_nil() ? uuid : uuids::uuid_system_generator{}();
 
     if (name.empty())
     {
@@ -59,6 +59,19 @@ uuids::uuid EntityManager::CreateEntity(std::string_view name)
     }
 
     return info.m_uuid;
+}
+
+void EntityManager::CreateEntityForce(std::string_view name, const uuids::uuid& uuid)
+{
+    EntityInfo info;
+    info.m_name = name;
+    info.m_uuid = uuid;
+
+    const auto e = m_registry.create();
+    m_uuidToEntity[uuid] = e;
+    AddComponent<TransformComponent>(info.m_uuid);
+
+    m_entities[e] = std::move(info);
 }
 
 void EntityManager::RemoveEntity(const uuids::uuid& uuid)

@@ -11,6 +11,7 @@ find_package(EnTT REQUIRED)
 find_package(stduuid REQUIRED)
 find_package(stb REQUIRED)
 find_package(assimp REQUIRED)
+find_package(simdjson REQUIRED)
 
 file(GLOB_RECURSE SOURCE_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/Src/*.cpp"
@@ -30,6 +31,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
                             EnTT::EnTT
                             stduuid::stduuid
                             stb::stb
+                            simdjson::simdjson
                     )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_EXPORT)

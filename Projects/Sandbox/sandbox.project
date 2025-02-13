@@ -1,21 +1,20 @@
 {
+    "__type__": "engine::ProjectData",
     "name": "sandbox",
-    "version": 0,
     "settings": [
         {
             "__type__": "engine::io::VFSSettings",
             "settings": [
                 {
-                    "__type__": "engine::io::VFSSettings::Setting",
                     "alias": "/System",
                     "path": "/Resources"
                 },
                 {
-                    "__type__": "engine::io::VFSSettings::Setting",
                     "alias": "/",
                     "path": "/Projects/Sandbox/Resources"
                 }
             ]
         }
-    ]
+    ],
+    "version": 0
 }

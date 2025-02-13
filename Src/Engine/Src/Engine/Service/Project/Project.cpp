@@ -1,27 +1,29 @@
 #include <Engine/Service/Project/Project.hpp>
 #include <Engine/Service/Filesystem/VirtualFilesystemService.hpp>
+#include <Engine/Service/Filesystem/File.hpp>
 #include <Engine/Registration.hpp>
+#include <Engine/Serialization/ToJson.hpp>
+#include <Engine/Serialization/FromJson.hpp>
 #include <nlohmann/json.hpp>
 #include <fstream>
 
 RTTR_REGISTRATION
 {
-    engine::registration::CommandLineArgs()
+    using namespace engine;
+    using namespace engine::registration;
+
+    CommandLineArgs()
             .Argument(
-                engine::registration::CommandLineArg("-prj", "--project")
+                CommandLineArg("-prj", "--project")
                 .Help("Absolute path to a project file")
                 .DefaultValue("")
             );
-}
 
-namespace
-{
-constexpr std::string_view    C_TYPE_KEY = "__type__";
-constexpr std::string_view    C_PROJECT_NAME_KEY = "name";
-constexpr std::string_view    C_VERSION_KEY = "version";
-constexpr std::string_view    C_SETTINGS_KEY = "settings";
-constexpr uint8_t            C_VERSION = 0; // Please up project settings version each time you change the format
-} // unnamed
+    Class<ProjectData>("engine::ProjectData")
+        .Property("name", &engine::ProjectData::m_name)
+        .Property("version", &engine::ProjectData::m_version)
+        .Property("settings", &engine::ProjectData::m_settings);
+}
 
 namespace engine
 {
@@ -35,33 +37,16 @@ Project::Project(const io::fs::path& path) : m_path(path)
     ENGINE_ASSERT(path.extension() == ".project");
     ENGINE_ASSERT(path.is_absolute());
 
-    std::ifstream file(path);
+    std::ifstream t(path);
+    std::stringstream buffer;
+    buffer << t.rdbuf();
 
-    auto j = json::parse(file);
-    m_name = j[C_PROJECT_NAME_KEY];
-    m_version = j[C_VERSION_KEY];
+    const auto string = buffer.str();
 
-    ENGINE_ASSERT(m_version == C_VERSION);
+    const auto dataOpt = FromJsonString<ProjectData>(string);
+    ENGINE_ASSERT_WITH_MESSAGE(dataOpt.has_value(), fmt::format("Can't read project file: '{}'", path.generic_string()).c_str());
 
-    // TODO: Implement smart settings parsing using reflection from RTTR
-
-    auto& vfsSettingsJson = j[C_SETTINGS_KEY][0];
-    ENGINE_ASSERT(vfsSettingsJson[C_TYPE_KEY] == "engine::io::VFSSettings");
-
-    auto& vfsSettingsArray = vfsSettingsJson[C_SETTINGS_KEY];
-    ENGINE_ASSERT(vfsSettingsArray.is_array());
-
-    io::VFSSettings vfsSettings;
-    for (auto& settingJson : vfsSettingsArray)
-    {
-        ENGINE_ASSERT(settingJson[C_TYPE_KEY] == "engine::io::VFSSettings::Setting");
-        io::VFSSettings::Setting setting;
-        setting.m_alias = settingJson["alias"];
-        setting.m_path = settingJson["path"];
-        vfsSettings.m_settings.emplace_back(std::move(setting));
-    }
-
-    m_settings.emplace_back(std::move(vfsSettings));
+    m_data = dataOpt.value();
 }
 
 } // engine
