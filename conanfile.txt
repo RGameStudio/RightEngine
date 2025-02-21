@@ -1,6 +1,7 @@
 [requires]
 argparse/2.9
 assimp/5.3.1
+doctest/2.4.11
 eastl/3.21.12
 entt/3.13.0
 fmt/[~10]

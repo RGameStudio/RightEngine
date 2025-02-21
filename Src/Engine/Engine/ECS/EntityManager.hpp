@@ -35,6 +35,7 @@ public:
     void                RemoveEntity(entt::entity e);
 
     const EntityInfo&   GetEntityInfo(entt::entity e);
+    const EntityInfo&   GetEntityInfo(const uuids::uuid& uuid);
 
     template<typename T>
     T*                  TryGetComponent(entt::entity e)

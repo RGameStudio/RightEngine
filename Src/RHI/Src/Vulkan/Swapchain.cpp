@@ -106,7 +106,7 @@ Swapchain::Swapchain(const SwapchainDescriptor& desc) : m_descriptor(desc)
     createInfo.presentMode = presentMode;
     createInfo.clipped = VK_TRUE;
 
-    const auto error = vkCreateSwapchainKHR(VulkanDevice::s_ctx.m_device, &createInfo, nullptr, &m_swapchain);
+    [[maybe_unused]] const auto error = vkCreateSwapchainKHR(VulkanDevice::s_ctx.m_device, &createInfo, nullptr, &m_swapchain);
     RHI_ASSERT(error == VK_SUCCESS);
 
     vkGetSwapchainImagesKHR(VulkanDevice::s_ctx.m_device, m_swapchain, &imageCount, nullptr);
@@ -168,7 +168,8 @@ Swapchain::~Swapchain()
 uint32_t Swapchain::AcquireNextImage(VkDevice device, VkSemaphore presentSemaphore)
 {
     uint32_t imageIndex;
-    RHI_ASSERT(vkAcquireNextImageKHR(device, m_swapchain, UINT64_MAX, presentSemaphore, (VkFence)nullptr, &imageIndex) == VK_SUCCESS);
+    [[maybe_unused]] const auto res = vkAcquireNextImageKHR(device, m_swapchain, UINT64_MAX, presentSemaphore, (VkFence)nullptr, &imageIndex);
+    RHI_ASSERT(res == VK_SUCCESS);
     return imageIndex;
 }
 

@@ -9,4 +9,5 @@
 #endif
 #else
 #define ENGINE_ASSERT(x, ...)
+#define ENGINE_ASSERT_WITH_MESSAGE(x, ...)
 #endif

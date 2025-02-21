@@ -7,7 +7,8 @@ RTTR_REGISTRATION
 {
 	using namespace engine::registration;
 
-	ResourceLoader<engine::MeshLoader>("engine::MeshLoader");
+	ResourceLoader<engine::MeshLoader>("engine::MeshLoader")
+		.Domain(engine::Domain::UI);
 }
 
 namespace

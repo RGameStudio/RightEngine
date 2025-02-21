@@ -15,7 +15,7 @@ const eastl::vector<const char*> C_VALIDATION_LAYERS =
     "VK_LAYER_KHRONOS_validation"
 };
 
-bool CheckValidationLayerSupport()
+[[maybe_unused]] bool CheckValidationLayerSupport()
 {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);

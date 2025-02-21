@@ -32,7 +32,7 @@ namespace helpers
 } // helpers
 
 template<typename T>
-class ENGINE_API Service : public core::RTTRObject<T>
+class Service : public core::RTTRObject<T>
 {
 public:
     Service(std::string_view name) : core::RTTRObject<T>(name)
@@ -100,7 +100,7 @@ private:
 };
 
 template<typename T>
-class ENGINE_API System : public core::RTTRObject<T>
+class System : public core::RTTRObject<T>
 {
 public:
     System(std::string_view name) : core::RTTRObject<T>(name)
@@ -155,7 +155,7 @@ enum class CtorType : uint8_t
 };
 
 template<typename T, CtorType type = CtorType::AsObject>
-class ENGINE_API Class : public core::RTTRObject<T>
+class Class : public core::RTTRObject<T>
 {
 public:
     explicit Class(std::string_view name) : core::RTTRObject<T>(name)
@@ -196,20 +196,34 @@ public:
     }
 };
 
-
-// TODO: Add domain support
 template<typename T>
-class ENGINE_API ResourceLoader : public Class<T, CtorType::AsRawPtr>
+class ResourceLoader : public Class<T, CtorType::AsRawPtr>
 {
 public:
     ResourceLoader(std::string_view name) : Class<T, CtorType::AsRawPtr>(name)
     {
         static_assert(std::is_base_of_v<Loader, T>, "Resource loader must be derived of Loader class");
     }
+
+    ~ResourceLoader()
+    {
+        this->m_class(
+            rttr::metadata(C_METADATA_KEY, std::move(m_meta))
+        );
+    }
+
+    ResourceLoader& Domain(Domain domain)
+    {
+        m_meta.m_domain = domain;
+        return *this;
+    }
+
+private:
+    engine::Loader::MetaInfo m_meta;
 };
 
 template<typename T>
-class ENGINE_API ProjectSettings : public Class<T>
+class ProjectSettings : public Class<T>
 {
 public:
     ProjectSettings(std::string_view name) : Class<T>(name) {}
@@ -230,7 +244,7 @@ public:
 };
 
 template<typename T>
-class ENGINE_API Component : public Class<T>
+class Component : public Class<T>
 {
 public:
     Component(ecs::Component::Type type, std::string_view name) : Class<T>(name) {}

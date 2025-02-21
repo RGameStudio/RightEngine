@@ -28,19 +28,19 @@ void CommandBuffer::Begin(bool oneTimeUsage)
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     }
 
-    const auto result = vkBeginCommandBuffer(m_handle, &beginInfo);
+    [[maybe_unused]] const auto result = vkBeginCommandBuffer(m_handle, &beginInfo);
     RHI_ASSERT(result == VK_SUCCESS);
 }
 
 void CommandBuffer::End()
 {
-    const auto result = vkEndCommandBuffer(m_handle);
+    [[maybe_unused]] const auto result = vkEndCommandBuffer(m_handle);
     RHI_ASSERT(result == VK_SUCCESS);
 }
 
 void CommandBuffer::Reset()
 {
-    const auto result = vkResetCommandBuffer(m_handle, 0);
+    [[maybe_unused]] const auto result = vkResetCommandBuffer(m_handle, 0);
     RHI_ASSERT(result == VK_SUCCESS);
 }
 

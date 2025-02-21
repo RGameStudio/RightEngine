@@ -6,6 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/.bin)
 
 option(ENABLE_TRACY "Enable tracy profiling" ON)
 option(ENABLE_ASSERTS "Enable asserts" ON)
+option(ENABLE_TESTS "Enable unit tests" ON)
 
 if (ENABLE_ASSERTS)
     add_compile_definitions(R_ENABLE_ASSERTS)
@@ -75,6 +76,10 @@ add_subdirectory(Src/RHI)
 add_subdirectory(Src/Engine)
 add_subdirectory(Src/EngineLauncher)
 
+if (ENABLE_TESTS)
+    add_subdirectory(Src/TestLauncher)
+endif()
+
 set_target_properties(Core PROPERTIES FOLDER ${ENGINE_PROJECT_DIR})
 set_target_properties(RHI PROPERTIES FOLDER ${ENGINE_PROJECT_DIR})
 set_target_properties(Engine PROPERTIES FOLDER ${ENGINE_PROJECT_DIR})
@@ -82,5 +87,9 @@ set_target_properties(Engine PROPERTIES FOLDER ${ENGINE_PROJECT_DIR})
 if (MSVC)
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT EngineLauncher)
     set_target_properties(EngineLauncher PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "--project ${CMAKE_CURRENT_SOURCE_DIR}/Projects/Sandbox/sandbox.project")
+
+    if (ENABLE_TESTS)
+        set_target_properties(TestLauncher PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "--project ${CMAKE_CURRENT_SOURCE_DIR}/Projects/Sandbox/sandbox.project --mode client_no_ui")
+    endif()
 endif()
 

@@ -98,4 +98,17 @@ const EntityManager::EntityInfo& EntityManager::GetEntityInfo(entt::entity e)
     return info;
 }
 
+const EntityManager::EntityInfo& EntityManager::GetEntityInfo(const uuids::uuid& uuid)
+{
+    if (const auto it = m_uuidToEntity.find(uuid); it != m_uuidToEntity.end())
+    {
+        return GetEntityInfo(it->second);
+        
+    }
+
+    ENGINE_ASSERT(false);
+
+    static EntityInfo info{};
+    return info;
+}
 } // engine::ecs

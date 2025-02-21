@@ -1,5 +1,6 @@
 #include <Core/Log.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/msvc_sink.h>
 #include <sstream>
 #include <iomanip>
 #include <filesystem>
@@ -32,7 +33,8 @@ namespace core::log::impl
 
 #ifdef R_WIN32
         auto winSink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
-        s_instance = std::make_unique<spdlog::logger>("Engine", std::initializer_list<spdlog::sink_ptr>{ fileSink, winSink });
+        auto vsSink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+        s_instance = std::make_unique<spdlog::logger>("Engine", std::initializer_list<spdlog::sink_ptr>{ fileSink, winSink, vsSink });
 #else
         auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         m_loggerInstance = std::make_unique<spdlog::logger>("Engine", std::initializer_list<spdlog::sink_ptr>{ consoleSink, fileSink });

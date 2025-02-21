@@ -15,7 +15,8 @@ RTTR_REGISTRATION
 {
 	using namespace engine::registration;
 
-	ResourceLoader<engine::MaterialLoader>("engine::MaterialLoader");
+    ResourceLoader<engine::MaterialLoader>("engine::MaterialLoader")
+        .Domain(engine::Domain::UI);
 
     rttr::registration::enumeration<rhi::CullMode>("rhi::CullMode")
         (

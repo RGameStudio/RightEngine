@@ -1,8 +1,10 @@
 #pragma once
 
 #include <Engine/Config.hpp>
+#include <Engine/Engine.hpp>
 #include <Engine/ECS/System.hpp>
 #include <Core/Type.hpp>
+#include <Core/Log.hpp>
 #include <taskflow/taskflow.hpp>
 
 namespace engine::ecs
@@ -20,7 +22,19 @@ public:
     void Add()
     {
         static_assert(std::is_base_of_v<ISystem, T>);
-        ENGINE_ASSERT(rttr::type::get<T>().get_constructor({rttr::type::get<World*>()}).is_valid());
+        const auto type = rttr::type::get<T>();
+        ENGINE_ASSERT(type.get_constructor({rttr::type::get<World*>()}).is_valid());
+
+        const auto metadata = type.get_metadata(registration::C_METADATA_KEY).get_value_safe<ISystem::MetaInfo>();
+
+        if (metadata.m_domain != Domain::ALL && (Instance().Cfg().m_domain & metadata.m_domain) != metadata.m_domain)
+        {
+            core::log::info("[SystemManager] Skipping '{}' registration due to incompatible domain '{}' engine domain: '{}'",
+                type.get_name(),
+                DomainToString(metadata.m_domain),
+                DomainToString(Instance().Cfg().m_domain));
+            return;
+        }
 
         m_systems.emplace_back(std::make_unique<T>(m_world));
         m_typeToSystem[rttr::type::get<T>()] = m_systems.back().get();
