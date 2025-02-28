@@ -1,0 +1,55 @@
+{
+    "version": 4,
+    "include": ["./ConanPresets.json"],
+    "configurePresets": [
+        {
+            "name": "win-debug",
+            "hidden": false,
+            "inherits": [
+                "conan-default"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENGINE_ENABLE_TESTS": "ON",
+                "ENGINE_ENABLE_TRACY": "ON"
+            }
+        },
+        {
+            "name": "win-release",
+            "hidden": false,
+            "inherits": [
+                "conan-default"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ENGINE_ENABLE_TESTS": "OFF",
+                "ENGINE_ENABLE_TRACY": "ON"
+            }
+        },
+        {
+            "name": "win-release-ut",
+            "hidden": false,
+            "inherits": [
+                "conan-default"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ENGINE_ENABLE_TESTS": "ON",
+                "ENGINE_ENABLE_TRACY": "OFF",
+                "ENGINE_ENABLE_ASSERTS": "OFF"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "engine-win-debug",
+            "configurePreset": "win-debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "engine-win-release-ut",
+            "configurePreset": "win-release-ut",
+            "configuration": "Release"
+        }
+    ]
+    }

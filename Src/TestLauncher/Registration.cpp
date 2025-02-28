@@ -1,1 +1,0 @@
-#include <TestsCore/Config.hpp>

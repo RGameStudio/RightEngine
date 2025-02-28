@@ -8,3 +8,4 @@
 /.dist
 
 CMakeUserPresets.json
+ConanPresets.json
