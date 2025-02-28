@@ -39,7 +39,7 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/P
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/.bin)
 
-if (ENABLE_TESTS)
+if (ENGINE_ENABLE_TESTS)
         target_compile_definitions(${PROJECT_NAME} PUBLIC DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL 
                 DOCTEST_CONFIG_NO_WINDOWS_SEH)
 endif()

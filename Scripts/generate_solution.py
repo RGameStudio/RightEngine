@@ -5,22 +5,37 @@ import shutil
 from conan.api.conan_api import ConanAPI
 from conan.api.model import RecipeReference
 
-if len(sys.argv) < 2:
-    print("Usage: python generate_solution.py <build_type>")
-    print("<build_type>: Debug|Release")
+if len(sys.argv) < 3:
+    print("Usage: python generate_solution.py <preset name> <profile_name>")
     sys.exit(1)
 
-build_type = sys.argv[1]
-if (build_type not in "Debug" and build_type not in "Release"):
-    print(f"Incorrect build type: {build_type}")
+preset_name = sys.argv[1]
+if "debug" in preset_name:
+    build_type = "Debug"
+if "release" in preset_name:
+    build_type = "Release"
+
+if "debug" not in preset_name and "release" not in preset_name:
+    print(f"Incorrect preset name: '{preset_name}'. It must contain debug or release postfix in it.")
     sys.exit(1)
+
+if "win" in preset_name:
+    platfrom = "win"
+if "mac" in preset_name:
+    platfrom = "mac"
+
+if "win" not in preset_name and "mac" not in preset_name:
+    print(f"Incorrect preset name: '{preset_name}'. It must contain platform (win, mac) postfix in it.")
+    sys.exit(1)
+
+profile_name = sys.argv[2]
 
 #Remove previous cache files
-try:
-    os.remove(".build/Win/CMakeCache.txt")
-    shutil.rmtree(".build/Win/CMakeFiles")
-except Exception as e:
-    pass
+# try:
+    # os.remove(f".build/{platfrom}/CMakeCache.txt")
+    # shutil.rmtree(f".build/{platfrom}/CMakeFiles")
+# except Exception as e:
+#     pass
 
 #Build and install custom built packages if needed
 def check_lib_version(package_name, version):
@@ -85,14 +100,17 @@ def check_process_status_code(code, proc_stderr):
 
 print(f"Generating solution...")
 
+if not os.path.exists(".build"):
+    os.mkdir(".build")
+
 try:
-    status_code = sub.run(f"conan install . --deployer=dll_deployer -c tools.cmake.cmake_layout:build_folder=\".build/Win\" --build=missing --profile=win-64 -s build_type={build_type}", shell=True, check=True, text=True)
+    status_code = sub.run(f"conan install . --deployer=dll_deployer -c tools.cmake.cmake_layout:build_folder=\".build/{platfrom}\" --build=missing --profile={profile_name} -s build_type={build_type}", shell=True, check=True, text=True)
     check_process_status_code(status_code.returncode, status_code.stderr)
 
     copy_files(".build/Win/dll", f".build/Win/.bin/{build_type}", ".dll")
     copy_files("Scripts/bin", f".build/Win/.bin/{build_type}", ".exe")
 
-    status_code = sub.run(f"cmake -B .build/Win -DCMAKE_BUILD_TYPE={build_type} --preset conan-default .", shell=True, check=True, text=True)
+    status_code = sub.run(f"cmake -B .build/Win -DCMAKE_BUILD_TYPE={build_type} --preset {preset_name} .", shell=True, check=True, text=True)
     check_process_status_code(status_code.returncode, status_code.stderr)
     
     print("Solution was successfully generated!")
