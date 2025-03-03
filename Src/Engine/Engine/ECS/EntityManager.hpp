@@ -37,6 +37,11 @@ public:
     const EntityInfo&   GetEntityInfo(entt::entity e);
     const EntityInfo&   GetEntityInfo(const uuids::uuid& uuid);
 
+    bool                Exists(entt::entity e);
+    bool                Exists(const uuids::uuid& uuid);
+
+    entt::entity        GetEntity(const uuids::uuid& uuid);
+
     template<typename T>
     T*                  TryGetComponent(entt::entity e)
     {

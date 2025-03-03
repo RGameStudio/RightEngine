@@ -111,4 +111,33 @@ const EntityManager::EntityInfo& EntityManager::GetEntityInfo(const uuids::uuid&
     static EntityInfo info{};
     return info;
 }
+
+entt::entity EntityManager::GetEntity(const uuids::uuid& uuid)
+{
+    if (const auto it = m_uuidToEntity.find(uuid); it != m_uuidToEntity.end())
+    {
+        return it->second;
+    }
+
+    return {};
+}
+
+bool EntityManager::Exists(entt::entity e)
+{
+    if (const auto it = m_entities.find(e); it == m_entities.end())
+    {
+        return false;
+    }
+    return true;
+}
+
+bool EntityManager::Exists(const uuids::uuid& uuid)
+{
+    if (const auto it = m_uuidToEntity.find(uuid); it != m_uuidToEntity.end())
+    {
+        return Exists(it->second);
+    }
+    return false;
+}
+
 } // engine::ecs

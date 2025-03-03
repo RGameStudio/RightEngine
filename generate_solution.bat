@@ -1,3 +1,3 @@
 @echo off
 
-python Scripts/generate_solution.py win-release-ut win-64
+python Scripts/generate_solution.py win-debug win-64
