@@ -8,7 +8,8 @@ RTTR_REGISTRATION
     using namespace engine::ecs;
 
     engine::registration::System<engine::SkyboxSystem>("engine::SkyboxSystem")
-        .UpdateAfter<engine::RenderSystem>();
+        .UpdateAfter<engine::RenderSystem>()
+        .Domain(engine::Domain::UI);
 
     engine::registration::Component<engine::SkyboxComponent>(Component::Type::ENGINE, "engine::SkyboxComponent");
 }

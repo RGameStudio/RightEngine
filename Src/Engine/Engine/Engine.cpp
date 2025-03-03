@@ -22,7 +22,7 @@ using namespace rttr;
 CommandLineArgs()
             .Argument(
                 CommandLineArg("-m", "--mode")
-                .Help("Engine launch mode - client, server, server_no_ui or editor")
+                .Help("Engine launch mode - client or editor")
                 .DefaultValue("editor")
             );
 
@@ -31,8 +31,7 @@ registration::enumeration<engine::Domain>("engine::Domain")(
         value("none", engine::Domain::NONE),
         value("editor", engine::Domain::ALL),
         value("client", engine::Domain::CLIENT),
-        value("server", engine::Domain::SERVER_UI),
-        value("server_no_ui", engine::Domain::SERVER_NO_UI)
+        value("client_no_ui", engine::Domain::CLIENT_NO_UI)
     );
 }
 
@@ -89,13 +88,15 @@ Engine::Engine(int argCount, char* argPtr[])
 
         resourceService.InitializeLoaders();
 
-        auto& renderService = m_serviceManager->Service<RenderService>();
+        auto* renderService = m_serviceManager->FindService<RenderService>();
+        if (renderService)
+        {
+            renderService->LoadSystemResources();
 
-        renderService.LoadSystemResources();
-
-        auto extent = Instance().Service<WindowService>().Extent();
-        renderService.OnWindowResize(extent);
-        renderService.OnResize(extent);
+            auto extent = Instance().Service<WindowService>().Extent();
+            renderService->OnWindowResize(extent);
+            renderService->OnResize(extent);
+        }
     }
 
     m_serviceManager->RegisterService<ImguiService>();
@@ -105,7 +106,10 @@ Engine::Engine(int argCount, char* argPtr[])
 
     m_serviceManager->UpdateDependencyOrder();
 
-    m_serviceManager->Service<EditorService>().Initialize();
+    if (auto es = m_serviceManager->FindService<EditorService>())
+    {
+        es->Initialize();
+    }
 
     core::log::info("Frame limiter targeted frametime is {}ms", C_TARGET_FRAME_TIME);
     core::log::info("Engine was initialized successfully for {}s", m_timer.TimeInSeconds());
@@ -129,13 +133,14 @@ int Engine::Run()
     }
 
     core::log::info("Stopped engine loop");
-    return 0;
+    return m_status;
 }
 
-void Engine::Stop()
+void Engine::Stop(int status)
 {
     core::log::info("Engine loop stop requested");
     m_running = false;
+    m_status = status;
 }
 
 void Engine::Update()

@@ -29,13 +29,15 @@ public:
     ~Engine();
 
     int             Run();
-    void            Stop();
+    void            Stop(int status = 0);
 
     template<typename T>
     T&              Service() { return m_serviceManager->Service<T>(); }
 
     template<typename T>
     T*              FindService() { return m_serviceManager->FindService<T>(); }
+
+    std::unique_ptr<ServiceManager>& GetServiceManager() { return m_serviceManager; }
 
     const Config&   Cfg() const { return m_config; }
 
@@ -47,6 +49,7 @@ private:
     inline static Engine*               s_instance = nullptr;
 
     bool                                m_running = false;
+    int                                 m_status = 0;
     Timer                               m_timer;
     Timer                               m_frameLimiterTimer;
     std::unique_ptr<ServiceManager>     m_serviceManager;

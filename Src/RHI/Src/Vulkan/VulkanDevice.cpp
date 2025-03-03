@@ -292,10 +292,12 @@ void VulkanDevice::BeginFrame()
     m_currentCmdBufferIndex = m_frameIndex % m_cmdBuffers.size();
 
     auto& cmdBuffer = m_cmdBuffers[m_currentCmdBufferIndex];
-    RHI_ASSERT(vkResetCommandBuffer(cmdBuffer, 0) == VK_SUCCESS);
+    [[maybe_unused]] auto result = vkResetCommandBuffer(cmdBuffer, 0);
+    RHI_ASSERT(result == VK_SUCCESS);
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    RHI_ASSERT(vkBeginCommandBuffer(cmdBuffer, &beginInfo) == VK_SUCCESS);
+    result = vkBeginCommandBuffer(cmdBuffer, &beginInfo);
+    RHI_ASSERT(result == VK_SUCCESS);
 
     auto& presentSemaphore = m_presentSemaphores[m_currentCmdBufferIndex];
 
@@ -435,7 +437,8 @@ void VulkanDevice::Present()
     }
 
     const uint32_t nextFrameIndex = (m_frameIndex + 1) % s_ctx.m_instance->m_parameters.m_framesInFlight;
-    RHI_ASSERT(vkWaitForFences(s_ctx.m_device, 1, &m_fences[nextFrameIndex], VK_TRUE, UINT64_MAX) == VK_SUCCESS);
+    [[maybe_unused]] const auto res = vkWaitForFences(s_ctx.m_device, 1, &m_fences[nextFrameIndex], VK_TRUE, UINT64_MAX);
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 void VulkanDevice::BeginPipeline(const std::shared_ptr<Pipeline>& pipeline)

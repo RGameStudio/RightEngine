@@ -9,4 +9,5 @@
 #endif
 #else
 #define RHI_ASSERT(x, ...)
+#define RHI_ASSERT_WITH_MESSAGE(x, ...)
 #endif

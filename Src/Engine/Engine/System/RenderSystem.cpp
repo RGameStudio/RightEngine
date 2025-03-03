@@ -20,9 +20,11 @@ RTTR_REGISTRATION
     using namespace engine::ecs;
 
     engine::registration::System<engine::CameraSystem>("engine::CameraSystem")
+        .Domain(engine::Domain::UI)
         .UpdateAfter<engine::TransformSystem>();
 
     engine::registration::System<engine::RenderSystem>("engine::RenderSystem")
+        .Domain(engine::Domain::UI)
         .UpdateAfter<engine::CameraSystem>();
 
     engine::registration::Component<engine::MeshComponent>(Component::Type::ENGINE, "engine::MeshComponent");

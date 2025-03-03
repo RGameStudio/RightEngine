@@ -1,5 +1,7 @@
 #include <Core/Log.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/msvc_sink.h>
+#include <spdlog/sinks/dup_filter_sink.h>
 #include <sstream>
 #include <iomanip>
 #include <filesystem>
@@ -27,16 +29,17 @@ namespace core::log::impl
         filenameSS << C_LOG_DIR << "/" << C_LOG_FILENAME << std::put_time(&timeinfo, "%d-%m-%Y_%H-%M-%S") << ".log";
         const std::string logFilename = filenameSS.str();
 
-        // Create a file sink with the generated log file name
-        auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilename, true);
+        auto dupSink = std::make_shared<spdlog::sinks::dup_filter_sink_mt>(std::chrono::milliseconds(500));
+        dupSink->add_sink(std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilename));
+        dupSink->add_sink(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
 
 #ifdef R_WIN32
-        auto winSink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
-        s_instance = std::make_unique<spdlog::logger>("Engine", std::initializer_list<spdlog::sink_ptr>{ fileSink, winSink });
-#else
-        auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        m_loggerInstance = std::make_unique<spdlog::logger>("Engine", std::initializer_list<spdlog::sink_ptr>{ consoleSink, fileSink });
+        auto debugSink = std::make_shared<spdlog::sinks::windebug_sink_mt>();
+        debugSink->set_pattern("[%H:%M:%S:%e] [thread %5t] %^[%l] %v%$");
+        dupSink->add_sink(std::move(debugSink));
 #endif
+
+        s_instance = std::make_unique<spdlog::logger>("Engine", std::initializer_list<spdlog::sink_ptr>{ dupSink });
 
         // Set the log level
         s_instance->set_level(spdlog::level::debug);

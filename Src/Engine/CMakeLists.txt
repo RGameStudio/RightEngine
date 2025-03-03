@@ -11,11 +11,12 @@ find_package(EnTT REQUIRED)
 find_package(stduuid REQUIRED)
 find_package(stb REQUIRED)
 find_package(assimp REQUIRED)
+find_package(doctest REQUIRED)
 
 file(GLOB_RECURSE SOURCE_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/Src/*.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Src/*.hpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Src/*.h"
+                "${CMAKE_CURRENT_SOURCE_DIR}/Engine/*.cpp"
+                "${CMAKE_CURRENT_SOURCE_DIR}/Engine/*.hpp"
+                "${CMAKE_CURRENT_SOURCE_DIR}/Engine/*.h"
         )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
@@ -30,12 +31,18 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
                             EnTT::EnTT
                             stduuid::stduuid
                             stb::stb
+                            doctest::doctest
                     )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_EXPORT)
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Src/PCH.hpp")
-target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Src/")
+target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/PCH.hpp")
+target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/.bin)
+
+if (ENGINE_ENABLE_TESTS)
+        target_compile_definitions(${PROJECT_NAME} PUBLIC DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL 
+                DOCTEST_CONFIG_NO_WINDOWS_SEH)
+endif()
 
 # Create source groups for each directory
 foreach(FILE ${SOURCE_FILES})

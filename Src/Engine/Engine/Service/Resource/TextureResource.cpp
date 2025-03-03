@@ -11,7 +11,8 @@ RTTR_REGISTRATION
 {
 	using namespace engine::registration;
 
-	ResourceLoader<engine::TextureLoader>("engine::TextureLoader");
+	ResourceLoader<engine::TextureLoader>("engine::TextureLoader")
+		.Domain(engine::Domain::UI);
 }
 
 namespace

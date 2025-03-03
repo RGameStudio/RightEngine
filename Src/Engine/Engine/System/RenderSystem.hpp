@@ -5,6 +5,7 @@
 #include <Engine/ECS/World.hpp>
 #include <Engine/ECS/Component.hpp>
 #include <Engine/Service/Resource/MeshResource.hpp>
+#include <Engine/Service/Resource/MaterialResource.hpp>
 
 namespace engine
 {

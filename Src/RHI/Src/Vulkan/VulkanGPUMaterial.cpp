@@ -27,8 +27,7 @@ VulkanGPUMaterial::VulkanGPUMaterial(const std::shared_ptr<VulkanShader>& shader
     allocInfo.descriptorSetCount = 1;
     allocInfo.pSetLayouts = &layout;
 
-    const auto res = vkAllocateDescriptorSets(VulkanDevice::s_ctx.m_device, &allocInfo, &m_descriptorSet);
-
+    [[maybe_unused]] const auto res = vkAllocateDescriptorSets(VulkanDevice::s_ctx.m_device, &allocInfo, &m_descriptorSet);
     RHI_ASSERT(res == VK_SUCCESS);
 }
 

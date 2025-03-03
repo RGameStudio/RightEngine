@@ -62,6 +62,16 @@ public:
 
 		if (m_loadersMap.find(type) == m_loadersMap.end())
 		{
+			const auto metadata = type.get_metadata(registration::C_METADATA_KEY).get_value_safe<Loader::MetaInfo>();
+
+			if (metadata.m_domain != Domain::ALL && (Instance().Cfg().m_domain & metadata.m_domain) != metadata.m_domain)
+			{
+				core::log::info("[ResourceService] Skipping '{}' registration due to incompatible domain '{}' engine domain: '{}'",
+					type.get_name(),
+					DomainToString(metadata.m_domain),
+					DomainToString(Instance().Cfg().m_domain));
+				return false;
+			}
 			m_loadersMap[type] = std::make_unique<T>();
 			core::log::info("[ResourceService] Registered loader '{}'", type.get_name());
 			return true;

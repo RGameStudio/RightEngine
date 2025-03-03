@@ -170,8 +170,7 @@ VulkanTexture::VulkanTexture(const TextureDescriptor& desc, const std::shared_pt
     imageAllocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
     imageAllocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-    const auto status = vmaCreateImage(VulkanDevice::s_ctx.m_allocator, &imageCreateInfo, &imageAllocInfo, &m_image, &m_allocation, nullptr);
-
+    [[maybe_unused]] const auto status = vmaCreateImage(VulkanDevice::s_ctx.m_allocator, &imageCreateInfo, &imageAllocInfo, &m_image, &m_allocation, nullptr);
     RHI_ASSERT(status == VK_SUCCESS);
 
     // TODO: Add later support for more layers
