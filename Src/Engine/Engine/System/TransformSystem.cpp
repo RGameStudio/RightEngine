@@ -9,7 +9,10 @@ RTTR_REGISTRATION
 
     engine::registration::System<engine::TransformSystem>("engine::TransformSystem");
 
-    engine::registration::Component<engine::TransformComponent>(Component::Type::ENGINE, "engine::TransformComponent");
+    engine::registration::Component<engine::TransformComponent>(IComponent::Type::ENGINE, "engine::TransformComponent")
+        .Property("position", &engine::TransformComponent::m_position)
+        .Property("rotation", &engine::TransformComponent::m_rotation)
+        .Property("scale", &engine::TransformComponent::m_scale);
 }
 
 namespace engine

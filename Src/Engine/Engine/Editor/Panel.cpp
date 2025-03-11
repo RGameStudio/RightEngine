@@ -6,13 +6,27 @@ namespace engine::editor
 
 void Panel::Draw()
 {
-	ImGui::Begin(m_name.c_str());
+	if (m_menuBar)
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			m_isHovered = ImGui::IsWindowHovered();
 
-	m_isHovered = ImGui::IsWindowHovered();
+			DrawPanel();
 
-	DrawPanel();
+			ImGui::EndMainMenuBar();
+		}
+	}
+	else
+	{
+		ImGui::Begin(m_name.c_str());
 
-	ImGui::End();
+		m_isHovered = ImGui::IsWindowHovered();
+
+		DrawPanel();
+
+		ImGui::End();
+	}
 }
 
 } // engine::editor

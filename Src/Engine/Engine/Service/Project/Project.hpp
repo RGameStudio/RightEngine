@@ -32,9 +32,10 @@ public:
     }
 
 private:
-    std::string                        m_name;
-    uint8_t                            m_version;
-    eastl::vector<rttr::variant>    m_settings;
+    std::string                    m_name;
+    const io::fs::path&            m_path;
+    uint8_t                        m_version;
+    eastl::vector<rttr::variant>   m_settings;
 };
 
 } // engine

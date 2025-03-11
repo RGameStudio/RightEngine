@@ -10,11 +10,12 @@ file(GLOB_RECURSE SOURCE_FILES
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Engine)
-
 if (MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
     set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/${CMAKE_BUILD_TYPE}")
 endif()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Engine)
 
 # Create source groups for each directory
 foreach(FILE ${SOURCE_FILES})

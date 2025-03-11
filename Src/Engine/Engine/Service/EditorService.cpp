@@ -18,6 +18,7 @@
 #include <Engine/Editor/ViewportPanel.hpp>
 #include <Engine/Editor/EntityTreePanel.hpp>
 #include <Engine/Editor/ComponentPanel.hpp>
+#include <Engine/Editor/MenuBarPanel.hpp>
 #include <RHI/Pipeline.hpp>
 #include <imgui.h>
 
@@ -77,6 +78,7 @@ EditorService::EditorService()
     m_impl->m_panels.emplace_back(std::make_shared<ViewportPanel>());
     m_impl->m_panels.emplace_back(std::make_shared<EntityTreePanel>());
     m_impl->m_panels.emplace_back(std::make_shared<ComponentPanel>());
+    m_impl->m_panels.emplace_back(std::make_shared<MenuBarPanel>());
 
     m_impl->m_viewportPanel = std::static_pointer_cast<ViewportPanel>(m_impl->m_panels[0]);
 }
@@ -92,23 +94,6 @@ EditorService::~EditorService()
 void EditorService::Update(float dt)
 {
     PROFILER_CPU_ZONE;
-    
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("General"))
-        {
-            bool shouldShutdownEngine = false;
-            ImGui::MenuItem("Exit", nullptr, &shouldShutdownEngine);
-    
-            if (shouldShutdownEngine)
-            {
-                Instance().Stop();
-            }
-    
-            ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-    }
     
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 

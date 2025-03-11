@@ -18,6 +18,8 @@ public:
 
     std::unique_ptr<ecs::World>& CurrentWorld() { return m_world; }
 
+    void SaveCurrentWorld();
+
 private:
     std::unique_ptr<ecs::World>        m_world;
 };

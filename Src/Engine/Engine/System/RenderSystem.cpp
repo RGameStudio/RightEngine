@@ -27,9 +27,9 @@ RTTR_REGISTRATION
         .Domain(engine::Domain::UI)
         .UpdateAfter<engine::CameraSystem>();
 
-    engine::registration::Component<engine::MeshComponent>(Component::Type::ENGINE, "engine::MeshComponent");
-    engine::registration::Component<engine::CameraComponent>(Component::Type::ENGINE, "engine::CameraComponent");
-    engine::registration::Component<engine::DirectionalLightComponent>(Component::Type::ENGINE, "engine::DirectionalLightComponent");
+    engine::registration::Component<engine::MeshComponent>(IComponent::Type::ENGINE, "engine::MeshComponent");
+    engine::registration::Component<engine::CameraComponent>(IComponent::Type::ENGINE, "engine::CameraComponent");
+    engine::registration::Component<engine::DirectionalLightComponent>(IComponent::Type::ENGINE, "engine::DirectionalLightComponent");
 
     engine::registration::Class<engine::CameraUB>("engine::CameraUB");
     engine::registration::Class<engine::LightBufferUB>("engine::LightBufferUB");
