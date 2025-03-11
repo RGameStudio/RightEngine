@@ -62,4 +62,25 @@ RTTR_REGISTRATION
         ENGINE_ASSERT_WITH_MESSAGE(false, fmt::format("Invalid uuid: '{}'", str));
         return uuids::uuid();
     });
+
+    registration::Class<std::filesystem::path>("std::filesystem::path")
+        .Meta(registration::meta::C_METAINFO_IS_STRING_LIKE_TAG, true);
+
+    rttr::type::register_converter_func([](const std::filesystem::path& path, bool& ok) -> std::string
+    {
+        ok = true;
+        return path.generic_string();
+    });
+
+    rttr::type::register_converter_func([](const std::string& str, bool& ok) -> std::filesystem::path
+    {
+        ok = true;
+        return std::filesystem::path(str);
+    });
+
+    rttr::type::register_converter_func([](std::string_view str, bool& ok) -> std::filesystem::path
+    {
+        ok = true;
+        return std::filesystem::path(str);
+    });
 }

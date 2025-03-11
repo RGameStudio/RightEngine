@@ -100,7 +100,7 @@ public:
     bool                 RemoveComponent(entt::entity e)
     {
         static_assert(std::is_base_of_v<IComponent, T>, "Class must be a derived of engine::ecs::Component");
-        ENGINE_ASSERT(TryGetComponent<T>(e));
+        ENGINE_ASSERT(TryGetComponent<T>(e) != nullptr);
         ENGINE_ASSERT(engine::registration::helpers::typeRegistered<T>());
 
         return m_registry.remove<T>(e) != 0;

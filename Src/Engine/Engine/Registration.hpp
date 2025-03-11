@@ -5,6 +5,7 @@
 #include <Engine/ECS/Component.hpp>
 #include <Engine/ECS/System.hpp>
 #include <Core/Hash.hpp>
+#include <Core/TypesUtils.hpp>
 #include <Core/RTTRIntegration.hpp>
 #include <argparse/argparse.hpp>
 #include <rttr/policy.h>
@@ -18,18 +19,89 @@ constexpr uint64_t C_PROJECT_SETTINGS_METADATA_KEY = core::hash::HashString("Pro
 namespace helpers
 {
 
-    template<typename T>
-    inline bool typeRegistered()
-    {
-        return rttr::type::get<T>().get_constructor().is_valid();
-    }
+template<typename T>
+inline bool typeRegistered()
+{
+    return rttr::type::get<T>().get_constructor().is_valid();
+}
 
-    inline bool typeRegistered(rttr::type type)
-    {
-        return type.get_constructor().is_valid();
-    }
+inline bool typeRegistered(rttr::type type)
+{
+    return type.get_constructor().is_valid();
+}
 
 } // helpers
+
+namespace details
+{
+
+template<typename T>
+static void RegisterDefaultConstructor()
+{
+    if constexpr (!std::is_array_v<T>)
+    {
+        if (const rttr::type t = rttr::type::get<T>(); t.get_constructors().empty())
+        {
+            typename rttr::registration::template class_<T> c(t.get_name());
+            c.constructor()(rttr::policy::ctor::as_object);
+        }
+    }
+
+    if constexpr (core::IsContainerType<T>)
+    {
+        using KeyType = typename core::GetKeyType<T>::type;
+        using ValueType = typename core::GetValueType<T>::type;
+
+        if constexpr (core::IsContainerType<KeyType>)
+        {
+            RegisterDefaultConstructor<KeyType>();
+        }
+        if constexpr (core::IsContainerType<ValueType>)
+        {
+            RegisterDefaultConstructor<ValueType>();
+        }
+    }
+}
+
+template<typename Getter, typename T>
+using PropertyType = std::remove_cv_t<std::remove_reference_t<std::invoke_result_t<Getter, const T&>>>;
+
+template<typename Getter, typename T, typename = void>
+struct IsGetter : std::false_type {};
+
+template<typename Getter, typename T>
+struct IsGetter<Getter, T, std::void_t<PropertyType<Getter, T>>> : std::bool_constant<!std::is_member_object_pointer_v<Getter>> {};
+
+template<typename Setter, typename T, typename Getter, typename = void>
+struct IsSetter : std::false_type {};
+
+template<typename Setter, typename T, typename Getter>
+struct IsSetter<Setter, T, Getter, std::void_t<std::invoke_result_t<Setter, T&, PropertyType<Getter, T>>>> : std::true_type {};
+
+template<typename T, typename E = void> struct AccessorInvokeResult { static_assert(core::AlwaysFalse<T>, "Accessor type T is not supported"); };
+template<typename T> struct AccessorInvokeResult<T, std::enable_if_t<core::FunctionTraits<T>::ArgCount == 0>> { using Type = std::invoke_result_t<T>; };
+template<typename T> struct AccessorInvokeResult<T, std::enable_if_t<core::FunctionTraits<T>::ArgCount == 1>> { using Type = std::invoke_result_t<T, typename core::FunctionTraits<T>::template ArgType<0>>; };
+template<typename T> using AccessorInvokeResultT = typename AccessorInvokeResult<T>::Type;
+
+template<typename Acc> struct AccessorTraitsImpl
+{
+    using AccessedType = Acc;
+    using AccessedTypeDecay = typename std::remove_cv_t<std::remove_reference_t<Acc>>;
+};
+template<typename T, typename E = void> struct AccessorTraits { static_assert(core::AlwaysFalse<T>, "Accessor type T is not supported"); using AccessedType = void; using AccessedTypeDecay = void; };
+template<typename T> struct AccessorTraits<T*, std::enable_if_t<!rttr::detail::is_function<T>::value>> : AccessorTraitsImpl<T> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)> : AccessorTraitsImpl<R> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)(void)> : AccessorTraitsImpl<R> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)(void) const> : AccessorTraitsImpl<R> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)(void) volatile> : AccessorTraitsImpl<R> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)(void) const volatile> : AccessorTraitsImpl<R> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)(void) noexcept> : AccessorTraitsImpl<R> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)(void) const noexcept> : AccessorTraitsImpl<R> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)(void) volatile noexcept> : AccessorTraitsImpl<R> {};
+template<typename R, typename C> struct AccessorTraits<R(C::*)(void) const volatile noexcept> : AccessorTraitsImpl<R> {};
+template<typename T> struct AccessorTraits<T, std::enable_if_t<std::is_function_v<T> || rttr::detail::is_functor<T>::value>> : AccessorTraitsImpl<AccessorInvokeResultT<T>> {};
+
+} // details
 
 namespace meta
 {
@@ -219,12 +291,41 @@ public:
     {
         static_assert(std::is_base_of_v<ClassType, T>);
 
+        details::RegisterDefaultConstructor<PropType>();
+
         auto prop = this->m_class.property(name, field);
         if constexpr (sizeof...(Meta) > 0)
         {
             prop(rttr::metadata(Meta::MetaId, std::forward<Meta>(meta)) ...);
         }
         return *this;
+    }
+
+    template <typename Getter, typename Setter, typename... Meta, typename = std::enable_if_t<details::IsGetter<Getter, T>::value && details::IsSetter<Setter, T, Getter>::value>>
+    Class& Property(std::string_view name, Getter getter, Setter setter, Meta&&... meta)
+    {
+        using AccessorTraits = details::AccessorTraits<Getter>;
+        checkAccessedType<typename AccessorTraits::AccessedTypeDecay, Meta...>();
+
+        details::RegisterDefaultConstructor<details::PropertyType<Getter, T>>();
+
+        auto prop = this->m_class.property(name, std::move(getter), std::move(setter));
+        if constexpr (sizeof...(Meta) > 0)
+        {
+            prop(rttr::metadata(Meta::MetaHandle(), std::forward<Meta>(meta)) ...);
+        }
+
+        return *this;
+    }
+
+protected:
+    template<typename AccessedTypeT, typename... Meta>
+    constexpr void checkAccessedType() const
+    {
+        static_assert(
+            !core::IsPointerLikeV<AccessedTypeT>,
+            "Pointer-like properties are not allowed for serialization (excluding ResPtr<T, R>)"
+            );
     }
 };
 
@@ -252,6 +353,21 @@ public:
 
 private:
     engine::Loader::MetaInfo m_meta;
+};
+
+template<typename T>
+class Resource : public core::RTTRObject<T>
+{
+public:
+    Resource(std::string_view name) : core::RTTRObject<T>(name)
+    {
+        static_assert(std::is_base_of_v<Resource, T>, "Resource must be derived of Resource class");
+
+        if constexpr (std::is_constructible_v<T, io::fs::path>)
+        {
+            this->m_class.template constructor<io::fs::path>()(rttr::policy::ctor::as_std_shared_ptr);
+        }
+    }
 };
 
 template<typename T>

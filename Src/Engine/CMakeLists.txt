@@ -12,6 +12,7 @@ find_package(stduuid REQUIRED)
 find_package(stb REQUIRED)
 find_package(assimp REQUIRED)
 find_package(doctest REQUIRED)
+find_package(simdjson REQUIRED)
 
 file(GLOB_RECURSE SOURCE_FILES
                 "${CMAKE_CURRENT_SOURCE_DIR}/Engine/*.cpp"
@@ -32,6 +33,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
                             stduuid::stduuid
                             stb::stb
                             doctest::doctest
+                            simdjson::simdjson
                     )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_EXPORT)

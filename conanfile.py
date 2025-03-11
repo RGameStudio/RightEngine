@@ -27,6 +27,7 @@ class RightEngineRecipe(ConanFile):
         "spirv-cross/1.3.296.0",
         "stb/cci.20230920",
         "stduuid/1.2.3",
+        "simdjson/3.10.1",
         "taskflow/3.6.0",
         "tracy/0.10",
         "vulkan-headers/1.3.268.0",

@@ -7,7 +7,7 @@
 #include <Engine/System/RenderSystem.hpp>
 #include <Engine/System/TransformSystem.hpp>
 #include <Engine/System/SkyboxSystem.hpp>
-#include <Engine/Serialization/JsonSerializer.hpp>
+#include <Engine/Serialization/ToJson.hpp>
 #include <Core/Profiling.hpp>
 #include <nlohmann/json.hpp>
 

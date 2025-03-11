@@ -1,4 +1,4 @@
-#include <Engine/Serialization/JsonSerializer.hpp>
+#include <Engine/Serialization/ToJson.hpp>
 
 namespace
 {
@@ -171,10 +171,6 @@ nlohmann::json ToJsonRecursively(const rttr::variant& obj, rttr::type expectedTy
 namespace engine
 {
 
-
-
-
-
 std::string ToJsonString(const rttr::variant& obj, rttr::type expectedType)
 {
     PROFILER_CPU_ZONE;
@@ -182,15 +178,11 @@ std::string ToJsonString(const rttr::variant& obj, rttr::type expectedType)
     return ToJsonObject(obj, expectedType).dump(4, ' ');
 }
 
-
 nlohmann::json ToJsonObject(const rttr::variant& obj, rttr::type expectedType)
 {
     PROFILER_CPU_ZONE;
 
-	ENGINE_ASSERT(registration::helpers::typeRegistered(expectedType));
-
     auto json = ToJsonRecursively(obj, expectedType);
-
     return json;
 }
 

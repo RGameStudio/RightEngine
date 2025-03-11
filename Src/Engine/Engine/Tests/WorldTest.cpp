@@ -14,25 +14,15 @@ TEST_CASE("Simple entity manipulations")
     em->Update();
     const auto e = em->GetEntity(uuid);
 
-    SUBCASE("Entity was created and component added")
-    {
-        em->AddComponent<engine::MeshComponent>(uuid, engine::MeshComponent());
+    em->AddComponent<engine::MeshComponent>(uuid, engine::MeshComponent());
+    CHECK_EQ(em->GetEntityInfo(uuid).m_name, C_TEST_ENTITY_NAME);
+    CHECK_NE(em->TryGetComponent<engine::MeshComponent>(uuid), nullptr);
+    CHECK_NE(em->TryGetComponent<engine::MeshComponent>(e), nullptr);
 
-        CHECK_EQ(em->GetEntityInfo(uuid).m_name, C_TEST_ENTITY_NAME);
-        CHECK_NE(em->TryGetComponent<engine::MeshComponent>(uuid), nullptr);
-        CHECK_NE(em->TryGetComponent<engine::MeshComponent>(e), nullptr);
-    }
+    em->RemoveComponent<engine::MeshComponent>(uuid);
+    CHECK_EQ(em->TryGetComponent<engine::MeshComponent>(uuid), nullptr);
 
-    SUBCASE("MeshComponent was deleted")
-    {
-        em->RemoveComponent<engine::MeshComponent>(uuid);
-
-        CHECK_EQ(em->TryGetComponent<engine::MeshComponent>(uuid), nullptr);
-    }
-
-    SUBCASE("Entity was deleted")
-    {
-        em->RemoveEntity(uuid);
-        em->Update();
-    }
+    em->RemoveEntity(uuid);
+    em->Update();
+    CHECK_EQ(em->GetEntity(uuid), entt::entity());
 }

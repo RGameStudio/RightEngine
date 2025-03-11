@@ -224,7 +224,7 @@ struct eastl_associative_container_base
         return container.erase(key);
     }
 
-    template <typename K, typename V>
+    template<typename K, typename V>
     static std::pair<itr_t, bool> insert_key_value(container_t& container, K&& key, V&& value)
     {
         if (auto it = container.find(key); it != container.end())
@@ -235,6 +235,23 @@ struct eastl_associative_container_base
 
         auto ret = container.emplace(std::forward<K>(key), std::forward<V>(value));
         return std::make_pair(ret.first, ret.second);
+    }
+
+    static void reserve(container_t& container, size_t n)
+    {
+        reserve_impl<container_t>(container, n);
+    }
+
+private:
+    template <typename U>
+    static detail::enable_if_t<detail::has_reserve<U>::value, void> reserve_impl(U& container, size_t n)
+    {
+        container.reserve(n);
+    }
+
+    template <typename U>
+    static detail::enable_if_t<!detail::has_reserve<U>::value, void> reserve_impl(U& container, size_t n)
+    {
     }
 };
 
