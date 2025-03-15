@@ -46,7 +46,20 @@ RTTR_REGISTRATION
                 obj.m_mesh = rs.Load<engine::MeshResource>(meshSerialized.m_meshPath);
             });
 
-    engine::registration::Component<engine::CameraComponent>(IComponent::Type::ENGINE, "engine::CameraComponent");
+    rttr::registration::enumeration<engine::CameraComponent::Type>("engine::CameraComponent::Type")
+        (
+            rttr::value("Editor", engine::CameraComponent::Type::EDITOR),
+            rttr::value("Game", engine::CameraComponent::Type::GAME)
+            );
+
+    engine::registration::Component<engine::CameraComponent>(IComponent::Type::ENGINE, "engine::CameraComponent")
+        .Property("near", &engine::CameraComponent::m_near)
+        .Property("far", &engine::CameraComponent::m_far)
+        .Property("aspectRatio", &engine::CameraComponent::m_aspectRatio)
+        .Property("fov", &engine::CameraComponent::m_fov)
+        .Property("type", &engine::CameraComponent::m_type)
+        .Property("active", &engine::CameraComponent::m_active);
+
     engine::registration::Component<engine::DirectionalLightComponent>(IComponent::Type::ENGINE, "engine::DirectionalLightComponent");
 
     engine::registration::Class<engine::CameraUB>("engine::CameraUB");

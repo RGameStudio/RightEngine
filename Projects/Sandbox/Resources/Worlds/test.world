@@ -31,7 +31,7 @@
                 }
             ],
             "name": "Monkey",
-            "uuid": "d9cd2b2b-78c2-420b-af46-f53a02f7cc39"
+            "uuid": "f2a3b1fd-42f6-41eb-b8fa-fb9baa9f73b1"
         },
         {
             "components": [
@@ -43,20 +43,29 @@
                         "z": -10.0
                     },
                     "rotation": {
-                        "w": 0.7640735507011414,
-                        "x": 0.6448780298233032,
-                        "y": -0.013754821382462978,
-                        "z": 0.011609066277742386
+                        "w": 0.73776775598526,
+                        "x": 0.6722963452339172,
+                        "y": -0.04505976662039757,
+                        "z": 0.04106104001402855
                     },
                     "scale": {
                         "x": 1.0,
                         "y": 1.0,
                         "z": 1.0
                     }
+                },
+                {
+                    "__type__": "engine::CameraComponent",
+                    "active": true,
+                    "aspectRatio": 1.7777777910232544,
+                    "far": 5000.0,
+                    "fov": 1.2217304706573486,
+                    "near": 0.10000000149011612,
+                    "type": "Editor"
                 }
             ],
             "name": "Editor Camera",
-            "uuid": "a6347a00-a49f-4772-b8b8-a3da85ad69ae"
+            "uuid": "bb60f432-5454-4c67-973e-b4e13bca4496"
         },
         {
             "components": [
@@ -81,7 +90,7 @@
                 }
             ],
             "name": "Directional Light",
-            "uuid": "4e0f9db1-e63d-4886-b363-a42763c96c5e"
+            "uuid": "cd9a050a-4e94-4c2e-b89e-c21069900706"
         },
         {
             "components": [
@@ -106,7 +115,7 @@
                 }
             ],
             "name": "Skybox",
-            "uuid": "2c43755f-339d-4eca-ab50-43124ad1a860"
+            "uuid": "3e81335d-7ed2-4956-baf2-cecb37e0c50a"
         }
     ],
     "name": "Test world",
