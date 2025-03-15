@@ -1,6 +1,6 @@
 #include <Engine/Editor/ComponentPanel.hpp>
 #include <Engine/Service/EditorService.hpp>
-#include <Engine/Service/WorldService.hpp>
+#include <Engine/Service/World/WorldService.hpp>
 #include <Engine/System/TransformSystem.hpp>
 #include <Engine/System/RenderSystem.hpp>
 #include <Engine/Registration.hpp>

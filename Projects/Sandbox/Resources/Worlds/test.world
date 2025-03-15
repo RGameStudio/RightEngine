@@ -1,0 +1,107 @@
+{
+    "__type__": "engine::WorldData",
+    "entities": [
+        {
+            "components": [
+                {
+                    "__type__": "engine::TransformComponent",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            ],
+            "name": "Monkey",
+            "uuid": "dac99ca0-ca06-4b45-baeb-aba79949b051"
+        },
+        {
+            "components": [
+                {
+                    "__type__": "engine::TransformComponent",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -10.0
+                    },
+                    "rotation": {
+                        "w": 0.667710542678833,
+                        "x": 0.7271728515625,
+                        "y": -0.1077549085021019,
+                        "z": 0.11735057085752487
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            ],
+            "name": "Editor Camera",
+            "uuid": "2dda98cb-91b3-4d9b-b1ca-c0228c356011"
+        },
+        {
+            "components": [
+                {
+                    "__type__": "engine::TransformComponent",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            ],
+            "name": "Directional Light",
+            "uuid": "4fb6e822-5682-4be7-a2cf-7d531d72aaaa"
+        },
+        {
+            "components": [
+                {
+                    "__type__": "engine::TransformComponent",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            ],
+            "name": "Skybox",
+            "uuid": "62986c84-01b2-4386-a3d1-bd91d55a63ad"
+        }
+    ],
+    "name": "Test world",
+    "version": 0
+}

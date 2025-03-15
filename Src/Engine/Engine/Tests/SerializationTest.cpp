@@ -1,5 +1,5 @@
 #include <Engine/Tests/Service/DoctestService.hpp>
-#include <Engine/Service/WorldService.hpp>
+#include <Engine/Service/World/WorldService.hpp>
 #include <Engine/Engine.hpp>
 #include <Engine/System/RenderSystem.hpp>
 #include <Engine/Serialization/ToJson.hpp>
