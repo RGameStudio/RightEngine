@@ -34,16 +34,17 @@ namespace
 {
 
 template<typename T>
-T* TryGetComponent(entt::entity e, const std::unique_ptr<engine::ecs::EntityManager>& em)
+bool TryAddComponent(entt::entity e, const std::unique_ptr<engine::ecs::EntityManager>& em, eastl::vector<rttr::variant>& comps)
 {
     const auto type = rttr::type::get<T>();
     if (const auto comp = em->TryGetComponent<T>(e); comp && engine::registration::helpers::typeRegistered(type))
     {
-        return comp;
+        comps.emplace_back(*comp);
+        return true;
     }
 
     core::log::warning("Unknown component type '{}', maybe you forgot to register it?", type.get_name());
-    return nullptr;
+    return false;
 }
 
 } // unnamed
@@ -110,10 +111,8 @@ WorldData WorldService::CollectWorldData(const std::unique_ptr<ecs::World>& worl
         worldEntity.m_name = info.m_name;
         worldEntity.m_uuid = uuids::to_string(info.m_uuid);
 
-        if (const auto comp = TryGetComponent<TransformComponent>(e, em))
-        {
-            worldEntity.m_components.emplace_back(*comp);
-        }
+        TryAddComponent<TransformComponent>(e, em, worldEntity.m_components);
+        TryAddComponent<MeshComponent>(e, em, worldEntity.m_components);
 
         data.m_entities.emplace_back(worldEntity);
     }

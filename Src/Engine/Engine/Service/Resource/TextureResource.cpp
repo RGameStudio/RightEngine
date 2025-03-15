@@ -63,7 +63,7 @@ void TextureLoader::Update()
 	PROFILER_CPU_ZONE;
 }
 
-ResPtr<Resource> TextureLoader::Load(const fs::path& path)
+ResPtr<IResource> TextureLoader::Load(const fs::path& path)
 {
 	std::lock_guard l(m_mutex);
 
@@ -73,7 +73,7 @@ ResPtr<Resource> TextureLoader::Load(const fs::path& path)
 	}
 
 	auto resource = MakeResPtr<TextureResource>(path);
-	resource->m_status = Resource::Status::LOADING;
+	resource->m_status = IResource::Status::LOADING;
 	m_cache[path] = resource;
 
 	auto& ts = Instance().Service<ThreadService>();
@@ -82,13 +82,13 @@ ResPtr<Resource> TextureLoader::Load(const fs::path& path)
 		{
 			PROFILER_CPU_ZONE_NAME("Load texture");
 			const auto result = Load(resource);
-			resource->m_status = result ? Resource::Status::READY : Resource::Status::FAILED;
+			resource->m_status = result ? IResource::Status::READY : IResource::Status::FAILED;
 		});
 
 	return resource;
 }
 
-ResPtr<Resource> TextureLoader::Get(const fs::path& path) const
+ResPtr<IResource> TextureLoader::Get(const fs::path& path) const
 {
 	if (const auto it = m_cache.find(path); it != m_cache.end())
 	{

@@ -21,10 +21,17 @@
                         "y": 1.0,
                         "z": 1.0
                     }
+                },
+                {
+                    "__type__": "engine::MeshComponent",
+                    "mesh": {
+                        "material": "/System/Materials/pbr.material",
+                        "mesh": "/System/Models/sphere.fbx"
+                    }
                 }
             ],
             "name": "Monkey",
-            "uuid": "dac99ca0-ca06-4b45-baeb-aba79949b051"
+            "uuid": "d9cd2b2b-78c2-420b-af46-f53a02f7cc39"
         },
         {
             "components": [
@@ -36,10 +43,10 @@
                         "z": -10.0
                     },
                     "rotation": {
-                        "w": 0.667710542678833,
-                        "x": 0.7271728515625,
-                        "y": -0.1077549085021019,
-                        "z": 0.11735057085752487
+                        "w": 0.7640735507011414,
+                        "x": 0.6448780298233032,
+                        "y": -0.013754821382462978,
+                        "z": 0.011609066277742386
                     },
                     "scale": {
                         "x": 1.0,
@@ -49,7 +56,7 @@
                 }
             ],
             "name": "Editor Camera",
-            "uuid": "2dda98cb-91b3-4d9b-b1ca-c0228c356011"
+            "uuid": "a6347a00-a49f-4772-b8b8-a3da85ad69ae"
         },
         {
             "components": [
@@ -74,7 +81,7 @@
                 }
             ],
             "name": "Directional Light",
-            "uuid": "4fb6e822-5682-4be7-a2cf-7d531d72aaaa"
+            "uuid": "4e0f9db1-e63d-4886-b363-a42763c96c5e"
         },
         {
             "components": [
@@ -99,7 +106,7 @@
                 }
             ],
             "name": "Skybox",
-            "uuid": "62986c84-01b2-4386-a3d1-bd91d55a63ad"
+            "uuid": "2c43755f-339d-4eca-ab50-43124ad1a860"
         }
     ],
     "name": "Test world",
