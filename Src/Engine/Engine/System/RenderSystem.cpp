@@ -18,6 +18,7 @@ constexpr glm::vec3     C_WORLD_UP = glm::vec3(0, 1, 0);
 RTTR_REGISTRATION
 {
     using namespace engine::ecs;
+    using namespace engine::registration;
 
     engine::registration::System<engine::CameraSystem>("engine::CameraSystem")
         .Domain(engine::Domain::UI)
@@ -27,8 +28,38 @@ RTTR_REGISTRATION
         .Domain(engine::Domain::UI)
         .UpdateAfter<engine::CameraSystem>();
 
-    engine::registration::Component<engine::MeshComponent>(IComponent::Type::ENGINE, "engine::MeshComponent");
-    engine::registration::Component<engine::CameraComponent>(IComponent::Type::ENGINE, "engine::CameraComponent");
+    Class<engine::MeshComponent::Serialized>("engine::MeshComponent::Serialized")
+        .Property("material", &engine::MeshComponent::Serialized::m_materialPath)
+        .Property("mesh", &engine::MeshComponent::Serialized::m_meshPath);
+
+    engine::registration::Component<engine::MeshComponent>(IComponent::Type::ENGINE, "engine::MeshComponent")
+        .Property("mesh",
+            [](const engine::MeshComponent& mesh) -> engine::MeshComponent::Serialized
+            {
+                return { mesh.m_material->SourcePath().generic_string(), mesh.m_mesh->SourcePath().generic_string() };
+            },
+            [](engine::MeshComponent& obj, engine::MeshComponent::Serialized meshSerialized)
+            {
+                auto& rs = engine::Instance().Service<engine::ResourceService>();
+
+                obj.m_material = rs.Load<engine::MaterialResource>(meshSerialized.m_materialPath);
+                obj.m_mesh = rs.Load<engine::MeshResource>(meshSerialized.m_meshPath);
+            });
+
+    rttr::registration::enumeration<engine::CameraComponent::Type>("engine::CameraComponent::Type")
+        (
+            rttr::value("Editor", engine::CameraComponent::Type::EDITOR),
+            rttr::value("Game", engine::CameraComponent::Type::GAME)
+            );
+
+    engine::registration::Component<engine::CameraComponent>(IComponent::Type::ENGINE, "engine::CameraComponent")
+        .Property("near", &engine::CameraComponent::m_near)
+        .Property("far", &engine::CameraComponent::m_far)
+        .Property("aspectRatio", &engine::CameraComponent::m_aspectRatio)
+        .Property("fov", &engine::CameraComponent::m_fov)
+        .Property("type", &engine::CameraComponent::m_type)
+        .Property("active", &engine::CameraComponent::m_active);
+
     engine::registration::Component<engine::DirectionalLightComponent>(IComponent::Type::ENGINE, "engine::DirectionalLightComponent");
 
     engine::registration::Class<engine::CameraUB>("engine::CameraUB");
@@ -79,19 +110,19 @@ void RenderSystem::Update(float dt)
     eastl::vector<eastl::reference_wrapper<TransformComponent>> transforms;
 
     for (const auto [e, mesh, t] : W()->View<MeshComponent, TransformComponent>())
-    {
-        ENGINE_ASSERT(mesh.m_material);
-
-        if (!mesh.m_mesh)
         {
-            continue;
+            ENGINE_ASSERT(mesh.m_material);
+
+            if (!mesh.m_mesh)
+            {
+                continue;
+            }
+
+            auto& pipeline = rs.Pipeline(mesh.m_material);
+
+            meshesMap[pipeline].emplace_back(mesh);
+            transforms.emplace_back(t);
         }
-
-        auto& pipeline = rs.Pipeline(mesh.m_material);
-
-        meshesMap[pipeline].emplace_back(mesh);
-        transforms.emplace_back(t);
-    }
 
     ENGINE_ASSERT(meshesMap.size() == transforms.size());
 
@@ -99,15 +130,15 @@ void RenderSystem::Update(float dt)
     for (const auto& [pipeline, meshes] : meshesMap)
     {
         for (const auto& mesh : meshes)
-        {
-            if (materials.find(mesh.get().m_material) != materials.end())
             {
-                continue;
-            }
+                if (materials.find(mesh.get().m_material) != materials.end())
+                {
+                    continue;
+                }
 
-            mesh.get().m_material->Material()->UpdateBuffer(1, cameraUB);
+                mesh.get().m_material->Material()->UpdateBuffer(1, cameraUB);
+            }
         }
-    }
 
     int i = 0;
     for (const auto& [pipeline, meshes] : meshesMap)

@@ -18,9 +18,9 @@ public:
 
 	virtual void					Update() override;
 
-	virtual ResPtr<Resource>		Load(const fs::path& path) override;
+	virtual ResPtr<IResource>		Load(const fs::path& path) override;
 
-	virtual ResPtr<Resource>		Get(const fs::path& path) const override;
+	virtual ResPtr<IResource>		Get(const fs::path& path) const override;
 
 	virtual void					LoadSystemResources() override;
 
@@ -91,7 +91,7 @@ private:
 	ResPtr<MaterialResource>															m_prefilterLoadMaterial;
 };
 
-class ENGINE_API MaterialResource final : public Resource
+class ENGINE_API MaterialResource final : public Resource<MaterialResource>
 {
 public:
 	MaterialResource(const io::fs::path& path);

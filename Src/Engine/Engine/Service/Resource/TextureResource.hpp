@@ -17,9 +17,9 @@ public:
 
 	virtual void				Update() override;
 
-	virtual ResPtr<Resource>	Load(const fs::path& path) override;
+	virtual ResPtr<IResource>	Load(const fs::path& path) override;
 
-	virtual ResPtr<Resource>	Get(const fs::path& path) const override;
+	virtual ResPtr<IResource>	Get(const fs::path& path) const override;
 
 	virtual void				LoadSystemResources() override {}
 
@@ -31,7 +31,7 @@ private:
 	eastl::unordered_map<fs::path, ResPtr<TextureResource>>	m_cache;
 };
 
-class ENGINE_API TextureResource final : public Resource
+class ENGINE_API TextureResource final : public Resource<TextureResource>
 {
 public:
 	TextureResource(const io::fs::path& path);

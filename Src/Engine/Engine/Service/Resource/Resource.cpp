@@ -3,7 +3,7 @@
 namespace engine
 {
 
-Resource::Resource(const io::fs::path& path) : m_srcPath(path)
+IResource::IResource(const io::fs::path& path) : m_srcPath(path)
 {
 }
 

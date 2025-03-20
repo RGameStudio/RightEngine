@@ -2,7 +2,7 @@
 #include <Engine/Service/Imgui/ImguiService.hpp>
 #include <Engine/Service/Render/RenderService.hpp>
 #include <Engine/Service/EditorService.hpp>
-#include <Engine/Service/WorldService.hpp>
+#include <Engine/Service/World/WorldService.hpp>
 #include <RHI/Pipeline.hpp>
 
 namespace engine::editor

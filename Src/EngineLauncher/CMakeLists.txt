@@ -14,6 +14,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Engine)
 
 if (MSVC)
     set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/.bin/${CMAKE_BUILD_TYPE}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()
 
 # Create source groups for each directory

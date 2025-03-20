@@ -53,6 +53,12 @@ struct ENGINE_API DirectionalLightComponent : public ecs::Component<DirectionalL
 
 struct ENGINE_API MeshComponent : public ecs::Component<MeshComponent>
 {
+    struct Serialized
+    {
+        std::string m_materialPath;
+        std::string m_meshPath;
+    };
+
     std::shared_ptr<MaterialResource>    m_material;
     std::shared_ptr<MeshResource>        m_mesh;
 };

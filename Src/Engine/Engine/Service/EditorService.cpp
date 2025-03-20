@@ -6,7 +6,7 @@
 #include <Engine/Engine.hpp>
 #include <Engine/Registration.hpp>
 #include <Engine/Service/Imgui/ImguiService.hpp>
-#include <Engine/Service/WorldService.hpp>
+#include <Engine/Service/World/WorldService.hpp>
 #include <Engine/Service/Filesystem/VirtualFilesystemService.hpp>
 #include <Engine/Service/Resource/ResourceService.hpp>
 #include <Engine/Service/Resource/TextureResource.hpp>

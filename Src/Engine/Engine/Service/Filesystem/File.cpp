@@ -33,4 +33,18 @@ bool File::Read()
     return true;
 }
 
+bool File::Write(std::string_view str)
+{
+    auto& vfs = Instance().Service<VirtualFilesystemService>();
+
+    std::ofstream file(vfs.Absolute(m_path).c_str());
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    file << str;
+    return true;
+}
+
 } // engine::io

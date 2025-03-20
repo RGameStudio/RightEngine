@@ -30,7 +30,7 @@ public:
 	template<typename T>
 	std::shared_ptr<T> Load(const io::fs::path& path)
 	{
-		static_assert(std::is_base_of_v<Resource, T>);
+		static_assert(std::is_base_of_v<IResource, T>);
 
 		if constexpr (std::is_same_v<T, MaterialResource>)
 		{

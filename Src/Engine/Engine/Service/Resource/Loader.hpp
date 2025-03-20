@@ -13,7 +13,7 @@ using ResPtr = std::shared_ptr<T>;
 template<typename T, typename... Args>
 ResPtr<T> MakeResPtr(Args&&... args)
 {
-	static_assert(std::is_base_of_v<Resource, T>);
+	static_assert(std::is_base_of_v<IResource, T>);
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
 
@@ -32,12 +32,12 @@ public:
 	virtual void Update() = 0;
 
 	// Async load of a resource
-	virtual ResPtr<Resource> Load(const fs::path& path) = 0;
+	virtual ResPtr<IResource> Load(const fs::path& path) = 0;
 
 	virtual void LoadSystemResources() = 0;
 
 	// Return resource pointer if it was already loaded, if not returns nullptr
-	virtual ResPtr<Resource> Get(const fs::path& path) const = 0;
+	virtual ResPtr<IResource> Get(const fs::path& path) const = 0;
 };
 
 } // engine

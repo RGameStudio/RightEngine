@@ -42,6 +42,8 @@ public:
 
     entt::entity        GetEntity(const uuids::uuid& uuid);
 
+    const eastl::vector_map<entt::entity, EntityInfo>& EntitiesMap() { return m_entities; }
+
     template<typename T>
     T*                  TryGetComponent(entt::entity e)
     {
@@ -114,8 +116,6 @@ public:
 
         return RemoveComponent<T>(it->second);
     }
-
-    const eastl::vector_map<entt::entity, EntityInfo>& EntitiesMap() { return m_entities; }
 
 private:
     friend class World;

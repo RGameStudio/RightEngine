@@ -1,5 +1,5 @@
 #include <Engine/Editor/MenuBarPanel.hpp>
-#include <Engine/Service/WorldService.hpp>
+#include <Engine/Service/World/WorldService.hpp>
 #include <imgui.h>
 
 namespace engine::editor
@@ -25,7 +25,7 @@ void MenuBarPanel::DrawPanel()
         if (ImGui::MenuItem("Save"))
         {
             auto& ws = Instance().Service<WorldService>();
-            ws.SaveCurrentWorld();
+            ws.SaveWorld();
         }
         ImGui::EndMenu();
     }

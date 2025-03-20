@@ -26,10 +26,10 @@ public:
         return m_entityManager->m_registry.view<T, Types...>().each();
     }
 
-    const std::string& Name() const { return m_name; }
-
     std::unique_ptr<SystemManager>& GetSystemManager() { return m_systemManager; }
     std::unique_ptr<EntityManager>& GetEntityManager() { return m_entityManager; }
+
+    std::string_view Name() const { return m_name; }
 
 private:
     std::unique_ptr<SystemManager>  m_systemManager;

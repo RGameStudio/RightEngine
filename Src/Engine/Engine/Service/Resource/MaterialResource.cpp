@@ -94,7 +94,7 @@ void MaterialLoader::Update()
 	PROFILER_CPU_ZONE;
 }
 
-ResPtr<Resource> MaterialLoader::Load(const fs::path& path)
+ResPtr<IResource> MaterialLoader::Load(const fs::path& path)
 {
 	std::lock_guard l(m_mutex);
 
@@ -104,7 +104,7 @@ ResPtr<Resource> MaterialLoader::Load(const fs::path& path)
 	}
 
 	auto resource = MakeResPtr<MaterialResource>(path);
-	resource->m_status = Resource::Status::LOADING;
+	resource->m_status = IResource::Status::LOADING;
 	m_cache[path] = resource;
 
 	auto& ts = Instance().Service<ThreadService>();
@@ -113,13 +113,13 @@ ResPtr<Resource> MaterialLoader::Load(const fs::path& path)
 		{
 			PROFILER_CPU_ZONE_NAME("Load texture");
 			const auto result = Load(resource);
-			resource->m_status = result ? Resource::Status::READY : Resource::Status::FAILED;
+			resource->m_status = result ? IResource::Status::READY : IResource::Status::FAILED;
 		});
 
 	return resource;
 }
 
-ResPtr<Resource> MaterialLoader::Get(const fs::path& path) const
+ResPtr<IResource> MaterialLoader::Get(const fs::path& path) const
 {
 	if (const auto it = m_cache.find(path); it != m_cache.end())
 	{
@@ -185,13 +185,13 @@ void MaterialLoader::ResizePipelines(glm::ivec2 extent, bool offscreen)
 		{
 			auto& ts = Instance().Service<ThreadService>();
 
-			resource->m_status = Resource::Status::LOADING;
+			resource->m_status = IResource::Status::LOADING;
 
 			tasks.push_back(ts.AddBackgroundTask([this, resource]()
 				{
 					PROFILER_CPU_ZONE_NAME("Load texture");
 					const auto result = Load(resource, true);
-					resource->m_status = result ? Resource::Status::READY : Resource::Status::FAILED;
+					resource->m_status = result ? IResource::Status::READY : IResource::Status::FAILED;
 				}));
 		}
 	}

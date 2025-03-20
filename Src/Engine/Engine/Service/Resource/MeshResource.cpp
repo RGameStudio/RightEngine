@@ -72,7 +72,7 @@ void MeshLoader::Update()
 	PROFILER_CPU_ZONE;
 }
 
-ResPtr<Resource> MeshLoader::Load(const fs::path& path)
+ResPtr<IResource> MeshLoader::Load(const fs::path& path)
 {
 	std::lock_guard l(m_mutex);
 
@@ -82,7 +82,7 @@ ResPtr<Resource> MeshLoader::Load(const fs::path& path)
 	}
 
 	auto resource = MakeResPtr<MeshResource>(path);
-	resource->m_status = Resource::Status::LOADING;
+	resource->m_status = IResource::Status::LOADING;
 	m_cache[path] = resource;
 
 	auto& ts = Instance().Service<ThreadService>();
@@ -91,13 +91,13 @@ ResPtr<Resource> MeshLoader::Load(const fs::path& path)
 		{
 			PROFILER_CPU_ZONE_NAME("Load mesh");
 	        const auto result = Load(resource);
-	        resource->m_status = result ? Resource::Status::READY : Resource::Status::FAILED;
+	        resource->m_status = result ? IResource::Status::READY : IResource::Status::FAILED;
 		});
 
 	return resource;
 }
 
-ResPtr<Resource> MeshLoader::Get(const fs::path& path) const
+ResPtr<IResource> MeshLoader::Get(const fs::path& path) const
 {
 	if (const auto it = m_cache.find(path); it != m_cache.end())
 	{

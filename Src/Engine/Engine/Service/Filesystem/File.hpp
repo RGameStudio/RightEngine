@@ -12,6 +12,7 @@ public:
 	File(const fs::path& path);
 
 	bool				Read();
+	bool				Write(std::string_view str);
 
 	const fs::path&		Path() const { return m_path; }
 	size_t				Size() const { return m_data.size(); }
