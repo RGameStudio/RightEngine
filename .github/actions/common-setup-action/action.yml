@@ -5,7 +5,7 @@ inputs:
   ssh-private-key:
     description: 'SSH private key for authentication'
     required: true
-  clang-version:
+  llvm-version:
     description: 'clang version to install'
     required: true
   vulkan-version:
@@ -37,7 +37,7 @@ runs:
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v2
       with:
-        version: ${{ inputs.ninja-version }}
+        version: ${{ inputs.llvm-version }}
         env: true
 
     - name: Check conan cache

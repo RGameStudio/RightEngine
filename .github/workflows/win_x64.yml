@@ -22,7 +22,7 @@ jobs:
       uses: ./.github/actions/common-setup-action
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        clang-version: ${{env.CLANG_VERSION}}
+        llvm-version: ${{env.CLANG_VERSION}}
         vulkan-version: ${{env.VULKAN_VERSION}}
         ninja-version: ${{env.NINJA_VERSION}}
 
@@ -45,7 +45,7 @@ jobs:
       uses: ./.github/actions/common-setup-action
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        clang-version: ${{env.CLANG_VERSION}}
+        llvm-version: ${{env.CLANG_VERSION}}
         vulkan-version: ${{env.VULKAN_VERSION}}
         ninja-version: ${{env.NINJA_VERSION}}
 
