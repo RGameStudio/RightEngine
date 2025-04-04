@@ -46,6 +46,7 @@ runs:
         Write-Output "PATH: $env:PATH"
         Write-Output "CC: $env:CC"
         Write-Output "CXX: $env:CXX"
+        ls
 
     - name: Check conan cache
       id: cache-conan
