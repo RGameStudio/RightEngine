@@ -6,70 +6,58 @@ on:
   workflow_dispatch:
 
 env:
-  BUILD_TYPE: Release
+  CLANG_VERSION: "17.0.3"
+  VULKAN_VERSION: 1.3.268.0
+  NINJA_VERSION: 1.12.1
 
 jobs:
   build:
+    name: Debug build
     runs-on: windows-2022
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Setup
-      uses: RGameStudio/ci-actions@0.0.1
+      uses: RGameStudio/ci-actions@0.0.2
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        clang-version: ${{env.CLANG_VERSION}}
+        vulkan-version: ${{env.VULKAN_VERSION}}
+        ninja-version: ${{env.NINJA_VERSION}}
 
     - name: Prepare conan environment
-      run: python Scripts/prepare_env.py win-64-ninja-msvc
+      run: python Scripts/prepare_env.py win-64-ninja-clang
 
     - name: Generate solution
-      run: cmake -DCMAKE_BUILD_TYPE=Debug --preset debug
+      run: cmake --preset debug
 
     - name: Build
-      run: cmake --build .build/Win --config ${{env.BUILD_TYPE}} --parallel 4
+      run: cmake --build --preset engine-win-debug --parallel 4
   test:
     name: Unit tests (no assert)
     runs-on: windows-2022
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: SSH Agent
-      uses: webfactory/ssh-agent@v0.5.4
+
+    - name: Setup
+      uses: RGameStudio/ci-actions@0.0.2
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Pull Git LFS resources
-      run: |
-        git lfs install 
-        git lfs pull
-
-    - name: Check conan cache
-      id: cache-conan
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.conan2
-          ~/.conan
-        key: ${{ runner.os }}-conan-cache
-
-    - name: Prepare Vulkan SDK
-      uses: humbletim/setup-vulkan-sdk@main
-      with:
-        vulkan-query-version: 1.3.268.0
-        vulkan-components: Vulkan-Headers, Vulkan-Loader
-        vulkan-use-cache: true
+        clang-version: ${{env.CLANG_VERSION}}
+        vulkan-version: ${{env.VULKAN_VERSION}}
+        ninja-version: ${{env.NINJA_VERSION}}
 
     - name: Prepare conan environment
-      run: python Scripts/prepare_env.py
+      run: python Scripts/prepare_env.py win-64-ninja-clang
 
-    - name: Prepare conan packages and Visual Studio solution
-      run: python Scripts/generate_solution.py win-release-ut win-64
+    - name: Generate solution
+      run: cmake --preset release-ut
 
     - name: Build
-      run: cmake --build .build/Win --config ${{env.BUILD_TYPE}} --parallel 4
+      run: cmake --build --preset engine-win-release-ut --parallel 4
     
     - name: Test
-      run: .build/Win/.bin/Release/TestLauncher.exe --project Projects/Sandbox/sandbox.project --mode client_no_ui
+      run: .build/release-ut/.bin/TestLauncher.exe --project Projects/Sandbox/sandbox.project --mode client_no_ui
       
