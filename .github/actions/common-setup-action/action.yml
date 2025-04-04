@@ -14,6 +14,9 @@ inputs:
   ninja-version:
     description: 'Ninja version to install'
     required: true
+  msvc-version:
+    description: 'MSVC version to install'
+    required: true
 
 runs:
   using: "composite"
@@ -39,6 +42,11 @@ runs:
       with:
         version: ${{ inputs.llvm-version }}
         env: true
+
+    - name: Install MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        toolset: ${{ inputs.msvc-version }}
 
     - name: Add ninja_bin to PATH
       shell: pwsh
