@@ -45,7 +45,7 @@ VulkanShader::~VulkanShader()
 {
     vkDestroyDescriptorSetLayout(VulkanDevice::s_ctx.m_device, m_layout, nullptr);
 
-    for (const auto [_, module] : m_modules)
+    for (const auto& [_, module] : m_modules)
     {
         vkDestroyShaderModule(VulkanDevice::s_ctx.m_device, module, nullptr);
     }
@@ -134,13 +134,13 @@ void VulkanShader::FillVertexData()
 
     // Here we use negative offset, so we can correctly calculate offset of the first element - 0 bytes
     int32_t offset = -static_cast<int32_t>(layoutElements.front().GetSize());
-    for (int i = 0; i < layoutElements.size(); i++)
+    for (size_t i = 0; i < layoutElements.size(); i++)
     {
         VkVertexInputAttributeDescription attributeDescription;
         attributeDescription.binding = 0;
         attributeDescription.location = i;
         attributeDescription.format = helpers::Format(layoutElements[i].m_type);
-        attributeDescription.offset = offset + layoutElements[std::max(0, i - 1)].GetSize();
+        attributeDescription.offset = offset + layoutElements[std::max<int>(0, i - 1)].GetSize();
         offset += layoutElements[i].GetSize();
 
         m_attributesDescription.emplace_back(attributeDescription);

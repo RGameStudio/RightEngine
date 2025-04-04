@@ -23,7 +23,7 @@ void DrawVec3Control(const std::string& label, glm::vec3& values, float resetVal
 
 	ImGui::Columns(2);
 	ImGui::SetColumnWidth(0, columnWidth);
-	ImGui::Text(label.c_str());
+	ImGui::TextUnformatted(label.c_str());
 	ImGui::NextColumn();
 
 	ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
@@ -96,7 +96,7 @@ void DrawComponent(entt::entity entity, std::unique_ptr<engine::ecs::EntityManag
 
 		ImGui::PushID(&typeId);
 
-		bool open = ImGui::TreeNodeEx(&typeId, treeNodeFlags, type.get_name().data());
+		bool open = ImGui::TreeNodeEx(&typeId, treeNodeFlags, "%s", type.get_name().data());
 
 		ImGui::SameLine();
 		if (ImGui::Button("+"))

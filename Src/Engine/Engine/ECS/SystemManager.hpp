@@ -25,7 +25,7 @@ public:
         const auto type = rttr::type::get<T>();
         ENGINE_ASSERT(type.get_constructor({rttr::type::get<World*>()}).is_valid());
 
-        const auto metadata = type.get_metadata(registration::C_METADATA_KEY).get_value_safe<ISystem::MetaInfo>();
+        const auto metadata = type.get_metadata(registration::C_METADATA_KEY).template get_value_safe<ISystem::MetaInfo>();
 
         if (metadata.m_domain != Domain::ALL && (Instance().Cfg().m_domain & metadata.m_domain) != metadata.m_domain)
         {

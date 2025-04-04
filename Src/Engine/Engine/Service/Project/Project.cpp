@@ -46,7 +46,8 @@ Project::Project(const io::fs::path& path) : m_path(path)
     // TODO: Implement smart settings parsing using reflection from RTTR
 
     auto& vfsSettingsJson = j[C_SETTINGS_KEY][0];
-    ENGINE_ASSERT(vfsSettingsJson[C_TYPE_KEY] == "engine::io::VFSSettings");
+    auto type = vfsSettingsJson[C_TYPE_KEY];
+    ENGINE_ASSERT(type == "engine::io::VFSSettings");
 
     auto& vfsSettingsArray = vfsSettingsJson[C_SETTINGS_KEY];
     ENGINE_ASSERT(vfsSettingsArray.is_array());
@@ -54,7 +55,8 @@ Project::Project(const io::fs::path& path) : m_path(path)
     io::VFSSettings vfsSettings;
     for (auto& settingJson : vfsSettingsArray)
     {
-        ENGINE_ASSERT(settingJson[C_TYPE_KEY] == "engine::io::VFSSettings::Setting");
+        auto settingType = settingJson[C_TYPE_KEY];
+        ENGINE_ASSERT(settingType == "engine::io::VFSSettings::Setting");
         io::VFSSettings::Setting setting;
         setting.m_alias = settingJson["alias"];
         setting.m_path = settingJson["path"];

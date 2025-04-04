@@ -229,6 +229,11 @@ VulkanTexture::VulkanTexture(const TextureDescriptor& desc, const std::shared_pt
                 viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                 break;
             }
+            default:
+            {
+                RHI_ASSERT(false);
+                break;
+            }
             }
         }
         else

@@ -144,7 +144,7 @@ void VulkanPipeline::CreateFxPipeline()
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
-    for (int i = 0; i < renderPassDescriptor.m_colorAttachments.size(); i++)
+    for (size_t i = 0; i < renderPassDescriptor.m_colorAttachments.size(); i++)
     {
         colorBlendAttachments.push_back(colorBlendAttachment);
     }

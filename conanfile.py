@@ -10,7 +10,7 @@ class RightEngineRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps"
     requires = [
-        "argparse/2.9",
+        "argparse/3.1",
         "assimp/5.3.1",
         "doctest/2.4.11",
         "eastl/3.21.12",
@@ -49,7 +49,6 @@ class RightEngineRecipe(ConanFile):
         "spirv-cross*:c_api": False,
         "spirv-cross*:util": False,
         "glfw*:shared": True,
-        "rttr*:shared": True,
         "tracy*:shared": True
     }
 

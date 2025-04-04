@@ -5,8 +5,6 @@ namespace
 {
 
 constexpr const size_t C_MIN_ARRAY_ITEMS_TO_PARALLELIZE = std::numeric_limits<size_t>::max();
-constexpr const size_t C_PARALLELIZE_CHUNK_SIZE = 512;
-constexpr const size_t C_PARALLELIZE_PARTITION = 4;
 
 rttr::type ExtractType(const simdjson::dom::element& j)
 {

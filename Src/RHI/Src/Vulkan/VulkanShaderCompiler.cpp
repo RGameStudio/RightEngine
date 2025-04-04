@@ -306,7 +306,7 @@ core::Blob VulkanShaderCompiler::CompileShader(const std::string& shaderStr, std
     glslang_program_delete(program);
     glslang_shader_delete(shader);
 
-    return std::move(shaderBinary);
+    return shaderBinary;
 }
 
 ShaderReflection VulkanShaderCompiler::ReflectShader(const core::Blob& shaderBlob, std::string_view path, ShaderStage stage)

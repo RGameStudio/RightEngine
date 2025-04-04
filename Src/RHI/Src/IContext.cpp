@@ -1,5 +1,3 @@
-#pragma once
-
 #include <RHI/IContext.hpp>
 #include "Vulkan/VulkanContext.hpp"
 

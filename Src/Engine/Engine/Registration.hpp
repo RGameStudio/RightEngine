@@ -495,7 +495,7 @@ public:
         return *this;
     }
 
-    static std::string_view Get(std::string_view name)
+    static std::string Get(std::string_view name)
     {
         return m_parser->get<std::string>(name);
     }

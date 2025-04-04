@@ -42,6 +42,11 @@ public:
     // Global context needed for operations with memory (buffers, texture and other allocations)
     struct ContextHolder
     {
+        ContextHolder() : m_device(nullptr), m_allocator(nullptr), m_physicalDevice(nullptr), m_instance(nullptr)
+        {
+
+        }
+
         VkDevice            m_device = nullptr;
         VmaAllocator        m_allocator = nullptr;
         VkPhysicalDevice    m_physicalDevice = nullptr;

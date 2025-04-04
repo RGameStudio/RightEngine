@@ -15,7 +15,7 @@ add_library(VulkanMemoryAllocator STATIC vk_mem_alloc.cpp)
 target_include_directories(VulkanMemoryAllocator PRIVATE ${Vulkan_INCLUDE_DIR})
 target_include_directories(VulkanMemoryAllocator PUBLIC include)
 
-if (MSVC)
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
     target_compile_options(VulkanMemoryAllocator PRIVATE
         /WX-
         /MP                # Enable parallel compilation
@@ -30,5 +30,11 @@ if (MSVC)
         /wd4189
         /wd4127
         /wd4324
+    )
+endif()
+
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+    target_compile_options(VulkanMemoryAllocator PRIVATE
+            -w                  # Disable all warnings
     )
 endif()

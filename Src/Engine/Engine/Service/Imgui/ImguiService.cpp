@@ -73,6 +73,11 @@ enum class CommonColor : uint8_t
 	Count
 };
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+
 constexpr ImVec4 Transparent() { return ImVec4(0.0f, 0.0f, 0.0f, 0.0f); }
 constexpr ImVec4 Black() { return ImVec4(0.0f, 0.0f, 0.0f, 1.0f); }
 constexpr ImVec4 White() { return ImVec4(1.0f, 1.0f, 1.0f, 1.0f); }
@@ -82,6 +87,10 @@ constexpr ImVec4 Blue() { return ImVec4(0.0f, 0.0f, 1.0f, 1.0f); }
 constexpr ImVec4 Yellow() { return ImVec4(1.0f, 1.0f, 0.0f, 1.0f); }
 constexpr ImVec4 Cyan() { return ImVec4(0.0f, 1.0f, 1.0f, 1.0f); }
 constexpr ImVec4 Magenta() { return ImVec4(1.0f, 0.0f, 1.0f, 1.0f); }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 constexpr ImVec4 FromRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {

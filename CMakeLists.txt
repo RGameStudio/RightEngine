@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.19)
 project(RightEngine)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/.bin)
 
 option(ENGINE_ENABLE_TRACY "Enable tracy profiling" ON)
 option(ENGINE_ENABLE_ASSERTS "Enable asserts" ON)
@@ -23,7 +22,7 @@ elseif (APPLE)
     add_compile_definitions(R_APPLE)
 endif()
 
-if (MSVC)
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
     add_compile_options(
         /W4              # Warning level 4
         /WX              # Enable warnings as errors
@@ -63,6 +62,37 @@ if (MSVC)
     add_link_options("/ignore:4075")
     # disable warning LNK4075: defaultlib conflicts with use of other libs; use /NODEFAULTLIB:library
     add_link_options("/ignore:4098")
+
+    string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    string(REPLACE "/WX-" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(
+            -Wall                 # Enables all commonly used warnings
+            -Wextra               # Enables additional warnings that are not included by -Wall
+            -Werror               # Treats warnings as errors, stopping compilation
+            -Wpedantic
+            -Wunused-variable      # Warns about unused local variables
+            -Woverloaded-virtual   # Warns when a function in a derived class hides a function in a base class
+            -Wnon-virtual-dtor     # Warns about base classes with non-virtual destructors in polymorphic classes
+            -Wtautological-constant-compare  # Warns about comparisons that are always true or false due to constants
+            -Wunused-value         # Warns about values that are computed but not used
+            -Wreorder              # Warns when class members are initialized in a different order than their declaration
+            -Wunused-lambda-capture # Warns when a lambda capture is unused
+            -Wunused-function      # Warns about unused static or internal functions in a translation unit
+
+            # Turn off specific warnings
+            -Wno-delete-non-abstract-non-virtual-dtor  # Suppresses warnings about deleting non-abstract base classes without virtual destructors
+            -Wno-unused-parameter  # Suppresses warnings for unused function parameters
+            -Wno-missing-braces
+            -Wno-c++20-extensions
+            -Wno-unused-but-set-variable
+            -Wno-unused-const-variable
+            -Wno-nullability-extension
+
+            -ffast-math
+    )
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -95,3 +125,12 @@ if (MSVC)
     endif()
 endif()
 
+execute_process(
+        COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/Scripts/copy_binaries.py" "${CMAKE_BINARY_DIR}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        RESULT_VARIABLE SCRIPT_RESULT
+)
+
+if (NOT SCRIPT_RESULT EQUAL 0)
+    message(FATAL_ERROR "CMake generation failed: Python script execution failed with code: ${SCRIPT_RESULT}")
+endif ()

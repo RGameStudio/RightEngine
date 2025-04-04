@@ -167,7 +167,8 @@ const eastl::vector<const char*>& VulkanContext::ValidationLayers() const
     }
     else
     {
-        return {};
+        static eastl::vector<const char*> empty;
+        return empty;
     }
 }
 

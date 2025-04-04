@@ -10,7 +10,7 @@
 namespace engine
 {
 
-enum class ENGINE_API Domain : uint32_t
+enum class Domain : uint32_t
 {
     NONE = 0x00,
     EDITOR = 0x01,
