@@ -40,6 +40,37 @@ runs:
         version: ${{ inputs.llvm-version }}
         env: true
 
+    - name: Add ninja_bin to PATH
+      shell: pwsh
+      run: |
+        # Get the full path to ninja_bin in your workspace
+        $ninja_bin_path = Join-Path $env:GITHUB_WORKSPACE "ninja_bin"
+
+        # Verify the directory exists
+        if (Test-Path $ninja_bin_path) {
+          Write-Output "Found ninja_bin at: $ninja_bin_path"
+        } else {
+          Write-Error "ninja_bin directory not found at: $ninja_bin_path"
+          exit 1
+        }
+
+        # Add to PATH for current step
+        $env:PATH = "$ninja_bin_path;$env:PATH"
+
+        # Add to PATH for subsequent steps in this job
+        echo "$ninja_bin_path" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+        # Verify the updated PATH
+        Write-Output "Updated PATH: $env:PATH"
+
+        # Try to find ninja in the PATH
+        $ninja_location = Get-Command ninja -ErrorAction SilentlyContinue
+        if ($ninja_location) {
+          Write-Output "Ninja found at: $($ninja_location.Source)"
+        } else {
+          Write-Output "Ninja executable not found in PATH"
+        }
+
     - name: Env variables
       shell: pwsh
       run: |
