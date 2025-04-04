@@ -1,0 +1,57 @@
+name: 'Common Setup'
+description: 'Sets up the environment for building the project'
+
+inputs:
+  ssh-private-key:
+    description: 'SSH private key for authentication'
+    required: true
+  clang-version:
+    description: 'clang version to install'
+    required: true
+  vulkan-version:
+    description: 'VUlkan SDK version to install'
+    required: true
+  ninja-version:
+    description: 'Ninja version to install'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: SSH Agent
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ inputs.ssh-private-key }}
+
+    - name: Pull Git LFS resources
+      shell: bash
+      run: |
+        git lfs install 
+        git lfs pull
+
+    - name: Install Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        version: ${{ inputs.ninja-version }}
+
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: ${{ inputs.ninja-version }}
+        env: true
+
+    - name: Check conan cache
+      id: cache-conan
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.conan2
+          ~/.conan
+        key: ${{ runner.os }}-conan-cache
+
+    - name: Prepare Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@main
+      with:
+        vulkan-query-version: ${{ inputs.vulkan-version }}
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+        vulkan-use-cache: true
