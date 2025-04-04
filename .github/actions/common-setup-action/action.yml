@@ -40,6 +40,13 @@ runs:
         version: ${{ inputs.llvm-version }}
         env: true
 
+    - name: Env variables
+      shell: pwsh
+      run: |
+        Write-Output "PATH: $env:PATH"
+        Write-Output "CC: $env:CC"
+        Write-Output "CXX: $env:CXX"
+
     - name: Check conan cache
       id: cache-conan
       uses: actions/cache@v3
