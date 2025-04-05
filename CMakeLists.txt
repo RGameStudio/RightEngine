@@ -86,7 +86,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             -Wno-delete-non-abstract-non-virtual-dtor  # Suppresses warnings about deleting non-abstract base classes without virtual destructors
             -Wno-unused-parameter  # Suppresses warnings for unused function parameters
             -Wno-missing-braces
-            -Wno-c++20-extensions
             -Wno-unused-but-set-variable
             -Wno-unused-const-variable
             -Wno-nullability-extension

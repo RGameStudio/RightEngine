@@ -24,3 +24,5 @@ int main(int argc, char* argv[])
 
     return engine.Run();
 }
+
+EASTL_ALLOCATOR_IMPL

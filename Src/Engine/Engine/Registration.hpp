@@ -251,7 +251,7 @@ class Class : public core::RTTRObject<T>
 public:
     explicit Class(std::string_view name) : core::RTTRObject<T>(name)
     {
-        ENGINE_ASSERT_WITH_MESSAGE(!helpers::typeRegistered<T>(), fmt::format("Type '{}' was already registered!", rttr::type::get<T>().get_name()));
+        //ENGINE_ASSERT_WITH_MESSAGE(!helpers::typeRegistered<T>(), fmt::format("Type '{}' was already registered!", rttr::type::get<T>().get_name()));
 
         if constexpr (type == CtorType::AsObject)
         {
@@ -505,3 +505,35 @@ private:
 };
 
 } // engine::registration
+
+#include <glm/vec2.hpp>
+
+namespace rttr::detail
+{
+    template<>
+    struct template_type_trait<glm::vec<2, float>> : std::true_type
+    {
+        static std::vector<::rttr::template_argument_data> get_template_arguments()
+        {
+            return {{::rttr::type::get<int>(), false}, {::rttr::type::get<float>(), false}};
+        }
+    };
+
+    template<>
+    struct template_type_trait<glm::vec<3, float>> : std::true_type
+    {
+        static std::vector<::rttr::template_argument_data> get_template_arguments()
+        {
+            return {{::rttr::type::get<int>(), false}, {::rttr::type::get<float>(), false}};
+        }
+    };
+
+    template<>
+    struct template_type_trait<glm::vec<4, float>> : std::true_type
+    {
+        static std::vector<::rttr::template_argument_data> get_template_arguments()
+        {
+            return {{::rttr::type::get<int>(), false}, {::rttr::type::get<float>(), false}};
+        }
+    };
+} // rttr::detail

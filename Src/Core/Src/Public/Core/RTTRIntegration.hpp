@@ -402,6 +402,10 @@ public:
 
     public:
         RTTRNatvisHolder() = default;
+        ~RTTRNatvisHolder()
+        {
+            core::log::error("");
+        }
 
         core::INatvisHolder* Value(const rttr::variant& v) override
         {
@@ -443,7 +447,14 @@ private:
     template<typename T>
     void RegisterSingle(std::shared_ptr<IRTTRNatvis> factory)
     {
-        m_fns[rttr::type::get<T>()] = factory;
+        auto type = rttr::type::get<T>();
+
+        if (m_fns.find(type) != m_fns.end())
+        {
+            CORE_ASSERT(false);
+            return;
+        }
+        m_fns[type] = factory;
     }
 
     core::INatvisHolder* GetNatvis(const void* var);

@@ -68,3 +68,16 @@ public:
 };
 
 } // eastl
+
+// TODO: Make an EASTL fork and rewrite their stupid allocator
+// Must be defined in each dll that uses EASTL
+
+#define EASTL_ALLOCATOR_IMPL \
+void* __cdecl operator new[](size_t size, size_t alignment, size_t offset, const char* pName, int flags, unsigned debugFlags, const char* file, int line) \
+{ \
+    return new uint8_t[size]; \
+} \
+void* __cdecl operator new[](size_t size, const char* name, int flags, unsigned debugFlags, const char* file, int line) \
+{ \
+    return new uint8_t[size]; \
+}

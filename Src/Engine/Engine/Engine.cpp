@@ -193,3 +193,4 @@ void Engine::ParseCfg(int argCount, char* argPtr[])
 
 } // namespace engine
 
+EASTL_ALLOCATOR_IMPL
