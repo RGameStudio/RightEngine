@@ -57,20 +57,17 @@
         {
             "name": "engine-win-debug",
             "configurePreset": "debug",
-            "configuration": "Debug",
-            "jobs": 7
+            "configuration": "Debug"
         },
         {
             "name": "engine-win-release",
             "configurePreset": "release",
-            "configuration": "Release",
-            "jobs": 7
+            "configuration": "Release"
         },
         {
             "name": "engine-win-release-ut",
             "configurePreset": "release-ut",
-            "configuration": "Release",
-            "jobs": 7
+            "configuration": "Release"
         }
     ]
-    }
+}

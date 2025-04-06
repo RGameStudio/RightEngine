@@ -402,10 +402,6 @@ public:
 
     public:
         RTTRNatvisHolder() = default;
-        ~RTTRNatvisHolder()
-        {
-            core::log::error("");
-        }
 
         core::INatvisHolder* Value(const rttr::variant& v) override
         {

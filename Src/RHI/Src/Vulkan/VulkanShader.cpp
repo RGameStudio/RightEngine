@@ -100,7 +100,9 @@ void VulkanShader::CreateDescriptorSetLayout()
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     layoutInfo.pBindings = bindings.data();
 
-    RHI_ASSERT(vkCreateDescriptorSetLayout(VulkanDevice::s_ctx.m_device, &layoutInfo, nullptr, &m_layout) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkCreateDescriptorSetLayout(VulkanDevice::s_ctx.m_device, &layoutInfo, nullptr, &m_layout);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 void VulkanShader::FillPushContansts()

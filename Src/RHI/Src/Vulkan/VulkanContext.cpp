@@ -8,7 +8,11 @@ namespace rhi::vulkan
 namespace
 {
 
-constexpr const bool C_ENABLE_VALIDATION_LAYERS = true;
+#if NDEBUG
+    constexpr const bool C_ENABLE_VALIDATION_LAYERS = false;
+#else
+    constexpr const bool C_ENABLE_VALIDATION_LAYERS = true;
+#endif
 
 const eastl::vector<const char*> C_VALIDATION_LAYERS =
 {

@@ -20,21 +20,19 @@ sub.run("pip install -r Scripts/requirements.txt")
 print("Preparing conan env")
 sub.run("conan config install -t dir Scripts/conan")
 
-print("Installing conan packages")
-
 from custom_packages import install_custom_packages
 
 install_custom_packages()
 
 sub.run("C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")
 
-print("Installing debug conan packages")
-status_code = sub.run(f"conan install . --deployer=dll_deployer -c tools.cmake.cmake_layout:build_folder=\".build/conan\" --build=missing --profile={profile_name} -s build_type=Debug", shell=True, check=True, text=True)
-check_process_status_code(status_code.returncode, status_code.stderr)
+def install_all(profile_name: str, build_type: str):
+    print(f"Installing {build_type} conan packages")
+    status_code = sub.run(f"conan install . --deployer=dll_deployer -c tools.cmake.cmake_layout:build_folder=\".build/conan\" --build=missing --profile={profile_name} -s build_type={build_type}", shell=True, check=True, text=True)
+    check_process_status_code(status_code.returncode, status_code.stderr)
 
-print("Installing release conan packages")
-status_code = sub.run(f"conan install . --deployer=dll_deployer -c tools.cmake.cmake_layout:build_folder=\".build/conan\" --build=missing --profile={profile_name} -s build_type=Release", shell=True, check=True, text=True)
-check_process_status_code(status_code.returncode, status_code.stderr)
+install_all(profile_name, "Debug")
+install_all(profile_name, "Release")
 
 if not os.path.exists(".build"):
     os.mkdir(".build")

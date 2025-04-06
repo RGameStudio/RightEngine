@@ -89,6 +89,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             -Wno-unused-but-set-variable
             -Wno-unused-const-variable
             -Wno-nullability-extension
+            -Wno-unneeded-internal-declaration
 
             -ffast-math
     )

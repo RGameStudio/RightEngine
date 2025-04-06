@@ -131,7 +131,9 @@ Swapchain::Swapchain(const SwapchainDescriptor& desc) : m_descriptor(desc)
         imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
         imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-        RHI_ASSERT(vkCreateImageView(VulkanDevice::s_ctx.m_device, &imageViewCreateInfo, nullptr, &m_imageViews[i]) == VK_SUCCESS);
+        [[maybe_unused]] auto res = vkCreateImageView(VulkanDevice::s_ctx.m_device, &imageViewCreateInfo, nullptr, &m_imageViews[i]);
+
+        RHI_ASSERT(res == VK_SUCCESS);
     }
 
     CommandBuffer cmdBuffer;

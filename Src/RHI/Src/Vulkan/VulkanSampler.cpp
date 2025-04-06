@@ -27,7 +27,9 @@ namespace rhi::vulkan
         samplerInfo.minLod = descriptor.m_minLod;
         samplerInfo.maxLod = descriptor.m_maxLod;
 
-        RHI_ASSERT(vkCreateSampler(VulkanDevice::s_ctx.m_device, &samplerInfo, nullptr, &m_sampler) == VK_SUCCESS);
+        [[maybe_unused]] auto res = vkCreateSampler(VulkanDevice::s_ctx.m_device, &samplerInfo, nullptr, &m_sampler);
+
+        RHI_ASSERT(res == VK_SUCCESS);
     }
 
     VulkanSampler::~VulkanSampler()

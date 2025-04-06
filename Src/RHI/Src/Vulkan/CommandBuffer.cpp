@@ -12,7 +12,9 @@ CommandBuffer::CommandBuffer()
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
-    RHI_ASSERT(vkAllocateCommandBuffers(VulkanDevice::s_ctx.m_device, &allocInfo, &m_handle) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkAllocateCommandBuffers(VulkanDevice::s_ctx.m_device, &allocInfo, &m_handle);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 CommandBuffer::~CommandBuffer()

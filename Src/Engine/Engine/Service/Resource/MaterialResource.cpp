@@ -133,9 +133,12 @@ void MaterialLoader::LoadSystemResources()
 	m_renderMaterial = std::static_pointer_cast<MaterialResource>(Load("/System/Materials/pbr.material"));
 	m_skyboxMaterial = std::static_pointer_cast<MaterialResource>(Load("/System/Materials/skybox.material"));
 	m_presentMaterial = std::static_pointer_cast<MaterialResource>(Load("/System/Materials/present.material"));
-	m_equirectToCubemapMaterial = std::static_pointer_cast<MaterialResource>(Load("/System/Materials/equirect_to_cubemap.material"));
-	m_envmapIrradianceMaterial = std::static_pointer_cast<MaterialResource>(Load("/System/Materials/envmap_irradiance.material"));
-	m_envmapPrefilterMaterial = std::static_pointer_cast<MaterialResource>(Load("/System/Materials/envmap_prefilter.material"));
+	m_equirectToCubemapMaterial = std::static_pointer_cast<MaterialResource>(
+		Load("/System/Materials/equirect_to_cubemap.material"));
+	m_envmapIrradianceMaterial = std::static_pointer_cast<MaterialResource>(
+		Load("/System/Materials/envmap_irradiance.material"));
+	m_envmapPrefilterMaterial = std::static_pointer_cast<MaterialResource>(
+		Load("/System/Materials/envmap_prefilter.material"));
 
 	m_renderMaterial->Wait();
 	m_presentMaterial->Wait();
@@ -145,7 +148,7 @@ void MaterialLoader::LoadSystemResources()
 	m_envmapPrefilterMaterial->Wait();
 }
 
-const ResPtr<rhi::Pipeline>& MaterialLoader::Pipeline(const ResPtr<MaterialResource>& res) const
+	const ResPtr<rhi::Pipeline>& MaterialLoader::Pipeline(const ResPtr<MaterialResource>& res) const
 {
 	std::lock_guard l(m_mutex);
 
@@ -173,14 +176,17 @@ void MaterialLoader::ResizePipelines(glm::ivec2 extent, bool offscreen)
 
 	for (const auto& cacheEntry : m_cache)
 	{
-		auto resource = cacheEntry.second;
+		auto& resource = cacheEntry.second;
+
 		// TODO: Probably we need to resize it later
 		if (!resource->Ready())
 		{
 			continue;
 		}
 
-		if (const auto& pipeline = Pipeline(resource); pipeline->Descriptor().m_offscreen == offscreen && !pipeline->Descriptor().m_compute)
+		const auto& pipeline = Pipeline(resource);
+
+		if (pipeline->Descriptor().m_offscreen == offscreen && !pipeline->Descriptor().m_compute)
 		{
 			auto& ts = Instance().Service<ThreadService>();
 
@@ -192,10 +198,7 @@ void MaterialLoader::ResizePipelines(glm::ivec2 extent, bool offscreen)
 					const auto result = Load(resource, true);
 					resource->m_status = result ? IResource::Status::READY : IResource::Status::FAILED;
 				}));
-			return;
 		}
-
-		core::log::error("[MaterialLoader] Can't resize pipeline for material '{}'", resource->SourcePath().generic_u8string());
 	}
 
 	for (auto& task : tasks)

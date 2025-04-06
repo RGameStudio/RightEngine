@@ -26,7 +26,7 @@ public:
 
 	const io::fs::path&		SourcePath() const { return m_srcPath; }
 	bool					Ready() const { return m_status == Status::READY; }
-	void					Wait() const { while(!Ready()); }
+	void					Wait() const { while (!Ready()) { std::this_thread::yield(); } }
 
 	io::fs::path	m_srcPath;
 protected:
