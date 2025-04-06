@@ -4,13 +4,6 @@
 #include <Engine/Engine.hpp>
 #include <doctest/doctest.h>
 
-RTTR_REGISTRATION
-{
-    engine::registration::Service<tests::DoctestService>("tests::DoctestService")
-        .PostUpdateAfter<engine::WorldService>()
-        .Domain(engine::Domain::CLIENT_NO_UI);
-}
-
 namespace tests
 {
 

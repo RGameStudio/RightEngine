@@ -45,7 +45,11 @@ void SetThreadName(std::string_view name)
 
 #if defined(R_WIN32)
     using SetThreadDescriptionPtr = HRESULT(__stdcall*)(HANDLE, PCWSTR);
-    static const auto SetThreadDescription = reinterpret_cast<SetThreadDescriptionPtr>(GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "SetThreadDescription"));
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+    static const auto SetThreadDescription = reinterpret_cast<SetThreadDescriptionPtr>(GetProcAddress(
+        GetModuleHandle(TEXT("kernel32.dll")), "SetThreadDescription"));
+#pragma clang diagnostic pop
 
     if (!SetThreadDescription)
     {

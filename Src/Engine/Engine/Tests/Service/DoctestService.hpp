@@ -26,7 +26,6 @@ private:
     std::unique_ptr<doctest::Context> m_context;
     std::unique_ptr<engine::CustomThread> m_testThread;
     std::future<int> m_waitFuture;
-    bool m_started = false;
 };
 
 } // tests

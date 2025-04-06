@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Rhi/ComputeState.hpp>
+#include <RHI/ComputeState.hpp>
 #include <Vulkan/CommandBuffer.hpp>
 
 namespace rhi::vulkan

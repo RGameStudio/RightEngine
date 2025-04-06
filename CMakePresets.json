@@ -1,39 +1,52 @@
 {
-    "version": 4,
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 30,
+        "patch": 0
+    },
     "include": ["./ConanPresets.json"],
     "configurePresets": [
         {
-            "name": "win-debug",
+            "name": "common",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/.build/${presetName}/.bin",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "debug",
             "hidden": false,
             "inherits": [
-                "conan-default"
+                "conan-debug",
+                "common"
             ],
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
                 "ENGINE_ENABLE_TESTS": "ON",
                 "ENGINE_ENABLE_TRACY": "ON"
             }
         },
         {
-            "name": "win-release",
+            "name": "release",
             "hidden": false,
             "inherits": [
-                "conan-default"
+                "conan-release",
+                "common"
             ],
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
                 "ENGINE_ENABLE_TESTS": "OFF",
                 "ENGINE_ENABLE_TRACY": "ON"
             }
         },
         {
-            "name": "win-release-ut",
+            "name": "release-ut",
             "hidden": false,
             "inherits": [
-                "conan-default"
+                "conan-release",
+                "common"
             ],
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
                 "ENGINE_ENABLE_TESTS": "ON",
                 "ENGINE_ENABLE_TRACY": "OFF",
                 "ENGINE_ENABLE_ASSERTS": "OFF"
@@ -43,13 +56,18 @@
     "buildPresets": [
         {
             "name": "engine-win-debug",
-            "configurePreset": "win-debug",
+            "configurePreset": "debug",
             "configuration": "Debug"
         },
         {
+            "name": "engine-win-release",
+            "configurePreset": "release",
+            "configuration": "Release"
+        },
+        {
             "name": "engine-win-release-ut",
-            "configurePreset": "win-release-ut",
+            "configurePreset": "release-ut",
             "configuration": "Release"
         }
     ]
-    }
+}

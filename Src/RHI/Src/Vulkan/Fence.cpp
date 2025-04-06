@@ -10,7 +10,9 @@ Fence::Fence(bool signaled)
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
 
-    RHI_ASSERT(vkCreateFence(VulkanDevice::s_ctx.m_device, &fenceInfo, nullptr, &m_handle) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkCreateFence(VulkanDevice::s_ctx.m_device, &fenceInfo, nullptr, &m_handle);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 Fence::~Fence()

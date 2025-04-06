@@ -1,7 +1,13 @@
-#pragma once
-
 #include <Engine/Engine.hpp>
 #include <Engine/Tests/Service/DoctestService.hpp>
+#include <Engine/Service/World/WorldService.hpp>
+
+RTTR_REGISTRATION
+{
+    engine::registration::Service<tests::DoctestService>("tests::DoctestService")
+        .PostUpdateAfter<engine::WorldService>()
+        .Domain(engine::Domain::CLIENT_NO_UI);
+}
 
 int main(int argc, char* argv[])
 {
@@ -18,3 +24,5 @@ int main(int argc, char* argv[])
 
     return engine.Run();
 }
+
+EASTL_ALLOCATOR_IMPL

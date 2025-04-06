@@ -7,6 +7,7 @@
 #    define R_RTTR_INCLUDE_GUARD
 #endif
 
+#include <Core/Assert.hpp>
 #include <Core/Config.hpp>
 #include <Core/EASTLIntergration.hpp>
 #include <Core/Hash.hpp>
@@ -18,6 +19,8 @@
 #include <rttr/type>
 #include <rttr/variant.h>
 #include <fmt/format.h>
+
+#include "Log.hpp"
 
 namespace eastl
 {
@@ -402,8 +405,6 @@ public:
 
         core::INatvisHolder* Value(const rttr::variant& v) override
         {
-            static auto rttrType = rttr::type::get<T>();
-
             const T* p = nullptr;
 
             if (v.get_type().is_pointer())
@@ -442,7 +443,14 @@ private:
     template<typename T>
     void RegisterSingle(std::shared_ptr<IRTTRNatvis> factory)
     {
-        m_fns[rttr::type::get<T>()] = factory;
+        auto type = rttr::type::get<T>();
+
+        if (m_fns.find(type) != m_fns.end())
+        {
+            CORE_ASSERT(false);
+            return;
+        }
+        m_fns[type] = factory;
     }
 
     core::INatvisHolder* GetNatvis(const void* var);
@@ -474,9 +482,16 @@ private:
     {
         const auto typeByName = rttr::type::get_by_name(name);
 
-        CORE_ASSERT_WITH_MESSAGE((!typeByName.is_valid() 
-            || !rttr::type::get<T>().is_valid() 
-            || (rttr::type::get<T>().get_id() == typeByName.get_id())), 
+        auto isValid = !typeByName.is_valid()
+            || !rttr::type::get<T>().is_valid()
+            || rttr::type::get<T>().get_id() == typeByName.get_id();
+
+        if (!isValid)
+        {
+            log::error("[RTTRObject] Type '{}' is invalid.", name);
+        }
+
+        CORE_ASSERT_WITH_MESSAGE(isValid,
             "Looks like you're trying to register type twice or with the same name.");
 
         return name;

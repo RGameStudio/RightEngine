@@ -229,6 +229,11 @@ VulkanTexture::VulkanTexture(const TextureDescriptor& desc, const std::shared_pt
                 viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
                 break;
             }
+            default:
+            {
+                RHI_ASSERT(false);
+                break;
+            }
             }
         }
         else
@@ -240,7 +245,9 @@ VulkanTexture::VulkanTexture(const TextureDescriptor& desc, const std::shared_pt
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = m_descriptor.m_type == TextureType::TEXTURE_CUBEMAP ? 6 : 1;
 
-        RHI_ASSERT(vkCreateImageView(VulkanDevice::s_ctx.m_device, &viewInfo, nullptr, &m_imageViews[i]) == VK_SUCCESS);
+        [[maybe_unused]] auto res = vkCreateImageView(VulkanDevice::s_ctx.m_device, &viewInfo, nullptr, &m_imageViews[i]);
+
+        RHI_ASSERT(res == VK_SUCCESS);
         RHI_ASSERT(m_imageViews[i]);
     }
 }

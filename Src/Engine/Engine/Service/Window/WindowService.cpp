@@ -26,7 +26,8 @@ namespace engine
 
 WindowService::WindowService()
 {
-    ENGINE_ASSERT(glfwInit());
+    [[maybe_unused]] auto result = glfwInit();
+    ENGINE_ASSERT(result);
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     m_window = glfwCreateWindow(1920, 1080, "Right Engine", nullptr, nullptr);

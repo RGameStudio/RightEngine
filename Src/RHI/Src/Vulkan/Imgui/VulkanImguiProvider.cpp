@@ -138,9 +138,11 @@ void VulkanImguiProvider::CreateDescriptorPool()
     poolInfo.poolSizeCount = static_cast<uint32_t>(std::size(poolSizes));
     poolInfo.pPoolSizes = poolSizes;
 
-    RHI_ASSERT(vkCreateDescriptorPool(VulkanDevice::s_ctx.m_device, &poolInfo,
+    [[maybe_unused]] auto res = vkCreateDescriptorPool(VulkanDevice::s_ctx.m_device, &poolInfo,
                                       nullptr,
-                                      &m_descriptorPool) == VK_SUCCESS);
+                                      &m_descriptorPool);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 VkDescriptorSet VulkanImguiProvider::GetDescriptorSet(const std::shared_ptr<Texture>& texture)

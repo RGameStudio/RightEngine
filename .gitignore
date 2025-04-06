@@ -6,6 +6,7 @@
 /.vs
 /.build
 /.dist
+Scripts/__pycache__
 
 CMakeUserPresets.json
 ConanPresets.json

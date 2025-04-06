@@ -181,20 +181,34 @@ VulkanDevice::VulkanDevice(const std::shared_ptr<VulkanContext>& context)
         allocInfo.commandPool = s_ctx.m_instance->CommandPool();
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
-        RHI_ASSERT(vkAllocateCommandBuffers(VulkanDevice::s_ctx.m_device, &allocInfo, &m_cmdBuffers[i]) == VK_SUCCESS);
-        RHI_ASSERT(vkAllocateCommandBuffers(VulkanDevice::s_ctx.m_device, &allocInfo, &m_computeCmdBuffers[i]) == VK_SUCCESS);
+
+        [[maybe_unused]] auto res = vkAllocateCommandBuffers(VulkanDevice::s_ctx.m_device, &allocInfo, &m_cmdBuffers[i]);
+        RHI_ASSERT(res == VK_SUCCESS);
+
+        res = vkAllocateCommandBuffers(VulkanDevice::s_ctx.m_device, &allocInfo, &m_computeCmdBuffers[i]);
+        RHI_ASSERT(res == VK_SUCCESS);
 
         VkFenceCreateInfo fenceInfo{};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-        RHI_ASSERT(vkCreateFence(VulkanDevice::s_ctx.m_device, &fenceInfo, nullptr, &m_fences[i]) == VK_SUCCESS);
-        RHI_ASSERT(vkCreateFence(VulkanDevice::s_ctx.m_device, &fenceInfo, nullptr, &m_computeFences[i]) == VK_SUCCESS);
+
+        res = vkCreateFence(VulkanDevice::s_ctx.m_device, &fenceInfo, nullptr, &m_fences[i]);
+        RHI_ASSERT(res == VK_SUCCESS);
+
+        res = vkCreateFence(VulkanDevice::s_ctx.m_device, &fenceInfo, nullptr, &m_computeFences[i]);
+        RHI_ASSERT(res == VK_SUCCESS);
 
         VkSemaphoreCreateInfo semaphoreInfo{};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        RHI_ASSERT(vkCreateSemaphore(VulkanDevice::s_ctx.m_device, &semaphoreInfo, nullptr, &m_presentSemaphores[i]) == VK_SUCCESS);
-        RHI_ASSERT(vkCreateSemaphore(VulkanDevice::s_ctx.m_device, &semaphoreInfo, nullptr, &m_renderSemaphores[i]) == VK_SUCCESS);
-        RHI_ASSERT(vkCreateSemaphore(VulkanDevice::s_ctx.m_device, &semaphoreInfo, nullptr, &m_computeSemaphores[i]) == VK_SUCCESS);
+
+        res = vkCreateSemaphore(VulkanDevice::s_ctx.m_device, &semaphoreInfo, nullptr, &m_presentSemaphores[i]);
+        RHI_ASSERT(res == VK_SUCCESS);
+
+        res = vkCreateSemaphore(VulkanDevice::s_ctx.m_device, &semaphoreInfo, nullptr, &m_renderSemaphores[i]);
+        RHI_ASSERT(res == VK_SUCCESS);
+
+        res = vkCreateSemaphore(VulkanDevice::s_ctx.m_device, &semaphoreInfo, nullptr, &m_computeSemaphores[i]);
+        RHI_ASSERT(res == VK_SUCCESS);
     }
 }
 
@@ -309,7 +323,8 @@ void VulkanDevice::EndFrame()
     PROFILER_CPU_ZONE;
 
     auto& cmdBuffer = m_cmdBuffers[m_currentCmdBufferIndex];
-    RHI_ASSERT(vkEndCommandBuffer(cmdBuffer) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkEndCommandBuffer(cmdBuffer);
+    RHI_ASSERT(res == VK_SUCCESS);
 
     VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
@@ -323,8 +338,11 @@ void VulkanDevice::EndFrame()
     submitInfo.pCommandBuffers = &cmdBuffer;
     submitInfo.commandBufferCount = 1;
 
-    RHI_ASSERT(vkResetFences(s_ctx.m_device, 1, &m_fences[m_currentCmdBufferIndex]) == VK_SUCCESS);
-    RHI_ASSERT(vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, m_fences[m_currentCmdBufferIndex]) == VK_SUCCESS);
+    res = vkResetFences(s_ctx.m_device, 1, &m_fences[m_currentCmdBufferIndex]);
+    RHI_ASSERT(res == VK_SUCCESS);
+
+    res = vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, m_fences[m_currentCmdBufferIndex]);
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 void VulkanDevice::BeginComputePipeline(const std::shared_ptr<Pipeline>& pipeline)
@@ -800,10 +818,12 @@ void VulkanDevice::CreateLogicalDevice(const std::shared_ptr<VulkanContext>& con
         createInfo.enabledLayerCount = 0;
     }
 
-    RHI_ASSERT_WITH_MESSAGE(vkCreateDevice(s_ctx.m_physicalDevice,
-                                           &createInfo, 
-                                           nullptr, 
-                                           &s_ctx.m_device) == VK_SUCCESS, "Failed to create logical device!");
+    [[maybe_unused]] const auto result = vkCreateDevice(s_ctx.m_physicalDevice,
+                                           &createInfo,
+                                           nullptr,
+                                           &s_ctx.m_device);
+
+    RHI_ASSERT_WITH_MESSAGE(result == VK_SUCCESS, "Failed to create logical device!");
 }
 
 void VulkanDevice::SetupDeviceQueues(const std::shared_ptr<VulkanContext>& context)
@@ -830,7 +850,9 @@ void VulkanDevice::SetupCommandPool(const std::shared_ptr<VulkanContext>& contex
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = vulkan::FindQueueFamilies(s_ctx.m_physicalDevice, context->Surface()).graphicsFamily.value();
 
-    RHI_ASSERT(vkCreateCommandPool(s_ctx.m_device, &poolInfo, nullptr, &m_commandPool) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkCreateCommandPool(s_ctx.m_device, &poolInfo, nullptr, &m_commandPool);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 void VulkanDevice::FillProperties()

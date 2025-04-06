@@ -10,7 +10,7 @@ class RightEngineRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps"
     requires = [
-        "argparse/2.9",
+        "argparse/3.1",
         "assimp/5.3.1",
         "doctest/2.4.11",
         "eastl/3.21.12",
@@ -22,7 +22,7 @@ class RightEngineRecipe(ConanFile):
         "imgui/1.90.2-docking",
         "imguizmo/1.83.2",
         "nlohmann_json/3.11.3",
-        "rttr/0.9.7",
+        "rttr/0.9.8",
         "spdlog/1.12.0",
         "spirv-cross/1.3.296.0",
         "stb/cci.20230920",
@@ -37,7 +37,16 @@ class RightEngineRecipe(ConanFile):
 
     default_options = {
         "assimp*:shared": True,
-        "eastl*:shared": True,
+        "assimp*:with_gltf": False,
+        "assimp*:with_gltf_exporter": False,
+        "assimp*:with_3mf_exporter": False,
+        "assimp*:with_blend": False,
+        "assimp*:with_ifc": False,
+        "assimp*:with_m3d": False,
+        "assimp*:with_m3d_exporter": False,
+        "assimp*:with_pbrt_exporter": False,
+        "assimp*:with_opengex": False,
+        "eastl*:shared": False,
         "glslang*:shared": False,
         "glslang*:build_executables": False,
         "glslang*:spv_remapper": False,
@@ -49,7 +58,6 @@ class RightEngineRecipe(ConanFile):
         "spirv-cross*:c_api": False,
         "spirv-cross*:util": False,
         "glfw*:shared": True,
-        "rttr*:shared": True,
         "tracy*:shared": True
     }
 

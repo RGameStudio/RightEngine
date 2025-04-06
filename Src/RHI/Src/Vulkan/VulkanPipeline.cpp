@@ -44,7 +44,9 @@ VulkanPipeline::VulkanPipeline(const PipelineDescriptor& descriptor) : Pipeline(
         pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
     }
 
-    RHI_ASSERT(vkCreatePipelineLayout(VulkanDevice::s_ctx.m_device, &pipelineLayoutInfo, nullptr, &m_layout) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkCreatePipelineLayout(VulkanDevice::s_ctx.m_device, &pipelineLayoutInfo, nullptr, &m_layout);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 
     if (descriptor.m_compute)
     {
@@ -144,7 +146,7 @@ void VulkanPipeline::CreateFxPipeline()
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
-    for (int i = 0; i < renderPassDescriptor.m_colorAttachments.size(); i++)
+    for (size_t i = 0; i < renderPassDescriptor.m_colorAttachments.size(); i++)
     {
         colorBlendAttachments.push_back(colorBlendAttachment);
     }
@@ -224,7 +226,9 @@ void VulkanPipeline::CreateFxPipeline()
     pipelineInfo.basePipelineHandle = nullptr; // Optional
     pipelineInfo.basePipelineIndex = -1; // Optional
 
-    RHI_ASSERT(vkCreateGraphicsPipelines(VulkanDevice::s_ctx.m_device, nullptr, 1, &pipelineInfo, nullptr, &m_pipeline) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkCreateGraphicsPipelines(VulkanDevice::s_ctx.m_device, nullptr, 1, &pipelineInfo, nullptr, &m_pipeline);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 void VulkanPipeline::CreateComputePipeline()
@@ -240,7 +244,9 @@ void VulkanPipeline::CreateComputePipeline()
     pipelineInfo.layout = m_layout;
     pipelineInfo.stage = shaderStageInfo;
 
-    RHI_ASSERT(vkCreateComputePipelines(VulkanDevice::s_ctx.m_device, nullptr, 1, &pipelineInfo, nullptr, &m_pipeline) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkCreateComputePipelines(VulkanDevice::s_ctx.m_device, nullptr, 1, &pipelineInfo, nullptr, &m_pipeline);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 } // rhi::vulkan

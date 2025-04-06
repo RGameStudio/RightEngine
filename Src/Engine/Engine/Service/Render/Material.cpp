@@ -39,7 +39,7 @@ Material::Material(const std::shared_ptr<rhi::Shader>& shader) : m_shader(shader
 void Material::SetBuffer(rttr::type type, int slot, rhi::ShaderStage stage, std::string_view name, int offset)
 {
     ENGINE_ASSERT(type.is_valid());
-    ENGINE_ASSERT(slot < m_buffers.size());
+    ENGINE_ASSERT(slot < static_cast<int>(m_buffers.size()));
     ENGINE_ASSERT(stage != rhi::ShaderStage::NONE);
 
     auto& rs = Instance().Service<RenderService>();

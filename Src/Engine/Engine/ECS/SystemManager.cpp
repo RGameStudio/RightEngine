@@ -1,3 +1,8 @@
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wrange-loop-construct"
+#endif
+
 #include <Engine/ECS/SystemManager.hpp>
 #include <Engine/Engine.hpp>
 #include <Engine/Service/ThreadService.hpp>
@@ -78,3 +83,7 @@ void SystemManager::UpdateDependenciesOrder()
 }
 
 } // engine::ecs
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

@@ -115,8 +115,9 @@ bool MeshLoader::Load(const ResPtr<MeshResource>& resource)
 		PROFILER_CPU_ZONE_NAME("Import mesh");
 
 		auto& vfs = Instance().Service<io::VirtualFilesystemService>();
+		auto path = vfs.Absolute(resource->m_srcPath).generic_u8string();
 
-		scene = m_importer.ReadFile(vfs.Absolute(resource->m_srcPath).generic_u8string(),
+		scene = m_importer.ReadFile(path,
 			aiProcess_Triangulate
 			| aiProcess_GenSmoothNormals
 			| aiProcess_FlipUVs

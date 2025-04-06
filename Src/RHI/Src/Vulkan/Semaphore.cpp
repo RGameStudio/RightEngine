@@ -9,7 +9,8 @@ Semaphore::Semaphore()
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-    RHI_ASSERT(vkCreateSemaphore(VulkanDevice::s_ctx.m_device, &semaphoreInfo, nullptr, &m_handle) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkCreateSemaphore(VulkanDevice::s_ctx.m_device, &semaphoreInfo, nullptr, &m_handle);
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 Semaphore::~Semaphore()

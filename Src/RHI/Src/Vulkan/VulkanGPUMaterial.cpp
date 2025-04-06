@@ -216,7 +216,9 @@ void VulkanGPUMaterial::AllocateDescriptorPool()
     poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = C_DESCRIPTOR_POOL_SIZE;
 
-    RHI_ASSERT(vkCreateDescriptorPool(VulkanDevice::s_ctx.m_device, &poolInfo, nullptr, &s_descriptorPool) == VK_SUCCESS);
+    [[maybe_unused]] auto res = vkCreateDescriptorPool(VulkanDevice::s_ctx.m_device, &poolInfo, nullptr, &s_descriptorPool);
+
+    RHI_ASSERT(res == VK_SUCCESS);
 }
 
 VkDescriptorType VulkanGPUMaterial::DescriptorType(uint8_t slot)

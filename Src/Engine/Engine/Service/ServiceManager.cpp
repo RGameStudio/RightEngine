@@ -68,6 +68,8 @@ void ServiceManager::PostUpdate(float dt)
     }
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wrange-loop-construct"
 void ServiceManager::UpdateDependencyOrder()
 {
     ServiceDepsMap updateDependenciesMap;
@@ -118,6 +120,8 @@ void ServiceManager::UpdateDependencyOrder()
         m_postUpdateOrder.emplace_back(m_services[m_servicesMap[t]]);
     }
 }
+
+#pragma clang diagnostic pop
 
 void ServiceManager::Destroy()
 {

@@ -4,7 +4,7 @@
 #include <Engine/Service/ThreadService.hpp>
 #include <Engine/Service/EditorService.hpp>
 #include <Engine/Service/Render/RenderService.hpp>
-#include <Engine/Service/ImGui/ImguiService.hpp>
+#include <Engine/Service/Imgui/ImguiService.hpp>
 #include <Engine/Service/Filesystem/VirtualFilesystemService.hpp>
 #include <Engine/Service/Project/ProjectService.hpp>
 #include <Engine/Service/World/WorldService.hpp>
@@ -193,3 +193,4 @@ void Engine::ParseCfg(int argCount, char* argPtr[])
 
 } // namespace engine
 
+EASTL_ALLOCATOR_IMPL

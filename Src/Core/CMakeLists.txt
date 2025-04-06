@@ -24,7 +24,7 @@ target_link_libraries(Core PUBLIC
                             EASTL::EASTL 
                             spdlog::spdlog
                             fmt::fmt 
-                            RTTR::Core 
+                            RTTR::Core_Lib
                             Tracy::TracyClient
                             glm::glm)
                             
