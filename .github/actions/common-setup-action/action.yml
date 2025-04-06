@@ -7,7 +7,7 @@ inputs:
     required: true
   llvm-version:
     description: 'clang version to install'
-    default: "19.1.1"
+    default: "19.1.0"
     required: false
   vulkan-version:
     description: 'Vulkan SDK version to install'
