@@ -8,11 +8,12 @@ def check_process_status_code(code, proc_stderr):
         print("Error message: ", proc_stderr)
         sys.exit(1)
 
-if len(sys.argv) < 2:
-    print("Usage: python prepare_env.py <profile name>")
+if len(sys.argv) < 3:
+    print("Usage: python prepare_env.py <profile name> <is running ci>")
     sys.exit(1)
 
 profile_name = sys.argv[1]
+is_ci = sys.argv[2].lower() == "true"
 
 print("Configuring python env")
 sub.run("pip install -r Scripts/requirements.txt")
@@ -24,7 +25,8 @@ from custom_packages import install_custom_packages
 
 install_custom_packages()
 
-sub.run("C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")
+if is_ci:
+    sub.run("C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")
 
 def install_all(profile_name: str, build_type: str):
     print(f"Installing {build_type} conan packages")
