@@ -19,7 +19,7 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Prepare conan environment
-      run: python Scripts/prepare_env.py win-64-ninja-clang
+      run: python Scripts/prepare_env.py win-64-ninja-clang true
 
     - name: Generate solution
       run: cmake --preset debug
@@ -39,7 +39,7 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Prepare conan environment
-      run: python Scripts/prepare_env.py win-64-ninja-clang
+      run: python Scripts/prepare_env.py win-64-ninja-clang true
 
     - name: Generate solution
       run: cmake --preset release-ut

@@ -25,7 +25,7 @@ from custom_packages import install_custom_packages
 
 install_custom_packages()
 
-if is_ci:
+if not is_ci:
     sub.run("C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")
 
 def install_all(profile_name: str, build_type: str):
