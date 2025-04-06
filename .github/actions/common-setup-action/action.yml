@@ -69,7 +69,7 @@ runs:
         }
 
     - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action@v2
+      uses: KyleMayes/install-llvm-action@v2.0.6
       with:
         version: ${{ inputs.llvm-version }}
         env: true
