@@ -7,7 +7,7 @@ inputs:
     required: true
   llvm-version:
     description: 'clang version to install'
-    default: "19.1.0"
+    default: "19.1.1"
     required: false
   vulkan-version:
     description: 'Vulkan SDK version to install'
@@ -74,17 +74,9 @@ runs:
         version: ${{ inputs.llvm-version }}
         env: true
 
-    - name: Env variables
-      shell: pwsh
-      run: |
-        Write-Output "PATH: $env:PATH"
-        Write-Output "CC: $env:CC"
-        Write-Output "CXX: $env:CXX"
-        ls
-
     - name: Check conan cache
       id: cache-conan
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.conan2
