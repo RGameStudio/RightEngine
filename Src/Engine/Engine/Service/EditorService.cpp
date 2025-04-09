@@ -22,6 +22,8 @@
 #include <RHI/Pipeline.hpp>
 #include <imgui.h>
 
+#include "Resource/EnvironmentMapResource.hpp"
+
 RTTR_REGISTRATION
 {
     engine::registration::Service<engine::EditorService>("engine::EditorService")
@@ -124,13 +126,12 @@ void EditorService::Initialize()
     auto& resourceService = Instance().Service<ResourceService>();
 
     auto& meshLoader = resourceService.GetLoader<MeshLoader>();
-    m_impl->m_monkeyMesh = std::static_pointer_cast<MeshResource>(meshLoader.Load("/System/Models/sphere.fbx"));
+    m_impl->m_monkeyMesh = std::static_pointer_cast<MeshResource>(meshLoader.Load("/System/Models/sphere.fbx", false));
 
     while (!m_impl->m_monkeyMesh->Ready()) {}
 
-    auto& matLoader = Instance().Service<ResourceService>().GetLoader<MaterialLoader>();
-    const auto env = matLoader.LoadEnvironmentMap("/System/Textures/spree_bank_env.hdr");
-    m_impl->m_envCubMap = env.m_cubemap;
+    const auto env = resourceService.Load<EnvironmentMapResource>("/System/Textures/spree_bank_env.hdr", true);
+    m_impl->m_envCubMap = env->Raw().m_cubemap;
 
     auto skyboxMaterial = resourceService.Load<MaterialResource>("/System/Materials/skybox.material");
     skyboxMaterial->Material()->SetTexture(m_impl->m_envCubMap, 3);
@@ -157,8 +158,8 @@ void EditorService::Initialize()
     defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 5);
     defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 6);
     defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 7);
-    defaultMat->Material()->SetTexture(env.m_irradianceTexture, 8);
-    defaultMat->Material()->SetTexture(env.m_prefilterTexture, 9);
+    defaultMat->Material()->SetTexture(env->Raw().m_irradianceTexture, 8);
+    defaultMat->Material()->SetTexture(env->Raw().m_prefilterTexture, 9);
     defaultMat->Material()->SetTexture(m_impl->m_brdfTex->Texture(), 10);
     defaultMat->Material()->Sync();
 

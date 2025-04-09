@@ -17,7 +17,7 @@ public:
 
 	virtual void				Update() override;
 
-	virtual ResPtr<IResource>	Load(const fs::path& path) override;
+	virtual ResPtr<IResource>	Load(const fs::path& path, bool immediate) override;
 
 	virtual ResPtr<IResource>	Get(const fs::path& path) const override;
 

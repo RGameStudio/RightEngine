@@ -37,13 +37,17 @@ template<typename T>
 bool TryAddComponent(entt::entity e, const std::unique_ptr<engine::ecs::EntityManager>& em, eastl::vector<rttr::variant>& comps)
 {
     const auto type = rttr::type::get<T>();
-    if (const auto comp = em->TryGetComponent<T>(e); comp && engine::registration::helpers::typeRegistered(type))
+    const auto typeRegistered = engine::registration::helpers::typeRegistered(type);
+    if (const auto comp = em->TryGetComponent<T>(e); comp && typeRegistered)
     {
         comps.emplace_back(*comp);
         return true;
     }
 
-    core::log::warning("Unknown component type '{}', maybe you forgot to register it?", type.get_name());
+    if (!typeRegistered)
+    {
+        core::log::warning("Unknown component type '{}', maybe you forgot to register it?", type.get_name());
+    }
     return false;
 }
 
@@ -87,7 +91,11 @@ void WorldService::SaveWorld()
     auto json = engine::ToJsonString(data);
 
     io::File worldFile("/Worlds/test.world");
-    worldFile.Write(json);
+    auto res = worldFile.Write(json);
+    if (res)
+    {
+        core::log::info("[WorldService] World '{}' saved successfully", worldFile.Path().generic_string());
+    }
 }
 
 WorldData WorldService::CollectWorldData(const std::unique_ptr<ecs::World>& world)
