@@ -15,7 +15,7 @@ public:
 
 	virtual void				Update() override;
 
-	virtual engine::ResPtr<engine::IResource>	Load(const engine::io::fs::path& path) override;
+	virtual engine::ResPtr<engine::IResource>	Load(const engine::io::fs::path& path, bool immediate) override;
 
 	virtual engine::ResPtr<engine::IResource>	Get(const engine::io::fs::path& path) const override;
 

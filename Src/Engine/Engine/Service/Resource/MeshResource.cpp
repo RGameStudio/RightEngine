@@ -72,7 +72,7 @@ void MeshLoader::Update()
 	PROFILER_CPU_ZONE;
 }
 
-ResPtr<IResource> MeshLoader::Load(const fs::path& path)
+ResPtr<IResource> MeshLoader::Load(const fs::path& path, bool immediate)
 {
 	std::lock_guard l(m_mutex);
 
@@ -85,13 +85,23 @@ ResPtr<IResource> MeshLoader::Load(const fs::path& path)
 	resource->m_status = IResource::Status::LOADING;
 	m_cache[path] = resource;
 
-	auto& ts = Instance().Service<ThreadService>();
+	auto load = [this, resource]
+	{
+		PROFILER_CPU_ZONE_NAME("Load mesh");
+		const auto result = Load(resource);
+		resource->m_status = result ? IResource::Status::READY : IResource::Status::FAILED;
+	};
 
-	ts.AddBackgroundTask([this, resource]()
+	if (immediate)
+	{
+		load();
+		return resource;
+	}
+
+	auto& ts = Instance().Service<ThreadService>();
+	ts.AddBackgroundTask([load]()
 		{
-			PROFILER_CPU_ZONE_NAME("Load mesh");
-	        const auto result = Load(resource);
-	        resource->m_status = result ? IResource::Status::READY : IResource::Status::FAILED;
+			load();
 		});
 
 	return resource;

@@ -12,7 +12,7 @@ void TestResourceLoader::Update()
 	PROFILER_CPU_ZONE;
 }
 
-engine::ResPtr<engine::IResource> TestResourceLoader::Load(const engine::io::fs::path& path)
+engine::ResPtr<engine::IResource> TestResourceLoader::Load(const engine::io::fs::path& path, bool immediate)
 {
 	std::lock_guard l(m_mutex);
 

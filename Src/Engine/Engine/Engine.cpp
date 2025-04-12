@@ -12,6 +12,7 @@
 #include <Engine/Service/Resource/TextureResource.hpp>
 #include <Engine/Service/Resource/MeshResource.hpp>
 #include <Engine/Service/Resource/MaterialResource.hpp>
+#include <Engine/Service/Resource/EnvironmentMapResource.hpp>
 #include <Core/Profiling.hpp>
 
 RTTR_REGISTRATION
@@ -78,6 +79,7 @@ Engine::Engine(int argCount, char* argPtr[])
     resourceService.RegisterLoader<TextureLoader>();
     resourceService.RegisterLoader<MeshLoader>();
     resourceService.RegisterLoader<MaterialLoader>();
+    resourceService.RegisterLoader<EnvironmentMapLoader>();
 
     m_serviceManager->RegisterService<EditorService>();
 

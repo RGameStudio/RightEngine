@@ -32,7 +32,7 @@ public:
 	virtual void Update() = 0;
 
 	// Async load of a resource
-	virtual ResPtr<IResource> Load(const fs::path& path) = 0;
+	virtual ResPtr<IResource> Load(const fs::path& path, bool immediate) = 0;
 
 	virtual void LoadSystemResources() = 0;
 
