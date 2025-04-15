@@ -6,6 +6,8 @@
 #include <RHI/Pipeline.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
+#include "SkyboxSystem.hpp"
+
 namespace
 {
 
@@ -28,22 +30,26 @@ RTTR_REGISTRATION
         .Domain(engine::Domain::UI)
         .UpdateAfter<engine::CameraSystem>();
 
-    Class<engine::MeshComponent::Serialized>("engine::MeshComponent::Serialized")
-        .Property("material", &engine::MeshComponent::Serialized::m_materialPath)
-        .Property("mesh", &engine::MeshComponent::Serialized::m_meshPath);
-
     engine::registration::Component<engine::MeshComponent>(IComponent::Type::ENGINE, "engine::MeshComponent")
         .Property("mesh",
-            [](const engine::MeshComponent& mesh) -> engine::MeshComponent::Serialized
+            [](const engine::MeshComponent& mesh) -> std::string
             {
-                return { mesh.m_material->SourcePath().generic_string(), mesh.m_mesh->SourcePath().generic_string() };
+                return mesh.m_mesh->SourcePath().generic_string();
             },
-            [](engine::MeshComponent& obj, engine::MeshComponent::Serialized meshSerialized)
+            [](engine::MeshComponent& obj, const std::string& meshPath)
             {
                 auto& rs = engine::Instance().Service<engine::ResourceService>();
-
-                obj.m_material = rs.Load<engine::MaterialResource>(meshSerialized.m_materialPath);
-                obj.m_mesh = rs.Load<engine::MeshResource>(meshSerialized.m_meshPath);
+                obj.m_mesh = rs.Load<engine::MeshResource>(meshPath);
+            })
+        .Property("material",
+            [](const engine::MeshComponent& mesh) -> std::string
+            {
+                return mesh.m_material->SourcePath().generic_string();
+            },
+            [](engine::MeshComponent& obj, const std::string& materialPath)
+            {
+                auto& rs = engine::Instance().Service<engine::ResourceService>();
+                obj.m_material = rs.Load<engine::MaterialResource>(materialPath);
             });
 
     rttr::registration::enumeration<engine::CameraComponent::Type>("engine::CameraComponent::Type")
@@ -109,36 +115,56 @@ void RenderSystem::Update(float dt)
     eastl::vector_map<std::shared_ptr<rhi::Pipeline>, eastl::vector<eastl::reference_wrapper<MeshComponent>>> meshesMap;
     eastl::vector<eastl::reference_wrapper<TransformComponent>> transforms;
 
+    bool updateSkybox = false;
     for (const auto [e, mesh, t] : W()->View<MeshComponent, TransformComponent>())
+    {
+        ENGINE_ASSERT(mesh.m_material);
+
+        if (!mesh.m_mesh)
         {
-            ENGINE_ASSERT(mesh.m_material);
-
-            if (!mesh.m_mesh)
-            {
-                continue;
-            }
-
-            auto& pipeline = rs.Pipeline(mesh.m_material);
-
-            meshesMap[pipeline].emplace_back(mesh);
-            transforms.emplace_back(t);
+            continue;
         }
 
+        auto& pipeline = rs.Pipeline(mesh.m_material);
+
+        meshesMap[pipeline].emplace_back(mesh);
+        transforms.emplace_back(t);
+        updateSkybox |= mesh.IsRecentlyCreated();
+        mesh.Init();
+    }
+
     ENGINE_ASSERT(meshesMap.size() == transforms.size());
+
+    RPtr<EnvironmentMapResource> envmap;
+    if (updateSkybox)
+    {
+        for (const auto [e, skybox] : W()->View<SkyboxComponent>())
+        {
+            envmap = skybox.m_environmentMap;
+            break;
+        }
+    }
 
     eastl::unordered_set<ResPtr<MaterialResource>> materials;
     for (const auto& [pipeline, meshes] : meshesMap)
     {
         for (const auto& mesh : meshes)
+        {
+            if (materials.find(mesh.get().m_material) != materials.end())
             {
-                if (materials.find(mesh.get().m_material) != materials.end())
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                mesh.get().m_material->Material()->UpdateBuffer(1, cameraUB);
+            mesh.get().m_material->Material()->UpdateBuffer(1, cameraUB);
+
+            if (updateSkybox && envmap)
+            {
+                mesh.get().m_material->Material()->SetTexture(envmap->Raw().m_irradianceTexture, 8);
+                mesh.get().m_material->Material()->SetTexture(envmap->Raw().m_prefilterTexture, 9);
+                mesh.get().m_material->Material()->Sync();
             }
         }
+    }
 
     int i = 0;
     for (const auto& [pipeline, meshes] : meshesMap)
