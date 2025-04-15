@@ -11,7 +11,19 @@ RTTR_REGISTRATION
         .UpdateAfter<engine::RenderSystem>()
         .Domain(engine::Domain::UI);
 
-    engine::registration::Component<engine::SkyboxComponent>(IComponent::Type::ENGINE, "engine::SkyboxComponent");
+    engine::registration::Component<engine::SkyboxComponent>(IComponent::Type::ENGINE, "engine::SkyboxComponent")
+        .Property("skybox",
+            [](const engine::SkyboxComponent& skybox) -> std::string
+            {
+                return skybox.m_environmentMap->SourcePath().generic_string();
+            },
+            [](engine::SkyboxComponent& obj, const std::string& skyboxPath)
+            {
+                auto& rs = engine::Instance().Service<engine::ResourceService>();
+
+                obj.m_environmentMap = rs.Load<engine::EnvironmentMapResource>(skyboxPath);
+                obj.m_skyboxMaterial = rs.Load<engine::MaterialResource>("/System/Materials/skybox.material");
+            });
 }
 
 namespace

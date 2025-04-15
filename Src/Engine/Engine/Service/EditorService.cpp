@@ -158,8 +158,6 @@ void EditorService::Initialize()
     defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 5);
     defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 6);
     defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 7);
-    defaultMat->Material()->SetTexture(env->Raw().m_irradianceTexture, 8);
-    defaultMat->Material()->SetTexture(env->Raw().m_prefilterTexture, 9);
     defaultMat->Material()->SetTexture(m_impl->m_brdfTex->Texture(), 10);
     defaultMat->Material()->Sync();
 
@@ -185,6 +183,7 @@ void EditorService::Initialize()
 
     auto& skybox = em->AddComponent<SkyboxComponent>(skyboxUuid);
     skybox.m_skyboxMaterial = skyboxMaterial;
+    skybox.m_environmentMap = env;
 
     em->AddComponent<DirectionalLightComponent>(dirLightUuid);
 }

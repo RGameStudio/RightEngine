@@ -24,14 +24,12 @@
                 },
                 {
                     "__type__": "engine::MeshComponent",
-                    "mesh": {
-                        "material": "/System/Materials/pbr.material",
-                        "mesh": "/System/Models/sphere.fbx"
-                    }
+                    "material": "/System/Materials/pbr.material",
+                    "mesh": "/System/Models/sphere.fbx"
                 }
             ],
             "name": "Monkey",
-            "uuid": "f2a3b1fd-42f6-41eb-b8fa-fb9baa9f73b1"
+            "uuid": "34f68fbc-85a0-41c4-8fee-616624e0ee23"
         },
         {
             "components": [
@@ -43,10 +41,10 @@
                         "z": -10.0
                     },
                     "rotation": {
-                        "w": 0.73776775598526,
-                        "x": 0.6722963452339172,
-                        "y": -0.04505976662039757,
-                        "z": 0.04106104001402855
+                        "w": 0.603176474571228,
+                        "x": 0.7954251170158386,
+                        "y": -0.03562876209616661,
+                        "z": 0.04698459804058075
                     },
                     "scale": {
                         "x": 1.0,
@@ -65,7 +63,7 @@
                 }
             ],
             "name": "Editor Camera",
-            "uuid": "bb60f432-5454-4c67-973e-b4e13bca4496"
+            "uuid": "548d9b79-ab7d-4e97-b9e5-bd154559b9ef"
         },
         {
             "components": [
@@ -90,7 +88,7 @@
                 }
             ],
             "name": "Directional Light",
-            "uuid": "cd9a050a-4e94-4c2e-b89e-c21069900706"
+            "uuid": "c4648066-6c63-41eb-80e0-fec4cec44ace"
         },
         {
             "components": [
@@ -112,10 +110,14 @@
                         "y": 1.0,
                         "z": 1.0
                     }
+                },
+                {
+                    "__type__": "engine::SkyboxComponent",
+                    "skybox": "/System/Textures/spree_bank_env.hdr"
                 }
             ],
             "name": "Skybox",
-            "uuid": "3e81335d-7ed2-4956-baf2-cecb37e0c50a"
+            "uuid": "b5f10174-9284-4a40-977b-ecda6b2b4b80"
         }
     ],
     "name": "Test world",

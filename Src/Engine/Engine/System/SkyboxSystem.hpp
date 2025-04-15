@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Engine/ECS/System.hpp>
-#include <Engine/Service/Resource/TextureResource.hpp>
 #include <RHI/Buffer.hpp>
 
 namespace engine
@@ -13,9 +12,7 @@ struct ENGINE_API SkyboxComponent : public ecs::Component<SkyboxComponent>
     ~SkyboxComponent() = default;
 
     RPtr<MaterialResource>  m_skyboxMaterial;
-    RPtr<rhi::Texture>      m_irradianceTexture;
-    RPtr<rhi::Texture>      m_prefilterTexture;
-    RPtr<rhi::Texture>      m_brdfTexture;
+    RPtr<EnvironmentMapResource> m_environmentMap;
 };
 
 class ENGINE_API SkyboxSystem : public ecs::System<SkyboxSystem>

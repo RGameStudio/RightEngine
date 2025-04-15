@@ -122,6 +122,7 @@ WorldData WorldService::CollectWorldData(const std::unique_ptr<ecs::World>& worl
         TryAddComponent<TransformComponent>(e, em, worldEntity.m_components);
         TryAddComponent<MeshComponent>(e, em, worldEntity.m_components);
         TryAddComponent<CameraComponent>(e, em, worldEntity.m_components);
+        TryAddComponent<SkyboxComponent>(e, em, worldEntity.m_components);
 
         data.m_entities.emplace_back(worldEntity);
     }
