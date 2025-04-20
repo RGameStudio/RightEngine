@@ -1,0 +1,125 @@
+{
+    "__type__": "engine::WorldData",
+    "entities": [
+        {
+            "components": [
+                {
+                    "__type__": "engine::TransformComponent",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                {
+                    "__type__": "engine::MeshComponent",
+                    "material": "/System/Materials/pbr.material",
+                    "mesh": "/System/Models/sphere.fbx"
+                }
+            ],
+            "name": "Monkey",
+            "uuid": "34f68fbc-85a0-41c4-8fee-616624e0ee23"
+        },
+        {
+            "components": [
+                {
+                    "__type__": "engine::TransformComponent",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -10.0
+                    },
+                    "rotation": {
+                        "w": 0.603176474571228,
+                        "x": 0.7954251170158386,
+                        "y": -0.03562876209616661,
+                        "z": 0.04698459804058075
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                {
+                    "__type__": "engine::CameraComponent",
+                    "active": true,
+                    "aspectRatio": 1.7777777910232544,
+                    "far": 5000.0,
+                    "fov": 1.2217304706573486,
+                    "near": 0.10000000149011612,
+                    "type": "Editor"
+                }
+            ],
+            "name": "Editor Camera",
+            "uuid": "548d9b79-ab7d-4e97-b9e5-bd154559b9ef"
+        },
+        {
+            "components": [
+                {
+                    "__type__": "engine::TransformComponent",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            ],
+            "name": "Directional Light",
+            "uuid": "c4648066-6c63-41eb-80e0-fec4cec44ace"
+        },
+        {
+            "components": [
+                {
+                    "__type__": "engine::TransformComponent",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                {
+                    "__type__": "engine::SkyboxComponent",
+                    "skybox": "/System/Textures/spree_bank_env.hdr"
+                }
+            ],
+            "name": "Skybox",
+            "uuid": "b5f10174-9284-4a40-977b-ecda6b2b4b80"
+        }
+    ],
+    "name": "Test world",
+    "version": 0
+}

@@ -27,6 +27,11 @@ void MenuBarPanel::DrawPanel()
             auto& ws = Instance().Service<WorldService>();
             ws.SaveWorld();
         }
+        if (ImGui::MenuItem("Load"))
+        {
+            auto& ws = Instance().Service<WorldService>();
+            ws.LoadWorld();
+        }
         ImGui::EndMenu();
     }
 }

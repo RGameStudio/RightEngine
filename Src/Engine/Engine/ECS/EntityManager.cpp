@@ -42,12 +42,12 @@ void EntityManager::Update()
     m_pendingDeleteEntities.clear();
 }
 
-uuids::uuid EntityManager::CreateEntity(std::string_view name)
+uuids::uuid EntityManager::CreateEntity(std::string_view name, const uuids::uuid& uuid)
 {
     std::lock_guard l(m_mutex);
 
     auto& info = m_pendingCreateEntities.emplace_back();
-    info.m_uuid = uuids::uuid_system_generator{}();
+    info.m_uuid = uuid.is_nil() ? uuids::uuid_system_generator{}() : uuid;
 
     if (name.empty())
     {

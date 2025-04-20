@@ -10,6 +10,7 @@
 #include <Engine/Registration.hpp>
 #include <Core/Profiling.hpp>
 
+#include "Engine/Serialization/FromJson.hpp"
 #include "Engine/Service/Filesystem/File.hpp"
 
 RTTR_REGISTRATION
@@ -49,6 +50,19 @@ bool TryAddComponent(entt::entity e, const std::unique_ptr<engine::ecs::EntityMa
         core::log::warning("Unknown component type '{}', maybe you forgot to register it?", type.get_name());
     }
     return false;
+}
+
+template <typename TComponent>
+void CheckAndAddComponentToEntity(const uuids::uuid& uuid,
+    rttr::type type,
+    const rttr::variant& variant,
+    const std::unique_ptr<engine::ecs::World>& world)
+{
+    if (type == rttr::type::get<TComponent>())
+    {
+        auto& comp = world->GetEntityManager()->AddComponent<TComponent>(uuid);
+        comp = variant.get_value_safe<TComponent>();
+    }
 }
 
 } // unnamed
@@ -95,6 +109,60 @@ void WorldService::SaveWorld()
     if (res)
     {
         core::log::info("[WorldService] World '{}' saved successfully", worldFile.Path().generic_string());
+    }
+}
+
+void WorldService::LoadWorld()
+{
+    PROFILER_CPU_ZONE;
+
+    io::File worldFile("/Worlds/test.world");
+    auto res = worldFile.Read();
+    if (!res)
+    {
+        core::log::error("[WorldService] World file '{}' wasnt loaded", worldFile.Path().generic_string());
+    }
+
+    // Convert raw void* to a std::string using reinterpret_cast and assuming the void* points to a char buffer
+    std::string worldData(reinterpret_cast<const char*>(worldFile.Raw()), worldFile.Size());
+    std::string errorBuffer;
+    errorBuffer.resize(1024);
+
+    auto json = engine::FromJsonString<WorldData>(worldData, &errorBuffer);
+    if (!json.has_value())
+    {
+        core::log::error("[WorldService] World file '{}' want parsed", worldFile.Path().generic_string());
+        return;
+    }
+
+    std::unique_ptr<ecs::World> world = std::make_unique<ecs::World>("Test world");
+
+    for (auto& entity : json->m_entities)
+    {
+        auto uuidOpt = uuids::uuid::from_string(entity.m_uuid);
+        if (!uuidOpt)
+        {
+            core::log::warning("[WorldService] Invalid uuid '{}'", entity.m_uuid);
+            continue;
+        }
+
+        const auto uuid = uuidOpt.value();
+        world->GetEntityManager()->CreateEntity(entity.m_name, uuid);
+        world->GetEntityManager()->Update();
+
+        for (auto& componentVariant : entity.m_components)
+        {
+            auto type = rttr::get_type_or_wrapped_type(componentVariant);
+            if (type == rttr::type::get<TransformComponent>())
+            {
+                auto& comp = world->GetEntityManager()->GetComponent<TransformComponent>(uuid);
+                comp = componentVariant.get_value_safe<TransformComponent>();
+            }
+            CheckAndAddComponentToEntity<MeshComponent>(uuid, type, componentVariant, world);
+            CheckAndAddComponentToEntity<SkyboxComponent>(uuid, type, componentVariant, world);
+            CheckAndAddComponentToEntity<MeshComponent>(uuid, type, componentVariant, world);
+            CheckAndAddComponentToEntity<CameraComponent>(uuid, type, componentVariant, world);
+        }
     }
 }
 

@@ -30,7 +30,7 @@ public:
 
     void                Update();
 
-    uuids::uuid         CreateEntity(std::string_view name = "");
+    uuids::uuid         CreateEntity(std::string_view name = "", const uuids::uuid& uuid = uuids::uuid());
     void                RemoveEntity(const uuids::uuid& uuid);
     void                RemoveEntity(entt::entity e);
 
