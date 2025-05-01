@@ -26,3 +26,8 @@ TEST_CASE("Simple entity manipulations")
     em->Update();
     CHECK_EQ(em->GetEntity(uuid), entt::entity());
 }
+
+TEST_CASE("Save world")
+{
+
+}

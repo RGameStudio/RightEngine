@@ -112,15 +112,15 @@ void WorldService::SaveWorld()
     }
 }
 
-void WorldService::LoadWorld()
+std::unique_ptr<ecs::World>& WorldService::LoadWorld(const io::fs::path& path)
 {
     PROFILER_CPU_ZONE;
 
-    io::File worldFile("/Worlds/test.world");
+    io::File worldFile(path);
     auto res = worldFile.Read();
     if (!res)
     {
-        core::log::error("[WorldService] World file '{}' wasnt loaded", worldFile.Path().generic_string());
+        core::log::error("[WorldService] World file '{}' wasn't loaded", worldFile.Path().generic_string());
     }
 
     // Convert raw void* to a std::string using reinterpret_cast and assuming the void* points to a char buffer
@@ -131,13 +131,21 @@ void WorldService::LoadWorld()
     auto json = engine::FromJsonString<WorldData>(worldData, &errorBuffer);
     if (!json.has_value())
     {
-        core::log::error("[WorldService] World file '{}' want parsed", worldFile.Path().generic_string());
-        return;
+        core::log::error("[WorldService] World file '{}' wasn't parsed. Error: '{}'", worldFile.Path().generic_string(),
+            errorBuffer);
+        static std::unique_ptr<ecs::World> empty;
+        return empty;
     }
 
-    std::unique_ptr<ecs::World> world = std::make_unique<ecs::World>("Test world");
+    return ParseWorld(json.value());
+}
 
-    for (auto& entity : json->m_entities)
+std::unique_ptr<ecs::World>& WorldService::ParseWorld(const WorldData& data)
+{
+    PROFILER_CPU_ZONE;
+    std::unique_ptr<ecs::World> world = std::make_unique<ecs::World>(data.m_name);
+
+    for (auto& entity : data.m_entities)
     {
         auto uuidOpt = uuids::uuid::from_string(entity.m_uuid);
         if (!uuidOpt)
@@ -164,6 +172,8 @@ void WorldService::LoadWorld()
             CheckAndAddComponentToEntity<CameraComponent>(uuid, type, componentVariant, world);
         }
     }
+
+    return m_world;
 }
 
 WorldData WorldService::CollectWorldData(const std::unique_ptr<ecs::World>& world)

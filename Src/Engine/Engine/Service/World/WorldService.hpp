@@ -33,7 +33,8 @@ public:
     std::unique_ptr<ecs::World>& CurrentWorld() { return m_world; }
 
     void SaveWorld();
-    std::unique_ptr<ecs::World>& LoadWorld();
+    std::unique_ptr<ecs::World>& LoadWorld(const io::fs::path& path);
+    std::unique_ptr<ecs::World>& ParseWorld(const WorldData& data);
 
     WorldData CollectWorldData(const std::unique_ptr<ecs::World>& world);
 
