@@ -11,12 +11,10 @@ namespace core
     {
 #ifdef R_OS_WIN32
         __debugbreak();
-#elif defined(__APPLE__)
+#elif defined(R_OS_MACOS)
         __builtin_trap();
-#elif defined(__linux__)
-        raise(SIGTRAP);
 #else
-        std::abort();
+#error Unsupported platform! Implement assert here!
 #endif
     }
 
