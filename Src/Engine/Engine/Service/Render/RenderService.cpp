@@ -126,7 +126,7 @@ RenderService::RenderService()
     {
         VkSurfaceKHR surface = nullptr;
         auto result = glfwCreateWindowSurface(instance, Instance().Service<WindowService>().Window(), nullptr, &surface);
-        core::log::error("m_surfaceConstructor: {}", VkResultToString(result));
+        core::log::debug("m_surfaceConstructor: {}", VkResultToString(result));
         return surface;
     };
 
@@ -137,7 +137,7 @@ RenderService::RenderService()
     eastl::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-#ifdef R_APPLE
+#ifdef R_OS_MACOS
     extensions.push_back("VK_KHR_portability_enumeration");
     extensions.push_back("VK_KHR_get_physical_device_properties2");
 #endif
@@ -179,13 +179,13 @@ void RenderService::PostUpdate(float dt)
 {
     PROFILER_CPU_ZONE;
 
-    BeginPass(m_impl->m_presentMaterial);
-    BindMaterial(m_impl->m_presentMaterial);
-    
-    Draw(m_impl->m_presentVB, m_impl->m_presentVB->Descriptor().m_size /
-        Pipeline(m_impl->m_presentMaterial)->Descriptor().m_shader->Descriptor().m_reflection.m_inputLayout.Stride());
-    
-    EndPass(m_impl->m_presentMaterial);
+    // BeginPass(m_impl->m_presentMaterial);
+    // BindMaterial(m_impl->m_presentMaterial);
+    //
+    // Draw(m_impl->m_presentVB, m_impl->m_presentVB->Descriptor().m_size /
+    //     Pipeline(m_impl->m_presentMaterial)->Descriptor().m_shader->Descriptor().m_reflection.m_inputLayout.Stride());
+    //
+    // EndPass(m_impl->m_presentMaterial);
 
     RunOnRenderThread([=]
         {
@@ -531,6 +531,7 @@ void RenderService::CreateWindowResources(glm::ivec2 extent)
 void RenderService::LoadSystemResources()
 {
     auto& matLoader = Instance().Service<ResourceService>().GetLoader<MaterialLoader>();
+    matLoader.LoadSystemResources();
 
     m_impl->m_renderMaterial = matLoader.RenderMaterial();
     m_impl->m_presentMaterial = matLoader.PresentMaterial();
@@ -538,11 +539,11 @@ void RenderService::LoadSystemResources()
     ENGINE_ASSERT(m_impl->m_renderMaterial->Ready());
     ENGINE_ASSERT(m_impl->m_presentMaterial->Ready());
 
-    auto albedoTex = Instance().Service<ResourceService>().Load<TextureResource>("/Textures/brick.png");
-    albedoTex->Wait();
+    // auto albedoTex = Instance().Service<ResourceService>().Load<TextureResource>("/Textures/brick.png");
+    // albedoTex->Wait();
 
-    m_impl->m_renderMaterial->Material()->SetBuffer<CameraUB>(1, rhi::ShaderStage::VERTEX, "CameraUB");
-    m_impl->m_renderMaterial->Material()->Sync();
+    // m_impl->m_renderMaterial->Material()->SetBuffer<CameraUB>(1, rhi::ShaderStage::VERTEX, "CameraUB");
+    // m_impl->m_renderMaterial->Material()->Sync();
 
     rhi::BufferDescriptor presentVBDesc{};
     presentVBDesc.m_size = sizeof(presentVBRaw[0]) * static_cast<uint32_t>(presentVBRaw.size());

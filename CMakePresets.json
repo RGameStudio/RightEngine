@@ -12,6 +12,7 @@
             "hidden": true,
             "cacheVariables": {
                 "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/.build/${presetName}/.bin",
+                "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/.build/${presetName}/.bin",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
         },

@@ -11,24 +11,24 @@ def check_lib_version(package_name, version):
     recipe_ref = RecipeReference(package_name, version)
     return len(conan_api.list.recipe_revisions(recipe_ref)) > 0
 
-def install_custom_packages():
+def install_custom_packages(profile_name: str):
     print("Installing custom packages")
     if not check_lib_version("imguizmo", IMGUIZMO_VERSION):
-        sub.run(f"conan create Scripts/lib/imguizmo/all -s build_type=Debug --version {IMGUIZMO_VERSION}")
-        sub.run(f"conan create Scripts/lib/imguizmo/all -s build_type=Release --version {IMGUIZMO_VERSION}")
+        sub.run(f"poetry run conan create Scripts/lib/imguizmo/all -s build_type=Debug --build=missing --version {IMGUIZMO_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
+        sub.run(f"poetry run conan create Scripts/lib/imguizmo/all -s build_type=Release --build=missing --version {IMGUIZMO_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
 
     if not check_lib_version("rttr", RTTR_VERSION):
-        sub.run(f"conan create Scripts/lib/rttr/all -s build_type=Debug --version {RTTR_VERSION}")
-        sub.run(f"conan create Scripts/lib/rttr/all -s build_type=Release --version {RTTR_VERSION}")
-
-    if not check_lib_version("glslang", GLSLANG_VERSION):
-        sub.run(f"conan create Scripts/lib/glslang/all -s build_type=Debug --version {GLSLANG_VERSION}")
-        sub.run(f"conan create Scripts/lib/glslang/all -s build_type=Release --version {GLSLANG_VERSION}")
-
-    if not check_lib_version("spirv-cross", GLSLANG_VERSION):
-        sub.run(f"conan create Scripts/lib/spirv-cross/all -s build_type=Debug --version {GLSLANG_VERSION}")
-        sub.run(f"conan create Scripts/lib/spirv-cross/all -s build_type=Release --version {GLSLANG_VERSION}")
+        sub.run(f"poetry run conan create Scripts/lib/rttr/all -s build_type=Debug --build=missing --version {RTTR_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
+        sub.run(f"poetry run conan create Scripts/lib/rttr/all -s build_type=Release --build=missing --version {RTTR_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
 
     if not check_lib_version("spirv-tools", GLSLANG_VERSION):
-        sub.run(f"conan create Scripts/lib/spirv-tools/all -s build_type=Debug --version {GLSLANG_VERSION}")
-        sub.run(f"conan create Scripts/lib/spirv-tools/all -s build_type=Release --version {GLSLANG_VERSION}")
+        sub.run(f"poetry run conan create Scripts/lib/spirv-tools/all -s build_type=Debug --build=missing --version {GLSLANG_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
+        sub.run(f"poetry run conan create Scripts/lib/spirv-tools/all -s build_type=Release --build=missing --version {GLSLANG_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
+
+    if not check_lib_version("spirv-cross", GLSLANG_VERSION):
+        sub.run(f"poetry run conan create Scripts/lib/spirv-cross/all -s build_type=Debug --build=missing --version {GLSLANG_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
+        sub.run(f"poetry run conan create Scripts/lib/spirv-cross/all -s build_type=Release --build=missing --version {GLSLANG_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
+
+    if not check_lib_version("glslang", GLSLANG_VERSION):
+        sub.run(f"poetry run conan create Scripts/lib/glslang/all -s build_type=Debug --build=missing --version {GLSLANG_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)
+        sub.run(f"poetry run conan create Scripts/lib/glslang/all -s build_type=Release --build=missing --version {GLSLANG_VERSION} --profile:host={profile_name} --profile:build={profile_name}", shell=True, check=True, text=True)

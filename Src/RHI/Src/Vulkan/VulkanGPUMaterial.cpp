@@ -195,15 +195,15 @@ void VulkanGPUMaterial::AllocateDescriptorPool()
     {
         poolSizes.push_back(bufferPoolSize);
     }
-    else if (texturePoolSize.descriptorCount > 0)
+    if (texturePoolSize.descriptorCount > 0)
     {
         poolSizes.push_back(texturePoolSize);
     }
-    else if (imageStoragePoolSize.descriptorCount > 0)
+    if (imageStoragePoolSize.descriptorCount > 0)
     {
         poolSizes.push_back(imageStoragePoolSize);
     }
-    else if (storageBufferPoolSize.descriptorCount > 0)
+    if (storageBufferPoolSize.descriptorCount > 0)
     {
         poolSizes.push_back(storageBufferPoolSize);
     }

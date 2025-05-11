@@ -5,7 +5,7 @@
 
 #include "Engine/Engine.hpp"
 
-#if defined(R_WIN32)
+#if defined(R_OS_WIN32)
 #define NOMINMAX
 #include <Windows.h>
 #endif
@@ -22,9 +22,9 @@ namespace engine
 
 auto CurrentThreadNativeHandle()
 {
-#if defined(R_WIN32)
+#if defined(R_OS_WIN32)
     return GetCurrentThread();
-#elif defined(R_APPLE)
+#elif defined(R_OS_MACOS)
     return pthread_self();
 #else
     static_assert(false, "Not implemented!");
@@ -43,7 +43,7 @@ void SetThreadName(std::string_view name)
 
     PROFILER_SET_THREAD_NAME(name.data());
 
-#if defined(R_WIN32)
+#if defined(R_OS_WIN32)
     using SetThreadDescriptionPtr = HRESULT(__stdcall*)(HANDLE, PCWSTR);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
@@ -59,10 +59,10 @@ void SetThreadName(std::string_view name)
     const auto wName = core::string::Convert(name);
 
     SetThreadDescription(CurrentThreadNativeHandle(), wName.c_str());
-#elif defined(COREX_PLATFORM_LINUX)
-    pthread_setname_np(currentThreadNativeHandle(), name.data());
-#elif defined(COREX_PLATFORM_APPLE)
+#elif defined(R_OS_MACOS)
     pthread_setname_np(name.data());
+#else
+#error Unsupported platform! You must implement SetThreadName() for it!
 #endif
 }
 

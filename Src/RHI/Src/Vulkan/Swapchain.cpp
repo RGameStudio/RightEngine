@@ -171,7 +171,7 @@ uint32_t Swapchain::AcquireNextImage(VkDevice device, VkSemaphore presentSemapho
 {
     uint32_t imageIndex;
     [[maybe_unused]] const auto res = vkAcquireNextImageKHR(device, m_swapchain, UINT64_MAX, presentSemaphore, (VkFence)nullptr, &imageIndex);
-    RHI_ASSERT(res == VK_SUCCESS);
+    RHI_ASSERT(res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR);
     return imageIndex;
 }
 

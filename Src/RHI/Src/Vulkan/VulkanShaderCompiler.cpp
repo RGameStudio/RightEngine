@@ -218,17 +218,9 @@ core::Blob VulkanShaderCompiler::CompileShader(const std::string& shaderStr, std
     input.language = GLSLANG_SOURCE_GLSL;
     input.stage = RHITypeToGLSLangType(stage);
     input.client = GLSLANG_CLIENT_VULKAN;
-#ifdef R_APPLE
-    input.client_version = GLSLANG_TARGET_VULKAN_1_0;
-#else
-    input.client_version = GLSLANG_TARGET_VULKAN_1_3;
-#endif
+    input.client_version = GLSLANG_TARGET_VULKAN_1_2;
     input.target_language = GLSLANG_TARGET_SPV;
-#ifdef R_APPLE
-    input.target_language_version = GLSLANG_TARGET_SPV_1_0;
-#else
     input.target_language_version = GLSLANG_TARGET_SPV_1_5;
-#endif
     input.code = shaderStr.data();
     input.default_version = 450;
     input.default_profile = GLSLANG_CORE_PROFILE;

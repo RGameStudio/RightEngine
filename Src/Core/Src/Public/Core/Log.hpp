@@ -15,7 +15,7 @@ class CORE_API Logger
 public:
     Logger();
 
-    inline const std::unique_ptr<spdlog::logger>& GetLogger() const;
+    const std::unique_ptr<spdlog::logger>& GetLogger() const;
 
     static Logger& Get();
 
