@@ -1,15 +1,10 @@
 #pragma once
 
-#pragma once
-
-#include <iostream>
-#include <cassert>
+#include <Core/AssertImpl.hpp>
 
 #ifdef R_ENABLE_ASSERTS
-#ifdef R_WIN32
-#define CORE_ASSERT(x) do { if(!(x)) { std::cout << "[CORE] Assertion failed: " << #x << std::endl; assert(x); } } while(false)
-#define CORE_ASSERT_WITH_MESSAGE(x, ...) do { if(!(x)) { std::cout << "[CORE] Assertion failed: " << #x << __VA_ARGS__ << " " << std::endl; assert(x); } } while(false)
-#endif
+#define CORE_ASSERT(x) do { if(!(x)) { core::Assert("CORE", #x); } } while(false)
+#define CORE_ASSERT_WITH_MESSAGE(x, ...) do { if(!(x)) { core::Assert("CORE", #x, __VA_ARGS__); } } while(false)
 #else
 #define CORE_ASSERT(x)
 #define CORE_ASSERT_WITH_MESSAGE(x, ...)

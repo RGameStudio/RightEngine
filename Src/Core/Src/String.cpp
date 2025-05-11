@@ -1,22 +1,31 @@
 #include <Core/String.hpp>
 
-#ifdef R_WIN32
+#ifdef R_OS_WIN32
 #include <windows.h>
 #endif
 
 namespace core::string
 {
 
-std::wstring Convert(std::string_view str)
-{
-#ifdef R_WIN32
+std::wstring Convert(std::string_view str) {
+#ifdef R_OS_WIN32
     const auto count = MultiByteToWideChar(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), nullptr, 0);
     std::wstring result(count, L'\0');
     MultiByteToWideChar(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), result.data(), static_cast<int>(result.size()));
     return result;
+#elif defined(R_OS_MACOS)
+	std::mbstate_t state{};
+	const char *src = str.data();
+	std::size_t len = std::mbsrtowcs(nullptr, &src, 0, &state);
+	if (len == static_cast<std::size_t>(-1)) {
+		return L"";
+	}
+	std::wstring result(len, L'\0');
+	std::mbsrtowcs(&result[0], &src, len, &state);
+	return result;
 #else
-    static_assert(false);
-    return L""
+    static_assert(false, "Platform not supported");
+    return L"";
 #endif
 }
 

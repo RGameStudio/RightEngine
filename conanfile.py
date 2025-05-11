@@ -36,7 +36,6 @@ class RightEngineRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "Src/*"
 
     default_options = {
-        "assimp*:shared": True,
         "assimp*:with_gltf": False,
         "assimp*:with_gltf_exporter": False,
         "assimp*:with_3mf_exporter": False,
@@ -47,7 +46,6 @@ class RightEngineRecipe(ConanFile):
         "assimp*:with_pbrt_exporter": False,
         "assimp*:with_opengex": False,
         "eastl*:shared": False,
-        "glslang*:shared": False,
         "glslang*:build_executables": False,
         "glslang*:spv_remapper": False,
         "glslang*:hlsl": False,
@@ -57,9 +55,22 @@ class RightEngineRecipe(ConanFile):
         "spirv-cross*:msl": False,
         "spirv-cross*:c_api": False,
         "spirv-cross*:util": False,
-        "glfw*:shared": True,
-        "tracy*:shared": True
+        "rttr*:with_rtti": True
     }
+
+    def configure(self):
+        if self.settings.os == "Macos":
+            self.options["assimp"].shared = False
+            self.options["glslang"].shared = False
+            self.options["glfw"].shared = False
+            self.options["tracy"].shared = False
+            self.options["imgui"].shared = False
+            self.options["fmt"].shared = False
+            self.options["spdlog"].shared = False
+        else:
+            self.options["assimp"].shared = True
+            self.options["glfw"].shared = True
+            self.options["tracy"].shared = True
 
     def layout(self):
         cmake_layout(self)

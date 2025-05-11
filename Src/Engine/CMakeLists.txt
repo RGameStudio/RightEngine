@@ -39,7 +39,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_EXPORT)
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/PCH.hpp")
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/.bin)
 
 if (ENGINE_ENABLE_TESTS)
         target_compile_definitions(${PROJECT_NAME} PUBLIC DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL 

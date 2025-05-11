@@ -69,7 +69,7 @@ public:
 
 		if (m_loadersMap.find(type) == m_loadersMap.end())
 		{
-			const auto metadata = type.get_metadata(registration::C_METADATA_KEY).get_value_safe<Loader::MetaInfo>();
+			const auto metadata = type.get_metadata(registration::C_METADATA_KEY).template get_value_safe<Loader::MetaInfo>();
 
 			if (metadata.m_domain != Domain::ALL && (Instance().Cfg().m_domain & metadata.m_domain) != metadata.m_domain)
 			{

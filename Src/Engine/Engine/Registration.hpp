@@ -198,7 +198,7 @@ public:
     {
         static_assert(std::is_base_of_v<engine::ecs::ISystem, T>, "T must be derived of engine::ecs::System");
 
-        this->m_class.constructor<ecs::World*>();
+        this->m_class.template constructor<ecs::World*>();
     }
 
     ~System()

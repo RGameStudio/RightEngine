@@ -16,7 +16,7 @@ namespace core::log::impl
         const auto now = std::chrono::system_clock::now();
         const auto timestamp = std::chrono::system_clock::to_time_t(now);
         struct tm timeinfo;
-#ifdef R_WIN32
+#ifdef R_OS_WIN32
         localtime_s(&timeinfo, &timestamp);
 #else
         localtime_r(&timestamp, &timeinfo);
@@ -33,7 +33,7 @@ namespace core::log::impl
         dupSink->add_sink(std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilename));
         dupSink->add_sink(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
 
-#ifdef R_WIN32
+#ifdef R_OS_WIN32
         auto debugSink = std::make_shared<spdlog::sinks::windebug_sink_mt>();
         debugSink->set_pattern("[%H:%M:%S:%e] [thread %5t] %^[%l] %v%$");
         dupSink->add_sink(std::move(debugSink));

@@ -17,9 +17,11 @@ if (ENGINE_ENABLE_TRACY)
 endif()
 
 if (WIN32)
-    add_compile_definitions(R_WIN32)
+    add_compile_definitions(R_OS_WIN32)
 elseif (APPLE)
-    add_compile_definitions(R_APPLE)
+    add_compile_definitions(R_OS_MACOS)
+else ()
+    message(FATAL_ERROR "Only Windows and macOS operating systems are currently supported")
 endif()
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
@@ -90,6 +92,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             -Wno-unused-const-variable
             -Wno-nullability-extension
             -Wno-unneeded-internal-declaration
+            -Wno-unknown-pragmas
 
             -ffast-math
     )

@@ -89,11 +89,15 @@ void VulkanImguiProvider::End()
         vkTexture->ChangeImageLayout(cmdBuffer, vkTexture->Layout(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     }
 
-    vkCmdBeginRendering(cmdBuffer, &renderingInfo);
+    static auto vkCmdBeginRenderingKHR = reinterpret_cast<PFN_vkCmdBeginRenderingKHR>(vkGetInstanceProcAddr(VulkanDevice::s_ctx.m_instance->Context()->Instance(), "vkCmdBeginRenderingKHR"));
+    static auto vkCmdEndRenderingKHR = reinterpret_cast<PFN_vkCmdEndRenderingKHR>(vkGetInstanceProcAddr(VulkanDevice::s_ctx.m_instance->Context()->Instance(), "vkCmdEndRenderingKHR"));
 
+    RHI_ASSERT(vkCmdEndRenderingKHR);
+    RHI_ASSERT(vkCmdBeginRenderingKHR);
+
+    vkCmdBeginRenderingKHR(cmdBuffer, &renderingInfo);
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
-
-    vkCmdEndRendering(cmdBuffer);
+    vkCmdEndRenderingKHR(cmdBuffer);
 
     for (auto &texture : renderPass->Descriptor().m_colorAttachments) 
     {

@@ -19,12 +19,13 @@ namespace rhi::vulkan
 namespace
 {
 
-const eastl::array<const char*, 2> C_DEVICE_EXTENSIONS =
+const eastl::array<const char*, 4> C_DEVICE_EXTENSIONS =
 {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-#ifdef R_APPLE
-        "VK_KHR_portability_subset",
+#ifdef R_OS_MACOS
+    VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
+    "VK_KHR_portability_subset",
 #endif
 };
 
@@ -149,7 +150,11 @@ bool IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface)
         && extensionsSupported
         && swapchainAdequate
         && supportedFeatures.samplerAnisotropy
-        && deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+        && (deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+#ifdef R_OS_MACOS
+        || deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU
+#endif
+            );
 }
 
 } // namespace unnamed
@@ -341,7 +346,7 @@ void VulkanDevice::EndFrame()
     res = vkResetFences(s_ctx.m_device, 1, &m_fences[m_currentCmdBufferIndex]);
     RHI_ASSERT(res == VK_SUCCESS);
 
-    res = vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, m_fences[m_currentCmdBufferIndex]);
+    res = vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr);
     RHI_ASSERT(res == VK_SUCCESS);
 }
 
@@ -442,7 +447,7 @@ void VulkanDevice::Present()
     presentInfo.waitSemaphoreCount = 1;
     result = vkQueuePresentKHR(m_presentQueue, &presentInfo);
 
-    if (result != VK_SUCCESS)
+    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
     {
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
@@ -463,6 +468,9 @@ void VulkanDevice::BeginPipeline(const std::shared_ptr<Pipeline>& pipeline)
 {
     PROFILER_CPU_ZONE;
 
+    static auto vkCmdBeginRenderingKHR = reinterpret_cast<PFN_vkCmdBeginRenderingKHR>(vkGetInstanceProcAddr(m_context->Instance(), "vkCmdBeginRenderingKHR"));
+
+    RHI_ASSERT(vkCmdBeginRenderingKHR);
     RHI_ASSERT(!pipeline->Descriptor().m_compute);
 
     auto& cmdBuffer = m_cmdBuffers[m_currentCmdBufferIndex];
@@ -492,7 +500,7 @@ void VulkanDevice::BeginPipeline(const std::shared_ptr<Pipeline>& pipeline)
             m_texturesToReset.emplace_back(vkTexture);
         }
 
-        vkCmdBeginRendering(cmdBuffer, &renderingInfo);
+        vkCmdBeginRenderingKHR(cmdBuffer, &renderingInfo);
     }
     else
     {
@@ -526,7 +534,7 @@ void VulkanDevice::BeginPipeline(const std::shared_ptr<Pipeline>& pipeline)
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             srcSubRange);
 
-        vkCmdBeginRendering(cmdBuffer, &renderingInfo);
+        vkCmdBeginRenderingKHR(cmdBuffer, &renderingInfo);
     }
 
     const auto vkPipeline = std::static_pointer_cast<VulkanPipeline>(pipeline);
@@ -552,10 +560,13 @@ void VulkanDevice::EndPipeline(const std::shared_ptr<Pipeline>& pipeline)
 {
     PROFILER_CPU_ZONE;
 
+    static auto vkCmdEndRenderingKHR = reinterpret_cast<PFN_vkCmdEndRenderingKHR>(vkGetInstanceProcAddr(m_context->Instance(), "vkCmdEndRenderingKHR"));
+
+    RHI_ASSERT(vkCmdEndRenderingKHR);
     RHI_ASSERT(!pipeline->Descriptor().m_compute);
 
     auto& cmdBuffer = m_cmdBuffers[m_currentCmdBufferIndex];
-    vkCmdEndRendering(cmdBuffer);
+    vkCmdEndRenderingKHR(cmdBuffer);
 
     for (auto& texture : m_texturesToReset)
     {
@@ -730,6 +741,11 @@ std::shared_ptr<Fence> VulkanDevice::Execute(CommandBuffer buffer)
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmd;
+    submitInfo.waitSemaphoreCount = 0;
+    submitInfo.pWaitSemaphores = nullptr;
+    submitInfo.pWaitDstStageMask = nullptr;
+    submitInfo.signalSemaphoreCount = 0;
+    submitInfo.pSignalSemaphores = nullptr;
 
     auto fence = std::make_shared<Fence>(true);
     fence->Reset();

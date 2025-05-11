@@ -20,7 +20,11 @@ namespace rhi::vulkan
         samplerInfo.maxAnisotropy = VulkanDevice::s_ctx.m_instance->m_parameters.m_maxSamplerAnisotropy;
         samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
         samplerInfo.unnormalizedCoordinates = VK_FALSE;
+#ifdef R_OS_MACOS
+        samplerInfo.compareEnable = VK_FALSE;
+#else
         samplerInfo.compareEnable = VK_TRUE;
+#endif
         samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
         samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
         samplerInfo.mipLodBias = 0.0f;

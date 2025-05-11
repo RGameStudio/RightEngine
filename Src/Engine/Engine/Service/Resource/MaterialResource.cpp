@@ -65,7 +65,7 @@ constexpr std::string_view C_PATH_KEY = "path";
 constexpr std::string_view C_INDEX_KEY = "index";
 
 template<typename T>
-T StringToEnum(std::string_view str)
+T StringToEnum(const std::string& str)
 {
 	const auto type = rttr::type::get<T>();
 	ENGINE_ASSERT(type.is_enumeration());
@@ -319,7 +319,7 @@ MaterialLoader::ParsedMaterial MaterialLoader::ParseJson(std::ifstream& stream)
 	auto j = json::parse(stream);
 
 	mat.m_name = j[C_NAME_KEY];
-	mat.m_shaderPath = io::fs::path(std::string_view(j[C_SHADER_KEY]));
+	mat.m_shaderPath = io::fs::path(std::string(j[C_SHADER_KEY]));
 	mat.m_version = j[C_VERSION_KEY];
 	if (!j[C_COMPUTE_KEY].is_null())
 	{
@@ -343,7 +343,7 @@ MaterialLoader::ParsedMaterial MaterialLoader::ParseJson(std::ifstream& stream)
 		if (attachmentJson.contains(C_DEPENDENCY_KEY))
 		{
 			auto& dep = attachmentJson[C_DEPENDENCY_KEY];
-			attachment.m_dependency = io::fs::path(std::string_view(dep[C_PATH_KEY]));
+			attachment.m_dependency = io::fs::path(std::string(dep[C_PATH_KEY]));
 			attachment.m_depAttachmentIndex = dep[C_INDEX_KEY];
 		}
 	}
@@ -359,7 +359,7 @@ MaterialLoader::ParsedMaterial MaterialLoader::ParseJson(std::ifstream& stream)
 		if (parsedDepthAttachment.contains(C_DEPENDENCY_KEY))
 		{
 			auto& dep = parsedDepthAttachment[C_DEPENDENCY_KEY];
-			depthAttachment.m_dependency = io::fs::path(std::string_view(dep[C_PATH_KEY]));
+			depthAttachment.m_dependency = io::fs::path(std::string(dep[C_PATH_KEY]));
 			depthAttachment.m_depAttachmentIndex = dep[C_INDEX_KEY];
 		}
 

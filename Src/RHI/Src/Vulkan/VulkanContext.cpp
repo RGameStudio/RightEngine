@@ -106,21 +106,15 @@ VulkanContext::VulkanContext(VulkanInitContext&& ctx)
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Right Engine Editor";
-#ifdef R_WIN32
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 3, 0);
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 3, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_3;
-#elif R_APPLE
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
-#endif
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 2, 0);
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 2, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_2;
     appInfo.pEngineName = "Right Engine";
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
-#ifdef R_APPLE
+#ifdef R_OS_MACOS
     createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
     createInfo.enabledExtensionCount = static_cast<uint32_t>(ctx.m_requiredExtensions.size());
