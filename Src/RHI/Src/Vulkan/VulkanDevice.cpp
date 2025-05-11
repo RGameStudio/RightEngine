@@ -346,7 +346,7 @@ void VulkanDevice::EndFrame()
     res = vkResetFences(s_ctx.m_device, 1, &m_fences[m_currentCmdBufferIndex]);
     RHI_ASSERT(res == VK_SUCCESS);
 
-    res = vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, nullptr);
+    res = vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, m_fences[m_currentCmdBufferIndex]);
     RHI_ASSERT(res == VK_SUCCESS);
 }
 

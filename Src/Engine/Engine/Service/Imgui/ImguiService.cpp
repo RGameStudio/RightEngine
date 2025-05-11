@@ -172,6 +172,7 @@ constexpr uint8_t C_DEFAULT_FONT_SIZE = 14;
 namespace engine
 {
 
+// TODO: Implement fix from here https://github.com/ocornut/imgui/issues/5081
 ImguiService::ImguiService()
 {
     IMGUI_CHECKVERSION();

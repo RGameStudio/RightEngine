@@ -179,13 +179,13 @@ void RenderService::PostUpdate(float dt)
 {
     PROFILER_CPU_ZONE;
 
-    // BeginPass(m_impl->m_presentMaterial);
-    // BindMaterial(m_impl->m_presentMaterial);
-    //
-    // Draw(m_impl->m_presentVB, m_impl->m_presentVB->Descriptor().m_size /
-    //     Pipeline(m_impl->m_presentMaterial)->Descriptor().m_shader->Descriptor().m_reflection.m_inputLayout.Stride());
-    //
-    // EndPass(m_impl->m_presentMaterial);
+    BeginPass(m_impl->m_presentMaterial);
+    BindMaterial(m_impl->m_presentMaterial);
+
+    Draw(m_impl->m_presentVB, m_impl->m_presentVB->Descriptor().m_size /
+        Pipeline(m_impl->m_presentMaterial)->Descriptor().m_shader->Descriptor().m_reflection.m_inputLayout.Stride());
+
+    EndPass(m_impl->m_presentMaterial);
 
     RunOnRenderThread([=]
         {
@@ -539,11 +539,11 @@ void RenderService::LoadSystemResources()
     ENGINE_ASSERT(m_impl->m_renderMaterial->Ready());
     ENGINE_ASSERT(m_impl->m_presentMaterial->Ready());
 
-    // auto albedoTex = Instance().Service<ResourceService>().Load<TextureResource>("/Textures/brick.png");
-    // albedoTex->Wait();
+    auto albedoTex = Instance().Service<ResourceService>().Load<TextureResource>("/Textures/brick.png");
+    albedoTex->Wait();
 
-    // m_impl->m_renderMaterial->Material()->SetBuffer<CameraUB>(1, rhi::ShaderStage::VERTEX, "CameraUB");
-    // m_impl->m_renderMaterial->Material()->Sync();
+    m_impl->m_renderMaterial->Material()->SetBuffer<CameraUB>(1, rhi::ShaderStage::VERTEX, "CameraUB");
+    m_impl->m_renderMaterial->Material()->Sync();
 
     rhi::BufferDescriptor presentVBDesc{};
     presentVBDesc.m_size = sizeof(presentVBRaw[0]) * static_cast<uint32_t>(presentVBRaw.size());
