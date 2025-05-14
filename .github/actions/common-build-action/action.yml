@@ -1,0 +1,31 @@
+name: 'Common Build'
+description: 'Generates project for requested platform and builds it'
+
+inputs:
+  conan-profile:
+    description: 'Conan profile for dependencies generation'
+    required: true
+  configuration-preset:
+    description: 'CMake preset name for project configuration'
+    required: true
+  build-preset:
+    description: 'CMake preset name for project build'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare conan environment
+      shell: bash
+      run: |
+        poetry env use python
+        poetry env activate
+        poetry run python Scripts/prepare_env.py ${{ inputs.conan-profile }} true
+
+    - name: Generate solution
+      shell: bash
+      run: cmake --preset ${{ inputs.configuration-preset }}
+
+    - name: Build
+      shell: bash
+      run: cmake --build --preset ${{ inputs.build-preset }} --parallel 4

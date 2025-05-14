@@ -36,8 +36,12 @@ input_dir = sys.argv[1]
 output_dir = sys.argv[2]
 
 try:
-    copy_files(input_dir, output_dir, ".dll")
-    copy_files("Scripts/bin", output_dir, ".exe")
+    if sys.platform == 'win32':
+        copy_files(input_dir, output_dir, ".dll")
+        copy_files("Scripts/bin/win", output_dir, ".exe")
+    else:
+        copy_files(input_dir, output_dir, ".dylib")
+        copy_files("Scripts/bin/macos", output_dir, "")
 
 except sub.CalledProcessError as e:
     print("Error while copying binaries:", e)
