@@ -11,11 +11,15 @@ inputs:
     required: false
   vulkan-version:
     description: 'Vulkan SDK version to install'
-    default: 1.3.268.0
+    default: 1.3.296.0
     required: false
   ninja-version:
     description: 'Ninja version to install'
     default: 1.12.1
+    required: false
+  poetry-version:
+    description: 'poetry version to install'
+    default: 2.1.3
     required: false
 
 runs:
@@ -38,6 +42,7 @@ runs:
         version: ${{ inputs.ninja-version }}
 
     - name: Add ninja_bin to PATH
+      if: runner.os == 'Windows'
       shell: pwsh
       run: |
         # Get the full path to ninja_bin in your workspace
@@ -69,10 +74,40 @@ runs:
         }
 
     - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action@v2.0.6
+      uses: KyleMayes/install-llvm-action@v2.0.7
       with:
         version: ${{ inputs.llvm-version }}
         env: true
+
+    - name: Install and configure Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: ${{ inputs.poetry-version }}
+
+    - name: Poetry setup
+      shell: bash
+      run: |
+        poetry install --no-root
+        poetry env use python
+        poetry env activate
+
+    - name: Add Poetry to PATH
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $poetry_path = "C:\Users\runneradmin\.local\bin"
+        
+        # Add to PATH for current step
+        $env:PATH = "$poetry_path;$env:PATH"
+        
+        # Add to PATH for subsequent steps
+        echo "$poetry_path" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        
+        Write-Output "Added Poetry to PATH: $poetry_path"
+
+    - name: Configure conan remote
+      shell: bash
+      run: poetry run conan remote update conancenter --url https://center2.conan.io
 
     - name: Check conan cache
       id: cache-conan
@@ -84,8 +119,7 @@ runs:
         key: ${{ runner.os }}-conan-cache
 
     - name: Prepare Vulkan SDK
-      uses: humbletim/setup-vulkan-sdk@main
+      uses: humbletim/install-vulkan-sdk@v1.2
       with:
-        vulkan-query-version: ${{ inputs.vulkan-version }}
-        vulkan-components: Vulkan-Headers, Vulkan-Loader
-        vulkan-use-cache: true
+        version: ${{ inputs.vulkan-version }}
+        cache: true

@@ -8,7 +8,7 @@ file(GLOB_RECURSE SOURCE_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/Src/*.h"
         )
 
-find_package(glslang REQUIRED)
+find_package(glslang REQUIRED CONFIG)
 find_package(spirv-cross REQUIRED)
 find_package(imgui REQUIRED)
 find_package(VulkanHeaders REQUIRED)

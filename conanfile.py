@@ -11,7 +11,7 @@ class RightEngineRecipe(ConanFile):
     generators = "CMakeDeps"
     requires = [
         "argparse/3.1",
-        "assimp/5.3.1",
+        "assimp/5.4.3",
         "doctest/2.4.11",
         "eastl/3.21.12",
         "entt/3.13.0",
@@ -29,7 +29,7 @@ class RightEngineRecipe(ConanFile):
         "simdjson/3.10.1",
         "taskflow/3.6.0",
         "tracy/0.10",
-        "vulkan-headers/1.3.268.0",
+        "vulkan-headers/1.3.296.0",
     ]
 
     exports_sources = "CMakeLists.txt", "Src/*"
@@ -67,7 +67,7 @@ class RightEngineRecipe(ConanFile):
             self.options["fmt"].shared = False
             self.options["spdlog"].shared = False
         else:
-            self.options["assimp"].shared = True
+            self.options["assimp"].shared = False
             self.options["glfw"].shared = True
             self.options["tracy"].shared = True
 

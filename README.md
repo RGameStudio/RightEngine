@@ -1,3 +1,5 @@
+![macos workflow](https://github.com/RGameStudio/RightEngine/actions/workflows/macos.yml/badge.svg?branch=development)
+![windows workflow](https://github.com/RGameStudio/RightEngine/actions/workflows/win_x64.yml/badge.svg?branch=development)
 # RightEngine
 
 Vulkan game engine that is in WIP
