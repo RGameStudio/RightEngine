@@ -19,6 +19,7 @@ public:
 
     // Removes image of the internal cache
     virtual void                        RemoveImage(const std::shared_ptr<Texture>& texture) = 0;
+    virtual void                        DestroyFontTexture() = 0;
 
     void                                SetRenderPass(const std::shared_ptr<rhi::RenderPass>& pass) { m_renderPass = pass; }
 

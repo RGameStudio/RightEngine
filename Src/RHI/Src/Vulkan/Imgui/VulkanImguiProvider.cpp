@@ -26,6 +26,8 @@ constexpr VkDescriptorPoolSize poolSizes[] =
         { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 100 }
 };
 
+constexpr VkFormat C_COLOR_ATTACHMENT_FORMAT = VK_FORMAT_B8G8R8A8_UNORM;
+
 } // unnamed
 
 namespace rhi::vulkan::imgui
@@ -45,9 +47,13 @@ VulkanImguiProvider::VulkanImguiProvider() : IImguiProvider()
     initInfo.ImageCount = 3;
     initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     initInfo.UseDynamicRendering = true;
-    initInfo.ColorAttachmentFormat = helpers::Format(rhi::Format::BGRA8_UNORM);
+    initInfo.PipelineRenderingCreateInfo = {};
+    initInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+    initInfo.PipelineRenderingCreateInfo.pNext = nullptr;
+    initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
+    initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &C_COLOR_ATTACHMENT_FORMAT;
 
-    ImGui_ImplVulkan_Init(&initInfo, nullptr);
+    ImGui_ImplVulkan_Init(&initInfo);
 }
 
 VulkanImguiProvider::~VulkanImguiProvider()
@@ -112,7 +118,7 @@ ImTextureID VulkanImguiProvider::Image(const std::shared_ptr<Texture>& texture, 
     RHI_ASSERT(core::IsRenderThread());
 
     std::shared_lock l(m_imageMapMutex);
-    return GetDescriptorSet(texture);
+    return (ImTextureID)GetDescriptorSet(texture);
 }
 
 void VulkanImguiProvider::RemoveImage(const std::shared_ptr<Texture>& texture)
@@ -131,6 +137,11 @@ void VulkanImguiProvider::RemoveImage(const std::shared_ptr<Texture>& texture)
     }
 
     m_imageViewToDescSet.erase(texIt);
+}
+
+void VulkanImguiProvider::DestroyFontTexture()
+{
+    ImGui_ImplVulkan_DestroyFontsTexture();
 }
 
 void VulkanImguiProvider::CreateDescriptorPool()

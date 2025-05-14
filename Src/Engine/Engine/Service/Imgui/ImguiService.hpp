@@ -22,6 +22,7 @@ public:
 private:
     std::string                                 m_configFilePath;
     std::shared_ptr<rhi::imgui::IImguiProvider> m_imguiProvider;
+    ImGuiStyle                                  m_defaultStyle;
 };
 
 } // engine

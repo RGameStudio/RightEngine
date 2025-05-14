@@ -284,7 +284,7 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 	{
 		parsedMat.m_parsedPipeline.m_viewportSize = parsedMat.m_parsedPipeline.m_offscreen ? 
 			Instance().Service<RenderService>().ViewportSize() :
-			Instance().Service<WindowService>().Extent();
+			Instance().Service<WindowService>().FramebufferExtent();
 
 		if (parsedMat.m_parsedPipeline.m_viewportSize.x < 1 ||
 			parsedMat.m_parsedPipeline.m_viewportSize.y < 1 ||

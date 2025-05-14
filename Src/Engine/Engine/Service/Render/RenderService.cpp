@@ -451,7 +451,7 @@ glm::ivec2 RenderService::ViewportSize() const
 
     if ((Instance().Cfg().m_domain & engine::Domain::CLIENT) == engine::Domain::CLIENT)
     {
-        return Instance().Service<WindowService>().Extent();
+        return Instance().Service<WindowService>().FramebufferExtent();
     }
 
     ENGINE_ASSERT(false);
