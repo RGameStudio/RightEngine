@@ -97,7 +97,7 @@ void EditorService::Update(float dt)
 {
     PROFILER_CPU_ZONE;
     
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+    ImGui::DockSpaceOverViewport(ImGui::GetWindowDockID(), ImGui::GetMainViewport());
 
     for (auto& panel : m_impl->m_panels)
     {

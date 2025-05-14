@@ -134,7 +134,7 @@ VulkanContext::VulkanContext(VulkanInitContext&& ctx)
         createInfo.pNext = nullptr;
     }
 
-    if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
+    if (const auto res = vkCreateInstance(&createInfo, nullptr, &m_instance); res != VK_SUCCESS)
     {
         RHI_ASSERT_WITH_MESSAGE(false, "Failed to create vulkan instance!");
     }

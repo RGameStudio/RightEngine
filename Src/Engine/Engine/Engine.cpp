@@ -95,7 +95,7 @@ Engine::Engine(int argCount, char* argPtr[])
         {
             renderService->LoadSystemResources();
 
-            auto extent = Instance().Service<WindowService>().Extent();
+            auto extent = Instance().Service<WindowService>().FramebufferExtent();
             renderService->OnWindowResize(extent);
             renderService->OnResize(extent);
         }

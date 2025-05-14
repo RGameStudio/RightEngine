@@ -165,6 +165,16 @@ constexpr ImVec4 MakeImVec4(const ImVec4& vec, float w)
 	return ImVec4(vec.x, vec.y, vec.x, w);
 }
 
+ImVec2 GetImGuiDisplayScale(GLFWwindow* window)
+{
+	int fbW = 0, fbH = 0;
+	glfwGetFramebufferSize(window, &fbW, &fbH);
+	int winW = 0, winH = 0;
+	glfwGetWindowSize(window, &winW, &winH);
+	// Note: io.DisplayFramebufferScale isn't set yet, so calculate the same value here..
+	return ImVec2(float(fbW) / winW, float(fbH) / winH);
+}
+
 constexpr uint8_t C_DEFAULT_FONT_SIZE = 14;
 
 } // unnamed
@@ -173,14 +183,24 @@ namespace engine
 {
 
 // TODO: Implement fix from here https://github.com/ocornut/imgui/issues/5081
+// Tried a fix from here https://github.com/DanielGibson/texview/blob/762de2b76200515b6ed785f492003c4b9728a41b/src/main.cpp#L1345
 ImguiService::ImguiService()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+
+	m_imguiProvider = rhi::imgui::IImguiProvider::Create();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+	m_defaultStyle = ImGui::GetStyle();
+	io.Fonts->Clear();
+	m_imguiProvider->DestroyFontTexture();
 
     auto& vfs = Instance().Service<io::VirtualFilesystemService>();
-    m_configFilePath = vfs.Absolute("/Config/imgui.ini").generic_u8string();
+#ifdef R_OS_WINDOWS
+	m_configFilePath = vfs.Absolute("/Config/imgui.ini").generic_u8string();
+#else
+    m_configFilePath = vfs.Absolute("/Config/imgui-macos.ini").generic_u8string();
+#endif
 
     io.IniFilename = m_configFilePath.c_str();
     ImGui::LoadIniSettingsFromDisk(io.IniFilename);
@@ -191,12 +211,23 @@ ImguiService::ImguiService()
     auto& ws = Instance().Service<WindowService>();
     const auto displayScale = ws.WindowScale();
 
-    io.DisplaySize = { displayScale.x, displayScale.y };
+	ImVec2 imguiCoordScale = GetImGuiDisplayScale(ws.Window());
+
+	float sx = displayScale.x / imguiCoordScale.x;
+	float sy = displayScale.y / imguiCoordScale.y;
+	float ourImguiScale = glm::max(sx, sy);
+
+	ImFontConfig fontCfg = {};
+	strcpy(fontCfg.Name, "/System/Fonts/Inter-Regular.ttf");
+	float fontSize = C_DEFAULT_FONT_SIZE * ourImguiScale;
+	fontCfg.RasterizerDensity = std::max(imguiCoordScale.x, imguiCoordScale.y);
+	float fontSizeInt = std::max(1.0f, roundf(fontSize));
 
     // TODO: Move that to project config file later
-    io.Fonts->AddFontFromFileTTF(vfs.Absolute("/System/Fonts/Inter-Regular.ttf").generic_u8string().c_str(), C_DEFAULT_FONT_SIZE * displayScale.x);
+    io.Fonts->AddFontFromFileTTF(vfs.Absolute("/System/Fonts/Inter-Regular.ttf").generic_u8string().c_str(), fontSizeInt, &fontCfg);
 
     ImGuiStyle& style = ImGui::GetStyle();
+	style = m_defaultStyle;
 	style.Colors[ImGuiCol_NavHighlight] = FromCommonColor(CommonColor::Orange200);
 	style.Colors[ImGuiCol_Text] = FromCommonColor(CommonColor::Neutral800);
 	style.Colors[ImGuiCol_TextDisabled] = FromCommonColor(CommonColor::Neutral600);
@@ -254,11 +285,9 @@ ImguiService::ImguiService()
 	style.Colors[ImGuiCol_TableBorderLight] = style.Colors[ImGuiCol_Separator];
     style.FrameRounding = 0.0f;
     style.FrameBorderSize = 0.5f;
-    style.ScaleAllSizes(displayScale.x);
+    style.ScaleAllSizes(ourImguiScale);
 
     ImGui_ImplGlfw_InitForVulkan(ws.Window(), true);
-
-    m_imguiProvider = rhi::imgui::IImguiProvider::Create();
 }
 
 ImguiService::~ImguiService()

@@ -128,10 +128,10 @@ void WindowService::PostUpdate(float dt)
     glfwSwapBuffers(m_window);
 }
 
-glm::ivec2 WindowService::Extent() const
+glm::ivec2 WindowService::FramebufferExtent() const
 {
     glm::ivec2 extent;
-    glfwGetWindowSize(m_window, &extent.x, &extent.y);
+    glfwGetFramebufferSize(m_window, &extent.x, &extent.y);
     return extent;
 }
 
