@@ -168,7 +168,6 @@ std::unique_ptr<ecs::World>& WorldService::ParseWorld(const WorldData& data)
             }
             CheckAndAddComponentToEntity<MeshComponent>(uuid, type, componentVariant, world);
             CheckAndAddComponentToEntity<SkyboxComponent>(uuid, type, componentVariant, world);
-            CheckAndAddComponentToEntity<MeshComponent>(uuid, type, componentVariant, world);
             CheckAndAddComponentToEntity<CameraComponent>(uuid, type, componentVariant, world);
         }
     }

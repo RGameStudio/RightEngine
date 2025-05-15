@@ -26,7 +26,10 @@ from custom_packages import install_custom_packages
 install_custom_packages()
 
 if not is_ci:
-    sub.run("C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")
+    try:
+        sub.run("C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")
+    except Exception as e:
+        sub.run("C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Auxiliary\\Build\\vcvars64.bat")
 
 def install_all(profile_name: str, build_type: str):
     print(f"Installing {build_type} conan packages")

@@ -30,7 +30,7 @@ void MenuBarPanel::DrawPanel()
         if (ImGui::MenuItem("Load"))
         {
             auto& ws = Instance().Service<WorldService>();
-            ws.LoadWorld();
+            ws.LoadWorld("/Worlds/test.world");
         }
         ImGui::EndMenu();
     }
