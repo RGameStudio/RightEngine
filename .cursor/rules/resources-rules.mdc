@@ -1,0 +1,9 @@
+---
+description: 
+globs: *.cpp,*.hpp,*.h
+alwaysApply: false
+---
+When you are asked to do something with thre resources files you must follow following rules:
+1. Put everything in one file *Resource.cpp/.hpp
+2. Don't create any helper files until you wasn't asked explictely
+3. Don't forget to register  in RTTR all resource classes that are used for serialization

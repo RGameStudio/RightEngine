@@ -1,0 +1,55 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+		"C_Cpp.intelliSenseEngine": "disabled",
+		"C_Cpp.autocomplete": "disabled",
+		"C_Cpp.configurationWarnings": "enabled",
+		"C_Cpp.enhancedColorization": "enabled",
+		"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+		"cmake.automaticReconfigure": false,
+		"cmake.configureOnOpen": false,
+		"cmake.configureOnEdit": false,
+		"clangd.arguments": [
+		"--query-driver=/opt/homebrew/Cellar/llvm@19/19.1.7/bin/clang,/opt/homebrew/Cellar/llvm@19/19.1.7/bin/clang++",
+		"--pretty",
+		"--background-index",
+		"--background-index-priority=background",
+		"--all-scopes-completion",
+		"--completion-style=detailed",
+		"--clang-tidy",
+		"-j=8"
+		],
+		"clangd.path": "/opt/homebrew/Cellar/llvm@19/19.1.7/bin/clangd",
+		"clangd.restartAfterCrash": true,
+		"files.associations": {
+			"*.h": "cpp",
+			"*.hpp": "cpp",
+			"*.cpp": "cpp",
+			"*.cc": "cpp",
+			"*.c": "c"
+    	},
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/.idea": true
+    	},
+	},
+	"extensions": {
+    "recommendations": [
+			"ms-vscode.cmake-tools",
+			"ms-vscode.cpptools",
+			"ms-vscode.cpptools-extension-pack",
+			"vadimcn.vscode-lldb",
+			"llvm-vs-code-extensions.vscode-clangd",
+			"sumneko.lua"
+    	]
+  	},
+}
