@@ -27,9 +27,24 @@ from custom_packages import install_custom_packages
 
 install_custom_packages(profile_name)
 
+win_sdk_version = "10.0.26100.0"
+
 if not is_ci:
     if is_windows:
-        sub.run("C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat")
+        try:
+            # Try Community edition first
+            sub.run(f"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat {win_sdk_version}")
+        except:
+            try:
+                # Try Professional edition
+                sub.run(f"C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Auxiliary\\Build\\vcvars64.bat {win_sdk_version}") 
+            except:
+                try:
+                    # Try Enterprise edition
+                    sub.run(f"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat {win_sdk_version}")
+                except:
+                    print("Error: Could not find Visual Studio installation")
+                    sys.exit(1)
 
 def install_all(profile_name: str, build_type: str):
     print(f"Installing {build_type} conan packages")

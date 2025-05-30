@@ -4,12 +4,46 @@
 #include <Engine/Service/Resource/Loader.hpp>
 #include <Engine/Service/Render/Material.hpp>
 #include <RHI/Texture.hpp>
+#include <RHI/RenderPass.hpp>
+#include <RHI/RenderPassDescriptor.hpp>
 #include <taskflow/taskflow.hpp>
+#include <optional>
+#include <string>
+#include <cstdint>
 
 namespace engine
 {
 
 class MaterialResource;
+
+// Структуры для сериализации материала
+struct MaterialDependency 
+{
+    std::string path;
+    int32_t index = 0;
+    bool hasDependency = false; // флаг наличия dependency
+};
+
+struct MaterialAttachment 
+{
+    rhi::AttachmentLoadOperation loadOperation = rhi::AttachmentLoadOperation::CLEAR;
+    rhi::AttachmentStoreOperation storeOperation = rhi::AttachmentStoreOperation::STORE;
+    MaterialDependency dependency;
+};
+
+struct MaterialData 
+{
+    std::string name;
+    std::string shader;
+    uint8_t version = 0;
+    bool offscreen = true;
+    std::string depthCompareOp = "LESS";
+    std::string cullMode = "BACK";
+    bool compute = false; // вместо optional<bool>
+    eastl::vector<MaterialAttachment> attachments;
+    MaterialAttachment depthAttachment;
+    bool hasDepthAttachment = false; // флаг наличия depth attachment
+};
 
 class ENGINE_API MaterialLoader final : public Loader
 {
@@ -52,16 +86,8 @@ private:
 		rhi::CullMode								m_cullMode = rhi::CullMode::BACK; // ignored in compute
 	};
 
-	struct ParsedMaterial
-	{
-		io::fs::path		m_shaderPath;
-		std::string			m_name;
-		uint8_t				m_version = std::numeric_limits<uint8_t>::max();
-		ParsedPipelineInfo	m_parsedPipeline;
-	};
-
 	bool							Load(const ResPtr<MaterialResource>& resource, bool forcePipelineRecreation = false);
-	ParsedMaterial					ParseJson(std::ifstream& stream);
+	MaterialData					ParseMaterialData(const std::string& jsonContent);
 	std::shared_ptr<rhi::Pipeline>	AllocatePipeline(ParsedPipelineInfo& info);
 
 	mutable std::mutex																	m_mutex;
