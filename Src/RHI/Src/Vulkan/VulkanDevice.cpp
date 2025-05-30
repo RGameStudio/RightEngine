@@ -19,15 +19,21 @@ namespace rhi::vulkan
 namespace
 {
 
-const eastl::array<const char*, 4> C_DEVICE_EXTENSIONS =
+#ifdef R_OS_WIN32
+const eastl::array<const char*, 2> C_DEVICE_EXTENSIONS =
 {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-    VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-#ifdef R_OS_MACOS
-    VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
-    "VK_KHR_portability_subset",
-#endif
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
 };
+#else
+const eastl::array<const char*, 4> C_DEVICE_EXTENSIONS =
+ {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+        VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
+        "VK_KHR_portability_subset",
+};
+#endif
 
 bool CheckDeviceExtensionSupport(VkPhysicalDevice device)
 {

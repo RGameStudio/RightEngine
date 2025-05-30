@@ -218,7 +218,7 @@ ImguiService::ImguiService()
 	float ourImguiScale = glm::max(sx, sy);
 
 	ImFontConfig fontCfg = {};
-	strcpy(fontCfg.Name, "/System/Fonts/Inter-Regular.ttf");
+	std::strcpy(fontCfg.Name, "/System/Fonts/Inter-Regular.ttf");
 	float fontSize = C_DEFAULT_FONT_SIZE * ourImguiScale;
 	fontCfg.RasterizerDensity = std::max(imguiCoordScale.x, imguiCoordScale.y);
 	float fontSizeInt = std::max(1.0f, roundf(fontSize));

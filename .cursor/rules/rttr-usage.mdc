@@ -1,0 +1,8 @@
+---
+description: 
+globs: *.cpp,*.hpp
+alwaysApply: false
+---
+- Never use std::optional or any other optional type for RTTR
+
+- Never use STL containers for classes that will be used in RTTR, use EASTL ones

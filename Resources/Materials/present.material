@@ -8,7 +8,23 @@
     "attachments": [
         {
             "loadOperation": "CLEAR",
-            "storeOperation": "STORE"
+            "storeOperation": "STORE",
+            "dependency": {
+                "path": "",
+                "index": 0,
+                "hasDependency": false
+            }
         }
-    ]
+    ],
+    "depthAttachment": {
+        "loadOperation": "CLEAR",
+        "storeOperation": "STORE",
+        "dependency": {
+            "path": "",
+            "index": 0,
+            "hasDependency": false
+        }
+    },
+    "hasDepthAttachment": false,
+    "compute": false
 }

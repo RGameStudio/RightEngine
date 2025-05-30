@@ -9,21 +9,22 @@
         {
             "loadOperation": "LOAD",
             "storeOperation": "STORE",
-            "dependency": 
-            {
+            "dependency": {
                 "path": "/System/Materials/pbr.material",
-                "index": 0
+                "index": 0,
+                "hasDependency": true
             }
         }
     ],
-    "depthAttachment": 
-    {
+    "depthAttachment": {
         "loadOperation": "LOAD",
         "storeOperation": "STORE",
-        "dependency": 
-        {
+        "dependency": {
             "path": "/System/Materials/pbr.material",
-            "index": 0
+            "index": 0,
+            "hasDependency": true
         }
-    }
+    },
+    "hasDepthAttachment": true,
+    "compute": false
 }

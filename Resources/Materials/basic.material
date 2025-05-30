@@ -1,5 +1,16 @@
 {
     "name": "basic",
     "version": 0,
-    "shader": "/System/Shaders/basic.glsl"
+    "shader": "/System/Shaders/basic.glsl",
+    "depthAttachment": {
+        "loadOperation": "CLEAR",
+        "storeOperation": "STORE",
+        "dependency": {
+            "path": "",
+            "index": 0,
+            "hasDependency": false
+        }
+    },
+    "hasDepthAttachment": false,
+    "compute": false
 }

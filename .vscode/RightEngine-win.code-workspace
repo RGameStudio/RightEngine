@@ -1,0 +1,55 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+		"cmake.automaticReconfigure": false,
+		"cmake.configureOnOpen": false,
+		"cmake.configureOnEdit": false,
+		"C_Cpp.intelliSenseEngine": "default",
+		"C_Cpp.configurationWarnings": "enabled",
+		"C_Cpp.default.cppStandard": "c++17",
+		"C_Cpp.default.cStandard": "c17",
+		"C_Cpp.default.intelliSenseMode": "windows-clang-x64",
+		"C_Cpp.default.compilerPath": "C:/Program Files/LLVM/bin/clang++.exe",
+		"C_Cpp.errorSquiggles": "enabled",
+		"C_Cpp.autocomplete": "default",
+		"C_Cpp.suggestSnippets": true,
+		"clangd.path": "C:/Program Files/LLVM/bin/clangd.exe",
+		"clangd.arguments": [
+			"--compile-commands-dir=${workspaceFolder}/.build/debug",
+			"--background-index",
+			"--clang-tidy",
+			"--completion-style=detailed",
+			"--header-insertion=iwyu"
+		],
+		"files.associations": {
+			"*.h": "cpp",
+			"*.hpp": "cpp",
+			"*.cpp": "cpp",
+			"*.cc": "cpp",
+			"*.c": "c"
+    	},
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/.idea": true
+    	},
+	},
+	"extensions": {
+    "recommendations": [
+			"ms-vscode.cmake-tools",
+			"ms-vscode.cpptools",
+			"ms-vscode.cpptools-extension-pack",
+			"vadimcn.vscode-lldb",
+			"llvm-vs-code-extensions.vscode-clangd",
+			"sumneko.lua"
+    	]
+  	},
+}

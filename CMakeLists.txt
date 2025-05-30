@@ -18,6 +18,7 @@ endif()
 
 if (WIN32)
     add_compile_definitions(R_OS_WIN32)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 elseif (APPLE)
     add_compile_definitions(R_OS_MACOS)
 else ()

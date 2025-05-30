@@ -5,6 +5,7 @@
 #include <Engine/Service/Filesystem/File.hpp>
 #include <Engine/Service/Render/RenderService.hpp>
 #include <Engine/Service/Window/WindowService.hpp>
+#include <Engine/Serialization/FromJson.hpp>
 #include <RHI/Helpers.hpp>
 #include <nlohmann/json.hpp>
 
@@ -17,6 +18,29 @@ RTTR_REGISTRATION
 
     ResourceLoader<engine::MaterialLoader>("engine::MaterialLoader")
         .Domain(engine::Domain::UI);
+
+    // Регистрация структур для сериализации материала
+    Class<engine::MaterialDependency>("engine::MaterialDependency")
+        .Property("path", &engine::MaterialDependency::path)
+        .Property("index", &engine::MaterialDependency::index)
+        .Property("hasDependency", &engine::MaterialDependency::hasDependency);
+
+    Class<engine::MaterialAttachment>("engine::MaterialAttachment")
+        .Property("loadOperation", &engine::MaterialAttachment::loadOperation)
+        .Property("storeOperation", &engine::MaterialAttachment::storeOperation)
+        .Property("dependency", &engine::MaterialAttachment::dependency);
+
+    Class<engine::MaterialData>("engine::MaterialData")
+        .Property("name", &engine::MaterialData::name)
+        .Property("shader", &engine::MaterialData::shader)
+        .Property("version", &engine::MaterialData::version)
+        .Property("offscreen", &engine::MaterialData::offscreen)
+        .Property("depthCompareOp", &engine::MaterialData::depthCompareOp)
+        .Property("cullMode", &engine::MaterialData::cullMode)
+        .Property("compute", &engine::MaterialData::compute)
+        .Property("attachments", &engine::MaterialData::attachments)
+        .Property("depthAttachment", &engine::MaterialData::depthAttachment)
+        .Property("hasDepthAttachment", &engine::MaterialData::hasDepthAttachment);
 
     rttr::registration::enumeration<rhi::CullMode>("rhi::CullMode")
         (
@@ -49,21 +73,6 @@ RTTR_REGISTRATION
 namespace
 {
 
-constexpr std::string_view C_NAME_KEY = "name";
-constexpr std::string_view C_SHADER_KEY = "shader";
-constexpr std::string_view C_VERSION_KEY = "version";
-constexpr std::string_view C_OFFSCREEN_KEY = "offscreen";
-constexpr std::string_view C_DEPTH_COMPARE_KEY = "depthCompareOp";
-constexpr std::string_view C_CULL_MODE_KEY = "cullMode";
-constexpr std::string_view C_COMPUTE_KEY = "compute";
-constexpr std::string_view C_ATTACHMENTS_KEY = "attachments";
-constexpr std::string_view C_DEPTH_ATTACHMENT_KEY = "depthAttachment";
-constexpr std::string_view C_LOAD_OPERATION_KEY = "loadOperation";
-constexpr std::string_view C_STORE_OPERATION_KEY = "storeOperation";
-constexpr std::string_view C_DEPENDENCY_KEY = "dependency";
-constexpr std::string_view C_PATH_KEY = "path";
-constexpr std::string_view C_INDEX_KEY = "index";
-
 template<typename T>
 T StringToEnum(const std::string& str)
 {
@@ -81,8 +90,6 @@ T StringToEnum(const std::string& str)
 
 namespace engine
 {
-
-using namespace nlohmann;
 
 MaterialLoader::MaterialLoader()
 {
@@ -147,7 +154,7 @@ void MaterialLoader::LoadSystemResources()
 	m_presentMaterial->Wait();
 }
 
-	const ResPtr<rhi::Pipeline>& MaterialLoader::Pipeline(const ResPtr<MaterialResource>& res) const
+const ResPtr<rhi::Pipeline>& MaterialLoader::Pipeline(const ResPtr<MaterialResource>& res) const
 {
 	std::lock_guard l(m_mutex);
 
@@ -220,12 +227,71 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 		return false;
 	}
 
-	auto parsedMat = ParseJson(file);
+	// Читаем весь файл в строку
+	std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	file.close();
 
-	if (parsedMat.m_name.empty())
+	// Используем FromJson API для парсинга
+	std::string errorBuffer;
+	auto materialDataOpt = FromJsonString<MaterialData>(jsonContent, &errorBuffer);
+
+	if (!materialDataOpt.has_value())
 	{
+		core::log::error("[MaterialLoader] Failed to parse material '{}': {}", resource->SourcePath().generic_u8string(), errorBuffer);
 		return false;
 	}
+
+	auto materialData = materialDataOpt.value();
+
+	if (materialData.name.empty())
+	{
+		core::log::error("[MaterialLoader] Material name is empty in '{}'", resource->SourcePath().generic_u8string());
+		return false;
+	}
+
+	// Создаем ParsedPipelineInfo из MaterialData
+	ParsedPipelineInfo parsedPipeline;
+	parsedPipeline.m_compute = materialData.compute;
+	parsedPipeline.m_offscreen = materialData.offscreen;
+	parsedPipeline.m_depthCompareOp = StringToEnum<rhi::CompareOp>(materialData.depthCompareOp);
+	parsedPipeline.m_cullMode = StringToEnum<rhi::CullMode>(materialData.cullMode);
+
+	// Конвертируем attachment'ы
+	for (const auto& attachmentData : materialData.attachments)
+	{
+		auto& attachment = parsedPipeline.m_attachments.emplace_back();
+		attachment.m_descriptor.m_clearValue = {};
+		attachment.m_descriptor.m_loadOperation = attachmentData.loadOperation;
+		attachment.m_descriptor.m_storeOperation = attachmentData.storeOperation;
+
+		if (attachmentData.dependency.hasDependency)
+		{
+			const auto& dep = attachmentData.dependency;
+			attachment.m_dependency = io::fs::path(dep.path);
+			attachment.m_depAttachmentIndex = dep.index;
+		}
+	}
+
+	// Конвертируем depth attachment
+	if (materialData.hasDepthAttachment)
+	{
+		const auto& depthData = materialData.depthAttachment;
+		LoadAttachmentDescriptor depthAttachment;
+		depthAttachment.m_descriptor.m_clearValue = {};
+		depthAttachment.m_descriptor.m_loadOperation = depthData.loadOperation;
+		depthAttachment.m_descriptor.m_storeOperation = depthData.storeOperation;
+
+		if (depthData.dependency.hasDependency)
+		{
+			const auto& dep = depthData.dependency;
+			depthAttachment.m_dependency = io::fs::path(dep.path);
+			depthAttachment.m_depAttachmentIndex = dep.index;
+		}
+
+		parsedPipeline.m_depthAttachment = depthAttachment;
+	}
+
+	io::fs::path shaderPath = io::fs::path(materialData.shader);
 
 	std::shared_ptr<rhi::Shader> shader;
 
@@ -241,11 +307,11 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 	{
 		auto& rs = Instance().Service<RenderService>();
 
-		const auto shaderType = parsedMat.m_shaderPath.extension() == ".glsl" ? rhi::ShaderType::FX : rhi::ShaderType::COMPUTE;
+		const auto shaderType = shaderPath.extension() == ".glsl" ? rhi::ShaderType::FX : rhi::ShaderType::COMPUTE;
 
 		const auto shaderData = rs.RunOnRenderThreadWait([&]()
 			{
-				return m_shaderCompiler->Compile(vfs.Absolute(parsedMat.m_shaderPath).generic_u8string(), shaderType);
+				return m_shaderCompiler->Compile(vfs.Absolute(shaderPath).generic_u8string(), shaderType);
 			});
 
 		if (!shaderData.m_valid)
@@ -254,19 +320,19 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 		}
 
 		rhi::ShaderDescriptor desc;
-		desc.m_name = parsedMat.m_name;
+		desc.m_name = materialData.name;
 		desc.m_type = shaderType;
 		desc.m_reflection = shaderData.m_reflection;
 		desc.m_blobByStage = shaderData.m_stageBlob;
-		desc.m_path = parsedMat.m_shaderPath.generic_u8string();
+		desc.m_path = shaderPath.generic_u8string();
 
 		shader = rs.CreateShader(desc);
 
-		parsedMat.m_parsedPipeline.m_shader = shader;
+		parsedPipeline.m_shader = shader;
 
 		{
 			std::lock_guard l(m_mutex);
-			m_shaderCache[parsedMat.m_shaderPath] = shader;
+			m_shaderCache[shaderPath] = shader;
 		}
 	}
 
@@ -282,22 +348,22 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 
 	if (!hasPipeline || forcePipelineRecreation)
 	{
-		parsedMat.m_parsedPipeline.m_viewportSize = parsedMat.m_parsedPipeline.m_offscreen ? 
+		parsedPipeline.m_viewportSize = parsedPipeline.m_offscreen ? 
 			Instance().Service<RenderService>().ViewportSize() :
 			Instance().Service<WindowService>().FramebufferExtent();
 
-		if (parsedMat.m_parsedPipeline.m_viewportSize.x < 1 ||
-			parsedMat.m_parsedPipeline.m_viewportSize.y < 1 ||
-			parsedMat.m_parsedPipeline.m_viewportSize.x > 65536 ||
-			parsedMat.m_parsedPipeline.m_viewportSize.y > 65536)
+		if (parsedPipeline.m_viewportSize.x < 1 ||
+			parsedPipeline.m_viewportSize.y < 1 ||
+			parsedPipeline.m_viewportSize.x > 65536 ||
+			parsedPipeline.m_viewportSize.y > 65536)
 		{
-			core::log::warning("[MaterialLoader] Viewport size is out of bounds: {}x{}", parsedMat.m_parsedPipeline.m_viewportSize.x,
-				parsedMat.m_parsedPipeline.m_viewportSize.y);
+			core::log::warning("[MaterialLoader] Viewport size is out of bounds: {}x{}", parsedPipeline.m_viewportSize.x,
+				parsedPipeline.m_viewportSize.y);
 		}
 
-		parsedMat.m_parsedPipeline.m_viewportSize = glm::clamp(parsedMat.m_parsedPipeline.m_viewportSize, glm::ivec2(1, 1), glm::ivec2(65536, 65536));
+		parsedPipeline.m_viewportSize = glm::clamp(parsedPipeline.m_viewportSize, glm::ivec2(1, 1), glm::ivec2(65536, 65536));
 
-		m_shaderToPipeline[shader] = AllocatePipeline(parsedMat.m_parsedPipeline);
+		m_shaderToPipeline[shader] = AllocatePipeline(parsedPipeline);
 	}
 
 	resource->m_material = std::make_shared<render::Material>(shader);
@@ -312,64 +378,18 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 	return true;
 }
 
-MaterialLoader::ParsedMaterial MaterialLoader::ParseJson(std::ifstream& stream)
+MaterialData MaterialLoader::ParseMaterialData(const std::string& jsonContent)
 {
-	ParsedMaterial mat{};
+	std::string errorBuffer;
+	auto materialDataOpt = FromJsonString<MaterialData>(jsonContent, &errorBuffer);
 
-	auto j = json::parse(stream);
-
-	mat.m_name = j[C_NAME_KEY];
-	mat.m_shaderPath = io::fs::path(std::string(j[C_SHADER_KEY]));
-	mat.m_version = j[C_VERSION_KEY];
-	if (!j[C_COMPUTE_KEY].is_null())
+	if (!materialDataOpt.has_value())
 	{
-		mat.m_parsedPipeline.m_compute = true;
-		return mat;
-	}
-	mat.m_parsedPipeline.m_offscreen = j[C_OFFSCREEN_KEY];
-	mat.m_parsedPipeline.m_depthCompareOp = StringToEnum<rhi::CompareOp>(j[C_DEPTH_COMPARE_KEY]);
-	mat.m_parsedPipeline.m_cullMode = StringToEnum<rhi::CullMode>(j[C_CULL_MODE_KEY]);
-
-	const auto& attachments = j[C_ATTACHMENTS_KEY];
-	ENGINE_ASSERT(attachments.is_array());
-
-	for (auto& attachmentJson : attachments)
-	{
-		auto& attachment = mat.m_parsedPipeline.m_attachments.emplace_back();
-		attachment.m_descriptor.m_clearValue = {};
-		attachment.m_descriptor.m_loadOperation = StringToEnum<rhi::AttachmentLoadOperation>(attachmentJson[C_LOAD_OPERATION_KEY]);
-		attachment.m_descriptor.m_storeOperation = StringToEnum<rhi::AttachmentStoreOperation>(attachmentJson[C_STORE_OPERATION_KEY]);
-
-		if (attachmentJson.contains(C_DEPENDENCY_KEY))
-		{
-			auto& dep = attachmentJson[C_DEPENDENCY_KEY];
-			attachment.m_dependency = io::fs::path(std::string(dep[C_PATH_KEY]));
-			attachment.m_depAttachmentIndex = dep[C_INDEX_KEY];
-		}
+		core::log::error("[MaterialLoader] Failed to parse material data: {}", errorBuffer);
+		return {};
 	}
 
-	const auto& parsedDepthAttachment = j[C_DEPTH_ATTACHMENT_KEY];
-	if (!parsedDepthAttachment.is_null() && parsedDepthAttachment.is_object())
-	{
-		LoadAttachmentDescriptor depthAttachment;
-		depthAttachment.m_descriptor.m_clearValue = {};
-		depthAttachment.m_descriptor.m_loadOperation = StringToEnum<rhi::AttachmentLoadOperation>(parsedDepthAttachment[C_LOAD_OPERATION_KEY]);
-		depthAttachment.m_descriptor.m_storeOperation = StringToEnum<rhi::AttachmentStoreOperation>(parsedDepthAttachment[C_STORE_OPERATION_KEY]);
-
-		if (parsedDepthAttachment.contains(C_DEPENDENCY_KEY))
-		{
-			auto& dep = parsedDepthAttachment[C_DEPENDENCY_KEY];
-			depthAttachment.m_dependency = io::fs::path(std::string(dep[C_PATH_KEY]));
-			depthAttachment.m_depAttachmentIndex = dep[C_INDEX_KEY];
-		}
-
-		mat.m_parsedPipeline.m_depthAttachment = depthAttachment;
-	}
-
-	ENGINE_ASSERT(mat.m_version != std::numeric_limits<uint8_t>::max());
-
-	return mat;
-	
+	return materialDataOpt.value();
 }
 
 std::shared_ptr<rhi::Pipeline> MaterialLoader::AllocatePipeline(ParsedPipelineInfo& info)

@@ -1,0 +1,39 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/Src/**",
+                "${workspaceFolder}/.build/debug/conan/**",
+                "${workspaceFolder}/.build/release/conan/**",
+                "C:/Program Files/LLVM/include/**",
+                "C:/Program Files (x86)/Windows Kits/10/Include/*/ucrt/**",
+                "C:/Program Files (x86)/Windows Kits/10/Include/*/um/**",
+                "C:/Program Files (x86)/Windows Kits/10/Include/*/shared/**",
+                "C:/Program Files (x86)/Windows Kits/10/Include/*/winrt/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "WIN32",
+                "_WIN32",
+                "R_OS_WIN32",
+                "_CRT_SECURE_NO_WARNINGS",
+                "R_ENABLE_ASSERTS",
+                "R_ENABLE_TRACY",
+                "TRACY_ENABLE",
+                "__clang__"
+            ],
+            "windowsSdkVersion": "10.0.26100.0",
+            "compilerPath": "C:/Program Files/LLVM/bin/clang++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-clang-x64",
+            "compileCommands": "${workspaceFolder}/.build/debug/compile_commands.json",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ]
+} 

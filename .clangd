@@ -1,0 +1,40 @@
+CompileFlags:
+  Add:
+    - -std=c++17
+    - -Wall
+    - -Wextra
+    - -DR_OS_WIN32
+    - -D_CRT_SECURE_NO_WARNINGS
+    - -DR_ENABLE_ASSERTS
+    - -DR_ENABLE_TRACY
+    - -DTRACY_ENABLE
+  Remove:
+    - -W*
+    - -fcoroutines-ts
+
+Index:
+  Background: Build
+  StandardLibrary: Yes
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+
+Hover:
+  ShowAKA: Yes
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - readability-*
+      - performance-*
+      - modernize-*
+      - bugprone-*
+    Remove:
+      - readability-magic-numbers
+      - readability-uppercase-literal-suffix
+      - modernize-use-trailing-return-type
+
+Completion:
+  AllScopes: Yes 

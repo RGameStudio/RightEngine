@@ -36,6 +36,7 @@ Follow the official ISO C++ standards and guidelines for best practices in moder
 - Create a core namespace for foundational components
 - Create a engine namespace for engine functions
 - Use RTTR lib API if you want to register class for serialization or deserialization, for examples see [SerializationTest.cpp](mdc:Src/Engine/Engine/Tests/SerializationTest.cpp)
+- You should store all unit tests for engine in Src/Engine/Engine/Tests
 
 ## Code Style
 
