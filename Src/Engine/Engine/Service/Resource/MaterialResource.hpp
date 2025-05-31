@@ -15,13 +15,21 @@ namespace engine
 {
 
 class MaterialResource;
+class TextureResource;
 
 // Структуры для сериализации материала
 struct MaterialDependency 
 {
-    std::string path;
+    io::fs::path path;
     int32_t index = 0;
     bool hasDependency = false; // флаг наличия dependency
+};
+
+struct MaterialTextureSlot
+{
+    io::fs::path texturePath;
+    uint8_t slot = 0;
+    uint8_t mipLevel = 0;
 };
 
 struct MaterialAttachment 
@@ -34,7 +42,7 @@ struct MaterialAttachment
 struct MaterialData 
 {
     std::string name;
-    std::string shader;
+    io::fs::path shader;
     uint8_t version = 0;
     bool offscreen = true;
     std::string depthCompareOp = "LESS";
@@ -43,6 +51,7 @@ struct MaterialData
     eastl::vector<MaterialAttachment> attachments;
     MaterialAttachment depthAttachment;
     bool hasDepthAttachment = false; // флаг наличия depth attachment
+    eastl::vector<MaterialTextureSlot> textureSlots; // текстурные слоты
 };
 
 class ENGINE_API MaterialLoader final : public Loader
@@ -98,6 +107,7 @@ private:
 	eastl::unordered_map<fs::path, ResPtr<MaterialResource>>							m_cache;
 	ResPtr<MaterialResource>															m_renderMaterial;
 	ResPtr<MaterialResource>															m_presentMaterial;
+	ResPtr<TextureResource>																m_errorTexture;
 };
 
 class ENGINE_API MaterialResource final : public Resource<MaterialResource>

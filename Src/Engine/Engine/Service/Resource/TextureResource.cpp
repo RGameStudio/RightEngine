@@ -107,6 +107,18 @@ ResPtr<IResource> TextureLoader::Get(const fs::path& path) const
 	return {};
 }
 
+void TextureLoader::LoadSystemResources()
+{
+	auto& rs = Instance().Service<ResourceService>();
+
+	auto error = rs.Load<TextureResource>("/System/Textures/error.png");
+	auto black = rs.Load<TextureResource>("/System/Textures/black.png");
+	auto white = rs.Load<TextureResource>("/System/Textures/white.png");
+	error->Wait();
+	black->Wait();
+	white->Wait();
+}
+
 bool TextureLoader::Load(const ResPtr<TextureResource>& resource)
 {
 	io::File file(resource->m_srcPath);

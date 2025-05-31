@@ -5,6 +5,8 @@
 #include <Engine/Service/Filesystem/File.hpp>
 #include <Engine/Service/Render/RenderService.hpp>
 #include <Engine/Service/Window/WindowService.hpp>
+#include <Engine/Service/Resource/ResourceService.hpp>
+#include <Engine/Service/Resource/TextureResource.hpp>
 #include <Engine/Serialization/FromJson.hpp>
 #include <RHI/Helpers.hpp>
 #include <nlohmann/json.hpp>
@@ -25,6 +27,11 @@ RTTR_REGISTRATION
         .Property("index", &engine::MaterialDependency::index)
         .Property("hasDependency", &engine::MaterialDependency::hasDependency);
 
+    Class<engine::MaterialTextureSlot>("engine::MaterialTextureSlot")
+        .Property("texturePath", &engine::MaterialTextureSlot::texturePath)
+        .Property("slot", &engine::MaterialTextureSlot::slot)
+        .Property("mipLevel", &engine::MaterialTextureSlot::mipLevel);
+
     Class<engine::MaterialAttachment>("engine::MaterialAttachment")
         .Property("loadOperation", &engine::MaterialAttachment::loadOperation)
         .Property("storeOperation", &engine::MaterialAttachment::storeOperation)
@@ -40,7 +47,8 @@ RTTR_REGISTRATION
         .Property("compute", &engine::MaterialData::compute)
         .Property("attachments", &engine::MaterialData::attachments)
         .Property("depthAttachment", &engine::MaterialData::depthAttachment)
-        .Property("hasDepthAttachment", &engine::MaterialData::hasDepthAttachment);
+        .Property("hasDepthAttachment", &engine::MaterialData::hasDepthAttachment)
+        .Property("textureSlots", &engine::MaterialData::textureSlots);
 
     rttr::registration::enumeration<rhi::CullMode>("rhi::CullMode")
         (
@@ -147,11 +155,14 @@ ResPtr<IResource> MaterialLoader::Get(const fs::path& path) const
 
 void MaterialLoader::LoadSystemResources()
 {
+	auto& rs = Instance().Service<ResourceService>();
 	m_renderMaterial = std::static_pointer_cast<MaterialResource>(Load("/System/Materials/pbr.material"));
 	m_presentMaterial = std::static_pointer_cast<MaterialResource>(Load("/System/Materials/present.material"));
+	m_errorTexture = rs.Load<TextureResource>("/System/Textures/error.png");
 
 	m_renderMaterial->Wait();
 	m_presentMaterial->Wait();
+	m_errorTexture->Wait();
 }
 
 const ResPtr<rhi::Pipeline>& MaterialLoader::Pipeline(const ResPtr<MaterialResource>& res) const
@@ -267,7 +278,7 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 		if (attachmentData.dependency.hasDependency)
 		{
 			const auto& dep = attachmentData.dependency;
-			attachment.m_dependency = io::fs::path(dep.path);
+			attachment.m_dependency = dep.path;
 			attachment.m_depAttachmentIndex = dep.index;
 		}
 	}
@@ -284,14 +295,14 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 		if (depthData.dependency.hasDependency)
 		{
 			const auto& dep = depthData.dependency;
-			depthAttachment.m_dependency = io::fs::path(dep.path);
+			depthAttachment.m_dependency = dep.path;
 			depthAttachment.m_depAttachmentIndex = dep.index;
 		}
 
 		parsedPipeline.m_depthAttachment = depthAttachment;
 	}
 
-	io::fs::path shaderPath = io::fs::path(materialData.shader);
+	io::fs::path shaderPath = materialData.shader;
 
 	std::shared_ptr<rhi::Shader> shader;
 
@@ -372,6 +383,26 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 	{
 		rttr::type type = rttr::type::get_by_name(fmt::format("engine::{}", buffer.m_name));
 		resource->m_material->SetBuffer(type, slot, buffer.m_stage, buffer.m_name);
+	}
+
+	auto& resourceService = Instance().Service<ResourceService>();
+	for (const auto& textureSlot : materialData.textureSlots)
+	{
+		if (!textureSlot.texturePath.empty())
+		{
+			auto textureResource = resourceService.Load<TextureResource>(textureSlot.texturePath, true);
+			textureResource->Wait();
+
+			if (textureResource->Ready())
+			{
+				resource->m_material->SetTexture(textureResource->Texture(), textureSlot.slot, textureSlot.mipLevel);
+			}
+			else
+			{
+				core::log::warning("[MaterialLoader] Failed to load texture '{}' for material '{}'",
+					textureSlot.texturePath.generic_u8string(), materialData.name);
+			}
+		}
 	}
 
 	resource->m_material->Sync();

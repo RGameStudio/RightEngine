@@ -21,7 +21,7 @@ public:
 
 	virtual ResPtr<IResource>	Get(const fs::path& path) const override;
 
-	virtual void				LoadSystemResources() override {}
+	virtual void				LoadSystemResources() override;
 
 private:
 	bool Load(const ResPtr<TextureResource>& resource);
