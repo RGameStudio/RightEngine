@@ -7,3 +7,4 @@ When you are asked to do something with thre resources files you must follow fol
 1. Put everything in one file *Resource.cpp/.hpp
 2. Don't create any helper files until you wasn't asked explictely
 3. Don't forget to register  in RTTR all resource classes that are used for serialization
+4. When you are loading another resource during loading of the other resource use immediate resource loading mode ResourceService::Load(const io::fs::path& path, bool immediate = false)

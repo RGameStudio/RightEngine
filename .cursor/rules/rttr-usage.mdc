@@ -4,5 +4,6 @@ globs: *.cpp,*.hpp
 alwaysApply: false
 ---
 - Never use std::optional or any other optional type for RTTR
-
 - Never use STL containers for classes that will be used in RTTR, use EASTL ones
+
+- If you need to add a path to a resource in class tht you are going to register in RTTR please use io::fs::path

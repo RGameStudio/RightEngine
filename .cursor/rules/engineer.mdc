@@ -335,7 +335,7 @@ Never use custom serialization/deserialization use [ToJson.hpp](mdc:Src/Engine/E
 
 ## Documentation
 
-- Use Russian language for documenatation and comments
+- Use English language for documenatation and comments
 - Write clear comments for classes, methods, and critical logic
 - Use Doxygen for generating API documentation
 - Document assumptions, constraints, and expected behavior of code

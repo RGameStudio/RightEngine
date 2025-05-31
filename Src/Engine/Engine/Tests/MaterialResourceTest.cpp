@@ -25,7 +25,7 @@ TEST_CASE("Material serialization/deserialization tests")
         CHECK(deserializedOpt.has_value());
 
         auto deserialized = deserializedOpt.value();
-        CHECK_EQ(deserialized.path, "/System/Materials/pbr.material");
+        CHECK_EQ(deserialized.path.generic_string(), "/System/Materials/pbr.material");
         CHECK_EQ(deserialized.index, 0);
         CHECK_EQ(deserialized.hasDependency, true);
     }
@@ -130,7 +130,7 @@ TEST_CASE("Material serialization/deserialization tests")
 
         auto deserialized = deserializedOpt.value();
         CHECK_EQ(deserialized.name, "skybox");
-        CHECK_EQ(deserialized.shader, "/System/Shaders/skybox.glsl");
+        CHECK_EQ(deserialized.shader.generic_string(), "/System/Shaders/skybox.glsl");
         CHECK_EQ(deserialized.version, 0);
         CHECK_EQ(deserialized.offscreen, true);
         CHECK_EQ(deserialized.depthCompareOp, "LESS_OR_EQUAL");
@@ -231,5 +231,159 @@ TEST_CASE("Material serialization/deserialization tests")
         CHECK_EQ(depthAttachment.dependency.hasDependency, true);
         CHECK_EQ(depthAttachment.dependency.path, "/System/Materials/pbr.material");
         CHECK_EQ(depthAttachment.dependency.index, 0);
+    }
+
+    SUBCASE("MaterialTextureSlot serialization")
+    {
+        MaterialTextureSlot textureSlot;
+        textureSlot.texturePath = "/System/Textures/white.png";
+        textureSlot.slot = 3;
+        textureSlot.mipLevel = 0;
+
+        auto json = ToJsonObject(textureSlot);
+
+        CHECK_EQ(json["texturePath"], "/System/Textures/white.png");
+        CHECK_EQ(json["slot"], 3);
+        CHECK_EQ(json["mipLevel"], 0);
+
+        auto deserializedOpt = FromJsonString<MaterialTextureSlot>(json.dump());
+        CHECK(deserializedOpt.has_value());
+
+        auto deserialized = deserializedOpt.value();
+        CHECK_EQ(deserialized.texturePath.generic_string(), "/System/Textures/white.png");
+        CHECK_EQ(deserialized.slot, 3);
+        CHECK_EQ(deserialized.mipLevel, 0);
+    }
+
+    SUBCASE("MaterialData with texture slots")
+    {
+        MaterialData materialData;
+        materialData.name = "pbr_material";
+        materialData.shader = "/System/Shaders/pbr.glsl";
+        materialData.version = 0;
+        materialData.offscreen = true;
+        materialData.depthCompareOp = "LESS";
+        materialData.cullMode = "BACK";
+        materialData.compute = false;
+        
+        // Добавляем текстурные слоты
+        MaterialTextureSlot diffuseSlot;
+        diffuseSlot.texturePath = "/System/Textures/white.png";
+        diffuseSlot.slot = 3;
+        diffuseSlot.mipLevel = 0;
+        materialData.textureSlots.push_back(diffuseSlot);
+        
+        MaterialTextureSlot normalSlot;
+        normalSlot.texturePath = "/System/Textures/normal_map.png";
+        normalSlot.slot = 4;
+        normalSlot.mipLevel = 0;
+        materialData.textureSlots.push_back(normalSlot);
+        
+        MaterialTextureSlot brdfSlot;
+        brdfSlot.texturePath = "/System/Textures/brdf_lut.tga";
+        brdfSlot.slot = 10;
+        brdfSlot.mipLevel = 0;
+        materialData.textureSlots.push_back(brdfSlot);
+
+        auto json = ToJsonObject(materialData);
+
+        CHECK_EQ(json["name"], "pbr_material");
+        CHECK_EQ(json["shader"], "/System/Shaders/pbr.glsl");
+        CHECK(json["textureSlots"].is_array());
+        CHECK_EQ(json["textureSlots"].size(), 3);
+        
+        // Проверяем текстурные слоты
+        CHECK_EQ(json["textureSlots"][0]["texturePath"], "/System/Textures/white.png");
+        CHECK_EQ(json["textureSlots"][0]["slot"], 3);
+        CHECK_EQ(json["textureSlots"][1]["texturePath"], "/System/Textures/normal_map.png");
+        CHECK_EQ(json["textureSlots"][1]["slot"], 4);
+        CHECK_EQ(json["textureSlots"][2]["texturePath"], "/System/Textures/brdf_lut.tga");
+        CHECK_EQ(json["textureSlots"][2]["slot"], 10);
+
+        auto deserializedOpt = FromJsonString<MaterialData>(json.dump());
+        CHECK(deserializedOpt.has_value());
+
+        auto deserialized = deserializedOpt.value();
+        CHECK_EQ(deserialized.name, "pbr_material");
+        CHECK_EQ(deserialized.textureSlots.size(), 3);
+        CHECK_EQ(deserialized.textureSlots[0].texturePath.generic_string(), "/System/Textures/white.png");
+        CHECK_EQ(deserialized.textureSlots[0].slot, 3);
+        CHECK_EQ(deserialized.textureSlots[1].texturePath.generic_string(), "/System/Textures/normal_map.png");
+        CHECK_EQ(deserialized.textureSlots[1].slot, 4);
+        CHECK_EQ(deserialized.textureSlots[2].texturePath.generic_string(), "/System/Textures/brdf_lut.tga");
+        CHECK_EQ(deserialized.textureSlots[2].slot, 10);
+    }
+
+    SUBCASE("Parse material with texture slots from real file format")
+    {
+        std::string pbrMaterialJson = R"({
+            "name": "pbr",
+            "version": 0,
+            "shader": "/System/Shaders/pbr.glsl",
+            "offscreen": true,
+            "depthCompareOp": "LESS",
+            "cullMode": "BACK",
+            "compute": false,
+            "attachments": [
+                {
+                    "loadOperation": "CLEAR",
+                    "storeOperation": "STORE",
+                    "dependency": {
+                        "path": "",
+                        "index": 0,
+                        "hasDependency": false
+                    }
+                }
+            ],
+            "depthAttachment": {
+                "loadOperation": "CLEAR",
+                "storeOperation": "STORE",
+                "dependency": {
+                    "path": "",
+                    "index": 0,
+                    "hasDependency": false
+                }
+            },
+            "hasDepthAttachment": true,
+            "textureSlots": [
+                {
+                    "texturePath": "/System/Textures/white.png",
+                    "slot": 3,
+                    "mipLevel": 0
+                },
+                {
+                    "texturePath": "/System/Textures/normal_map.png",
+                    "slot": 4,
+                    "mipLevel": 0
+                },
+                {
+                    "texturePath": "/System/Textures/brdf_lut.tga",
+                    "slot": 10,
+                    "mipLevel": 0
+                }
+            ]
+        })";
+
+        auto materialDataOpt = FromJsonString<MaterialData>(pbrMaterialJson);
+        CHECK(materialDataOpt.has_value());
+
+        auto materialData = materialDataOpt.value();
+        CHECK_EQ(materialData.name, "pbr");
+        CHECK_EQ(materialData.shader.generic_string(), "/System/Shaders/pbr.glsl");
+        CHECK_EQ(materialData.compute, false);
+        CHECK_EQ(materialData.textureSlots.size(), 3);
+
+        // Проверяем текстурные слоты
+        CHECK_EQ(materialData.textureSlots[0].texturePath.generic_string(), "/System/Textures/white.png");
+        CHECK_EQ(materialData.textureSlots[0].slot, 3);
+        CHECK_EQ(materialData.textureSlots[0].mipLevel, 0);
+
+        CHECK_EQ(materialData.textureSlots[1].texturePath.generic_string(), "/System/Textures/normal_map.png");
+        CHECK_EQ(materialData.textureSlots[1].slot, 4);
+        CHECK_EQ(materialData.textureSlots[1].mipLevel, 0);
+
+        CHECK_EQ(materialData.textureSlots[2].texturePath.generic_string(), "/System/Textures/brdf_lut.tga");
+        CHECK_EQ(materialData.textureSlots[2].slot, 10);
+        CHECK_EQ(materialData.textureSlots[2].mipLevel, 0);
     }
 } 

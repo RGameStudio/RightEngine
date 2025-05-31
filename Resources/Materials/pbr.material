@@ -1,10 +1,11 @@
 {
-    "name": "pbr",
+    "name": "pbr_with_textures",
     "version": 0,
     "shader": "/System/Shaders/pbr.glsl",
     "offscreen": true,
     "depthCompareOp": "LESS",
     "cullMode": "BACK",
+    "compute": false,
     "attachments": [
         {
             "loadOperation": "CLEAR",
@@ -26,5 +27,36 @@
         }
     },
     "hasDepthAttachment": true,
-    "compute": false
-}
+    "textureSlots": [
+        {
+            "texturePath": "/System/Textures/white.png",
+            "slot": 3,
+            "mipLevel": 0
+        },
+        {
+            "texturePath": "/System/Textures/normal_map.png",
+            "slot": 4,
+            "mipLevel": 0
+        },
+        {
+            "texturePath": "/System/Textures/white.png",
+            "slot": 5,
+            "mipLevel": 0
+        },
+        {
+            "texturePath": "/System/Textures/white.png",
+            "slot": 6,
+            "mipLevel": 0
+        },
+        {
+            "texturePath": "/System/Textures/white.png",
+            "slot": 7,
+            "mipLevel": 0
+        },
+        {
+            "texturePath": "/System/Textures/brdf_lut.tga",
+            "slot": 10,
+            "mipLevel": 0
+        }
+    ]
+} 

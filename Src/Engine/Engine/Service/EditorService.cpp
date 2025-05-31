@@ -143,24 +143,6 @@ void EditorService::Initialize()
     meshComponent.m_mesh = m_impl->m_monkeyMesh;
     meshComponent.m_material = defaultMat;
 
-    m_impl->m_brickTex = Instance().Service<ResourceService>().Load<TextureResource>("/System/Textures/white.png");
-    m_impl->m_whiteTex = Instance().Service<ResourceService>().Load<TextureResource>("/System/Textures/white.png");
-    m_impl->m_normalTex = Instance().Service<ResourceService>().Load<TextureResource>("/System/Textures/normal_map.png");
-    m_impl->m_brdfTex = Instance().Service<ResourceService>().Load<TextureResource>("/System/Textures/brdf_lut.tga");
-
-    m_impl->m_whiteTex->Wait();
-    m_impl->m_normalTex->Wait();
-    m_impl->m_brickTex->Wait();
-    m_impl->m_brdfTex->Wait();
-
-    defaultMat->Material()->SetTexture(m_impl->m_brickTex->Texture(), 3);
-    defaultMat->Material()->SetTexture(m_impl->m_normalTex->Texture(), 4);
-    defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 5);
-    defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 6);
-    defaultMat->Material()->SetTexture(m_impl->m_whiteTex->Texture(), 7);
-    defaultMat->Material()->SetTexture(m_impl->m_brdfTex->Texture(), 10);
-    defaultMat->Material()->Sync();
-
     auto& ws = Instance().Service<WorldService>();
     auto& em = ws.CurrentWorld()->GetEntityManager();
 
