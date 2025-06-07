@@ -109,6 +109,15 @@ void SkyboxSystem::Update(float dt)
 
     auto& rs = Instance().Service<RenderService>();
 
+    for (auto [e, skybox] : W()->View<SkyboxComponent>())
+    {
+        if (skybox.IsModified())
+        {
+            skybox.m_skyboxMaterial->Material()->SetTexture(skybox.m_environmentMap->Raw().m_cubemap, 3);
+            skybox.m_skyboxMaterial->Material()->Sync();
+        }
+    }
+
     bool skyboxDrawn = false;
     for (auto [e, skybox] : W()->View<SkyboxComponent>())
     {
