@@ -134,9 +134,7 @@ void EditorService::Initialize()
     m_impl->m_envCubMap = env->Raw().m_cubemap;
 
     auto skyboxMaterial = resourceService.Load<MaterialResource>("/System/Materials/skybox.material");
-    skyboxMaterial->Material()->SetTexture(m_impl->m_envCubMap, 3);
-    skyboxMaterial->Material()->Sync();
-
+    skyboxMaterial->Wait();
     const auto defaultMat = rs.DefaultMaterial();
 
     MeshComponent meshComponent;
@@ -164,6 +162,7 @@ void EditorService::Initialize()
     em->Update();
 
     auto& skybox = em->AddComponent<SkyboxComponent>(skyboxUuid);
+    skybox.Modify();
     skybox.m_skyboxMaterial = skyboxMaterial;
     skybox.m_environmentMap = env;
 
