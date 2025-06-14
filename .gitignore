@@ -11,6 +11,7 @@ Scripts/__pycache__
 Scripts/lib/spirv-cross/all/test_package/build
 Scripts/lib/spirv-tools/all/test_package/build
 Scripts/lib/glslang/all/test_package/build
+Scripts/lib/zlib/all/test_package/build/
 
 CMakeUserPresets.json
 ConanPresets.json

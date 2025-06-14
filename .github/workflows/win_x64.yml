@@ -46,5 +46,6 @@ jobs:
         configuration-preset: release-ut
     
     - name: Test
+      shell: powershell
       run: .build/release-ut/.bin/TestLauncher.exe --project Projects/Sandbox/sandbox.project --mode client_no_ui
       
