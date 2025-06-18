@@ -26,8 +26,6 @@ public:
     void            SelectedEntity(entt::entity e);
     entt::entity    SelectedEntity();
 
-    void            Initialize();
-
     glm::ivec2      ViewportSize() const;
     bool            IsViewportHovered() const;
 

@@ -33,11 +33,15 @@ public:
     std::unique_ptr<ecs::World>& CurrentWorld() { return m_world; }
 
     void SaveWorld();
+    bool LoadWorld(const io::fs::path& path);
 
     WorldData CollectWorldData(const std::unique_ptr<ecs::World>& world);
+    std::unique_ptr<ecs::World> CreateWorldFromData(const WorldData& data);
 
 private:
     std::unique_ptr<ecs::World>        m_world;
+    std::unique_ptr<ecs::World>        m_newWorld;
+    bool                               m_worldChanged = false;
 };
 
 } // engine

@@ -23,6 +23,7 @@ RTTR_REGISTRATION
 
                 obj.m_environmentMap = rs.Load<engine::EnvironmentMapResource>(skyboxPath);
                 obj.m_skyboxMaterial = rs.Load<engine::MaterialResource>("/System/Materials/skybox.material");
+                obj.Modify();
             });
 }
 

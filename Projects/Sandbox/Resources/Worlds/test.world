@@ -6,7 +6,7 @@
                 {
                     "__type__": "engine::TransformComponent",
                     "position": {
-                        "x": 0.0,
+                        "x": -13.199999809265137,
                         "y": 0.0,
                         "z": 0.0
                     },
@@ -29,22 +29,22 @@
                 }
             ],
             "name": "Monkey",
-            "uuid": "34f68fbc-85a0-41c4-8fee-616624e0ee23"
+            "uuid": "ac732856-76dc-4042-a7a2-7229237cb548"
         },
         {
             "components": [
                 {
                     "__type__": "engine::TransformComponent",
                     "position": {
-                        "x": 0.0,
+                        "x": -7.900000095367432,
                         "y": 0.0,
                         "z": -10.0
                     },
                     "rotation": {
-                        "w": 0.603176474571228,
-                        "x": 0.7954251170158386,
-                        "y": -0.03562876209616661,
-                        "z": 0.04698459804058075
+                        "w": 0.6628579497337341,
+                        "x": 0.7350573539733887,
+                        "y": -0.0954403206706047,
+                        "z": 0.10583588480949402
                     },
                     "scale": {
                         "x": 1.0,
@@ -63,7 +63,7 @@
                 }
             ],
             "name": "Editor Camera",
-            "uuid": "548d9b79-ab7d-4e97-b9e5-bd154559b9ef"
+            "uuid": "f4089f40-98b4-4b2e-9001-d1919a260d49"
         },
         {
             "components": [
@@ -88,7 +88,7 @@
                 }
             ],
             "name": "Directional Light",
-            "uuid": "c4648066-6c63-41eb-80e0-fec4cec44ace"
+            "uuid": "1aa0cff3-c64d-46a7-b810-39370cf81a5f"
         },
         {
             "components": [
@@ -117,7 +117,7 @@
                 }
             ],
             "name": "Skybox",
-            "uuid": "b5f10174-9284-4a40-977b-ecda6b2b4b80"
+            "uuid": "095f866c-982d-4726-b98e-71728e22b697"
         }
     ],
     "name": "Test world",

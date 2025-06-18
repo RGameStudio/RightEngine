@@ -392,9 +392,9 @@ public:
 };
 
 template<typename T>
-class Component : public Class<T, CtorType::AsRawPtr>
+class Component : public Class<T, CtorType::AsObject>
 {
-    using Base = Class<T, CtorType::AsRawPtr>;
+    using Base = Class<T, CtorType::AsObject>;
 public:
     Component(ecs::IComponent::Type type, std::string_view name) : Base(name) {}
 

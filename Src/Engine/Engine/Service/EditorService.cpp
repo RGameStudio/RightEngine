@@ -120,55 +120,6 @@ entt::entity EditorService::SelectedEntity()
     return m_impl->m_selectedEntity;
 }
 
-void EditorService::Initialize()
-{
-    auto& rs = Instance().Service<RenderService>();
-    auto& resourceService = Instance().Service<ResourceService>();
-
-    auto& meshLoader = resourceService.GetLoader<MeshLoader>();
-    m_impl->m_monkeyMesh = std::static_pointer_cast<MeshResource>(meshLoader.Load("/System/Models/sphere.fbx", false));
-
-    while (!m_impl->m_monkeyMesh->Ready()) {}
-
-    const auto env = resourceService.Load<EnvironmentMapResource>("/System/Textures/spree_bank_env.hdr", true);
-    m_impl->m_envCubMap = env->Raw().m_cubemap;
-
-    auto skyboxMaterial = resourceService.Load<MaterialResource>("/System/Materials/skybox.material");
-    skyboxMaterial->Wait();
-    const auto defaultMat = rs.DefaultMaterial();
-
-    MeshComponent meshComponent;
-    meshComponent.m_mesh = m_impl->m_monkeyMesh;
-    meshComponent.m_material = defaultMat;
-
-    auto& ws = Instance().Service<WorldService>();
-    auto& em = ws.CurrentWorld()->GetEntityManager();
-
-    const auto uuid = em->CreateEntity("Monkey");
-    const auto cameraUuid = em->CreateEntity("Editor Camera");
-    const auto dirLightUuid = em->CreateEntity("Directional Light");
-    em->Update();
-
-    em->AddComponent<MeshComponent>(uuid, meshComponent);
-
-    CameraComponent cameraComponent{};
-    cameraComponent.m_active = true;
-    em->AddComponent<CameraComponent>(cameraUuid, cameraComponent);
-
-    auto& cameraTransform = em->GetComponent<TransformComponent>(cameraUuid);
-    cameraTransform.m_position = glm::vec3(0, 0, -10);
-
-    const auto skyboxUuid = em->CreateEntity("Skybox");
-    em->Update();
-
-    auto& skybox = em->AddComponent<SkyboxComponent>(skyboxUuid);
-    skybox.Modify();
-    skybox.m_skyboxMaterial = skyboxMaterial;
-    skybox.m_environmentMap = env;
-
-    em->AddComponent<DirectionalLightComponent>(dirLightUuid);
-}
-
 glm::ivec2 EditorService::ViewportSize() const
 {
     return m_impl->m_viewportPanel->Size();

@@ -108,9 +108,9 @@ Engine::Engine(int argCount, char* argPtr[])
 
     m_serviceManager->UpdateDependencyOrder();
 
-    if (auto es = m_serviceManager->FindService<EditorService>())
+    if (auto ws = m_serviceManager->FindService<WorldService>())
     {
-        es->Initialize();
+        ws->LoadWorld("/Worlds/test.world");
     }
 
     core::log::info("Frame limiter targeted frametime is {}ms", C_TARGET_FRAME_TIME);
