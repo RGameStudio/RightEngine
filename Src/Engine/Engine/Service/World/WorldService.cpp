@@ -116,8 +116,11 @@ void WorldService::Update(float dt)
         m_worldChanged = false;
         core::log::info("[WorldService] World '{}' switched successfully", m_world->Name());
 
-        auto& rs = Instance().Service<RenderService>();
-        rs.WaitAll();
+        if ((Instance().Cfg().m_domain & Domain::UI) == Domain::UI)
+        {
+            auto& rs = Instance().Service<RenderService>();
+            rs.WaitAll();
+        }
     }
 
     if (m_world)

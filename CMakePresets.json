@@ -8,6 +8,13 @@
     "include": ["./ConanPresets.json"],
     "configurePresets": [
         {
+            "name": "release-debug-symbols",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
             "name": "common",
             "hidden": true,
             "cacheVariables": {
@@ -50,7 +57,7 @@
             "cacheVariables": {
                 "ENGINE_ENABLE_TESTS": "ON",
                 "ENGINE_ENABLE_TRACY": "OFF",
-                "ENGINE_ENABLE_ASSERTS": "OFF"
+                "ENGINE_ENABLE_ASSERTS": "ON"
             }
         }
     ],
@@ -68,7 +75,7 @@
         {
             "name": "engine-win-release-ut",
             "configurePreset": "release-ut",
-            "configuration": "Release"
+            "configuration": "RelWithDebInfo"
         }
     ]
 }

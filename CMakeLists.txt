@@ -112,6 +112,12 @@ add_subdirectory(Src/EngineLauncher)
 
 if (ENGINE_ENABLE_TESTS)
     add_subdirectory(Src/TestLauncher)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_options(
+                "-g"
+                "-fno-omit-frame-pointer"
+        )
+    endif()
 else()
     add_compile_definitions(DOCTEST_CONFIG_DISABLE)
 endif()

@@ -77,6 +77,7 @@ public:
 					type.get_name(),
 					DomainToString(metadata.m_domain),
 					DomainToString(Instance().Cfg().m_domain));
+				m_skippedLoaders.insert(type);
 				return false;
 			}
 			m_loadersMap[type] = std::make_unique<T>();
@@ -113,6 +114,10 @@ private:
 		static_assert(std::is_base_of_v<Loader, TLoader>);
 
 		auto loaderIt = m_loadersMap.find(rttr::type::get<TLoader>());
+		if (m_skippedLoaders.find(rttr::type::get<TLoader>()) != m_skippedLoaders.end())
+		{
+			return nullptr;
+		}
 		ENGINE_ASSERT(loaderIt != m_loadersMap.end());
 
 		auto& loader = loaderIt->second;
@@ -122,6 +127,7 @@ private:
 	}
 
 	eastl::unordered_map<rttr::type, std::unique_ptr<Loader>> m_loadersMap;
+	eastl::vector_set<rttr::type> m_skippedLoaders;
 };
 
 }
