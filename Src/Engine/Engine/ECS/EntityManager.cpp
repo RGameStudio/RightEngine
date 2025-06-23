@@ -140,4 +140,24 @@ bool EntityManager::Exists(const uuids::uuid& uuid)
     return false;
 }
 
+void EntityManager::SetEntityName(entt::entity e, std::string_view name)
+{
+    if (const auto it = m_entities.find(e); it != m_entities.end())
+    {
+        it->second.m_name = name;
+        return;
+    }
+    ENGINE_ASSERT_WITH_MESSAGE(false, "Entity not found");
+}
+
+void EntityManager::SetEntityName(const uuids::uuid& uuid, std::string_view name)
+{
+    if (const auto it = m_uuidToEntity.find(uuid); it != m_uuidToEntity.end())
+    {
+        SetEntityName(it->second, name);
+        return;
+    }
+    ENGINE_ASSERT_WITH_MESSAGE(false, fmt::format("Entity with uuid {} was not found!", uuids::to_string(uuid)));
+}
+
 } // engine::ecs

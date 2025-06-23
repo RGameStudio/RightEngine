@@ -9,7 +9,6 @@
 		"cmake.automaticReconfigure": false,
 		"cmake.configureOnOpen": false,
 		"cmake.configureOnEdit": false,
-		"C_Cpp.intelliSenseEngine": "default",
 		"C_Cpp.configurationWarnings": "enabled",
 		"C_Cpp.default.cppStandard": "c++17",
 		"C_Cpp.default.cStandard": "c17",
@@ -18,9 +17,10 @@
 		"C_Cpp.errorSquiggles": "enabled",
 		"C_Cpp.autocomplete": "default",
 		"C_Cpp.suggestSnippets": true,
+		"C_Cpp.default.compileCommands": "${workspaceFolder}/.build/conan/Debug/compile_commands.json",
 		"clangd.path": "C:/Program Files/LLVM/bin/clangd.exe",
 		"clangd.arguments": [
-			"--compile-commands-dir=${workspaceFolder}/.build/debug",
+			"--compile-commands-dir=${workspaceFolder}/.build/conan/Debug",
 			"--background-index",
 			"--clang-tidy",
 			"--completion-style=detailed",
@@ -48,8 +48,7 @@
 			"ms-vscode.cpptools",
 			"ms-vscode.cpptools-extension-pack",
 			"vadimcn.vscode-lldb",
-			"llvm-vs-code-extensions.vscode-clangd",
-			"sumneko.lua"
+			"llvm-vs-code-extensions.vscode-clangd"
     	]
   	},
 }

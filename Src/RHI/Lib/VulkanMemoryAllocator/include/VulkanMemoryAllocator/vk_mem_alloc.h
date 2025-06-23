@@ -2869,7 +2869,7 @@ remove them if not needed.
 
 // Assert used for reporting memory leaks - unfreed allocations.
 #ifndef VMA_ASSERT_LEAK
-    #define VMA_ASSERT_LEAK(expr)   VMA_ASSERT(expr)
+    #define VMA_ASSERT_LEAK(expr)
 #endif
 
 // If your compiler is not compatible with C++17 and definition of

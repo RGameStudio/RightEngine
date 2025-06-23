@@ -42,6 +42,9 @@ public:
 
     entt::entity        GetEntity(const uuids::uuid& uuid);
 
+    void                SetEntityName(entt::entity e, std::string_view name);
+    void                SetEntityName(const uuids::uuid& uuid, std::string_view name);
+
     const eastl::vector_map<entt::entity, EntityInfo>& EntitiesMap() { return m_entities; }
 
     template<typename T>

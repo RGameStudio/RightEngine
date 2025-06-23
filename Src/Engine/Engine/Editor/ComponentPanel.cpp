@@ -145,6 +145,22 @@ void ComponentPanel::DrawPanel()
         return;
     }
 
+    // Entity Name Panel
+    auto& entityInfo = em->GetEntityInfo(selectedEntity);
+    static char entityNameBuffer[256];
+    strncpy(entityNameBuffer, entityInfo.m_name.c_str(), sizeof(entityNameBuffer) - 1);
+    entityNameBuffer[sizeof(entityNameBuffer) - 1] = '\0';
+    
+    ImGui::Text("Entity Name:");
+    ImGui::SameLine();
+    if (ImGui::InputText("##EntityName", entityNameBuffer, sizeof(entityNameBuffer)))
+    {
+        em->SetEntityName(selectedEntity, std::string(entityNameBuffer));
+    }
+    
+    ImGui::Separator();
+    ImGui::Spacing();
+
 	DrawComponent<TransformComponent>(selectedEntity, em, [](TransformComponent& t)
 	{
 		auto rotation = glm::degrees(glm::eulerAngles(t.m_rotation));

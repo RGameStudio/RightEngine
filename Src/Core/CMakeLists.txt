@@ -13,6 +13,7 @@ find_package(EASTL REQUIRED)
 find_package(rttr REQUIRED)
 find_package(Tracy REQUIRED)
 find_package(glm REQUIRED)
+find_package(xxHash REQUIRED)
 
 add_library(Core SHARED ${SOURCE_FILES})
 
@@ -26,7 +27,8 @@ target_link_libraries(Core PUBLIC
                             fmt::fmt 
                             RTTR::Core_Lib
                             Tracy::TracyClient
-                            glm::glm)
+                            glm::glm
+                            xxHash::xxhash)
                             
 target_compile_definitions(Core PRIVATE CORE_EXPORT)
 target_precompile_headers(Core PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Src/PCH.hpp")

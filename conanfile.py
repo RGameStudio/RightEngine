@@ -31,6 +31,7 @@ class RightEngineRecipe(ConanFile):
         "taskflow/3.6.0",
         "tracy/0.10",
         "vulkan-headers/1.3.296.0",
+        "xxhash/0.8.3"
     ]
 
     exports_sources = "CMakeLists.txt", "Src/*"

@@ -4,6 +4,7 @@
 #include <Engine/Service/EditorService.hpp>
 #include <Engine/Service/World/WorldService.hpp>
 #include <RHI/Pipeline.hpp>
+#include <xxhash.h>
 
 namespace engine::editor
 {
@@ -16,15 +17,39 @@ void EntityTreePanel::DrawPanel()
 
     for (const auto entity : world->View())
     {
-        if (ImGui::TreeNode(world->GetEntityManager()->GetEntityInfo(entity).m_name.c_str())) 
+        const auto& eName = world->GetEntityManager()->GetEntityInfo(entity).m_name;
+        std::string nodeId;
+        if (eName.empty())
         {
-            if (ImGui::IsItemClicked()) 
-            {
-                editorService.SelectedEntity(entity);
-            }
+            nodeId = uuids::to_string(uuids::uuid_system_generator{}());
+        }
+        else
+        {
+            nodeId = fmt::format("{:016x}", XXH64(eName.c_str(), eName.size(), 0));
+        }
+
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick
+                                    | ImGuiTreeNodeFlags_SpanFullWidth
+                                    | ImGuiTreeNodeFlags_OpenOnArrow;
+        
+        // Check if this entity is selected
+        if (editorService.SelectedEntity() == entity)
+        {
+            flags |= ImGuiTreeNodeFlags_Selected;
+        }
+
+        bool nodeOpen = ImGui::TreeNodeEx(nodeId.c_str(), flags, "%s", eName.c_str());
+        
+        if (ImGui::IsItemClicked()) 
+        {
+            editorService.SelectedEntity(entity);
+        }
+        
+        if (nodeOpen)
+        {
             ImGui::TreePop();
         }
-	}
+    }
 }
 
 } // engine::editor

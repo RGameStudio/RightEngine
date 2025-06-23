@@ -28,23 +28,23 @@
                     "mesh": "/System/Models/sphere.fbx"
                 }
             ],
-            "name": "Monkey",
-            "uuid": "ac732856-76dc-4042-a7a2-7229237cb548"
+            "name": "Ball Model",
+            "uuid": "8c580383-ddc6-496e-8e52-af3c5e0f18ef"
         },
         {
             "components": [
                 {
                     "__type__": "engine::TransformComponent",
                     "position": {
-                        "x": -7.900000095367432,
-                        "y": 0.0,
-                        "z": -10.0
+                        "x": -15.710979461669922,
+                        "y": -1.7663856744766235,
+                        "z": -16.51795196533203
                     },
                     "rotation": {
-                        "w": 0.6628579497337341,
-                        "x": 0.7350573539733887,
-                        "y": -0.0954403206706047,
-                        "z": 0.10583588480949402
+                        "w": 0.7271999716758728,
+                        "x": 0.6848379373550415,
+                        "y": -0.03396763280034065,
+                        "z": 0.03198949992656708
                     },
                     "scale": {
                         "x": 1.0,
@@ -63,7 +63,7 @@
                 }
             ],
             "name": "Editor Camera",
-            "uuid": "f4089f40-98b4-4b2e-9001-d1919a260d49"
+            "uuid": "774d8c53-78f0-482a-8ade-676350925dc6"
         },
         {
             "components": [
@@ -88,7 +88,7 @@
                 }
             ],
             "name": "Directional Light",
-            "uuid": "1aa0cff3-c64d-46a7-b810-39370cf81a5f"
+            "uuid": "e6c5dfec-90c8-4dcc-b505-aefae2cab5b3"
         },
         {
             "components": [
@@ -117,7 +117,7 @@
                 }
             ],
             "name": "Skybox",
-            "uuid": "095f866c-982d-4726-b98e-71728e22b697"
+            "uuid": "d5b5ddfa-e592-4c80-b1ab-8f6ffc12e479"
         }
     ],
     "name": "Test world",
