@@ -224,7 +224,7 @@ void MaterialLoader::ResizePipelines(glm::ivec2 extent, bool offscreen)
 	}
 }
 
-bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePipelineRecreation)
+bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool onlyResizePipeline)
 {
 	auto& vfs = Instance().Service<io::VirtualFilesystemService>();
 
@@ -308,7 +308,7 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 
 	{
 		std::lock_guard l(m_mutex);
-		if (const auto it = m_shaderCache.find(srcPath); it != m_shaderCache.end())
+		if (const auto it = m_shaderCache.find(shaderPath); it != m_shaderCache.end())
 		{
 			shader = it->second;
 		}
@@ -339,13 +339,13 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 
 		shader = rs.CreateShader(desc);
 
-		parsedPipeline.m_shader = shader;
-
 		{
 			std::lock_guard l(m_mutex);
 			m_shaderCache[shaderPath] = shader;
 		}
 	}
+
+	parsedPipeline.m_shader = shader;
 
 	bool hasPipeline = false;
 
@@ -357,7 +357,7 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 		}
 	}
 
-	if (!hasPipeline || forcePipelineRecreation)
+	if (!hasPipeline || onlyResizePipeline)
 	{
 		parsedPipeline.m_viewportSize = parsedPipeline.m_offscreen ? 
 			Instance().Service<RenderService>().ViewportSize() :
@@ -377,7 +377,10 @@ bool MaterialLoader::Load(const ResPtr<MaterialResource>& resource, bool forcePi
 		m_shaderToPipeline[shader] = AllocatePipeline(parsedPipeline);
 	}
 
-	resource->m_material = std::make_shared<render::Material>(shader);
+	if (!onlyResizePipeline)
+	{
+		resource->m_material = std::make_shared<render::Material>(shader);
+	}
 
 	for (const auto& [slot, buffer] : shader->Descriptor().m_reflection.m_bufferMap)
 	{

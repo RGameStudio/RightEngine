@@ -95,7 +95,7 @@ private:
 		rhi::CullMode								m_cullMode = rhi::CullMode::BACK; // ignored in compute
 	};
 
-	bool							Load(const ResPtr<MaterialResource>& resource, bool forcePipelineRecreation = false);
+	bool							Load(const ResPtr<MaterialResource>& resource, bool onlyResizePipeline = false);
 	MaterialData					ParseMaterialData(const std::string& jsonContent);
 	std::shared_ptr<rhi::Pipeline>	AllocatePipeline(ParsedPipelineInfo& info);
 
