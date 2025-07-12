@@ -85,18 +85,17 @@ void DrawComponent(entt::entity entity, std::unique_ptr<engine::ecs::EntityManag
 {
 	ENGINE_ASSERT(engine::registration::helpers::typeRegistered<T>());
 
-	const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed
-		| ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap
+	const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen
+		| ImGuiTreeNodeFlags_Framed
+		| ImGuiTreeNodeFlags_SpanAvailWidth
+		| ImGuiTreeNodeFlags_AllowItemOverlap
 		| ImGuiTreeNodeFlags_FramePadding;
 
 	if (em->TryGetComponent<T>(entity))
 	{
 		const auto type = rttr::type::get<T>();
-		const auto typeId = type.get_id();
-
-		ImGui::PushID(&typeId);
-
-		bool open = ImGui::TreeNodeEx(&typeId, treeNodeFlags, "%s", type.get_name().data());
+		const auto typeName = type.get_name().data();
+		bool open = ImGui::TreeNodeEx(typeName, treeNodeFlags, "%s", typeName);
 
 		ImGui::SameLine();
 		if (ImGui::Button("+"))
@@ -123,8 +122,6 @@ void DrawComponent(entt::entity entity, std::unique_ptr<engine::ecs::EntityManag
 		{
 			em->RemoveComponent<T>(entity);
 		}
-
-		ImGui::PopID();
 	}
 }
 
