@@ -100,6 +100,11 @@ namespace engine
 
 WorldService::WorldService()
 {
+    Instance().Service<WindowService>().SubscribeOnWindowCollapse(
+        [this](bool isCollapsed)
+    {
+        m_world->GetSystemManager()->ToggleRenderSystem(isCollapsed);
+    });
 }
 
 WorldService::~WorldService()
@@ -222,7 +227,7 @@ std::unique_ptr<ecs::World> WorldService::CreateWorldFromData(const WorldData& d
     world->GetSystemManager()->Add<RenderSystem>();
     world->GetSystemManager()->Add<CameraSystem>();
     world->GetSystemManager()->Add<SkyboxSystem>();
-    world->GetSystemManager()->UpdateDependenciesOrder();
+    world->GetSystemManager()->UpdateDependenciesOrder(false);
 
     auto& em = world->GetEntityManager();
 

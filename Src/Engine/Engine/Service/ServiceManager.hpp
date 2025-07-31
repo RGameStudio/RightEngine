@@ -103,7 +103,11 @@ public:
 
     void UpdateDependencyOrder();
 
+    void ToggleRenderServices(bool disable);
+
     void Destroy();
+
+    void InitCallbacks();
 
 private:
     eastl::unordered_map<rttr::type, size_t>    m_servicesMap;
@@ -111,6 +115,7 @@ private:
     eastl::vector<std::shared_ptr<IService>>    m_updateOrder;
     eastl::vector<std::shared_ptr<IService>>    m_postUpdateOrder;
     Domain                                      m_domain;
+    bool                                        m_renderServicesDisabled = false;
 };
 
 } // namespace engine

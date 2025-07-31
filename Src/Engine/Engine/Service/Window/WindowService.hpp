@@ -12,6 +12,8 @@ namespace engine
 class ENGINE_API WindowService final : public Service<WindowService>
 {
 public:
+    using OnWindowCollapseCallback = std::function<void(bool isCollapsed)>;
+
     WindowService();
     virtual ~WindowService() override;
 
@@ -36,8 +38,12 @@ public:
     // Mouse position from the last frame
     glm::vec2           PrevMousePos() const;
 
+    void                SubscribeOnWindowCollapse(OnWindowCollapseCallback&& callback);
+    const eastl::vector<OnWindowCollapseCallback>& CollapseCallbacks() const { return m_collapseCallbacks; }
+
 private:
     GLFWwindow* m_window = nullptr;
+    eastl::vector<OnWindowCollapseCallback> m_collapseCallbacks;
 };
 
 } // namespace engine

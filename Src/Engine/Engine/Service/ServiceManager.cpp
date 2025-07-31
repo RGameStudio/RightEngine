@@ -1,4 +1,5 @@
 #include <Engine/Service/ServiceManager.hpp>
+#include <Engine/Service/Window/WindowService.hpp>
 #include <EASTL/queue.h>
 
 namespace
@@ -56,6 +57,15 @@ void ServiceManager::Update(float dt)
 {
     for (auto& service : m_updateOrder)
     {
+        const auto type = service->get_type();
+        auto meta = type.get_metadata(registration::C_METADATA_KEY).get_value_unsafe<IService::MetaInfo>();
+
+        if (!meta.m_ignoreRenderStopping
+            && m_renderServicesDisabled
+            && ((meta.m_domain & Domain::CLIENT) == Domain::CLIENT || (meta.m_domain & Domain::EDITOR) == Domain::EDITOR))
+        {
+            continue;
+        }
         service->Update(dt);
     }
 }
@@ -64,6 +74,15 @@ void ServiceManager::PostUpdate(float dt)
 {
     for (auto& service : m_postUpdateOrder)
     {
+        const auto type = service->get_type();
+        auto meta = type.get_metadata(registration::C_METADATA_KEY).get_value_unsafe<IService::MetaInfo>();
+
+        if (!meta.m_ignoreRenderStopping
+            && m_renderServicesDisabled
+            && ((meta.m_domain & Domain::CLIENT) == Domain::CLIENT || (meta.m_domain & Domain::EDITOR) == Domain::EDITOR))
+        {
+            continue;
+        }
         service->PostUpdate(dt);
     }
 }
@@ -121,6 +140,11 @@ void ServiceManager::UpdateDependencyOrder()
     }
 }
 
+void ServiceManager::ToggleRenderServices(bool disable)
+{
+    m_renderServicesDisabled = disable;
+}
+
 #pragma clang diagnostic pop
 
 void ServiceManager::Destroy()
@@ -137,4 +161,12 @@ void ServiceManager::Destroy()
     }
 }
 
+void ServiceManager::InitCallbacks()
+{
+    Instance().Service<WindowService>().SubscribeOnWindowCollapse(
+        [this](bool isCollapsed)
+    {
+        ToggleRenderServices(isCollapsed);
+    });
+}
 } // namespace engine

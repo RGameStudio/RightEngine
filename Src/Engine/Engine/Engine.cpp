@@ -72,6 +72,7 @@ Engine::Engine(int argCount, char* argPtr[])
 
     m_serviceManager->RegisterService<ThreadService>();
     m_serviceManager->RegisterService<WindowService>();
+    m_serviceManager->InitCallbacks();
     m_serviceManager->RegisterService<RenderService>();
     m_serviceManager->RegisterService<ResourceService>();
 

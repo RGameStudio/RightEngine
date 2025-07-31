@@ -17,6 +17,7 @@ class ENGINE_API IService : public core::NonCopyable
 public:
     struct MetaInfo
     {
+        bool m_ignoreRenderStopping = false;
         Domain m_domain = Domain::ALL;
         eastl::vector<rttr::type> m_updateAfter;
         eastl::vector<rttr::type> m_updateBefore;

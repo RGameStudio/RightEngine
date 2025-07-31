@@ -29,7 +29,7 @@ void SystemManager::Update(float dt)
     ts.AddForegroundTaskflow(m_taskflow).wait();
 }
 
-void SystemManager::UpdateDependenciesOrder()
+void SystemManager::UpdateDependenciesOrder(bool disableRender)
 {
     eastl::vector_map<rttr::type, eastl::vector_set<rttr::type>> dependencies;
 
@@ -41,6 +41,11 @@ void SystemManager::UpdateDependenciesOrder()
         const auto sysType = instance.get_derived_type();
 
         auto meta = sysType.get_metadata(engine::registration::C_METADATA_KEY).get_value_unsafe<ISystem::MetaInfo>();
+
+        if (disableRender && ((meta.m_domain & Domain::CLIENT) == Domain::CLIENT || (meta.m_domain & Domain::EDITOR) == Domain::EDITOR))
+        {
+            continue;
+        }
 
         dependencies[sysType].insert(meta.m_updateBefore.begin(), meta.m_updateBefore.end());
 
@@ -82,6 +87,10 @@ void SystemManager::UpdateDependenciesOrder()
     m_taskflow.dump(std::cout);
 }
 
+void SystemManager::ToggleRenderSystem(bool disable)
+{
+    UpdateDependenciesOrder(disable);
+}
 } // engine::ecs
 
 #ifdef __clang__

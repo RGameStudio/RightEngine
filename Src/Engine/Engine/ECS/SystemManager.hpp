@@ -40,7 +40,8 @@ public:
         m_typeToSystem[rttr::type::get<T>()] = m_systems.back().get();
     }
 
-    void UpdateDependenciesOrder();
+    void UpdateDependenciesOrder(bool disableRender);
+    void ToggleRenderSystem(bool disable);
 
 private:
     struct ExecutionParams

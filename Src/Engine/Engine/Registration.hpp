@@ -146,6 +146,12 @@ public:
         return *this;
     }
 
+    Service& IgnoreRenderStopping()
+    {
+        m_meta.m_ignoreRenderStopping = true;
+        return *this;
+    }
+
     template<typename TOther>
     Service& UpdateAfter()
     {

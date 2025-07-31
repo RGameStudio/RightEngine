@@ -8,6 +8,7 @@ RTTR_REGISTRATION
 {
 engine::registration::Service<engine::WindowService>("engine::WindowService")
     .UpdateBefore<engine::RenderService>()
+    .IgnoreRenderStopping()
     .Domain(engine::Domain::UI);
 }
 
@@ -45,7 +46,21 @@ WindowService::WindowService()
     glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
         {
             auto& rs = Instance().Service<RenderService>();
+            if (width == 0 && height == 0)
+            {
+                return;
+            }
             rs.OnWindowResize({ width, height });
+        });
+
+    glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* window, int iconified)
+        {
+            const auto isCollapsed = iconified == GLFW_TRUE;
+
+            for (auto& callback : Instance().Service<WindowService>().CollapseCallbacks())
+            {
+                callback(isCollapsed);
+            }
         });
 
     glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -162,4 +177,8 @@ glm::vec2 WindowService::PrevMousePos() const
     return prevMousePos;
 }
 
+void WindowService::SubscribeOnWindowCollapse(OnWindowCollapseCallback&& callback)
+{
+    m_collapseCallbacks.emplace_back(eastl::move(callback));
+}
 } // namespace engine
