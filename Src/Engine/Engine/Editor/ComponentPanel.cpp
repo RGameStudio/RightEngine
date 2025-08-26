@@ -3,12 +3,14 @@
 #include <Engine/Service/World/WorldService.hpp>
 #include <Engine/System/TransformSystem.hpp>
 #include <Engine/System/RenderSystem.hpp>
+#include <Engine/System/SkyboxSystem.hpp>
 #include <Engine/Registration.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <rttr/registration.h>
 
 namespace
 {
@@ -158,6 +160,12 @@ void ComponentPanel::DrawPanel()
     ImGui::Separator();
     ImGui::Spacing();
 
+    // Add Component Button
+    DrawAddComponentDropdown(selectedEntity);
+    
+    ImGui::Separator();
+    ImGui::Spacing();
+
 	DrawComponent<TransformComponent>(selectedEntity, em, [](TransformComponent& t)
 	{
 		auto rotation = glm::degrees(glm::eulerAngles(t.m_rotation));
@@ -227,6 +235,131 @@ void ComponentPanel::DrawPanel()
 			}
 		}
 	});
+
+	DrawComponent<SkyboxComponent>(selectedEntity, em, [](SkyboxComponent& s)
+	{
+		ImGui::TextUnformatted("Skybox Configuration");
+		ImGui::TextUnformatted("Material and Environment Map paths are managed via resources");
+	});
+
+	DrawComponent<CameraComponent>(selectedEntity, em, [](CameraComponent& c)
+	{
+		ImGui::DragFloat("Near", &c.m_near, 0.01f, 0.001f, 100.0f);
+		ImGui::DragFloat("Far", &c.m_far, 1.0f, 1.0f, 10000.0f);
+		ImGui::DragFloat("Aspect Ratio", &c.m_aspectRatio, 0.01f, 0.1f, 10.0f);
+		ImGui::DragFloat("FOV (radians)", &c.m_fov, 0.01f, 0.1f, 3.14f);
+		
+		const char* cameraTypes[] = { "Editor", "Game" };
+		int currentType = static_cast<int>(c.m_type);
+		if (ImGui::Combo("Type", &currentType, cameraTypes, 2))
+		{
+			c.m_type = static_cast<CameraComponent::Type>(currentType);
+		}
+		
+		ImGui::Checkbox("Active", &c.m_active);
+	});
+}
+
+void ComponentPanel::DrawAddComponentDropdown(entt::entity selectedEntity)
+{
+    if (ImGui::Button("Add Component"))
+    {
+        ImGui::OpenPopup("AddComponentPopup");
+    }
+    
+    if (ImGui::BeginPopup("AddComponentPopup"))
+    {
+        ImGui::TextUnformatted("Select Component Type:");
+        ImGui::Separator();
+        
+        auto availableTypes = GetAvailableComponentTypes(selectedEntity);
+        
+        for (const auto& type : availableTypes)
+        {
+            const auto typeName = type.get_name().data();
+            if (ImGui::MenuItem(typeName))
+            {
+                AddComponentToEntity(selectedEntity, type);
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        
+        if (availableTypes.empty())
+        {
+            ImGui::TextUnformatted("No components available to add");
+        }
+        
+        ImGui::EndPopup();
+    }
+}
+
+eastl::vector<rttr::type> ComponentPanel::GetAvailableComponentTypes(entt::entity entity)
+{
+    auto& em = Instance().Service<WorldService>().CurrentWorld()->GetEntityManager();
+    eastl::vector<rttr::type> availableTypes;
+    
+    // Список всех зарегистрированных компонентов
+    eastl::vector<rttr::type> allComponentTypes = {
+        rttr::type::get<TransformComponent>(),
+        rttr::type::get<DirectionalLightComponent>(),
+        rttr::type::get<MeshComponent>(),
+        rttr::type::get<CameraComponent>(),
+        rttr::type::get<SkyboxComponent>()
+    };
+    
+    for (const auto& type : allComponentTypes)
+    {
+        // Проверяем что компонент зарегистрирован в RTTR
+        if (!engine::registration::helpers::typeRegistered(type))
+            continue;
+            
+        // Проверяем что у энтити еще нет этого компонента
+        bool hasComponent = false;
+        
+        if (type == rttr::type::get<TransformComponent>())
+            hasComponent = em->TryGetComponent<TransformComponent>(entity) != nullptr;
+        else if (type == rttr::type::get<DirectionalLightComponent>())
+            hasComponent = em->TryGetComponent<DirectionalLightComponent>(entity) != nullptr;
+        else if (type == rttr::type::get<MeshComponent>())
+            hasComponent = em->TryGetComponent<MeshComponent>(entity) != nullptr;
+        else if (type == rttr::type::get<CameraComponent>())
+            hasComponent = em->TryGetComponent<CameraComponent>(entity) != nullptr;
+        else if (type == rttr::type::get<SkyboxComponent>())
+            hasComponent = em->TryGetComponent<SkyboxComponent>(entity) != nullptr;
+            
+        if (!hasComponent)
+        {
+            availableTypes.push_back(type);
+        }
+    }
+    
+    return availableTypes;
+}
+
+void ComponentPanel::AddComponentToEntity(entt::entity entity, rttr::type componentType)
+{
+    auto& em = Instance().Service<WorldService>().CurrentWorld()->GetEntityManager();
+    
+    if (componentType == rttr::type::get<TransformComponent>())
+    {
+        em->AddComponent<TransformComponent>(entity);
+    }
+    else if (componentType == rttr::type::get<DirectionalLightComponent>())
+    {
+        em->AddComponent<DirectionalLightComponent>(entity);
+    }
+    else if (componentType == rttr::type::get<MeshComponent>())
+    {
+        em->AddComponent<MeshComponent>(entity);
+    }
+    else if (componentType == rttr::type::get<CameraComponent>())
+    {
+        em->AddComponent<CameraComponent>(entity);
+    }
+    else if (componentType == rttr::type::get<SkyboxComponent>())
+    {
+        em->AddComponent<SkyboxComponent>(entity);
+    }
 }
 
 } // engine::editor

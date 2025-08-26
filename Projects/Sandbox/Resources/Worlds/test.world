@@ -29,7 +29,7 @@
                 }
             ],
             "name": "Ball Model",
-            "uuid": "8c580383-ddc6-496e-8e52-af3c5e0f18ef"
+            "uuid": "72828b7b-84e1-4c62-b2bf-7085f65eb0bb"
         },
         {
             "components": [
@@ -41,10 +41,10 @@
                         "z": -16.51795196533203
                     },
                     "rotation": {
-                        "w": 0.7271999716758728,
-                        "x": 0.6848379373550415,
-                        "y": -0.03396763280034065,
-                        "z": 0.03198949992656708
+                        "w": 0.5924646854400635,
+                        "x": 0.805133044719696,
+                        "y": 0.016192466020584106,
+                        "z": -0.022004086524248123
                     },
                     "scale": {
                         "x": 1.0,
@@ -55,7 +55,7 @@
                 {
                     "__type__": "engine::CameraComponent",
                     "active": true,
-                    "aspectRatio": 1.7777777910232544,
+                    "aspectRatio": 0.6880000233650208,
                     "far": 5000.0,
                     "fov": 1.2217304706573486,
                     "near": 0.10000000149011612,
@@ -63,7 +63,7 @@
                 }
             ],
             "name": "Editor Camera",
-            "uuid": "774d8c53-78f0-482a-8ade-676350925dc6"
+            "uuid": "38e00bbd-a592-4a53-84fc-38806eb7b9f9"
         },
         {
             "components": [
@@ -88,7 +88,7 @@
                 }
             ],
             "name": "Directional Light",
-            "uuid": "e6c5dfec-90c8-4dcc-b505-aefae2cab5b3"
+            "uuid": "62718c2d-df0c-4926-8717-df4b64b7c6e6"
         },
         {
             "components": [
@@ -117,7 +117,7 @@
                 }
             ],
             "name": "Skybox",
-            "uuid": "d5b5ddfa-e592-4c80-b1ab-8f6ffc12e479"
+            "uuid": "4189ca5e-e223-4099-890a-58b5c56d98d9"
         }
     ],
     "name": "Test world",
