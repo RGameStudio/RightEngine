@@ -40,4 +40,6 @@ inline uint32_t roundToDivisible(uint32_t num, uint32_t divisor)
     return num + (divisor - remainder);
 }
 
+bool CORE_API decomposeTransform(const glm::mat4 &transform, glm::vec3 &translation, glm::vec3 &rotation, glm::vec3 &scale);
+
 } // core::math

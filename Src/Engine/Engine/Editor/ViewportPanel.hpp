@@ -2,6 +2,7 @@
 
 #include <Engine/Editor/Panel.hpp>
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 namespace engine::editor
 {
@@ -19,8 +20,10 @@ public:
 
 private:
 	virtual void DrawPanel() override;
+	void DrawGizmos();
 
-	ImVec2	m_viewportSize = ImVec2(1, 1);
+	ImVec2				m_viewportSize = ImVec2(1, 1);
+	ImGuizmo::OPERATION m_gizmoType = ImGuizmo::TRANSLATE;
 };
 
 } // engine::editor

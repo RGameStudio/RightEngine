@@ -5,7 +5,7 @@
 #include <Engine/Service/Render/RenderService.hpp>
 #include <Engine/Service/Filesystem/VirtualFilesystemService.hpp>
 #include <Core/RTTRIntegration.hpp>
-#include <imgui.h>
+#include <ImGuizmo.h>
 #include "imgui_impl_glfw.h"
 
 RTTR_REGISTRATION
@@ -313,6 +313,7 @@ void ImguiService::Update(float dt)
 		});
 
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 }
 
 void ImguiService::PostUpdate(float dt)

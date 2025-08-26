@@ -13,6 +13,7 @@ find_package(stb REQUIRED)
 find_package(assimp REQUIRED)
 find_package(doctest REQUIRED)
 find_package(simdjson REQUIRED)
+find_package(imguizmo REQUIRED)
 
 file(GLOB_RECURSE SOURCE_FILES
                 "${CMAKE_CURRENT_SOURCE_DIR}/Engine/*.cpp"
@@ -34,6 +35,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
                             stb::stb
                             doctest::doctest
                             simdjson::simdjson
+                            imguizmo::imguizmo
                     )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_EXPORT)

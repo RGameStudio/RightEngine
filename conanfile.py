@@ -21,6 +21,7 @@ class RightEngineRecipe(ConanFile):
         "glm/cci.20230113",
         "glslang/1.3.268.0",
         "imgui/1.91.8-docking",
+        "imguizmo/1.83.2",
         "nlohmann_json/3.11.3",
         "rttr/0.9.8",
         "spdlog/1.12.0",
