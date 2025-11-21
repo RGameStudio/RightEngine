@@ -15,6 +15,12 @@ void EntityTreePanel::DrawPanel()
     auto& editorService = Instance().Service<EditorService>();
     auto& world = ws.CurrentWorld();
 
+    // Add Entity button
+    if (ImGui::Button("Add Entity"))
+    {
+        world->GetEntityManager()->CreateEntity("New Entity");
+    }
+
     for (const auto entity : world->View())
     {
         const auto& eName = world->GetEntityManager()->GetEntityInfo(entity).m_name;
